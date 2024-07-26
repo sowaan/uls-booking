@@ -106,6 +106,8 @@ frappe.ui.form.on("Rate Creation Tool", {
             } 
             else if(frm.doc.service_type && frm.doc.full_tariff && frm.doc.icris_account && frm.doc.weight_slab.length )
             {
+
+                console.log(frm.doc.full_tariff);
                         
                 let full_tariff = await frappe.db.get_doc('Full Tariff',frm.doc.full_tariff) ;
                 let valid = true;

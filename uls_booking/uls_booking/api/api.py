@@ -81,7 +81,7 @@ def get_service_types(customer,imp_exp_field) :
             service_types.append(ser_doc.name)
 
         if cust.custom_expedited_imp == 1 :
-            ser_doc = frappe.get_doc("Service Type","Import Expedited")
+            ser_doc = frappe.get_doc("Service Type","Import Express Saver")
             service_types.append(ser_doc.name)
 
         if cust.custom_express_freight_imp == 1 :
@@ -347,6 +347,7 @@ def check_for_existing_rate(full_tariff , icris_account , weight_slab , rate_typ
     full_tariff_doc = frappe.get_doc("Full Tariff",full_tariff)
     rate = []
 
+
     if full_tariff_doc.based_on == 'Zone' :
         rate = frappe.db.exists(rate_type, 
                         {
@@ -361,6 +362,7 @@ def check_for_existing_rate(full_tariff , icris_account , weight_slab , rate_typ
                             "expiry_date" : full_tariff_doc.expiry_date ,
 
                         })
+
     else :
         rate = frappe.db.exists(rate_type, 
                         {
@@ -379,12 +381,14 @@ def check_for_existing_rate(full_tariff , icris_account , weight_slab , rate_typ
     if rate :
         return rate
     else :
-        create_rate(full_tariff_doc , icris_account , weight_slab , False, rate_type)
+        create_rate(full_tariff , icris_account , weight_slab , False, rate_type)
         # return 0
         
 
 @frappe.whitelist()
 def create_rate(full_tariff , icris_account , weight_slab , exist , rate_type) :
+
+    
 
     weight_slab = json.loads(weight_slab)
     full_tariff_doc = frappe.get_doc("Full Tariff",full_tariff)
