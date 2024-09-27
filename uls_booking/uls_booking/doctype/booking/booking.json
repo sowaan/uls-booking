@@ -574,7 +574,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "default": "Air",
    "fieldname": "mode_of_transportation",
    "fieldtype": "Link",
    "label": "Mode of Transportation",
@@ -667,7 +666,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-07-20 15:01:15.822278",
+ "modified": "2024-09-23 17:35:30.403181",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Booking",

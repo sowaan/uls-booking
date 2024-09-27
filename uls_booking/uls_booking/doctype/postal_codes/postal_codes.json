@@ -11,7 +11,8 @@
   "country",
   "column_break_sjkz",
   "area",
-  "iata_code"
+  "iata_code",
+  "postal_code_creation_tool"
  ],
  "fields": [
   {
@@ -50,11 +51,18 @@
    "fieldname": "iata_code",
    "fieldtype": "Data",
    "label": "IATA Code"
+  },
+  {
+   "fieldname": "postal_code_creation_tool",
+   "fieldtype": "Link",
+   "label": "Postal Code Creation Tool",
+   "options": "Postal Code Creation Tool",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-18 19:04:49.233943",
+ "modified": "2024-09-24 16:33:31.461527",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Postal Codes",

@@ -37,21 +37,18 @@
    "fieldname": "additional_charge_type",
    "fieldtype": "Data",
    "label": "Additional Charge Type",
-   "read_only": 1,
    "unique": 1
   },
   {
    "fieldname": "additional_charge_based_on",
    "fieldtype": "Select",
    "label": "Additional Charge Based On",
-   "options": "Based on ImpExp\nBased on Area\nBased on Declare Value\nBased on Weight, Length And Width\nBased on Weight And Length Plus Girth\nBased on Weight, Length And Length Plus Girth\nOthers",
-   "read_only": 1
+   "options": "Based on ImpExp\nBased on Area\nBased on Declare Value\nBased on Weight, Length And Width\nBased on Weight And Length Plus Girth\nBased on Weight, Length And Length Plus Girth\nOthers"
   },
   {
    "default": "0",
    "fieldname": "if_selected",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "IF Selected"
   },
   {
@@ -67,24 +64,21 @@
    "fieldname": "impexp",
    "fieldtype": "Select",
    "label": "Imp/Exp",
-   "options": "\nImport\nExport\nBoth",
-   "read_only": 1
+   "options": "\nImport\nExport\nBoth"
   },
   {
    "depends_on": "eval: doc.additional_charge_based_on != \"Based on Area\";",
    "fieldname": "charge_based_on",
    "fieldtype": "Select",
    "label": "Charge Based On",
-   "options": "Amount\nPercentage",
-   "read_only": 1
+   "options": "Amount\nPercentage"
   },
   {
    "depends_on": "eval: doc.charge_based_on == 'Amount' && doc.additional_charge_based_on != \"Based on Area\" ;",
    "fieldname": "charge_depends_on",
    "fieldtype": "Select",
    "label": "Charge Depends On",
-   "options": "Per Shipment\nPer Package\nPer KG",
-   "read_only": 1
+   "options": "Per Shipment\nPer Package\nPer KG"
   },
   {
    "fieldname": "column_break_clmy",
@@ -95,8 +89,7 @@
    "fieldname": "percentage_on",
    "fieldtype": "Select",
    "label": "Percentage On",
-   "options": "Total Amount with Services\nAmount After Discount\nDeclare Value\nAmount Before Discount",
-   "read_only": 1
+   "options": "Total Amount with Services\nAmount After Discount\nDeclare Value\nAmount Before Discount"
   },
   {
    "depends_on": "eval: doc.charge_based_on == 'Amount' && doc.additional_charge_based_on != 'Based on Area' && doc.impexp != 'Both' ;",
@@ -188,7 +181,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-20 14:59:20.111868",
+ "modified": "2024-09-24 17:34:19.792060",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Additional Charges",

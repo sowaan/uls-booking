@@ -166,7 +166,7 @@ frappe.ui.form.on("Booking", {
 
 
             frm.set_value('address',null);
-
+            1.000
             await frappe.call({
                 method: "uls_booking.uls_booking.api.api.get_address",
                 args: {

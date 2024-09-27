@@ -51,6 +51,9 @@ fixtures = [
                                 "custom_expedited_imp",
                                 "custom_express_freight_imp",
 
+
+                                "custom_service_types",
+
                                 
                                 )
 	  	  

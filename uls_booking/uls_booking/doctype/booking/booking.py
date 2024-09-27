@@ -55,6 +55,25 @@ class Booking(Document):
 	def before_save(self):
 
 		
+
+
+		flg = 0
+		icris_doc = frappe.get_doc("ICRIS Account", self.icris_account)
+		if icris_doc.rate_group :
+		    for row in icris_doc.rate_group:
+			    if row.service_type == self.service_type and str(self.posting_date) >= str(row.from_date) and str(self.posting_date) <= str(row.to_date) :
+				    rate_grp = row.rate_group
+				    flg = 1
+				    break
+
+		if flg == 0:
+			frappe.throw("The rate list for the given service type is not attached to the given ICRIS Account.")
+	
+
+
+
+
+
 		self.extended_area_surcharge = 0
 		self.remote_area_surcharge = 0
 		self.add_handling_charges = 0
@@ -234,6 +253,7 @@ class Booking(Document):
 						total_add_ch = total_add_ch + max(add_charge_doc.amount_per_shipment, w)
 						rem_area = rem_area + max(add_charge_doc.amount_per_shipment, w)
 
+		
 		# Maximum Over Limit
 		if c_doc.custom_over_maximum_limit == 1 :
 			add_charge_type = 'Over Maximum Limits Fee'			
@@ -269,7 +289,7 @@ class Booking(Document):
 				self.maximum_over_limit = 1
 				max_ovr_lmt = max_ovr_lmt + max(single_pkg_no * add_charge_doc.amount, add_charge_doc.minimum_amount)
 
-		# frappe.msgprint("yes151")
+		
 		# LPS
 		if c_doc.custom_large_package_surcharge == 1 :
 			add_charge_type = 'Large Package Surcharge'
@@ -308,7 +328,7 @@ class Booking(Document):
 
 
 
-
+		
 		# Add Handling	
 		if c_doc.custom_additional_handling_charges == 1:
 			add_charge_doc = frappe.get_doc('Additional Charges','Additional Handling Charges')
@@ -371,8 +391,9 @@ class Booking(Document):
 								ignore_permissions=True)
 			self.zone = country[0].parent if country else None
 
+		
 		# Calculate Rate
-		if self.zone and self.weight :
+		if self.zone and self.weight:
 			amount = 0.0
 			env_weight = 0.0
 			doc_weight = 0.0
@@ -382,93 +403,141 @@ class Booking(Document):
 			packaging_type_weights = {}
 			last_row_rate = {}
 			today = nowdate()
-			for row in self.parcel_information :
-				signal = 0
-				country_zone_signal = 0
 
-				rate_list = frappe.get_list('Selling Rate',
-								filters={
-									'country': self.consignee_country,
-									'import__export': self.imp__exp,
-									'mode_of_transportation': self.mode_of_transportation,
-									'service_type': self.service_type,
-									'package_type': row.packaging_type,
-									'icris_account' : self.icris_account,
-								},fields = ['valid_from','expiry_date','name'],
-								order_by='valid_from DESC')
-				if rate_list :
-					for rate_entry in rate_list:
-						if str(rate_entry.valid_from) <= str(today) :
-							if rate_entry.expiry_date :
-								if str(rate_entry.expiry_date) >= str(today) :
-									rate_doc = frappe.get_doc('Selling Rate', rate_entry.name)
-									signal = 1
-									break
-							else :
-								rate_doc = frappe.get_doc('Selling Rate', rate_entry.name)
-								signal = 1
-								break
+			for row in self.parcel_information:
+				rate_list = frappe.get_list("Selling Rate", filters={
+					'country': self.consignee_country,
+					'based_on': 'Country',
+					'import__export': self.imp__exp,
+					'mode_of_transportation': self.mode_of_transportation,
+					'service_type': self.service_type,
+					'package_type': row.packaging_type,
+					'rate_group': rate_grp,
+				})
+
+				if not rate_list:
+					rate_list = frappe.get_list("Selling Rate", filters={
+						'zone': self.zone,
+						'based_on': 'Zone',
+						'import__export': self.imp__exp,
+						'mode_of_transportation': self.mode_of_transportation,
+						'service_type': self.service_type,
+						'package_type': row.packaging_type,
+						'rate_group': rate_grp,
+					})
+
+				if rate_list:
+					rate_doc = frappe.get_doc("Selling Rate", rate_list[0].name)
+					for x in rate_doc.package_rate:
+						if x.weight >= row.actual_weight_per_parcel:
+							amount += (x.rate * row.total_identical_parcels)
+							count = 1
+							break
+						else:
+							last_row_rate = x
+
+					if count == 0:
+						amount += ((last_row_rate.rate / last_row_rate.weight) * row.actual_weight_per_parcel) * row.total_identical_parcels
+				else:
+					frappe.throw(
+						"Selling Rate List for <b>'{}'</b> is not Available for Today's Date to <b>{}</b> in <b>{}</b> through <b>{}</b> with <b>{}</b> service.".format(
+							row.packaging_type, self.imp__exp, self.zone, self.mode_of_transportation, self.service_type))
+
+			self.amount = amount
+
+
+
+
+
+
+
+			# for row in self.parcel_information :
+			# 	signal = 0
+			# 	country_zone_signal = 0
+
+			# 	rate_list = frappe.get_list('Selling Rate',
+			# 					filters={
+			# 						'country': self.consignee_country,
+			# 						'import__export': self.imp__exp,
+			# 						'mode_of_transportation': self.mode_of_transportation,
+			# 						'service_type': self.service_type,
+			# 						'package_type': row.packaging_type,
+			# 						'icris_account' : self.icris_account,
+			# 					},fields = ['valid_from','expiry_date','name'],
+			# 					order_by='valid_from DESC')
+			# 	if rate_list :
+			# 		for rate_entry in rate_list:
+			# 			if str(rate_entry.valid_from) <= str(today) :
+			# 				if rate_entry.expiry_date :
+			# 					if str(rate_entry.expiry_date) >= str(today) :
+			# 						rate_doc = frappe.get_doc('Selling Rate', rate_entry.name)
+			# 						signal = 1
+			# 						break
+			# 				else :
+			# 					rate_doc = frappe.get_doc('Selling Rate', rate_entry.name)
+			# 					signal = 1
+			# 					break
 									
-						if signal == 1:		
-							for x in rate_doc.package_rate:
-								if x.weight >= row.actual_weight_per_parcel:
-									amount = amount + (x.rate * row.total_identical_parcels)
-									country_zone_signal = 1
-									count = 1
-									break
-								else :
-									last_row_rate = x
-							if count == 0:
-								amount = amount + (last_row_rate.rate * row.total_identical_parcels)
-								country_zone_signal = 1
+			# 			if signal == 1:		
+			# 				for x in rate_doc.package_rate:
+			# 					if x.weight >= row.actual_weight_per_parcel:
+			# 						amount = amount + (x.rate * row.total_identical_parcels)
+			# 						country_zone_signal = 1
+			# 						count = 1
+			# 						break
+			# 					else :
+			# 						last_row_rate = x
+			# 				if count == 0:
+			# 					amount = amount + (last_row_rate.rate * row.total_identical_parcels)
+			# 					country_zone_signal = 1
 
-						# else :
-						# 	frappe.throw("Selling Rate List for <b>'{}'</b> is not Available for Today's Date to <b>{}</b> in <b>{}</b> through <b>{}</b> with <b>{}</b> service.".format(row.packaging_type, self.imp__exp, self.zone, self.mode_of_transportation, self.service_type))
+			# 			# else :
+			# 			# 	frappe.throw("Selling Rate List for <b>'{}'</b> is not Available for Today's Date to <b>{}</b> in <b>{}</b> through <b>{}</b> with <b>{}</b> service.".format(row.packaging_type, self.imp__exp, self.zone, self.mode_of_transportation, self.service_type))
 					
 
-				if country_zone_signal == 0 :
-					rate_list = frappe.get_list('Selling Rate',
-								filters={
-									'zone': self.zone,
-									'import__export': self.imp__exp,
-									'mode_of_transportation': self.mode_of_transportation,
-									'service_type': self.service_type,
-									'package_type': row.packaging_type,
-									'icris_account' : self.icris_account,
-								},fields = ['valid_from','expiry_date','name'],
-								order_by='valid_from DESC')
-					if rate_list :
-						for rate_entry in rate_list:
-							if str(rate_entry.valid_from) <= str(today) :
-								if rate_entry.expiry_date :
-									if str(rate_entry.expiry_date) >= str(today) :
-										rate_doc = frappe.get_doc('Selling Rate', rate_entry.name)
-										signal = 1
-										break
-								else :
-									rate_doc = frappe.get_doc('Selling Rate', rate_entry.name)
-									signal = 1
-									break
+			# 	if country_zone_signal == 0 :
+			# 		rate_list = frappe.get_list('Selling Rate',
+			# 					filters={
+			# 						'zone': self.zone,
+			# 						'import__export': self.imp__exp,
+			# 						'mode_of_transportation': self.mode_of_transportation,
+			# 						'service_type': self.service_type,
+			# 						'package_type': row.packaging_type,
+			# 						'icris_account' : self.icris_account,
+			# 					},fields = ['valid_from','expiry_date','name'],
+			# 					order_by='valid_from DESC')
+			# 		if rate_list :
+			# 			for rate_entry in rate_list:
+			# 				if str(rate_entry.valid_from) <= str(today) :
+			# 					if rate_entry.expiry_date :
+			# 						if str(rate_entry.expiry_date) >= str(today) :
+			# 							rate_doc = frappe.get_doc('Selling Rate', rate_entry.name)
+			# 							signal = 1
+			# 							break
+			# 					else :
+			# 						rate_doc = frappe.get_doc('Selling Rate', rate_entry.name)
+			# 						signal = 1
+			# 						break
 									
-						if signal == 1:		
-							for x in rate_doc.package_rate:
-								if x.weight >= row.actual_weight_per_parcel:
-									amount = amount + (x.rate * row.total_identical_parcels)
-									count = 1
-									break
-								else :
-									last_row_rate = x
-							if count == 0:
-								amount = amount + (last_row_rate.rate * row.total_identical_parcels)
-						else :
-							frappe.throw("Selling Rate List for <b>'{}'</b> is not Available for Today's Date to <b>{}</b> in <b>{}</b> through <b>{}</b> with <b>{}</b> service.".format(row.packaging_type, self.imp__exp, self.zone, self.mode_of_transportation, self.service_type))
-					else :
-						frappe.throw("No Selling Rate List Available!")
+			# 			if signal == 1:		
+			# 				for x in rate_doc.package_rate:
+			# 					if x.weight >= row.actual_weight_per_parcel:
+			# 						amount = amount + (x.rate * row.total_identical_parcels)
+			# 						count = 1
+			# 						break
+			# 					else :
+			# 						last_row_rate = x
+			# 				if count == 0:
+			# 					amount = amount + (last_row_rate.rate * row.total_identical_parcels)
+			# 			else :
+			# 				frappe.throw("Selling Rate List for <b>'{}'</b> is not Available for Today's Date to <b>{}</b> in <b>{}</b> through <b>{}</b> with <b>{}</b> service.".format(row.packaging_type, self.imp__exp, self.zone, self.mode_of_transportation, self.service_type))
+			# 		else :
+			# 			frappe.throw("No Selling Rate List Available!")
 			
-			self.amount = amount	
+			# self.amount = amount	
 
 
-
+		
 		# FSC	/  Optional Services
 		if self.amount or self.amount==0 :
 			# total_opt_ser = 0
@@ -538,7 +607,6 @@ class Booking(Document):
 		else :
 			self.balance_credit_limit_after_shipment = self.balance_credit_limit_before_shipment - self.amount_after_discount
 				
-
 		# self.submit()
 
 

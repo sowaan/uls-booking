@@ -6,20 +6,31 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "service_type"
+  "service_type",
+  "imp__exp"
  ],
  "fields": [
   {
    "fieldname": "service_type",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Service Type",
    "options": "Service Type"
+  },
+  {
+   "fetch_from": "service_type.imp__exp",
+   "fieldname": "imp__exp",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Imp / Exp",
+   "options": "Import\nExport",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-07-18 18:42:09.413839",
+ "modified": "2024-09-23 15:42:07.485074",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Service Types List",

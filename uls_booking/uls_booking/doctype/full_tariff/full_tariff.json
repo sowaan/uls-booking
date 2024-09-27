@@ -98,6 +98,7 @@
    "label": "Rate List"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "package_rate",
    "fieldtype": "Table",
    "label": "Packa Rate",
@@ -107,7 +108,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-18 19:02:17.047530",
+ "modified": "2024-09-24 13:18:38.889697",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Full Tariff",

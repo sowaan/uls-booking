@@ -6,7 +6,11 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "icris_account"
+  "icris_account",
+  "section_break_uygx",
+  "rate_group",
+  "buying_rate_group_section",
+  "buying_rate_group"
  ],
  "fields": [
   {
@@ -14,11 +18,35 @@
    "fieldtype": "Data",
    "label": "ICRIS Account",
    "unique": 1
+  },
+  {
+   "fieldname": "section_break_uygx",
+   "fieldtype": "Section Break",
+   "label": "Selling Rate Group"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "rate_group",
+   "fieldtype": "Table",
+   "label": "Selling Rate Group",
+   "options": "Rate Group Table"
+  },
+  {
+   "fieldname": "buying_rate_group_section",
+   "fieldtype": "Section Break",
+   "label": "Buying Rate Group"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "buying_rate_group",
+   "fieldtype": "Table",
+   "label": "Buying Rate Group",
+   "options": "Buying Rate Group Table"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-18 19:07:28.314299",
+ "modified": "2024-09-24 13:22:01.363846",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "ICRIS Account",

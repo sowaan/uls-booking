@@ -1,0 +1,147 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-09-24 16:29:10.639633",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "column_break_yrxs",
+  "posting_date",
+  "section_break_xuyu",
+  "add_prefix",
+  "prefix",
+  "column_break_hdfs",
+  "add_suffix",
+  "suffix",
+  "section_break_pfpn",
+  "from_range",
+  "area",
+  "column_break_hqmr",
+  "to_range",
+  "country",
+  "section_break_zlf8",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_zlf8",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Postal Code Creation Tool",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "from_range",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "From Range",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_hqmr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_range",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "To Range",
+   "reqd": 1
+  },
+  {
+   "fieldname": "area",
+   "fieldtype": "Select",
+   "label": "Area",
+   "options": "\nExtended\nRemote"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "add_prefix",
+   "fieldtype": "Check",
+   "label": "Add Prefix"
+  },
+  {
+   "fieldname": "section_break_pfpn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_hdfs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "add_suffix",
+   "fieldtype": "Check",
+   "label": "Add Suffix"
+  },
+  {
+   "depends_on": "eval: doc.add_prefix == true ;",
+   "fieldname": "prefix",
+   "fieldtype": "Data",
+   "label": "Prefix",
+   "mandatory_depends_on": "eval: doc.add_prefix == true ;"
+  },
+  {
+   "depends_on": "eval: doc.add_suffix == true ;",
+   "fieldname": "suffix",
+   "fieldtype": "Data",
+   "label": "Suffix",
+   "mandatory_depends_on": "eval: doc.add_suffix == true ;"
+  },
+  {
+   "fieldname": "section_break_xuyu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_yrxs",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-09-24 19:12:20.774171",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Postal Code Creation Tool",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

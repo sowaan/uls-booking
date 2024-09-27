@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{full_tariff}-{#####}",
  "creation": "2024-07-18 18:59:52.510437",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -13,14 +14,15 @@
   "zone",
   "country",
   "mode_of_transportation",
-  "icris_account",
   "column_break_ayas",
   "package_type",
   "import__export",
-  "valid_from",
-  "expiry_date",
+  "select_rate_type",
+  "selling_rate_group",
+  "buying_rate_group",
   "section_break_cqsm",
-  "weight_slab"
+  "weight_slab",
+  "amended_from"
  ],
  "fields": [
   {
@@ -81,13 +83,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "icris_account",
-   "fieldtype": "Link",
-   "label": "ICRIS Account",
-   "options": "ICRIS Account",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_ayas",
    "fieldtype": "Column Break"
   },
@@ -107,38 +102,59 @@
    "read_only": 1
   },
   {
-   "fetch_from": "full_tariff.valid_from",
-   "fieldname": "valid_from",
-   "fieldtype": "Date",
-   "label": "Valid From",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "full_tariff.expiry_date",
-   "fieldname": "expiry_date",
-   "fieldtype": "Date",
-   "label": "Expiry Date",
-   "read_only": 1
-  },
-  {
    "fieldname": "section_break_cqsm",
    "fieldtype": "Section Break"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "weight_slab",
    "fieldtype": "Table",
    "label": "Weight Slab",
    "options": "Weight Slab",
    "reqd": 1
+  },
+  {
+   "depends_on": "eval: doc.select_rate_type == 'Selling Rate' ;",
+   "fieldname": "selling_rate_group",
+   "fieldtype": "Link",
+   "label": "Selling Rate Group",
+   "mandatory_depends_on": "eval: doc.select_rate_type == 'Selling Rate' ;",
+   "options": "Selling Rate Group"
+  },
+  {
+   "depends_on": "eval: doc.select_rate_type == 'Buying Rate' ;",
+   "fieldname": "buying_rate_group",
+   "fieldtype": "Link",
+   "label": "Buying Rate Group",
+   "mandatory_depends_on": "eval: doc.select_rate_type == 'Buying Rate' ;",
+   "options": "Buying Rate Group"
+  },
+  {
+   "fieldname": "select_rate_type",
+   "fieldtype": "Select",
+   "label": "Select Rate Type",
+   "options": "\nSelling Rate\nBuying Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rate Creation Tool",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
- "issingle": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2024-07-20 11:11:01.253018",
+ "modified": "2024-09-24 13:11:12.802879",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Rate Creation Tool",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

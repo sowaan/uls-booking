@@ -63,54 +63,61 @@ def get_icris_accounts(customer) :
 
 
 
+
+
 @frappe.whitelist()
 def get_service_types(customer,imp_exp_field) :
     cust = frappe.get_doc('Customer',customer)
     service_types = []
 
-    if imp_exp_field == 'Import' :
-        if cust.custom_express_plus == 1 :
-            ser_doc = frappe.get_doc("Service Type","Import Express Plus")
-            service_types.append(ser_doc.name)
-        if cust.custom_express_imp == 1 :
-            ser_doc = frappe.get_doc("Service Type","Import Express")
-            service_types.append(ser_doc.name)
+    # if imp_exp_field == 'Import' :
+    if cust.custom_service_types :
+        for row in cust.custom_service_types :
+            if row.imp__exp == imp_exp_field :
+                service_types.append(row.service_type)
 
-        if cust.custom_express_saver_imp == 1 :
-            ser_doc = frappe.get_doc("Service Type","Import Express Saver")
-            service_types.append(ser_doc.name)
+    #     if cust.custom_express_plus == 1 :
+    #         ser_doc = frappe.get_doc("Service Type","Import Express Plus")
+    #         service_types.append(ser_doc.name)
+    #     if cust.custom_express_imp == 1 :
+    #         ser_doc = frappe.get_doc("Service Type","Import Express")
+    #         service_types.append(ser_doc.name)
 
-        if cust.custom_expedited_imp == 1 :
-            ser_doc = frappe.get_doc("Service Type","Import Express Saver")
-            service_types.append(ser_doc.name)
+    #     if cust.custom_express_saver_imp == 1 :
+    #         ser_doc = frappe.get_doc("Service Type","Import Express Saver")
+    #         service_types.append(ser_doc.name)
 
-        if cust.custom_express_freight_imp == 1 :
-            ser_doc = frappe.get_doc("Service Type","Import Express Freight")
-            service_types.append(ser_doc.name)        
+    #     if cust.custom_expedited_imp == 1 :
+    #         ser_doc = frappe.get_doc("Service Type","Import Express Saver")
+    #         service_types.append(ser_doc.name)
 
-    elif imp_exp_field == 'Export' :
-        if cust.custom_express_plus_exp == 1 :
-            ser_doc = frappe.get_doc("Service Type","Export Express Plus")
-            service_types.append(ser_doc.name)
-        if cust.custom_express == 1 :
-            ser_doc = frappe.get_doc("Service Type","Export Express")
-            service_types.append(ser_doc.name)
+    #     if cust.custom_express_freight_imp == 1 :
+    #         ser_doc = frappe.get_doc("Service Type","Import Express Freight")
+    #         service_types.append(ser_doc.name)        
 
-        if cust.custom_express_saver == 1 :
-            ser_doc = frappe.get_doc("Service Type","Export Express Saver")
-            service_types.append(ser_doc.name)
+    # elif imp_exp_field == 'Export' :
+    #     if cust.custom_express_plus_exp == 1 :
+    #         ser_doc = frappe.get_doc("Service Type","Export Express Plus")
+    #         service_types.append(ser_doc.name)
+    #     if cust.custom_express == 1 :
+    #         ser_doc = frappe.get_doc("Service Type","Export Express")
+    #         service_types.append(ser_doc.name)
 
-        if cust.custom_expedited == 1 :
-            ser_doc = frappe.get_doc("Service Type","Export Expedited")
-            service_types.append(ser_doc.name)
+    #     if cust.custom_express_saver == 1 :
+    #         ser_doc = frappe.get_doc("Service Type","Export Express Saver")
+    #         service_types.append(ser_doc.name)
 
-        if cust.custom_express_freight == 1 :
-            ser_doc = frappe.get_doc("Service Type","Export Express Freight")
-            service_types.append(ser_doc.name)   
+    #     if cust.custom_expedited == 1 :
+    #         ser_doc = frappe.get_doc("Service Type","Export Expedited")
+    #         service_types.append(ser_doc.name)
 
-        if cust.custom_express_freight_midday == 1 :
-            ser_doc = frappe.get_doc("Service Type","Export Express Freight Midday")
-            service_types.append(ser_doc.name)            
+    #     if cust.custom_express_freight == 1 :
+    #         ser_doc = frappe.get_doc("Service Type","Export Express Freight")
+    #         service_types.append(ser_doc.name)   
+
+    #     if cust.custom_express_freight_midday == 1 :
+    #         ser_doc = frappe.get_doc("Service Type","Export Express Freight Midday")
+    #         service_types.append(ser_doc.name)            
 
     # for account in cust.service_types :
     #     service_types.append(account.service_type)
@@ -134,9 +141,30 @@ def get_email_table(email_id):
         return cont
         
 
+@frappe.whitelist()
+def get_customer(email_id) :
+    # cont = []
+    cust_list_1 = []
+    customers_list = frappe.get_list("Portal User",
+                            filters={
+                                'parenttype' : 'Customer' ,
+                                'user' : email_id ,
+                            }, fields=['parent'],
+                            ignore_permissions = True)
+                       
+    if customers_list :
+        for c in customers_list :
+            cust_list_1.append(c.parent)
+
+        cust_list = tuple(cust_list_1)
+        return cust_list
+
+
+
+
 
 @frappe.whitelist()
-def get_customer(contact):
+def get_customer1(contact):
     cust_list_1 = []
     cont_doc = frappe.get_doc('Contact',contact)
     for y in cont_doc.links :
@@ -299,6 +327,44 @@ def get_full_tariff(service_type) :
     return full_tariff
 
 
+
+@frappe.whitelist()
+def get_selling_rate_group(service_type) :
+
+    s_r_grp = []
+
+    s_r_grp_list = frappe.db.get_list("Selling Rate Group",
+                       filters={
+                           'service_type' : service_type
+                       })
+    if s_r_grp_list:
+        for x in s_r_grp_list :
+            s_r_grp.append(x.name)
+    
+    return s_r_grp
+
+
+
+
+
+@frappe.whitelist()
+def get_buying_rate_group(service_type) :
+
+    b_r_grp = []
+
+    b_r_grp_list = frappe.db.get_list("Buying Rate Group",
+                       filters={
+                           'service_type' : service_type
+                       })
+    if b_r_grp_list:
+        for x in b_r_grp_list :
+            b_r_grp.append(x.name)
+    
+    return b_r_grp
+
+
+
+
 @frappe.whitelist()
 def first_check_buying_rate(full_tariff , icris_account) :
     full_tariff_doc = frappe.get_doc("Full Tariff",full_tariff)
@@ -342,7 +408,7 @@ def first_check_buying_rate(full_tariff , icris_account) :
 
 
 @frappe.whitelist()
-def check_for_existing_rate(full_tariff , icris_account , weight_slab , rate_type) :
+def check_for_existing_rate(full_tariff , weight_slab , rate_type , rate_grp, rate_creation_tool) :
     
     full_tariff_doc = frappe.get_doc("Full Tariff",full_tariff)
     rate = []
@@ -352,7 +418,7 @@ def check_for_existing_rate(full_tariff , icris_account , weight_slab , rate_typ
         rate = frappe.db.exists(rate_type, 
                         {
                             "service_type" : full_tariff_doc.service_type , 
-                            "icris_account" : icris_account , 
+                            "rate_group" : rate_grp , 
                             "based_on" : full_tariff_doc.based_on ,
                             "zone" : full_tariff_doc.zone ,
                             "mode_of_transportation" : full_tariff_doc.mode_of_transportation ,
@@ -367,7 +433,7 @@ def check_for_existing_rate(full_tariff , icris_account , weight_slab , rate_typ
         rate = frappe.db.exists(rate_type, 
                         {
                             "service_type" : full_tariff_doc.service_type , 
-                            "icris_account" : icris_account , 
+                            "rate_group" : rate_grp , 
                             "based_on" : full_tariff_doc.based_on ,
                             "country" : full_tariff_doc.country ,
                             "mode_of_transportation" : full_tariff_doc.mode_of_transportation ,
@@ -381,28 +447,57 @@ def check_for_existing_rate(full_tariff , icris_account , weight_slab , rate_typ
     if rate :
         return rate
     else :
-        create_rate(full_tariff , icris_account , weight_slab , False, rate_type)
+        create_rate(full_tariff , weight_slab , False, rate_type , rate_grp, rate_creation_tool)
         # return 0
         
 
 @frappe.whitelist()
-def create_rate(full_tariff , icris_account , weight_slab , exist , rate_type) :
+def create_rate(full_tariff , weight_slab, rate_type, rate_grp, rate_creation_tool ) :
 
     
-
-    weight_slab = json.loads(weight_slab)
+    # weight_slab = json.loads(weight_slab)
     full_tariff_doc = frappe.get_doc("Full Tariff",full_tariff)
-    new_sell_rate = frappe.new_doc(rate_type)
-    new_sell_rate.icris_account = icris_account
+
+
+    ex_doc_name = frappe.db.exists({"doctype":rate_type , "rate_group":rate_grp , "full_tariff":full_tariff })
+    
+    
+    if ex_doc_name :
+        new_sell_rate = frappe.get_doc(rate_type,ex_doc_name)
+        new_sell_rate.package_rate = []
+
+    else :
+        new_sell_rate = frappe.new_doc(rate_type)
+
+    
+    
+    
+    
+    
+    new_sell_rate.rate_group = rate_grp
     new_sell_rate.mode_of_transportation = full_tariff_doc.mode_of_transportation
     new_sell_rate.service_type = full_tariff_doc.service_type
     new_sell_rate.package_type = full_tariff_doc.package_type
     new_sell_rate.import__export = full_tariff_doc.import__export
-    new_sell_rate.valid_from = full_tariff_doc.valid_from
-    new_sell_rate.expiry_date = full_tariff_doc.expiry_date
+    # new_sell_rate.valid_from = full_tariff_doc.valid_from
+    # new_sell_rate.expiry_date = full_tariff_doc.expiry_date
     new_sell_rate.based_on = full_tariff_doc.based_on
-    new_sell_rate.package_rate = full_tariff_doc.package_rate
     new_sell_rate.full_tariff = full_tariff_doc.name
+    new_sell_rate.rate_creation_tool = rate_creation_tool
+
+    for i in range(len(full_tariff_doc.package_rate)) :
+        weight = full_tariff_doc.package_rate[i].weight
+        rate = full_tariff_doc.package_rate[i].rate
+        new_sell_rate.append('package_rate', {
+            'weight': weight,
+            'discount_percentage' : 0,
+            'rate' : rate,
+        })
+
+        
+
+
+    # new_sell_rate.package_rate = full_tariff_doc.package_rate
 
     if full_tariff_doc.based_on == 'Zone' :
         new_sell_rate.zone = full_tariff_doc.zone
@@ -411,19 +506,23 @@ def create_rate(full_tariff , icris_account , weight_slab , exist , rate_type) :
 
 
     for slab in weight_slab:
-        from_weight = slab['from_weight']
-        to_weight = slab['to_weight']
-        percentage = slab['percentage']
+        from_weight = slab.from_weight
+        to_weight = slab.to_weight
+        percentage = slab.percentage
 
         for rate in new_sell_rate.package_rate:
             if from_weight <= rate.weight <= to_weight:
                 rate.rate = rate.rate * (1 - percentage / 100)
+                rate.discount_percentage = percentage
 
 
-    if exist != False :
-        frappe.delete_doc(rate_type, exist)
+    # if exist != False :
+    #     frappe.delete_doc(rate_type, exist)
 
-    new_sell_rate.insert()
+    if ex_doc_name :
+        new_sell_rate.save()
+    else :    
+        new_sell_rate.insert()
     frappe.msgprint("Rate Created.")
     # return 0
 
