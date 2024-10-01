@@ -182,9 +182,9 @@ fixtures = [
 # ---------------
 # Override standard doctype classes
 
-override_doctype_class = {
-	"Sales Invoice": "uls_booking.uls_booking.overrides.booking_invoice.BookingInvoice",
-}
+# override_doctype_class = {
+
+# }
 
 
 
