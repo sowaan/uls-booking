@@ -60,11 +60,11 @@ class Booking(Document):
 		flg = 0
 		icris_doc = frappe.get_doc("ICRIS Account", self.icris_account)
 		if icris_doc.rate_group :
-		    for row in icris_doc.rate_group:
-			    if row.service_type == self.service_type and str(self.posting_date) >= str(row.from_date) and str(self.posting_date) <= str(row.to_date) :
-				    rate_grp = row.rate_group
-				    flg = 1
-				    break
+			for row in icris_doc.rate_group:
+				if row.service_type == self.service_type and str(self.posting_date) >= str(row.from_date) and str(self.posting_date) <= str(row.to_date) :
+					rate_grp = row.rate_group
+					flg = 1
+					break
 
 		if flg == 0:
 			frappe.throw("The rate list for the given service type is not attached to the given ICRIS Account.")

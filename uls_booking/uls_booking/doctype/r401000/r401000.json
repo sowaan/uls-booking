@@ -1,0 +1,177 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:shipment_number",
+ "creation": "2024-04-19 18:32:21.251877",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "origin_country",
+  "origin_port",
+  "shipment_number",
+  "import_date",
+  "destination_country",
+  "destination_port",
+  "mawb_number",
+  "sold_to_delivery_center",
+  "sold_to_number",
+  "sold_to_name",
+  "sold_to_contact_name",
+  "sold_to_building",
+  "sold_to_street",
+  "sold_to_city",
+  "sold_to_county",
+  "sold_to_state",
+  "sold_to_postal_code",
+  "sold_to_country_code",
+  "sold_to_phone_number",
+  "sold_to_fax_number",
+  "gcc_number",
+  "shipment_total_quantity",
+  "gcc_clearance_country"
+ ],
+ "fields": [
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Data",
+   "label": "Origin Country"
+  },
+  {
+   "fieldname": "origin_port",
+   "fieldtype": "Data",
+   "label": "Origin Port"
+  },
+  {
+   "fieldname": "shipment_number",
+   "fieldtype": "Data",
+   "label": "Shipment Number",
+   "unique": 1
+  },
+  {
+   "fieldname": "import_date",
+   "fieldtype": "Data",
+   "label": "Import Date"
+  },
+  {
+   "fieldname": "destination_country",
+   "fieldtype": "Data",
+   "label": "Destination Country"
+  },
+  {
+   "fieldname": "destination_port",
+   "fieldtype": "Data",
+   "label": "Destination Port"
+  },
+  {
+   "fieldname": "mawb_number",
+   "fieldtype": "Data",
+   "label": "MAWB Number"
+  },
+  {
+   "fieldname": "sold_to_delivery_center",
+   "fieldtype": "Data",
+   "label": "Sold To Delivery Center"
+  },
+  {
+   "fieldname": "sold_to_number",
+   "fieldtype": "Data",
+   "label": "Sold To Number"
+  },
+  {
+   "fieldname": "sold_to_name",
+   "fieldtype": "Data",
+   "label": "Sold To Name"
+  },
+  {
+   "fieldname": "sold_to_contact_name",
+   "fieldtype": "Data",
+   "label": "Sold To Contact Name"
+  },
+  {
+   "fieldname": "sold_to_building",
+   "fieldtype": "Data",
+   "label": "Sold To Building "
+  },
+  {
+   "fieldname": "sold_to_street",
+   "fieldtype": "Data",
+   "label": "Sold To Street"
+  },
+  {
+   "fieldname": "sold_to_city",
+   "fieldtype": "Data",
+   "label": "Sold To City"
+  },
+  {
+   "fieldname": "sold_to_county",
+   "fieldtype": "Data",
+   "label": "Sold To County"
+  },
+  {
+   "fieldname": "sold_to_state",
+   "fieldtype": "Data",
+   "label": "Sold To State"
+  },
+  {
+   "fieldname": "sold_to_postal_code",
+   "fieldtype": "Data",
+   "label": "Sold To Postal Code"
+  },
+  {
+   "fieldname": "sold_to_country_code",
+   "fieldtype": "Data",
+   "label": "Sold To Country Code"
+  },
+  {
+   "fieldname": "sold_to_phone_number",
+   "fieldtype": "Data",
+   "label": "Sold To Phone Number"
+  },
+  {
+   "fieldname": "sold_to_fax_number",
+   "fieldtype": "Data",
+   "label": "Sold To FAX Number"
+  },
+  {
+   "fieldname": "gcc_number",
+   "fieldtype": "Data",
+   "label": "GCC Number"
+  },
+  {
+   "fieldname": "shipment_total_quantity",
+   "fieldtype": "Data",
+   "label": "Shipment Total Quantity"
+  },
+  {
+   "fieldname": "gcc_clearance_country",
+   "fieldtype": "Data",
+   "label": "GCC Clearance Country"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-07-15 21:27:40.836535",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "R401000",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,200 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-04-22 11:57:44.658387",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "origin_country",
+  "origin_port",
+  "destination_country",
+  "destination_port",
+  "shipment_number",
+  "import_date",
+  "mawb_number",
+  "package_tracking_number",
+  "bag_number",
+  "package_weight",
+  "package_weight_unit",
+  "package_revenue",
+  "currency_code_for_package_revenue",
+  "insurance_charges",
+  "currency_code_for_insurance_charges",
+  "oversize_package_flag",
+  "register_charges_amount",
+  "curency_code_for_register_charge",
+  "scanning_information",
+  "inbound_container_number",
+  "inbound_flight_number",
+  "outbound_flight_number",
+  "incomplete_shipment_flag",
+  "bypass_bag_or_container_flag",
+  "expanded_package_tracking_number",
+  "expanded_package_weight",
+  "check"
+ ],
+ "fields": [
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Data",
+   "label": "Origin Country"
+  },
+  {
+   "fieldname": "origin_port",
+   "fieldtype": "Data",
+   "label": "Origin Port"
+  },
+  {
+   "fieldname": "destination_country",
+   "fieldtype": "Data",
+   "label": "Destination Country "
+  },
+  {
+   "fieldname": "destination_port",
+   "fieldtype": "Data",
+   "label": "Destination Port"
+  },
+  {
+   "fieldname": "shipment_number",
+   "fieldtype": "Data",
+   "label": "Shipment Number"
+  },
+  {
+   "fieldname": "import_date",
+   "fieldtype": "Data",
+   "label": "Import Date"
+  },
+  {
+   "fieldname": "mawb_number",
+   "fieldtype": "Data",
+   "label": "MAWB Number"
+  },
+  {
+   "fieldname": "package_tracking_number",
+   "fieldtype": "Data",
+   "label": "Package Tracking Number"
+  },
+  {
+   "fieldname": "bag_number",
+   "fieldtype": "Data",
+   "label": "Bag Number"
+  },
+  {
+   "fieldname": "package_weight",
+   "fieldtype": "Data",
+   "label": "Package Weight"
+  },
+  {
+   "fieldname": "package_weight_unit",
+   "fieldtype": "Data",
+   "label": "Package Weight Unit"
+  },
+  {
+   "fieldname": "package_revenue",
+   "fieldtype": "Data",
+   "label": "Package Revenue"
+  },
+  {
+   "fieldname": "currency_code_for_package_revenue",
+   "fieldtype": "Data",
+   "label": "Currency Code For Package Revenue"
+  },
+  {
+   "fieldname": "insurance_charges",
+   "fieldtype": "Data",
+   "label": "Insurance Charges"
+  },
+  {
+   "fieldname": "currency_code_for_insurance_charges",
+   "fieldtype": "Data",
+   "label": "Currency Code For Insurance Charges"
+  },
+  {
+   "fieldname": "oversize_package_flag",
+   "fieldtype": "Data",
+   "label": "Oversize Package Flag"
+  },
+  {
+   "fieldname": "register_charges_amount",
+   "fieldtype": "Data",
+   "label": "Register Charges Amount"
+  },
+  {
+   "fieldname": "curency_code_for_register_charge",
+   "fieldtype": "Data",
+   "label": "Curency Code For Register Charge"
+  },
+  {
+   "fieldname": "scanning_information",
+   "fieldtype": "Data",
+   "label": "Scanning Information"
+  },
+  {
+   "fieldname": "inbound_container_number",
+   "fieldtype": "Data",
+   "label": "Inbound Container Number"
+  },
+  {
+   "fieldname": "inbound_flight_number",
+   "fieldtype": "Data",
+   "label": "Inbound Flight Number"
+  },
+  {
+   "fieldname": "outbound_flight_number",
+   "fieldtype": "Data",
+   "label": "Outbound Flight Number"
+  },
+  {
+   "fieldname": "incomplete_shipment_flag",
+   "fieldtype": "Data",
+   "label": "Incomplete Shipment Flag"
+  },
+  {
+   "fieldname": "bypass_bag_or_container_flag",
+   "fieldtype": "Data",
+   "label": "Bypass Bag Or Container Flag"
+  },
+  {
+   "fieldname": "expanded_package_tracking_number",
+   "fieldtype": "Data",
+   "label": "Expanded Package Tracking Number"
+  },
+  {
+   "fieldname": "expanded_package_weight",
+   "fieldtype": "Data",
+   "label": "Expanded Package Weight"
+  },
+  {
+   "default": "0",
+   "fieldname": "check",
+   "fieldtype": "Check",
+   "label": "Check",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-09-24 11:44:59.736594",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "R600000",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

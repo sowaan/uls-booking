@@ -9,6 +9,7 @@
   "service_type",
   "column_break_kvzm",
   "imp__exp",
+  "service",
   "section_break_ecvj",
   "description"
  ],
@@ -37,11 +38,16 @@
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description"
+  },
+  {
+   "fieldname": "service",
+   "fieldtype": "Data",
+   "label": "Service"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-18 19:02:50.269235",
+ "modified": "2024-09-19 18:29:11.605877",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Service Type",

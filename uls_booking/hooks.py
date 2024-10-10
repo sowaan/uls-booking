@@ -53,6 +53,34 @@ fixtures = [
 
 
                                 "custom_service_types",
+                                "custom_consignee_number",
+                                "custom_shipper_number",
+                                "custom_tracking_number",
+                                "custom_shipper_postal_code",
+                                "custom_shipper_phone_number",
+                                "custom_shipper_name",
+                                "custom_shipper_country",
+                                "custom_shipper_contact_name",
+                                "custom_shipper_city",
+                                "custom_shipment_weight_unit",
+                                "custom_shipment_weight",
+                                "custom_shipment_type",
+                                "custom_shipment_number",
+                                "custom_service_type",
+                                "custom_selling_percentage",
+                                "custom_packages",
+                                "custom_manifest",
+                                "custom_insurance_charges",
+                                "custom_insurance_amount",
+                                "custom_date_shipped",
+                                "custom_consignee_postal_code",
+                                "custom_consignee_phone_number",
+                                "custom_consignee_name",
+                                "custom_consignee_country",
+                                "custom_consignee_contact_name",
+                                "custom_consignee_city",
+                                "custom_booking_date",
+                                "custom_billing_term",
 
                                 
                                 )
@@ -183,7 +211,11 @@ fixtures = [
 # Override standard doctype classes
 
 # override_doctype_class = {
+<<<<<<< HEAD
+# 	"Sales Invoice": "uls_booking.uls_booking.overrides.booking_invoice.BookingInvoice",
+=======
 
+>>>>>>> 91f92945fcfb9869ec717dadedfd93e8483d4e8b
 # }
 
 
@@ -201,6 +233,12 @@ fixtures = [
 # 		"on_update": "method",
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
+# 	}
+# }
+
+# doc_events = {
+# 	"Sales Invoice": {
+# 		"before_save": "method",
 # 	}
 # }
 
