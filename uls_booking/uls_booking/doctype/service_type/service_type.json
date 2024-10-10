@@ -26,8 +26,10 @@
   {
    "fieldname": "imp__exp",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Imp / Exp",
-   "options": "Import\nExport"
+   "options": "Import\nExport",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_ecvj",
@@ -41,7 +43,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-18 19:02:50.269235",
+ "modified": "2024-10-01 18:07:01.009002",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Service Type",
