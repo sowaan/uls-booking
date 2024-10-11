@@ -15,6 +15,8 @@ def generate_sales_invoice_enqued(doc_str):
         final_rate = 0
         tarif = 0
         discounted_amount = 0
+        selling_rate_zone = None
+        selling_rate_country = 0
         arrayy=[]
         try:
             definition = frappe.get_doc("Sales Invocie Def", "54mcf25ihm")
@@ -138,11 +140,11 @@ def generate_sales_invoice_enqued(doc_str):
                         sales_invoice.append('taxes', rows)
 
                     
-                    if sales_invoice.custom_shipper_country:
-                        origin_country = sales_invoice.custom_shipper_country
+                    if sales_invoice.custom_consignee_country:
+                        origin_country = sales_invoice.custom_consignee_country
                         origin_country = origin_country.capitalize()
                        
-                    zone_with_country = None
+                    
                     zone_with_out_country = None
                     
                     selling_rate_name = None
@@ -157,38 +159,39 @@ def generate_sales_invoice_enqued(doc_str):
                                 break
                             # else:
                                 
-                    print(selling_group)
+                    
                     if selling_group:
-                        print("hellooooooooooooooooooooooooo")
+                        
                         zones = frappe.get_list("Zone",
                                                 filters = {"country" : origin_country , "is_single_country":1})
-                        print("pata chalay",zones)
+                        
                         flag = 0
                         if zones:
-                            zone_with_country = zones[0].name
-                            if zone_with_country:
-                                selling_rate_name = frappe.get_list("Selling Rate",
-                                    filters={
-                                        "country": origin_country,
-                                        "service_type": service_type[0].get("name"),
-                                        "package_type": sales_invoice.custom_shipment_type,
-                                        "rate_group": selling_group 
-                                    }
-                                )
-                            
-                                if selling_rate_name:        
-                                    selling_rate = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
-                                    # print("Found Selling Rate :",selling_rate," The shipment nummber is :" ,sales_invoice.shipment_number , "Country:", origin_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
-                                else :
-                                    # print("NO Selling Rate Found :",selling_rate," The shipment nummber is :" ,sales_invoice.shipment_number , "Country:", origin_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
-                                    flag = 1
+                                                     
+                            selling_rate_name = frappe.get_list("Selling Rate",
+                                filters={
+                                    "country": origin_country,
+                                    "service_type": service_type[0].get("name"),
+                                    "package_type": sales_invoice.custom_shipment_type,
+                                    "rate_group": selling_group 
+                                }
+                            )
+                        
+                            if selling_rate_name:        
+                                selling_rate_country = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
+                                selling_rate = selling_rate_country
+                               
+                            else :
                                 
+                                flag = 1
+                            
                         elif not zones:
                             flag = 1
 
                         if flag == 1 :
+
                             countries = frappe.db.get_all("Country Names", filters={"countries":origin_country} , fields = ['parent'])
-                            print("pata chalay",countries)
+                            
                             if countries:
                                 zone_with_out_country = countries[0].parent
                                 if zone_with_out_country:
@@ -201,22 +204,22 @@ def generate_sales_invoice_enqued(doc_str):
                                         }
                                     )
                                 
-                                   
+                                    
                                     if selling_rate_name:        
-                                        selling_rate = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
-                                        # print("Found Selling Rate :",selling_rate," The shipment nummber is :" ,sales_invoice.shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
+                                        selling_rate_zone = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
+                                        selling_rate = selling_rate_zone
+                                        
                                     else :
                                     
-                                        # print("No Selling Rate Found The shipment nummber is :" ,sales_invoice.shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
+                                        print("No Selling Rate Found The shipment nummber is :" ,sales_invoice.shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
                                         continue
                             else:
                                 continue            
                         
-                        
                         my_weight = float(sales_invoice.custom_shipment_weight)
                         # print(" Selling Group :" ,selling_group,"service type:",service_type , "and the psoting date is ", posting_date, "Icris Number :", icris_number , "Selling Rate:",selling_rate , "Origin Country:",origin_country)       
-                        print("Selling Group:",selling_group , "Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",zone_with_country,zone_with_out_country)
-                        print("Hello 22222")
+                        print("Selling Group:",selling_group , "Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Shipment NUmber:",shipment,"Icris Number:",icris_number)
+                        
 
                         if selling_rate :
 
@@ -239,141 +242,150 @@ def generate_sales_invoice_enqued(doc_str):
 
 
                             tarif = final_rate / (1- (final_discount_percentage/100))
-                    print("Tarif",tarif , "Final rate :", final_rate)  
+                    else:
+                        print("No selling Group Found","Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Shipment NUmber:",shipment,"Icris Number:",icris_number)   
+                    
 
 
 
-            # elif sales_invoice.custom_billing_term == "F/C" and sales_invoice.custom_shipper_country != "PAKISTAN":
+            elif sales_invoice.custom_billing_term == "F/C" and sales_invoice.custom_shipper_country != "PAKISTAN":
                
-            #     import_check = 1
-            #     check = frappe.get_list("ICRIS List",
-            #                             filters = {"shipper_no":sales_invoice.custom_consignee_number})
-            #     if check:
-            #         icris1 = frappe.get_doc("ICRIS List", {"shipper_no": check[0].name})
+                
+                check = frappe.get_list("ICRIS List",
+                                        filters = {"shipper_no":sales_invoice.custom_consignee_number})
+                if check:
+                    icris1 = frappe.get_doc("ICRIS List", {"shipper_no": check[0].name})
                    
-            #         sales_invoice.customer = icris1.shipper_name
+                    sales_invoice.customer = icris1.shipper_name
                     
-            #         mm = frappe.get_doc("Territory", {"name": sales_invoice.custom_consignee_city})
-            #         vv = mm.parent_territory
+                    mm = frappe.get_doc("Territory", {"name": sales_invoice.custom_consignee_city})
+                    vv = mm.parent_territory
                     
-            #         if vv != "All Territories":
-            #             bb = frappe.get_doc("Sales Taxes and Charges Template", {"province": vv})
-            #             sales_invoice.set("taxes_and_charges", bb.name)
-            #             for sale in bb.taxes:
-            #                 charge_type = sale.charge_type
-            #                 description = sale.description
-            #                 account_head = sale.account_head
-            #                 cost_center = sale.cost_center
-            #                 rate = sale.rate
-            #                 account_currency = sale.account_currency
-            #             rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
-            #             sales_invoice.append('taxes', rows)
+                    if vv != "All Territories":
+                        bb = frappe.get_doc("Sales Taxes and Charges Template", {"province": vv})
+                        sales_invoice.set("taxes_and_charges", bb.name)
+                        for sale in bb.taxes:
+                            charge_type = sale.charge_type
+                            description = sale.description
+                            account_head = sale.account_head
+                            cost_center = sale.cost_center
+                            rate = sale.rate
+                            account_currency = sale.account_currency
+                        rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
+                        sales_invoice.append('taxes', rows)
 
-            #         if sales_invoice.custom_shipper_country:
-            #             origin_country = sales_invoice.custom_shipper_country
-            #             origin_country = origin_country.capitalize()
+                    if sales_invoice.custom_shipper_country:
+                        origin_country = sales_invoice.custom_shipper_country
+                        origin_country = origin_country.capitalize()
                        
-            #         zone_with_country = None
-            #         zone_with_out_country = None
                     
-            #         selling_rate_name = None
+                    zone_with_out_country = None
                     
-            #         service_type = frappe.get_list("Service Type",
-            #                             filters = {"imp__exp":imp_exp , "service": sales_invoice.custom_service_type})
-            #         if service_type:
-            #             for icris in icris_account.rate_group:
-            #                 if  icris.service_type == service_type[0].get("name")  and icris.from_date <= posting_date <= icris.to_date:
-            #                     selling_group = icris.rate_group
-                                
-            #                     break
-            #                 # else:
-            #                 #     print("No selling Group on the service type :",service_type[0].get("name") , "and the psoting date is ", posting_date, "Icris Number :", icris_number)
+                    selling_rate_name = None
+                    
+                    service_type = frappe.get_list("Service Type",
+                                        filters = {"imp__exp":imp_exp , "service": sales_invoice.custom_service_type})
+                    if service_type:
+                        for icris in icris_account.rate_group:
+                            if  icris.service_type == service_type[0].get("name")  and icris.from_date <= posting_date <= icris.to_date:
+                                selling_group = icris.rate_group
+                                break
+                           
 
-            #         if selling_group:
-            #             zones = frappe.get_list("Zone",
-            #                                     filters = {"country" : origin_country , "is_single_country":1})
-            #             flag = 0
-            #             if zones:
-            #                 zone_with_country = zones[0].name
-            #                 if zone_with_country:
-            #                     selling_rate_name = frappe.get_list("Selling Rate",
-            #                         filters={
-            #                             "country": origin_country,
-            #                             "service_type": service_type[0].get("name"),
-            #                             "package_type": sales_invoice.custom_shipment_type,
-            #                             "rate_group": selling_group 
-            #                         }
-            #                     )
-                            
-            #                     if selling_rate_name:        
-            #                         selling_rate = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
-            #                         # print("Found Selling Rate :",selling_rate," The shipment nummber is :" ,sales_invoice.shipment_number , "Country:", origin_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
-            #                     else :
-            #                         # print("NO Selling Rate Found :",selling_rate," The shipment nummber is :" ,sales_invoice.shipment_number , "Country:", origin_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
-            #                         flag = 1
-                                
-            #             elif not zones:
-            #                     flag = 1
-
-            #             if flag == 1 :
-            #                 countries = frappe.db.get_all("Country Names", filters={"countries":origin_country} , fields = ['parent'])
-            #                 if countries:
-            #                     zone_with_out_country = countries[0].parent
-            #                     if zone_with_out_country:
-            #                         selling_rate_name = frappe.get_list("Selling Rate",
-            #                             filters={
-            #                                 "zone": zone_with_out_country,
-            #                                 "service_type": service_type[0].get("name"),
-            #                                 "package_type": sales_invoice.custom_shipment_type,
-            #                                 "rate_group": selling_group 
-            #                             }
-            #                         )
-                                
-
-            #                         if selling_rate_name:        
-            #                             selling_rate = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
-            #                             # print("Found Selling Rate :",selling_rate," The shipment nummber is :" ,sales_invoice.shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
-            #                         else :
-                                    
-            #                         #print("No Selling Rate Found The shipment nummber is :" ,sales_invoice.shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
-            #                             continue
-            #                 else:
-            #                     print("No zone Found for the Country")
-            #                     continue            
-
+                    if selling_group:
                         
-            #             my_weight = float(sales_invoice.custom_shipment_weight)
-            #             final_discount_percentage = 0
+                        zones = frappe.get_list("Zone",
+                                                filters = {"country" : origin_country , "is_single_country":1})
+                        
+                        flag = 0
+                        if zones:
+                                                     
+                            selling_rate_name = frappe.get_list("Selling Rate",
+                                filters={
+                                    "country": origin_country,
+                                    "service_type": service_type[0].get("name"),
+                                    "package_type": sales_invoice.custom_shipment_type,
+                                    "rate_group": selling_group 
+                                }
+                            )
+                        
+                            if selling_rate_name:        
+                                selling_rate_country = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
+                                selling_rate = selling_rate_country
+                               
+                            else :
+                                
+                                flag = 1
                             
+                        elif not zones:
+                            flag = 1
 
-            #             if selling_rate :
+                        if flag == 1 :
 
-            #                 flg = 0
-            #                 last_row = {}
+                            countries = frappe.db.get_all("Country Names", filters={"countries":origin_country} , fields = ['parent'])
+                            
+                            if countries:
+                                zone_with_out_country = countries[0].parent
+                                if zone_with_out_country:
+                                    selling_rate_name = frappe.get_list("Selling Rate",
+                                        filters={
+                                            "zone": zone_with_out_country,
+                                            "service_type": service_type[0].get("name"),
+                                            "package_type": sales_invoice.custom_shipment_type,
+                                            "rate_group": selling_group 
+                                        }
+                                    )
+                                
+                                    
+                                    if selling_rate_name:        
+                                        selling_rate_zone = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
+                                        selling_rate = selling_rate_zone
+                                        
+                                    else :
+                                    
+                                        print("No Selling Rate Found The shipment nummber is :" ,sales_invoice.shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
+                                        continue
+                            else:
+                                continue            
+                        
+                        my_weight = float(sales_invoice.custom_shipment_weight)
+                        # print(" Selling Group :" ,selling_group,"service type:",service_type , "and the psoting date is ", posting_date, "Icris Number :", icris_number , "Selling Rate:",selling_rate , "Origin Country:",origin_country)       
+                        print("Selling Group:",selling_group , "Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Shipment NUmber:",shipment,"Icris Number:",icris_number)
+                        
 
-            #                 for row in selling_rate.package_rate :
+                        if selling_rate :
 
-            #                     if my_weight <= row.weight :
-            #                         final_rate = row.rate
-            #                         final_discount_percentage = row.discount_percentage
-            #                         flg = 1
-            #                         break
-            #                     else :
-            #                         last_row = row
+                            flg = 0
+                            last_row = {}
 
-            #                 if flg == 0 :
-            #                     final_rate = ( last_row.rate / last_row.weight ) * my_weight
-            #                     final_discount_percentage = last_row.discount_percentage
+                            for row in selling_rate.package_rate :
+
+                                if my_weight <= row.weight :
+                                    final_rate = row.rate
+                                    final_discount_percentage = row.discount_percentage
+                                    flg = 1
+                                    break
+                                else :
+                                    last_row = row
+
+                            if flg == 0 :
+                                final_rate = ( last_row.rate / last_row.weight ) * my_weight
+                                final_discount_percentage = last_row.discount_percentage
 
 
-            #                 tarif = final_rate / (1- (final_discount_percentage/100))
-
-
-                # else:
-                #     print("Consignee Number : ",sales_invoice.custom_consignee_number, " not Found in the Icris", "Shipment Number :", shipment)
-                #     continue
-                    # sales_invoice.customer = "UPS SCS PAKISTAN PVT LTD ( B )"
+                            tarif = final_rate / (1- (final_discount_percentage/100))
+                    else:
+                        print("No selling Group Found","Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Shipment NUmber:",shipment,"Icris Number:",icris_number) 
            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             currency = frappe.get_value("Customer" , sales_invoice.customer , "default_currency") 
             sales_invoice.currency = currency
 
@@ -501,6 +513,7 @@ def generate_sales_invoice_enqued(doc_str):
                     # print(max_insured , " ", percent , " ", minimum_amount, " ", decalred_value)
                     if max_insured > 0 and sales_invoice.custom_shipment_type == "NON-DOCUMENTS":
                         rows = {'item_code': "INS", 'qty': '1', 'rate': max_insured}
+                        print("INS")
                         sales_invoice.append('items', rows)
 
                 
@@ -510,15 +523,19 @@ def generate_sales_invoice_enqued(doc_str):
 
                 if total_charges_other_charges:
                     rows = {'item_code': setting.other_charges, 'qty': 1} 
+                    print("OC")
                     sales_invoice.append('items', rows)
                 if FSCcharges:
                     rows = {'item_code': setting.fuel_charges, 'qty': '1', 'rate': FSCcharges}
+                    print("FSC")
                     sales_invoice.append('items', rows)
                 if tarif:
                     rows = {'item_code' : setting.freight_charges , 'qty' : '1' , 'rate' : tarif}
+                    print("EX")
                     sales_invoice.append('items' , rows)
                 if shipmentbillingamount:
                     rows = {'item_code' : setting.shipment_billing_charges , 'qty' : '1' , 'rate' : shipmentbillingamount}
+                    print("SBC")
                     sales_invoice.append('items' , rows)
 
 
@@ -554,7 +571,7 @@ def generate_sales_invoice_enqued(doc_str):
             # sales_invoice.validate()
             # sales_invoice.check_conversion_rate()
             
-            print("hello")
+            
             sales_invoice.insert()
             sales_invoice.save()
             if sales_invoice.customer != "UPS SCS PAKISTAN PVT LTD ( B )":

@@ -211,11 +211,7 @@ fixtures = [
 # Override standard doctype classes
 
 # override_doctype_class = {
-<<<<<<< HEAD
 # 	"Sales Invoice": "uls_booking.uls_booking.overrides.booking_invoice.BookingInvoice",
-=======
-
->>>>>>> 91f92945fcfb9869ec717dadedfd93e8483d4e8b
 # }
 
 
