@@ -211,7 +211,7 @@ def generate_sales_invoice_enqued(doc_str):
                                         
                                     else :
                                     
-                                        print("No Selling Rate Found The shipment nummber is :" ,sales_invoice.shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
+                                        print("No Selling Rate Found The shipment nummber is :" ,sales_invoice.custom_shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.custom_shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
                                         continue
                             else:
                                 continue            
@@ -343,7 +343,7 @@ def generate_sales_invoice_enqued(doc_str):
                                         
                                     else :
                                     
-                                        print("No Selling Rate Found The shipment nummber is :" ,sales_invoice.shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
+                                        print("No Selling Rate Found The shipment nummber is :" ,sales_invoice.custom_shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.custom_shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
                                         continue
                             else:
                                 continue            
