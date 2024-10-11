@@ -1,0 +1,563 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-10-04 12:38:32.152670",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_icdv",
+  "shipment_number",
+  "origin_country",
+  "origin_port",
+  "date_shipped",
+  "shipment_type",
+  "invoice_description",
+  "bill_term_surcharge_indicator",
+  "split_duty_and_vat_flag",
+  "shipment_weight",
+  "billable_weight",
+  "dws_actual",
+  "column_break_fxse",
+  "master_package_id",
+  "destination_country",
+  "destination_port",
+  "import_date",
+  "billing_term",
+  "invoice_value",
+  "shipment_tracking_status",
+  "terms_of_shipment",
+  "shipment_weight_unit",
+  "number_of_packages_in_shipment",
+  "dws_dim",
+  "amended_from",
+  "shipper_details_section",
+  "shipper_number",
+  "shipper_contact_name",
+  "shipper_street",
+  "shipper_country",
+  "shipper_postal_code",
+  "column_break_gpns",
+  "shipper_name",
+  "shipper_building",
+  "shipper_city",
+  "shipper_email_address",
+  "consignee_details_section",
+  "consignee_number",
+  "consignee_contact_name",
+  "consignee_street",
+  "consignee_country",
+  "consignee_email_address",
+  "column_break_mdzg",
+  "consignee_name",
+  "consignee_building",
+  "consignee_city",
+  "consignee_postal_code",
+  "pricing_activitynew_doc_and_fields_section",
+  "spot_rates_offered",
+  "column_break_yzwc",
+  "spot_rate_",
+  "ground_operations_activity_section",
+  "third_party_delivery",
+  "shipment_abandoned_date",
+  "hold_cage_location",
+  "column_break_oprq",
+  "third_party_tracking_no",
+  "abandon_reason",
+  "package_abandon_id",
+  "customer_services_activity_section",
+  "cs_ern_status",
+  "cs_investigation",
+  "cs_shipment_exception",
+  "cs_shipment_status",
+  "column_break_gggz",
+  "cs_ern_purpose",
+  "cs_investigation_outcome",
+  "cs_exception_details",
+  "brokerage__import_activities_section",
+  "shipment_status",
+  "detained_status",
+  "column_break_lwap",
+  "reason_for_shipment_status",
+  "recovery_activity_section",
+  "dispute_invoice_number",
+  "dispute_amount",
+  "final_outcome",
+  "column_break_pxjt",
+  "nature_of_dispute",
+  "recovery_chances",
+  "billing_activities_section",
+  "final_weight_from_gacs",
+  "revised_invoice_or_credit_note_number",
+  "column_break_waom",
+  "settlement",
+  "credit_note_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_icdv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "shipment_number",
+   "fieldtype": "Data",
+   "label": "Shipment Number"
+  },
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Data",
+   "label": "Origin Country"
+  },
+  {
+   "fieldname": "origin_port",
+   "fieldtype": "Data",
+   "label": "Origin Port"
+  },
+  {
+   "fieldname": "date_shipped",
+   "fieldtype": "Data",
+   "label": "Date Shipped"
+  },
+  {
+   "fieldname": "shipment_type",
+   "fieldtype": "Data",
+   "label": "Shipment Type"
+  },
+  {
+   "fieldname": "invoice_description",
+   "fieldtype": "Data",
+   "label": "Invoice Description"
+  },
+  {
+   "fieldname": "bill_term_surcharge_indicator",
+   "fieldtype": "Data",
+   "label": "Bill Term Surcharge Indicator"
+  },
+  {
+   "fieldname": "split_duty_and_vat_flag",
+   "fieldtype": "Data",
+   "label": "Split Duty And VAT Flag"
+  },
+  {
+   "fieldname": "shipment_weight",
+   "fieldtype": "Data",
+   "label": "Shipment Weight"
+  },
+  {
+   "fieldname": "billable_weight",
+   "fieldtype": "Data",
+   "label": "Billable Weight"
+  },
+  {
+   "fieldname": "dws_actual",
+   "fieldtype": "Data",
+   "label": "DWS Actual"
+  },
+  {
+   "fieldname": "column_break_fxse",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "master_package_id",
+   "fieldtype": "Data",
+   "label": "Master Package ID"
+  },
+  {
+   "fieldname": "destination_country",
+   "fieldtype": "Data",
+   "label": "Destination Country"
+  },
+  {
+   "fieldname": "destination_port",
+   "fieldtype": "Data",
+   "label": "Destination Port"
+  },
+  {
+   "fieldname": "import_date",
+   "fieldtype": "Data",
+   "label": "Import Date"
+  },
+  {
+   "fieldname": "billing_term",
+   "fieldtype": "Data",
+   "label": "Billing Term"
+  },
+  {
+   "fieldname": "invoice_value",
+   "fieldtype": "Data",
+   "label": "Invoice Value"
+  },
+  {
+   "fieldname": "shipment_tracking_status",
+   "fieldtype": "Data",
+   "label": "Shipment Tracking Status"
+  },
+  {
+   "fieldname": "terms_of_shipment",
+   "fieldtype": "Data",
+   "label": "Terms Of Shipment"
+  },
+  {
+   "fieldname": "shipment_weight_unit",
+   "fieldtype": "Data",
+   "label": "Shipment Weight Unit"
+  },
+  {
+   "fieldname": "number_of_packages_in_shipment",
+   "fieldtype": "Data",
+   "label": "Number Of Packages In Shipment"
+  },
+  {
+   "fieldname": "dws_dim",
+   "fieldtype": "Data",
+   "label": "DWS DIM"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Shipment Master Details",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "shipper_details_section",
+   "fieldtype": "Section Break",
+   "label": "Shipper Details"
+  },
+  {
+   "fieldname": "shipper_number",
+   "fieldtype": "Data",
+   "label": "Shipper Number"
+  },
+  {
+   "fieldname": "shipper_contact_name",
+   "fieldtype": "Data",
+   "label": "Shipper Contact Name"
+  },
+  {
+   "fieldname": "shipper_street",
+   "fieldtype": "Data",
+   "label": "Shipper Street"
+  },
+  {
+   "fieldname": "shipper_country",
+   "fieldtype": "Data",
+   "label": "Shipper Country"
+  },
+  {
+   "fieldname": "shipper_postal_code",
+   "fieldtype": "Data",
+   "label": "Shipper Postal Code"
+  },
+  {
+   "fieldname": "column_break_gpns",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipper_name",
+   "fieldtype": "Data",
+   "label": "Shipper Name"
+  },
+  {
+   "fieldname": "shipper_building",
+   "fieldtype": "Data",
+   "label": "Shipper Building"
+  },
+  {
+   "fieldname": "shipper_city",
+   "fieldtype": "Data",
+   "label": "Shipper City"
+  },
+  {
+   "fieldname": "shipper_email_address",
+   "fieldtype": "Data",
+   "label": "Shipper Email Address"
+  },
+  {
+   "fieldname": "consignee_details_section",
+   "fieldtype": "Section Break",
+   "label": "Consignee Details"
+  },
+  {
+   "fieldname": "consignee_number",
+   "fieldtype": "Data",
+   "label": "Consignee Number"
+  },
+  {
+   "fieldname": "consignee_contact_name",
+   "fieldtype": "Data",
+   "label": "Consignee Contact Name"
+  },
+  {
+   "fieldname": "consignee_street",
+   "fieldtype": "Data",
+   "label": "Consignee Street"
+  },
+  {
+   "fieldname": "consignee_country",
+   "fieldtype": "Data",
+   "label": "Consignee Country"
+  },
+  {
+   "fieldname": "consignee_email_address",
+   "fieldtype": "Data",
+   "label": "Consignee Email Address"
+  },
+  {
+   "fieldname": "column_break_mdzg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "consignee_name",
+   "fieldtype": "Data",
+   "label": "Consignee Name"
+  },
+  {
+   "fieldname": "consignee_building",
+   "fieldtype": "Data",
+   "label": "Consignee Building"
+  },
+  {
+   "fieldname": "consignee_city",
+   "fieldtype": "Data",
+   "label": "Consignee City"
+  },
+  {
+   "fieldname": "consignee_postal_code",
+   "fieldtype": "Data",
+   "label": "Consignee Postal Code"
+  },
+  {
+   "fieldname": "pricing_activitynew_doc_and_fields_section",
+   "fieldtype": "Section Break",
+   "label": "Pricing Activity(New Doc and fields)"
+  },
+  {
+   "fieldname": "spot_rates_offered",
+   "fieldtype": "Select",
+   "label": "Spot Rates Offered",
+   "options": "\nYES\nNO"
+  },
+  {
+   "fieldname": "column_break_yzwc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "spot_rate_",
+   "fieldtype": "Data",
+   "label": "Spot Rate %"
+  },
+  {
+   "fieldname": "ground_operations_activity_section",
+   "fieldtype": "Section Break",
+   "label": "Ground Operations Activity"
+  },
+  {
+   "fieldname": "third_party_delivery",
+   "fieldtype": "Select",
+   "label": "Third Party Delivery",
+   "options": "\nTCS\nLeopards\nBlue-Ex\nM&P"
+  },
+  {
+   "fieldname": "shipment_abandoned_date",
+   "fieldtype": "Data",
+   "label": "Shipment Abandoned Date"
+  },
+  {
+   "fieldname": "hold_cage_location",
+   "fieldtype": "Select",
+   "label": "Hold Cage Location",
+   "options": "\nKarachi\nLahore"
+  },
+  {
+   "fieldname": "column_break_oprq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "third_party_tracking_no",
+   "fieldtype": "Data",
+   "label": "Third Party Tracking No."
+  },
+  {
+   "fieldname": "abandon_reason",
+   "fieldtype": "Text",
+   "label": "Abandon Reason"
+  },
+  {
+   "fieldname": "package_abandon_id",
+   "fieldtype": "Data",
+   "label": "Package Abandon ID"
+  },
+  {
+   "fieldname": "customer_services_activity_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Services Activity"
+  },
+  {
+   "fieldname": "cs_ern_status",
+   "fieldtype": "Select",
+   "label": "CS ERN Status",
+   "options": "\nOpen\nClose\nTransferred"
+  },
+  {
+   "fieldname": "cs_investigation",
+   "fieldtype": "Select",
+   "label": "CS Investigation",
+   "options": "\nOpen\nClaim Declined\nCredit Note\nCheque"
+  },
+  {
+   "fieldname": "cs_shipment_exception",
+   "fieldtype": "Select",
+   "label": "CS Shipment Exception",
+   "options": "\nAir Capacity\nCustom Hold\nWeather\nFlight Cancellation\nExport Hold\nMisconnection\nDPS"
+  },
+  {
+   "fieldname": "cs_shipment_status",
+   "fieldtype": "Select",
+   "label": "CS Shipment Status",
+   "options": "\nDelivered\nIn Transit\nException\nReturn\nClaim\nAbandon"
+  },
+  {
+   "fieldname": "column_break_gggz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cs_ern_purpose",
+   "fieldtype": "Data",
+   "label": "CS ERN Purpose"
+  },
+  {
+   "fieldname": "cs_investigation_outcome",
+   "fieldtype": "Select",
+   "label": "CS Investigation Outcome",
+   "options": "\nDamaged\nLost\nMissing Item\nDenied Signature"
+  },
+  {
+   "fieldname": "cs_exception_details",
+   "fieldtype": "Data",
+   "label": "CS Exception Details"
+  },
+  {
+   "fieldname": "brokerage__import_activities_section",
+   "fieldtype": "Section Break",
+   "label": "Brokerage / Import Activities"
+  },
+  {
+   "fieldname": "shipment_status",
+   "fieldtype": "Select",
+   "label": "Shipment Status",
+   "options": "\nICG Cleared\nDetained\nConfiscated\nConsignee Refusal\nDO Delivered\nShipment Delivered\nAbandoned"
+  },
+  {
+   "fieldname": "detained_status",
+   "fieldtype": "Select",
+   "label": "Detained Status",
+   "options": "\n1st Contact to Consignee\nERN Open\nSelf Clearance\nDO Delivered\nDocuments Awaited\nDocuments Received\nDocuments Submitted to Agency\nDiscrepancy Found\nUnder Clearance\n1st Duty Paid\nUnder Examination\nUnder Assessment\nDuty Enhanced\nEnhance Duty Paid\nReleased from Customs"
+  },
+  {
+   "fieldname": "column_break_lwap",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reason_for_shipment_status",
+   "fieldtype": "Select",
+   "label": "Reason For Shipment Status",
+   "options": "\nHigh Value\nGovt. Approval Required\nContraband Item\nDocumentation Issue\nMissing Invoice\nRegularity Reason\nHigher Duty & Taxes\nDuty & Taxes Payer Party Dispute\nH.S Code Difference\nSplit Shipment"
+  },
+  {
+   "fieldname": "recovery_activity_section",
+   "fieldtype": "Section Break",
+   "label": "Recovery Activity"
+  },
+  {
+   "fieldname": "dispute_invoice_number",
+   "fieldtype": "Data",
+   "label": "Dispute Invoice Number"
+  },
+  {
+   "fieldname": "dispute_amount",
+   "fieldtype": "Data",
+   "label": "Dispute Amount"
+  },
+  {
+   "fieldname": "final_outcome",
+   "fieldtype": "Select",
+   "label": "Final Outcome",
+   "options": "\nFully Recovered\nPartially Recovered\nNot Recovered"
+  },
+  {
+   "fieldname": "column_break_pxjt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "nature_of_dispute",
+   "fieldtype": "Select",
+   "label": "Nature of Dispute",
+   "options": "\nWrong Payer Party\nWeight Difference\nItems Missing\nShipment Lost\nOther Charges\nShipment Damage\nWrong Discount Applied"
+  },
+  {
+   "fieldname": "recovery_chances",
+   "fieldtype": "Select",
+   "label": "Recovery Chances",
+   "options": "\nFully Recoverable\nPartially Recoverable\nNot Recoverable\nLawsuit Filed"
+  },
+  {
+   "fieldname": "billing_activities_section",
+   "fieldtype": "Section Break",
+   "label": "Billing Activities"
+  },
+  {
+   "fieldname": "final_weight_from_gacs",
+   "fieldtype": "Data",
+   "label": "Final Weight from GACS"
+  },
+  {
+   "fieldname": "revised_invoice_or_credit_note_number",
+   "fieldtype": "Data",
+   "label": "Revised Invoice or Credit Note Number"
+  },
+  {
+   "fieldname": "column_break_waom",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "settlement",
+   "fieldtype": "Select",
+   "label": "Settlement",
+   "options": "\nRevised Invoice\nCredit note"
+  },
+  {
+   "fieldname": "credit_note_amount",
+   "fieldtype": "Data",
+   "label": "Credit note Amount"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-10-11 15:15:00.875134",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Shipment Master Details",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
