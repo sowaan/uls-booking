@@ -6,9 +6,12 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "default_company",
+  "origin_country",
   "sales_invoice_definition",
   "surcharges",
-  "compensation_table"
+  "compensation_table",
+  "export_and_import_conditions"
  ],
  "fields": [
   {
@@ -31,11 +34,29 @@
    "fieldtype": "Table",
    "label": "Compensation Table",
    "options": "Compensation Detail"
+  },
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Link",
+   "label": "Origin Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "default_company",
+   "fieldtype": "Link",
+   "label": "Default Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "export_and_import_conditions",
+   "fieldtype": "Table",
+   "label": "Export And Import Conditions",
+   "options": "Export And Import Conditions"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-27 16:27:19.241834",
+ "modified": "2024-10-14 15:14:27.666858",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invocie Def",

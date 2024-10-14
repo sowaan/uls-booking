@@ -34,7 +34,16 @@ def generate_sales_invoice_enqued(doc_str):
         excluded_codes = []
         included_codes=[]
     
+        export_billing_term = []
+        import_billing_term = []
+        for term in definition.export_and_import_conditions:
+            if term.export_check == 1:
+                export_billing_term.append(term.billing_term)
 
+            elif term.export_check == 0:
+                import_billing_term.append(term.billing_term)
+
+        
 
         for code in setting.surcharges_code_excl_and_incl:
 
@@ -42,6 +51,7 @@ def generate_sales_invoice_enqued(doc_str):
             included_codes.append(code.included_codes)
 
         for shipment in shipments:
+            discounted_amount = discounted_amount +1
             final_rate = 0
             tarif = 0
             signal = 0
@@ -54,7 +64,11 @@ def generate_sales_invoice_enqued(doc_str):
                 continue
             
             sales_invoice = frappe.new_doc("Sales Invoice")
-            sales_invoice.customer = "UPS SCS PAKISTAN PVT LTD ( B )"
+            company = definition.default_company
+            customer = frappe.get_doc("Company",company,
+            fields = ["custom_default_customer"])
+            sales_invoice.customer = customer.custom_default_customer
+        
             
            
             doctype_name =0
@@ -73,7 +87,7 @@ def generate_sales_invoice_enqued(doc_str):
                     filters={'shipment_number': shipment},
                     fields=[field_name]
                 )
-
+                
                 if docs:
                    
                     sales_invoice.set(sales_field_name, docs[0][field_name])
@@ -86,7 +100,7 @@ def generate_sales_invoice_enqued(doc_str):
             selling_group = None
             selling_rate = None
             
-            if sales_invoice.custom_shipper_country == "PAKISTAN":
+            if sales_invoice.custom_shipper_country == definition.origin_country.upper():
                 imp_exp = "Export"
                 icris_number = sales_invoice.custom_shipper_number
 
@@ -107,13 +121,7 @@ def generate_sales_invoice_enqued(doc_str):
             
             
             
-
-
-
-
-
-            
-            if sales_invoice.custom_billing_term in ["F/D","P/P"] and sales_invoice.custom_shipper_country == "PAKISTAN":
+            if sales_invoice.custom_billing_term in export_billing_term and sales_invoice.custom_shipper_country == definition.origin_country.upper():
                 check1 = frappe.get_list("ICRIS List",
                                         filters = {"shipper_no":sales_invoice.custom_shipper_number})
                 
@@ -214,11 +222,11 @@ def generate_sales_invoice_enqued(doc_str):
                                         print("No Selling Rate Found The shipment nummber is :" ,sales_invoice.custom_shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.custom_shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
                                         continue
                             else:
+                                print("Shipment Number:",shipment,"Shipper Country;",origin_country)
                                 continue            
                         
                         my_weight = float(sales_invoice.custom_shipment_weight)
-                        # print(" Selling Group :" ,selling_group,"service type:",service_type , "and the psoting date is ", posting_date, "Icris Number :", icris_number , "Selling Rate:",selling_rate , "Origin Country:",origin_country)       
-                        print("Selling Group:",selling_group , "Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Shipment NUmber:",shipment,"Icris Number:",icris_number)
+                        
                         
 
                         if selling_rate :
@@ -248,7 +256,7 @@ def generate_sales_invoice_enqued(doc_str):
 
 
 
-            elif sales_invoice.custom_billing_term == "F/C" and sales_invoice.custom_shipper_country != "PAKISTAN":
+            elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
                
                 
                 check = frappe.get_list("ICRIS List",
@@ -285,13 +293,14 @@ def generate_sales_invoice_enqued(doc_str):
                     
                     service_type = frappe.get_list("Service Type",
                                         filters = {"imp__exp":imp_exp , "service": sales_invoice.custom_service_type})
+                    
                     if service_type:
                         for icris in icris_account.rate_group:
                             if  icris.service_type == service_type[0].get("name")  and icris.from_date <= posting_date <= icris.to_date:
                                 selling_group = icris.rate_group
                                 break
                            
-
+                    
                     if selling_group:
                         
                         zones = frappe.get_list("Zone",
@@ -350,7 +359,7 @@ def generate_sales_invoice_enqued(doc_str):
                         
                         my_weight = float(sales_invoice.custom_shipment_weight)
                         # print(" Selling Group :" ,selling_group,"service type:",service_type , "and the psoting date is ", posting_date, "Icris Number :", icris_number , "Selling Rate:",selling_rate , "Origin Country:",origin_country)       
-                        print("Selling Group:",selling_group , "Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Shipment NUmber:",shipment,"Icris Number:",icris_number)
+                        # print("Selling Group:",selling_group , "Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Shipment NUmber:",shipment,"Icris Number:",icris_number)
                         
 
                         if selling_rate :
@@ -466,7 +475,7 @@ def generate_sales_invoice_enqued(doc_str):
                         FSCcharges = (total_charges_incl_fuel + final_rate) * (FSCpercentage / 100 )
                         # print(FSCcharges)
                         
-                print("Tarif :" , tarif , "Final Rate :", final_rate , "Percentage" , final_discount_percentage ,"Selling Rate :", selling_rate , "Additional Charges Percentage:",FSCpercentage , "Fuel INCL :",total_charges_incl_fuel , "FSC CHARGES" ,FSCcharges  )
+            
 
             shipmentbillingcheck = 0
             shipmentbillingamount = 0
@@ -504,6 +513,7 @@ def generate_sales_invoice_enqued(doc_str):
 
 
             if sales_invoice.customer != "UPS SCS PAKISTAN PVT LTD ( B )":
+                # print("Tarif :" , tarif , "Final Rate :", final_rate , "Percentage" , final_discount_percentage ,"Selling Rate :", selling_rate , "Additional Charges Percentage:",FSCpercentage , "Fuel INCL :",total_charges_incl_fuel , "FSC CHARGES" ,FSCcharges ,"Shipment Number:",shipment,"Icris:",icris_number,"Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Selling Group",selling_group)
                 if decalred_value > 0:
                     
                     percent = frappe.db.get_value('Additional Charges', 'Declare Value', 'percentage')
@@ -513,7 +523,7 @@ def generate_sales_invoice_enqued(doc_str):
                     # print(max_insured , " ", percent , " ", minimum_amount, " ", decalred_value)
                     if max_insured > 0 and sales_invoice.custom_shipment_type == "NON-DOCUMENTS":
                         rows = {'item_code': "INS", 'qty': '1', 'rate': max_insured}
-                        print("INS")
+                        # print("INS")
                         sales_invoice.append('items', rows)
 
                 
@@ -523,30 +533,55 @@ def generate_sales_invoice_enqued(doc_str):
 
                 if total_charges_other_charges:
                     rows = {'item_code': setting.other_charges, 'qty': 1} 
-                    print("OC")
+                    # print("OC")
                     sales_invoice.append('items', rows)
                 if FSCcharges:
                     rows = {'item_code': setting.fuel_charges, 'qty': '1', 'rate': FSCcharges}
-                    print("FSC")
+                    # print("FSC")
                     sales_invoice.append('items', rows)
                 if tarif:
                     rows = {'item_code' : setting.freight_charges , 'qty' : '1' , 'rate' : tarif}
-                    print("EX")
+                    # print("EX")
                     sales_invoice.append('items' , rows)
                 if shipmentbillingamount:
                     rows = {'item_code' : setting.shipment_billing_charges , 'qty' : '1' , 'rate' : shipmentbillingamount}
-                    print("SBC")
+                    # print("SBC")
                     sales_invoice.append('items' , rows)
 
 
 
                     
             export_compensation_amount = 0
+            weight_frm_R200000 = frappe.get_value(
+                "R202000",
+                filters={'shipment_number': shipment},
+                fieldname="custom_expanded_shipment_weight"
+            )
+
+            weight_frm_R201000 = frappe.get_value(
+                "R201000",
+                filters={'shipment_number': shipment},
+                fieldname="custom_minimum_bill_weight"
+            )
+
+            # Convert the retrieved values to float
+            weight_frm_R200000 = float(weight_frm_R200000) if weight_frm_R200000 else 0.0
+            weight_frm_R201000 = float(weight_frm_R201000) if weight_frm_R201000 else 0.0
+
+            # Calculate the maximum weight
+            selected_weight = max(weight_frm_R200000, weight_frm_R201000)
+            
+            sales_invoice.custom_shipment_weight = selected_weight
+
+
+
+
             
                 
             # print(sales_invoice.currency)
             
             if sales_invoice.customer == "UPS SCS PAKISTAN PVT LTD ( B )":
+                # print("Customer Not Found Shipment Number",shipment,"Icris",icris_number)
                 sig = 0
                 for comp in definition.compensation_table:
                     if sales_invoice.custom_billing_term == comp.shipment_billing_term and sales_invoice.custom_shipment_type == comp.shipping_billing_type and imp_exp == comp.case:
@@ -558,8 +593,9 @@ def generate_sales_invoice_enqued(doc_str):
                         break
                     
                 if sig == 0:
+                    
                     arrayy.append(sales_invoice.custom_shipper_number)
-                    print("Shipper Number : ",sales_invoice.custom_shipper_number, " not Found in the Icris", "Shipment Number :", shipment)
+                    # print("Shipper Number : ",sales_invoice.custom_shipper_number, " not Found in the Icris", "Shipment Number :", shipment)
                     continue
                     # print(sales_invoice.billing_term_field," ",sales_invoice.shipment_type," ",imp_exp," ",import_compensation_amount + "Sufyan")
                     rows = {'item_code': "CC", 'qty': '1', 'rate': 0}
@@ -568,10 +604,11 @@ def generate_sales_invoice_enqued(doc_str):
             if not sales_invoice.items:
                 print("shipment number" , sales_invoice.custom_shipment_number , "Item table is empty, so cannot make Sales Invoice. \n \n \n")
                 continue
-            # sales_invoice.validate()
+            # print("Service Type:",service_type[0].get("name"))
             # sales_invoice.check_conversion_rate()
             
-            
+            # print("Shipment Weight:",sales_invoice.custom_shipment_weight)
+            discounted_amount = discounted_amount -1
             sales_invoice.insert()
             sales_invoice.save()
             if sales_invoice.customer != "UPS SCS PAKISTAN PVT LTD ( B )":
@@ -588,7 +625,7 @@ def generate_sales_invoice_enqued(doc_str):
                
 
 
-
+        print(discounted_amount)
     except json.JSONDecodeError:
         frappe.throw(frappe._("Invalid JSON data"))
     except Exception as e:
@@ -596,8 +633,8 @@ def generate_sales_invoice_enqued(doc_str):
 
 @frappe.whitelist()
 def generate_sales_invoice(doc_str):
-    generate_sales_invoice_enqued(doc_str)
-    # enqueue(generate_sales_invoice_enqued, doc_str=doc_str, queue="default")
+    # generate_sales_invoice_enqued(doc_str)
+    enqueue(generate_sales_invoice_enqued, doc_str=doc_str, queue="default")
     # generate_sales_invoice(doc_str)
    
 
@@ -822,7 +859,8 @@ class ManifestUploadData(Document):
                 chunk = arrays[current_index:current_index + chunk_size]                
                 
                 current_index += chunk_size
-                insert_data(chunk,frm,to )
+                # insert_data(chunk,frm,to )
+                enqueue(insert_data, arrays=chunk,frm=frm, to=to, queue="default")
                 
             
          
