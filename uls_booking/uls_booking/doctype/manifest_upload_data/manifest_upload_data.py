@@ -19,7 +19,7 @@ def generate_sales_invoice_enqued(doc_str):
         selling_rate_country = 0
         arrayy=[]
         try:
-            definition = frappe.get_doc("Sales Invocie Def", "54mcf25ihm")
+            definition = frappe.get_doc("Sales Invoice Definition", "4f1330rq6u")
         except frappe.DoesNotExistError:
             frappe.throw(frappe._("Sales Invoice Definition with ID '54mcf25ihm' does not exist"))
         except frappe.PermissionError:
@@ -64,6 +64,7 @@ def generate_sales_invoice_enqued(doc_str):
                 continue
             
             sales_invoice = frappe.new_doc("Sales Invoice")
+            
             company = definition.default_company
             customer = frappe.get_doc("Company",company,
             fields = ["custom_default_customer"])
@@ -128,10 +129,16 @@ def generate_sales_invoice_enqued(doc_str):
                 if check1:
                   
                     icris = frappe.get_doc("ICRIS List",check1[0].name)
+                    if icris.shipper_name:
+                        sales_invoice.customer = icris.shipper_name
+                    else:
+                        frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "No Customer Found",
+                                            "error": f"""Shipment Number:,{shipment},Icris Number: {icris_number}"""
+                                        }).insert()
                     
-                    sales_invoice.customer = icris.shipper_name
-                    
-                   
+
                     tt = frappe.get_doc("Territory", {"name": sales_invoice.custom_shipper_city})
                     pt = tt.parent_territory
                     if pt != "All Territories":
@@ -161,11 +168,19 @@ def generate_sales_invoice_enqued(doc_str):
                                         filters = {"imp__exp":imp_exp , "service": sales_invoice.custom_service_type})
                     if service_type:
                         for icris in icris_account.rate_group:
+
                             if  icris.service_type == service_type[0].get("name")  and icris.from_date <= posting_date and posting_date <= icris.to_date :
                                 selling_group = icris.rate_group
                                 
                                 break
-                            # else:
+                            
+                        if not selling_group:
+                            # print("Shipment Number:",shipment,"Selling Group:", selling_group,"Icris Number:",icris_number,"\n\n\n\n\n\n\n\n\n")
+                            frappe.get_doc({
+                                        "doctype": "Error Log",
+                                        "method": "No Selling Group For Export",
+                                        "error": f"""Shipment Number:,{shipment},Selling Group: {selling_group} , Icris Number: {icris_number}"""
+                                    }).insert()       
                                 
                     
                     if selling_group:
@@ -218,11 +233,24 @@ def generate_sales_invoice_enqued(doc_str):
                                         selling_rate = selling_rate_zone
                                         
                                     else :
-                                    
-                                        print("No Selling Rate Found The shipment nummber is :" ,sales_invoice.custom_shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.custom_shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
+                                        frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "No Selling Rate Found",
+                                            "error": f"""No Selling Rate Found The shipment nummber is : ,{sales_invoice.custom_shipment_number} , Zone:, {zone_with_out_country} , Service Type : ,  {service_type[0].get("name")} , Package type :,{sales_invoice.custom_shipment_type }, Selling Group : {selling_group}, Icris Number : {icris_number}"""
+                                        }).insert()
+                                        # print("No Selling Rate Found The shipment nummber is :" ,sales_invoice.custom_shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.custom_shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
                                         continue
                             else:
-                                print("Shipment Number:",shipment,"Shipper Country;",origin_country)
+
+
+                                frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "No Country Found",
+                                            "error": f"""Shipment Number:,{shipment},Shipper Country: {origin_country}"""
+                                        }).insert()
+
+
+                                # print("Shipment Number:",shipment,"Shipper Country;",origin_country)
                                 continue            
                         
                         my_weight = float(sales_invoice.custom_shipment_weight)
@@ -250,8 +278,8 @@ def generate_sales_invoice_enqued(doc_str):
 
 
                             tarif = final_rate / (1- (final_discount_percentage/100))
-                    else:
-                        print("No selling Group Found","Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Shipment NUmber:",shipment,"Icris Number:",icris_number)   
+                    # else:
+                    #     print("No selling Group Found","Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Shipment NUmber:",shipment,"Icris Number:",icris_number)   
                     
 
 
@@ -263,9 +291,16 @@ def generate_sales_invoice_enqued(doc_str):
                                         filters = {"shipper_no":sales_invoice.custom_consignee_number})
                 if check:
                     icris1 = frappe.get_doc("ICRIS List", {"shipper_no": check[0].name})
-                   
-                    sales_invoice.customer = icris1.shipper_name
-                    
+                    if icris1.shipper_name:
+                        sales_invoice.customer = icris1.shipper_name
+                    else:
+                        frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "No Customer Found",
+                                            "error": f"""Shipment Number:,{shipment},Icris Number: {icris_number}"""
+                                        }).insert()
+                        
+
                     mm = frappe.get_doc("Territory", {"name": sales_invoice.custom_consignee_city})
                     vv = mm.parent_territory
                     
@@ -299,6 +334,13 @@ def generate_sales_invoice_enqued(doc_str):
                             if  icris.service_type == service_type[0].get("name")  and icris.from_date <= posting_date <= icris.to_date:
                                 selling_group = icris.rate_group
                                 break
+                        if not selling_group:
+                            # print("Shipment Number:",shipment,"Selling Group:", selling_group,"Icris Number:",icris_number "\n\n\n\n\n\n\n\n\n")
+                            frappe.get_doc({
+                                        "doctype": "Error Log",
+                                        "method": "No Selling Group For Import",
+                                        "error": f"""Shipment Number:,{shipment},Selling Group: {selling_group} , Icris Number: {icris_number}"""
+                                    }).insert()
                            
                     
                     if selling_group:
@@ -351,10 +393,20 @@ def generate_sales_invoice_enqued(doc_str):
                                         selling_rate = selling_rate_zone
                                         
                                     else :
+                                        frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "No Selling Rate Found",
+                                            "error": f"""No Selling Rate Found The shipment nummber is : ,{sales_invoice.custom_shipment_number} , Zone:, {zone_with_out_country} , Service Type : ,  {service_type[0].get("name")} , Package type :,{sales_invoice.custom_shipment_type }, Selling Group : {selling_group}, Icris Number : {icris_number}"""
+                                        }).insert()
                                     
-                                        print("No Selling Rate Found The shipment nummber is :" ,sales_invoice.custom_shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.custom_shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
+                                        # print("No Selling Rate Found The shipment nummber is :" ,sales_invoice.custom_shipment_number , "Zone:", zone_with_out_country , "Service Type :" ,  service_type[0].get("name") , "Package type :",sales_invoice.custom_shipment_type , "Selling Group :", selling_group ,"Icris Number :", icris_number,"\n \n")
                                         continue
                             else:
+                                frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "No Country Found",
+                                            "error": f"""Shipment Number:,{shipment},Shipper Country: {origin_country}"""
+                                        }).insert()
                                 continue            
                         
                         my_weight = float(sales_invoice.custom_shipment_weight)
@@ -383,8 +435,8 @@ def generate_sales_invoice_enqued(doc_str):
 
 
                             tarif = final_rate / (1- (final_discount_percentage/100))
-                    else:
-                        print("No selling Group Found","Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Shipment NUmber:",shipment,"Icris Number:",icris_number) 
+                    # else:
+                    #     print("No selling Group Found","Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Shipment NUmber:",shipment,"Icris Number:",icris_number) 
            
             
             

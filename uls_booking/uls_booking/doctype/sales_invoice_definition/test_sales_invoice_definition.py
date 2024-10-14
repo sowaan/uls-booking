@@ -1,4 +1,4 @@
-# Copyright (c) 2024, fariz.khanzada@sowaan.com and Contributors
+# Copyright (c) 2024, Sowaan and Contributors
 # See license.txt
 
 # import frappe

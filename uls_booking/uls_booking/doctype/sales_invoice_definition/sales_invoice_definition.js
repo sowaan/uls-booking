@@ -1,7 +1,7 @@
-// Copyright (c) 2024, fariz.khanzada@sowaan.com and contributors
+// Copyright (c) 2024, Sowaan and contributors
 // For license information, please see license.txt
 
-// frappe.ui.form.on("Sales Invoice Definition", {
+// frappe.ui.form.on("Sales Invocie Def", {
 // 	refresh(frm) {
 
 // 	},
