@@ -5,24 +5,10 @@ import frappe
 from frappe.model.document import Document
 
 import requests
-
+import base64
 
 class ICRISAccount(Document):
-	# pass
-	def before_save(self) :
-		url = "https://wwwcie.ups.com/security/v1/oauth/authorize"
-
-		query = {
-			REMOVED ,
-			'redirect_uri' : 'https://onlinetools.ups.com' ,
-			'response_type' : 'code' ,
-		}
-
-		response = requests.get(url, params=query)
-
-		data = response.json()
-		frappe.msgprint(str(data))
-
+	pass
 
 
 

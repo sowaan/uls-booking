@@ -1,0 +1,59 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-10-10 16:50:43.640702",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "duty_and_taxes_template",
+  "tracking_number",
+  "shipment_number",
+  "logs"
+ ],
+ "fields": [
+  {
+   "fieldname": "duty_and_taxes_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Duty and Taxes Template",
+   "options": "Duty and Taxes Template",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "duty_and_taxes_template.tracking_number",
+   "fieldname": "tracking_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tracking Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "logs",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Logs",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "duty_and_taxes_template.shipment_number",
+   "fieldname": "shipment_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Shipment Number",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-10-15 15:52:29.450411",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Duty and Taxes Template Records Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

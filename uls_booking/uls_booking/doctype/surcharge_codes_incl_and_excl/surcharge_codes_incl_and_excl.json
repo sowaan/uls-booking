@@ -1,0 +1,36 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-09-30 10:25:17.026808",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "excluded_codes",
+  "included_codes"
+ ],
+ "fields": [
+  {
+   "fieldname": "excluded_codes",
+   "fieldtype": "Data",
+   "label": "Excluded Codes"
+  },
+  {
+   "fieldname": "included_codes",
+   "fieldtype": "Data",
+   "label": "Included Codes"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-09-30 10:25:52.045530",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Surcharge Codes INCL and EXCL",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
