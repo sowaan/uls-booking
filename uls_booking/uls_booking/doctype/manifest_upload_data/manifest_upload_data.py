@@ -772,10 +772,11 @@ def storing_shipment_number(arrays, frm, to, doc):
             continue  # Skip if it already exists
 
         date_shipped = frappe.get_value("R200000", {"shipment_number": shipment}, "date_shipped")
-        station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
+        
         customer = None
         icris_number = None
         billing_type = None
+        station = None
         # Fetch export shipments
         export_array_temp = frappe.get_list("R300000",
             filters=[
@@ -786,6 +787,7 @@ def storing_shipment_number(arrays, frm, to, doc):
         )
 
         if export_array_temp:
+            station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
             shipper_number = export_array_temp[0].shipper_number
             icris = frappe.get_list("ICRIS List",
                 filters=[
@@ -808,6 +810,7 @@ def storing_shipment_number(arrays, frm, to, doc):
         )
 
         if import_array_temp:
+            station = frappe.get_value("R400000", {"shipment_number": shipment}, "consignee_city")
             consignee_number = import_array_temp[0].consignee_number
             icris = frappe.get_list("ICRIS List",
                 filters=[

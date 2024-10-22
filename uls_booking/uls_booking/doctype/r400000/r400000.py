@@ -6,8 +6,9 @@ from frappe.model.document import Document
 import frappe
 
 class R400000(Document):
-    pass
-	# def before_save(self):
+    # pass
+	def before_save(self):
+		self.consignee_city = self.consignee_city.capitalize()
 		# setting = frappe.get_doc("Manifest Setting Definition")
 
 		# # for i in setting.manifest_setting:

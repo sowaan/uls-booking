@@ -8,6 +8,7 @@
   "start_date",
   "billing_type",
   "customer_wise",
+  "customer",
   "column_break_ornt",
   "end_date",
   "station",
@@ -47,9 +48,10 @@
   },
   {
    "fieldname": "station",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Station"
+   "label": "Station",
+   "options": "Territory"
   },
   {
    "fieldname": "section_break_ebtp",
@@ -94,12 +96,18 @@
    "fieldtype": "Long Text",
    "label": "Sales Invoices",
    "read_only": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-21 19:13:41.636888",
+ "modified": "2024-10-22 15:58:17.582116",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Generate Sales Invoice",
