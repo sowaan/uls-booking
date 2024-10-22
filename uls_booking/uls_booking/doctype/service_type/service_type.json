@@ -27,8 +27,10 @@
   {
    "fieldname": "imp__exp",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Imp / Exp",
-   "options": "Import\nExport"
+   "options": "Import\nExport",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_ecvj",

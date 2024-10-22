@@ -83,6 +83,12 @@ fixtures = [
                                 "custom_billing_term",
                                 "custom_default_customer",
 
+
+
+
+                                "custom_duty_and_taxes_sales_invoice_uploader",
+                                "custom_duty_and_taxes_template",
+
                                 
                                 )
 	  	  
@@ -223,7 +229,7 @@ fixtures = [
 # Override standard doctype classes
 
 # override_doctype_class = {
-# 	"Sales Invoice": "uls_booking.uls_booking.overrides.booking_invoice.BookingInvoice",
+
 # }
 
 
