@@ -808,7 +808,7 @@ def storing_shipment_number(arrays, frm, to, doc):
         # Fetch import shipments
         import_array_temp = frappe.get_list("R400000",
             filters=[
-                ["shipper_country", "!=", origin_country],
+                ["consignee_country_code", "!=", origin_country],
                 ["shipment_number", "=", shipment]
             ],
             fields=["shipment_number", "consignee_number"]
