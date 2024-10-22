@@ -11,7 +11,8 @@
   "sales_invoice_definition",
   "surcharges",
   "compensation_table",
-  "export_and_import_conditions"
+  "export_and_import_conditions",
+  "unassigned_customer_manifest"
  ],
  "fields": [
   {
@@ -52,11 +53,17 @@
    "fieldtype": "Table",
    "label": "Export And Import Conditions",
    "options": "Export And Import Conditions"
+  },
+  {
+   "fieldname": "unassigned_customer_manifest",
+   "fieldtype": "Link",
+   "label": "Unassigned Customer Manifest",
+   "options": "Customer"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-14 16:24:26.858999",
+ "modified": "2024-10-22 17:20:55.161408",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice Definition",
