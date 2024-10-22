@@ -1,0 +1,187 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-04-19 16:40:14.562046",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "origin_country",
+  "origin_port",
+  "shipment_number",
+  "import_date",
+  "destination_country",
+  "destination_port",
+  "mawb_number",
+  "region_district",
+  "pick_up_center",
+  "shipper_number",
+  "shipper_name",
+  "shipper_building",
+  "shipper_street",
+  "shipper_city",
+  "shipper_country",
+  "shipper_state",
+  "shipper_postal_code",
+  "shipper_phone_number",
+  "shipper_fax_number",
+  "shipper_3rd_party_account_number",
+  "shipper_3rd_party_name",
+  "shipper_3rd_party_country",
+  "shipper_customs",
+  "alternate_tracking_number_1",
+  "shipper_contact_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Data",
+   "label": "Origin Country"
+  },
+  {
+   "fieldname": "origin_port",
+   "fieldtype": "Data",
+   "label": "Origin Port"
+  },
+  {
+   "fieldname": "shipment_number",
+   "fieldtype": "Data",
+   "label": "Shipment Number",
+   "unique": 1
+  },
+  {
+   "fieldname": "import_date",
+   "fieldtype": "Data",
+   "label": "Import Date"
+  },
+  {
+   "fieldname": "destination_country",
+   "fieldtype": "Data",
+   "label": "Destination Country"
+  },
+  {
+   "fieldname": "destination_port",
+   "fieldtype": "Data",
+   "label": "Destination Port"
+  },
+  {
+   "fieldname": "mawb_number",
+   "fieldtype": "Data",
+   "label": "MAWB Number"
+  },
+  {
+   "fieldname": "region_district",
+   "fieldtype": "Data",
+   "label": "Region District"
+  },
+  {
+   "fieldname": "pick_up_center",
+   "fieldtype": "Data",
+   "label": "PICK UP Center"
+  },
+  {
+   "fieldname": "shipper_number",
+   "fieldtype": "Data",
+   "label": "Shipper Number"
+  },
+  {
+   "fieldname": "shipper_name",
+   "fieldtype": "Data",
+   "label": "Shipper Name"
+  },
+  {
+   "fieldname": "shipper_building",
+   "fieldtype": "Data",
+   "label": "Shipper Building"
+  },
+  {
+   "fieldname": "shipper_street",
+   "fieldtype": "Data",
+   "label": "Shipper Street"
+  },
+  {
+   "fieldname": "shipper_city",
+   "fieldtype": "Data",
+   "label": "Shipper City"
+  },
+  {
+   "fieldname": "shipper_country",
+   "fieldtype": "Data",
+   "label": "Shipper Country"
+  },
+  {
+   "fieldname": "shipper_state",
+   "fieldtype": "Data",
+   "label": "Shipper State"
+  },
+  {
+   "fieldname": "shipper_postal_code",
+   "fieldtype": "Data",
+   "label": "Shipper Postal Code"
+  },
+  {
+   "fieldname": "shipper_phone_number",
+   "fieldtype": "Data",
+   "label": "Shipper Phone Number"
+  },
+  {
+   "fieldname": "shipper_fax_number",
+   "fieldtype": "Data",
+   "label": "Shipper Fax Number"
+  },
+  {
+   "fieldname": "shipper_3rd_party_account_number",
+   "fieldtype": "Data",
+   "label": "Shipper 3RD Party Account Number"
+  },
+  {
+   "fieldname": "shipper_3rd_party_name",
+   "fieldtype": "Data",
+   "label": "Shipper 3RD Party Name"
+  },
+  {
+   "fieldname": "shipper_3rd_party_country",
+   "fieldtype": "Data",
+   "label": "Shipper 3RD Party Country"
+  },
+  {
+   "fieldname": "shipper_customs",
+   "fieldtype": "Data",
+   "label": "Shipper Customs"
+  },
+  {
+   "fieldname": "alternate_tracking_number_1",
+   "fieldtype": "Data",
+   "label": "Alternate Tracking Number 1"
+  },
+  {
+   "fieldname": "shipper_contact_name",
+   "fieldtype": "Data",
+   "label": "Shipper Contact Name"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-07-16 00:37:47.093255",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "R300000",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

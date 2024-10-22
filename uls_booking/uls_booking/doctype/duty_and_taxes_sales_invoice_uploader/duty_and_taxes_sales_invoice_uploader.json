@@ -1,0 +1,123 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{date}-{mawb_number}-{flight_number}-{type}-{mno}-{######}",
+ "creation": "2024-10-10 16:14:26.317487",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "filters_section",
+  "date",
+  "mawb_number",
+  "flight_number",
+  "column_break_hsht",
+  "type",
+  "mno",
+  "number_of_dtt_fetched",
+  "number_of_sales_invoice_created",
+  "section_break_ezpw",
+  "duty_and_taxes_template",
+  "section_break_unp9",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_unp9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Duty and Taxes Sales Invoice Uploader",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "mawb_number",
+   "fieldtype": "Data",
+   "label": "MAWB Number"
+  },
+  {
+   "fieldname": "flight_number",
+   "fieldtype": "Data",
+   "label": "Flight Number"
+  },
+  {
+   "fieldname": "column_break_hsht",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Data",
+   "label": "Type"
+  },
+  {
+   "fieldname": "number_of_dtt_fetched",
+   "fieldtype": "Int",
+   "label": "Number of DTT Fetched",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mno",
+   "fieldtype": "Data",
+   "label": "MNO"
+  },
+  {
+   "fieldname": "section_break_ezpw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "duty_and_taxes_template",
+   "fieldtype": "Table",
+   "label": "Duty and Taxes Template",
+   "options": "Duty and Taxes Template Records Table",
+   "read_only": 1
+  },
+  {
+   "fieldname": "number_of_sales_invoice_created",
+   "fieldtype": "Int",
+   "label": "Number of Sales Invoice Created",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-10-15 15:44:06.244349",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Duty and Taxes Sales Invoice Uploader",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

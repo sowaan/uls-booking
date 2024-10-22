@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:record_type",
+ "creation": "2024-04-01 15:25:05.636627",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "record_type",
+  "child_record",
+  "definitions"
+ ],
+ "fields": [
+  {
+   "fieldname": "record_type",
+   "fieldtype": "Link",
+   "label": "Record Type",
+   "options": "DocType",
+   "unique": 1
+  },
+  {
+   "fieldname": "definitions",
+   "fieldtype": "Table",
+   "label": "Definitions",
+   "options": "r200000def"
+  },
+  {
+   "default": "0",
+   "fieldname": "child_record",
+   "fieldtype": "Check",
+   "label": "Child Record"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-09-23 17:48:14.000579",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Definition Manifest",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

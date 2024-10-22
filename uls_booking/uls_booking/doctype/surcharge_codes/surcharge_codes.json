@@ -1,0 +1,36 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-09-10 10:44:19.298461",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sur_cod_1",
+  "sur_amt_1"
+ ],
+ "fields": [
+  {
+   "fieldname": "sur_cod_1",
+   "fieldtype": "Data",
+   "label": "SUR Cod"
+  },
+  {
+   "fieldname": "sur_amt_1",
+   "fieldtype": "Data",
+   "label": "SUR AMT"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-09-10 11:20:06.612380",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Surcharge Codes",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

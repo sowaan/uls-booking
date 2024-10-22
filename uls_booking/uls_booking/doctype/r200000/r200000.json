@@ -1,0 +1,571 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-03-25 16:31:31.323414",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "record_type",
+  "origin_port",
+  "origin_country",
+  "shipment_number",
+  "import_date",
+  "destination_country",
+  "destination_port",
+  "mawb_number",
+  "shipment_type",
+  "custom_control_number",
+  "biling_type_shipment",
+  "terms_of_shipment",
+  "number_of_packages_in_shipment",
+  "shipment_weight",
+  "shipment_weight_unit",
+  "shipper_export_document",
+  "country_origin_of_goods",
+  "declared_value",
+  "currency_code_of_insured_amount",
+  "importer_prior_customer",
+  "customs_incpection_requested",
+  "brokerage_hold__dangerous_goods_flag",
+  "customs_entry_type",
+  "see_fax_code",
+  "discount__rebate_amount",
+  "currency_code_for_rebate_amount",
+  "discount__rebate_text",
+  "insurance_charges",
+  "currency_code_for_insurance_charges",
+  "freight_charges",
+  "check",
+  "column_break_r16sy",
+  "currency_code_for_freight_charges",
+  "invoice_total",
+  "currency_code_for_invoice_total",
+  "split_duty_and_vat_flag",
+  "third_party_indicator_code",
+  "saturday_delivery_flag",
+  "consolidated_clearance_flag",
+  "consolidated_clearance_quality",
+  "special_instruction_flag",
+  "input_operator_id",
+  "input_date",
+  "shipment_type_hold",
+  "service_level",
+  "bag_number_of_first_package",
+  "sold_to_importer_flag",
+  "non_revenue_shipment_flag",
+  "free_domicile_of_duty_and_tax_flag",
+  "over_size_package_flag",
+  "freight_collect_flag",
+  "early_am_indicator",
+  "undeliverable_code",
+  "saturday_delivery_override",
+  "express_plus_override",
+  "package_type",
+  "chg_pymt_terms_flag",
+  "over_70_lbs_flag",
+  "currency_code_for_register_charge_amount",
+  "other_charges_amount",
+  "column_break_ivkpa",
+  "currency_code_for_other_charge_amt",
+  "shipment_agreement_type",
+  "certificate_of_origin",
+  "certificate_of_origin_number",
+  "freight_collect_insurance_amount",
+  "date_shipped",
+  "pickup_time",
+  "expanded_declared_value",
+  "expanded_invoice_total",
+  "billing_term_field",
+  "bill_term_surcharge_indicator",
+  "document_auditor_identification",
+  "import_zone_expanded",
+  "export_zone_expanded",
+  "dimensional_weight",
+  "dimensional_weight_unit",
+  "free_on_board_flag",
+  "cost_and_freight_flag",
+  "inbound_container_number",
+  "inbound_flight_number",
+  "outbound_flight_number",
+  "incomplete_shipment_flag",
+  "download_change_flag",
+  "bypass_bag_or_container_flag",
+  "shipment_type_for_return_shipments",
+  "expanded_packages_in_shipment",
+  "payment_collection_service_flag",
+  "payment_collection_service_hold_flag"
+ ],
+ "fields": [
+  {
+   "fieldname": "record_type",
+   "fieldtype": "Data",
+   "label": "Record Type"
+  },
+  {
+   "fieldname": "shipment_number",
+   "fieldtype": "Data",
+   "label": "Shipment Number",
+   "unique": 1
+  },
+  {
+   "fieldname": "shipment_type",
+   "fieldtype": "Data",
+   "label": "Shipment Type"
+  },
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Data",
+   "label": "Origin Country"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "origin_port",
+   "fieldtype": "Data",
+   "label": "Origin Port"
+  },
+  {
+   "fieldname": "import_date",
+   "fieldtype": "Data",
+   "label": "Import Date"
+  },
+  {
+   "fieldname": "destination_country",
+   "fieldtype": "Data",
+   "label": "Destination Country"
+  },
+  {
+   "fieldname": "destination_port",
+   "fieldtype": "Data",
+   "label": "Destination Port"
+  },
+  {
+   "fieldname": "mawb_number",
+   "fieldtype": "Data",
+   "label": "MAWB Number"
+  },
+  {
+   "fieldname": "custom_control_number",
+   "fieldtype": "Data",
+   "label": "Custom Control Number"
+  },
+  {
+   "fieldname": "biling_type_shipment",
+   "fieldtype": "Data",
+   "label": "Biling Type Shipment"
+  },
+  {
+   "fieldname": "terms_of_shipment",
+   "fieldtype": "Data",
+   "label": "Terms Of Shipment"
+  },
+  {
+   "fieldname": "number_of_packages_in_shipment",
+   "fieldtype": "Data",
+   "label": "Number Of Packages In Shipment"
+  },
+  {
+   "fieldname": "shipment_weight",
+   "fieldtype": "Data",
+   "label": "Shipment Weight"
+  },
+  {
+   "fieldname": "shipment_weight_unit",
+   "fieldtype": "Data",
+   "label": "Shipment Weight Unit"
+  },
+  {
+   "fieldname": "shipper_export_document",
+   "fieldtype": "Data",
+   "label": "Shipper Export Document"
+  },
+  {
+   "fieldname": "country_origin_of_goods",
+   "fieldtype": "Data",
+   "label": "Country Origin Of Goods"
+  },
+  {
+   "fieldname": "declared_value",
+   "fieldtype": "Data",
+   "label": "Declared Value"
+  },
+  {
+   "fieldname": "currency_code_of_insured_amount",
+   "fieldtype": "Data",
+   "label": "Currency Code of Insured Amount"
+  },
+  {
+   "fieldname": "importer_prior_customer",
+   "fieldtype": "Data",
+   "label": "Importer prior Customer"
+  },
+  {
+   "fieldname": "customs_incpection_requested",
+   "fieldtype": "Data",
+   "label": "Customs Incpection Requested"
+  },
+  {
+   "fieldname": "brokerage_hold__dangerous_goods_flag",
+   "fieldtype": "Data",
+   "label": "Brokerage Hold / Dangerous Goods Flag"
+  },
+  {
+   "fieldname": "customs_entry_type",
+   "fieldtype": "Data",
+   "label": "Customs Entry Type"
+  },
+  {
+   "fieldname": "see_fax_code",
+   "fieldtype": "Data",
+   "label": "See Fax Code"
+  },
+  {
+   "fieldname": "discount__rebate_amount",
+   "fieldtype": "Data",
+   "label": "Discount / Rebate Amount"
+  },
+  {
+   "fieldname": "currency_code_for_rebate_amount",
+   "fieldtype": "Data",
+   "label": "Currency Code For Rebate Amount"
+  },
+  {
+   "fieldname": "discount__rebate_text",
+   "fieldtype": "Data",
+   "label": "Discount / Rebate Text"
+  },
+  {
+   "fieldname": "insurance_charges",
+   "fieldtype": "Data",
+   "label": "Insurance Charges"
+  },
+  {
+   "fieldname": "currency_code_for_insurance_charges",
+   "fieldtype": "Data",
+   "label": "Currency Code For Insurance Charges"
+  },
+  {
+   "fieldname": "freight_charges",
+   "fieldtype": "Data",
+   "label": "Freight Charges"
+  },
+  {
+   "fieldname": "currency_code_for_freight_charges",
+   "fieldtype": "Data",
+   "label": "Currency Code For Freight Charges"
+  },
+  {
+   "fieldname": "invoice_total",
+   "fieldtype": "Data",
+   "label": "Invoice Total"
+  },
+  {
+   "fieldname": "currency_code_for_invoice_total",
+   "fieldtype": "Data",
+   "label": "Currency Code For Invoice Total"
+  },
+  {
+   "fieldname": "split_duty_and_vat_flag",
+   "fieldtype": "Data",
+   "label": "Split Duty And VAT Flag"
+  },
+  {
+   "fieldname": "third_party_indicator_code",
+   "fieldtype": "Data",
+   "label": "Third Party Indicator Code"
+  },
+  {
+   "fieldname": "saturday_delivery_flag",
+   "fieldtype": "Data",
+   "label": "Saturday Delivery Flag "
+  },
+  {
+   "fieldname": "consolidated_clearance_flag",
+   "fieldtype": "Data",
+   "label": "Consolidated Clearance Flag"
+  },
+  {
+   "fieldname": "consolidated_clearance_quality",
+   "fieldtype": "Data",
+   "label": "Consolidated Clearance Quality"
+  },
+  {
+   "fieldname": "special_instruction_flag",
+   "fieldtype": "Data",
+   "label": "Special Instruction Flag"
+  },
+  {
+   "fieldname": "input_operator_id",
+   "fieldtype": "Data",
+   "label": "Input Operator Id"
+  },
+  {
+   "fieldname": "input_date",
+   "fieldtype": "Data",
+   "label": "Input Date"
+  },
+  {
+   "fieldname": "shipment_type_hold",
+   "fieldtype": "Data",
+   "label": "Shipment Type Hold"
+  },
+  {
+   "fieldname": "service_level",
+   "fieldtype": "Data",
+   "label": "Service Level"
+  },
+  {
+   "fieldname": "bag_number_of_first_package",
+   "fieldtype": "Data",
+   "label": "Bag Number Of First Package"
+  },
+  {
+   "fieldname": "sold_to_importer_flag",
+   "fieldtype": "Data",
+   "label": "Sold To Importer Flag"
+  },
+  {
+   "fieldname": "non_revenue_shipment_flag",
+   "fieldtype": "Data",
+   "label": "Non Revenue Shipment Flag"
+  },
+  {
+   "fieldname": "free_domicile_of_duty_and_tax_flag",
+   "fieldtype": "Data",
+   "label": "Free Domicile Of Duty And Tax Flag"
+  },
+  {
+   "fieldname": "over_size_package_flag",
+   "fieldtype": "Data",
+   "label": "Over Size Package Flag"
+  },
+  {
+   "fieldname": "freight_collect_flag",
+   "fieldtype": "Data",
+   "label": "Freight Collect Flag"
+  },
+  {
+   "fieldname": "early_am_indicator",
+   "fieldtype": "Data",
+   "label": "Early Am Indicator"
+  },
+  {
+   "fieldname": "undeliverable_code",
+   "fieldtype": "Data",
+   "label": "Undeliverable Code"
+  },
+  {
+   "fieldname": "saturday_delivery_override",
+   "fieldtype": "Data",
+   "label": "Saturday Delivery Override"
+  },
+  {
+   "fieldname": "express_plus_override",
+   "fieldtype": "Data",
+   "label": "Express Plus Override"
+  },
+  {
+   "fieldname": "package_type",
+   "fieldtype": "Data",
+   "label": "Package Type"
+  },
+  {
+   "fieldname": "chg_pymt_terms_flag",
+   "fieldtype": "Data",
+   "label": "CHG PYMT Terms Flag "
+  },
+  {
+   "fieldname": "over_70_lbs_flag",
+   "fieldtype": "Data",
+   "label": "Over 70 LBS Flag"
+  },
+  {
+   "fieldname": "currency_code_for_register_charge_amount",
+   "fieldtype": "Data",
+   "label": "Currency Code For Register Charge Amount"
+  },
+  {
+   "fieldname": "other_charges_amount",
+   "fieldtype": "Data",
+   "label": "Other Charges Amount"
+  },
+  {
+   "fieldname": "currency_code_for_other_charge_amt",
+   "fieldtype": "Data",
+   "label": "Currency Code For Other Charge AMT"
+  },
+  {
+   "fieldname": "shipment_agreement_type",
+   "fieldtype": "Data",
+   "label": "Shipment Agreement Type"
+  },
+  {
+   "fieldname": "certificate_of_origin",
+   "fieldtype": "Data",
+   "label": "Certificate Of Origin"
+  },
+  {
+   "fieldname": "certificate_of_origin_number",
+   "fieldtype": "Data",
+   "label": "Certificate Of Origin Number"
+  },
+  {
+   "fieldname": "freight_collect_insurance_amount",
+   "fieldtype": "Data",
+   "label": "Freight Collect Insurance Amount"
+  },
+  {
+   "fieldname": "date_shipped",
+   "fieldtype": "Data",
+   "label": "Date Shipped"
+  },
+  {
+   "fieldname": "pickup_time",
+   "fieldtype": "Data",
+   "label": "Pickup Time"
+  },
+  {
+   "fieldname": "expanded_declared_value",
+   "fieldtype": "Data",
+   "label": "Expanded Declared Value"
+  },
+  {
+   "fieldname": "expanded_invoice_total",
+   "fieldtype": "Data",
+   "label": "Expanded Invoice Total"
+  },
+  {
+   "fieldname": "billing_term_field",
+   "fieldtype": "Data",
+   "label": "Billing Term Field"
+  },
+  {
+   "fieldname": "bill_term_surcharge_indicator",
+   "fieldtype": "Data",
+   "label": "Bill Term Surcharge Indicator"
+  },
+  {
+   "fieldname": "document_auditor_identification",
+   "fieldtype": "Data",
+   "label": "Document Auditor Identification"
+  },
+  {
+   "fieldname": "import_zone_expanded",
+   "fieldtype": "Data",
+   "label": "Import Zone Expanded"
+  },
+  {
+   "fieldname": "export_zone_expanded",
+   "fieldtype": "Data",
+   "label": "Export Zone Expanded"
+  },
+  {
+   "fieldname": "dimensional_weight",
+   "fieldtype": "Data",
+   "label": "Dimensional Weight"
+  },
+  {
+   "fieldname": "dimensional_weight_unit",
+   "fieldtype": "Data",
+   "label": "Dimensional Weight Unit"
+  },
+  {
+   "fieldname": "free_on_board_flag",
+   "fieldtype": "Data",
+   "label": "Free On Board Flag"
+  },
+  {
+   "fieldname": "cost_and_freight_flag",
+   "fieldtype": "Data",
+   "label": "Cost And Freight Flag"
+  },
+  {
+   "fieldname": "inbound_container_number",
+   "fieldtype": "Data",
+   "label": "Inbound Container Number"
+  },
+  {
+   "fieldname": "inbound_flight_number",
+   "fieldtype": "Data",
+   "label": "Inbound Flight Number"
+  },
+  {
+   "fieldname": "outbound_flight_number",
+   "fieldtype": "Data",
+   "label": "Outbound Flight Number"
+  },
+  {
+   "fieldname": "incomplete_shipment_flag",
+   "fieldtype": "Data",
+   "label": "Incomplete Shipment Flag"
+  },
+  {
+   "fieldname": "download_change_flag",
+   "fieldtype": "Data",
+   "label": "Download Change Flag"
+  },
+  {
+   "fieldname": "bypass_bag_or_container_flag",
+   "fieldtype": "Data",
+   "label": "Bypass Bag Or Container Flag"
+  },
+  {
+   "fieldname": "shipment_type_for_return_shipments",
+   "fieldtype": "Data",
+   "label": "Shipment Type For Return Shipments"
+  },
+  {
+   "fieldname": "expanded_packages_in_shipment",
+   "fieldtype": "Data",
+   "label": "Expanded Packages In Shipment"
+  },
+  {
+   "fieldname": "payment_collection_service_flag",
+   "fieldtype": "Data",
+   "label": "Payment Collection Service Flag"
+  },
+  {
+   "fieldname": "payment_collection_service_hold_flag",
+   "fieldtype": "Data",
+   "label": "Payment Collection Service Hold Flag"
+  },
+  {
+   "fieldname": "column_break_r16sy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ivkpa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "check",
+   "fieldtype": "Check",
+   "label": "Check"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-09-24 11:43:57.430588",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "R200000",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,110 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-10-09 14:12:51.162863",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "shipper_no",
+  "shipper_name",
+  "centre",
+  "price_list",
+  "column_break_evgf",
+  "active_account",
+  "contact",
+  "business_initiative",
+  "station"
+ ],
+ "fields": [
+  {
+   "fieldname": "shipper_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Shipper No",
+   "length": 6,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "shipper_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Shipper Name",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "centre",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Centre",
+   "options": "\n0741 PK - KARACHI\n0531 PK - LAHORE\n0611 PK - SIALKOT"
+  },
+  {
+   "fieldname": "price_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "column_break_evgf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "active_account",
+   "fieldtype": "Check",
+   "label": "Active Account"
+  },
+  {
+   "fieldname": "contact",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Contact",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "business_initiative",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Business Initiative ",
+   "options": "\nAA Enterprises\nADB Tender\nB2B Direct Sales\nB2C Direct Sales\nBanking Initiative\nBritish Council Material to WW\nEducational - British Council\nHeavy Weight Campaign\nLOC Tender\nNADRA Project\nPakistan Post Office - MRP\nPakistan Post Office Tender\nPK Ramadan Campaign\nProduct Boxes 10 and 25 Kg\nProject and Tender\nReseller - AA International\nReseller - AJ Worldwide\nReseller - Amanat Express\nReseller - Aviators\nReseller - Bex Logistics\nReseller - Call Courier\nReseller - Dart\nReseller - DHL Linker\nReseller - Easyways Express\nReseller - Express Movers\nReseller - Global Packers\nReseller - Noorani Impex\nReseller - North Pole\nReseller - Orbit\nReseller - Speedaf\nReseller and Retailor\nReseller North\nReseller South\nRetailor - Leopards\nRetailor - M&P\nRetailor - TCS Pvt. Ltd.\nWorld Food Programme WFP"
+  },
+  {
+   "fieldname": "station",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Station",
+   "options": "\nFaisalabad\nGujranwala\nIslamabad\nKarachi\nLahore\nLahore\nPeshawar\nSialkot\nWazirabad",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-10-09 14:22:56.902631",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "ICRIS List",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,146 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-04-22 11:37:05.510944",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "origin_country",
+  "origin_port",
+  "destination_country",
+  "destination_port",
+  "import_date",
+  "shipment_number",
+  "mawb_number",
+  "record_type",
+  "invoice_1_unit_quantity",
+  "invoice_1_code",
+  "invoice_1_price",
+  "invoice_1_currency_mode",
+  "invoice_number",
+  "invoice_1_country_of_origin",
+  "invoice_1_commodity_code",
+  "invoice_1_license_number",
+  "country_of_ultimate_destination",
+  "check"
+ ],
+ "fields": [
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Data",
+   "label": "Origin Country"
+  },
+  {
+   "fieldname": "origin_port",
+   "fieldtype": "Data",
+   "label": "Origin Port"
+  },
+  {
+   "fieldname": "destination_country",
+   "fieldtype": "Data",
+   "label": "Destination Country"
+  },
+  {
+   "fieldname": "destination_port",
+   "fieldtype": "Data",
+   "label": "Destination Port"
+  },
+  {
+   "fieldname": "import_date",
+   "fieldtype": "Data",
+   "label": "Import Date"
+  },
+  {
+   "fieldname": "shipment_number",
+   "fieldtype": "Data",
+   "label": "Shipment Number"
+  },
+  {
+   "fieldname": "mawb_number",
+   "fieldtype": "Data",
+   "label": "MAWB Number"
+  },
+  {
+   "fieldname": "record_type",
+   "fieldtype": "Data",
+   "label": "Record Type"
+  },
+  {
+   "fieldname": "invoice_1_unit_quantity",
+   "fieldtype": "Data",
+   "label": "Invoice 1 Unit Quantity"
+  },
+  {
+   "fieldname": "invoice_1_code",
+   "fieldtype": "Data",
+   "label": "Invoice 1 Code"
+  },
+  {
+   "fieldname": "invoice_1_price",
+   "fieldtype": "Data",
+   "label": "Invoice 1 Price"
+  },
+  {
+   "fieldname": "invoice_1_currency_mode",
+   "fieldtype": "Data",
+   "label": "Invoice 1 Currency Mode"
+  },
+  {
+   "fieldname": "invoice_number",
+   "fieldtype": "Data",
+   "label": "Invoice Number"
+  },
+  {
+   "fieldname": "invoice_1_commodity_code",
+   "fieldtype": "Data",
+   "label": "Invoice 1 Commodity Code"
+  },
+  {
+   "fieldname": "invoice_1_license_number",
+   "fieldtype": "Data",
+   "label": "Invoice 1 License Number"
+  },
+  {
+   "fieldname": "country_of_ultimate_destination",
+   "fieldtype": "Data",
+   "label": "Country Of Ultimate Destination"
+  },
+  {
+   "fieldname": "invoice_1_country_of_origin",
+   "fieldtype": "Data",
+   "label": "Invoice 1 Country Of Origin"
+  },
+  {
+   "default": "0",
+   "fieldname": "check",
+   "fieldtype": "Check",
+   "label": "Check",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-09-24 11:44:37.187851",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "R500000",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

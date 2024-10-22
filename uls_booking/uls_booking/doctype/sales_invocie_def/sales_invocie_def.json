@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "creation": "2024-09-09 10:13:58.032582",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sales_invoice_definition",
+  "surcharges",
+  "compensation_table"
+ ],
+ "fields": [
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "sales_invoice_definition",
+   "fieldtype": "Table",
+   "label": "Sales Invoice Definition",
+   "options": "Sales Invoice def"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "surcharges",
+   "fieldtype": "Table",
+   "label": "Surcharges",
+   "options": "Surcharge Codes"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "compensation_table",
+   "fieldtype": "Table",
+   "label": "Compensation Table",
+   "options": "Compensation Detail"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-09-27 16:27:19.241834",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Sales Invocie Def",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

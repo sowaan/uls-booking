@@ -1,0 +1,121 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-04-22 12:16:50.044752",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "origin_country",
+  "origin_port",
+  "destination_country",
+  "destination_port",
+  "shipment_number",
+  "import_date",
+  "mawb_number",
+  "shipment_remarks_code",
+  "shipment_remarks_text",
+  "shipment_remarks_date",
+  "operator_id",
+  "system_date",
+  "system_time",
+  "special_instruction_field"
+ ],
+ "fields": [
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Data",
+   "label": "Origin Country"
+  },
+  {
+   "fieldname": "origin_port",
+   "fieldtype": "Data",
+   "label": "Origin Port"
+  },
+  {
+   "fieldname": "destination_country",
+   "fieldtype": "Data",
+   "label": "Destination Country"
+  },
+  {
+   "fieldname": "destination_port",
+   "fieldtype": "Data",
+   "label": "Destination Port"
+  },
+  {
+   "fieldname": "shipment_number",
+   "fieldtype": "Data",
+   "label": "Shipment Number",
+   "unique": 1
+  },
+  {
+   "fieldname": "import_date",
+   "fieldtype": "Data",
+   "label": "Import Date"
+  },
+  {
+   "fieldname": "mawb_number",
+   "fieldtype": "Data",
+   "label": "MAWB Number"
+  },
+  {
+   "fieldname": "shipment_remarks_code",
+   "fieldtype": "Data",
+   "label": "Shipment Remarks Code"
+  },
+  {
+   "fieldname": "shipment_remarks_text",
+   "fieldtype": "Data",
+   "label": "Shipment Remarks Text"
+  },
+  {
+   "fieldname": "shipment_remarks_date",
+   "fieldtype": "Data",
+   "label": "Shipment Remarks Date"
+  },
+  {
+   "fieldname": "operator_id",
+   "fieldtype": "Data",
+   "label": "Operator Id"
+  },
+  {
+   "fieldname": "system_date",
+   "fieldtype": "Data",
+   "label": "System Date"
+  },
+  {
+   "fieldname": "system_time",
+   "fieldtype": "Data",
+   "label": "System Time"
+  },
+  {
+   "fieldname": "special_instruction_field",
+   "fieldtype": "Data",
+   "label": "Special Instruction Field"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-07-16 00:41:48.389068",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "R900000",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

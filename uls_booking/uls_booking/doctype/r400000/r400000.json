@@ -1,0 +1,223 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-04-02 14:06:15.640919",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "record_type",
+  "origin_country",
+  "origin_port",
+  "destination_country",
+  "destination_port",
+  "import_date",
+  "mawb_number",
+  "shipment_number",
+  "consignee_delivery_comp",
+  "consignee_delivery_center",
+  "consignee_number",
+  "consignee_name",
+  "consignee_contact_name",
+  "consignee_building",
+  "consignee_street",
+  "consignee_city",
+  "consignee_county",
+  "consignee_state",
+  "consignee_postal_code",
+  "consignee_country_code",
+  "consignee_phone_number",
+  "consignee_fax_number",
+  "consignee_po_number",
+  "consignee_bond_number",
+  "consignee_vat_number",
+  "consignee_pa_number",
+  "consignee_irs_number",
+  "alternate_tracking_number_2",
+  "consignee_tax_id__number",
+  "consignee_po_number_suffix",
+  "broker_code"
+ ],
+ "fields": [
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Data",
+   "label": "Origin Country"
+  },
+  {
+   "fieldname": "origin_port",
+   "fieldtype": "Data",
+   "label": "Origin Port"
+  },
+  {
+   "fieldname": "destination_country",
+   "fieldtype": "Data",
+   "label": "Destination Country"
+  },
+  {
+   "fieldname": "destination_port",
+   "fieldtype": "Data",
+   "label": "Destination Port"
+  },
+  {
+   "fieldname": "import_date",
+   "fieldtype": "Data",
+   "label": "Import Date"
+  },
+  {
+   "fieldname": "mawb_number",
+   "fieldtype": "Data",
+   "label": "MAWB Number"
+  },
+  {
+   "fieldname": "shipment_number",
+   "fieldtype": "Data",
+   "label": "Shipment Number",
+   "unique": 1
+  },
+  {
+   "fieldname": "record_type",
+   "fieldtype": "Data",
+   "label": "Record Type"
+  },
+  {
+   "fieldname": "consignee_delivery_comp",
+   "fieldtype": "Data",
+   "label": "Consignee Delivery COMP"
+  },
+  {
+   "fieldname": "consignee_delivery_center",
+   "fieldtype": "Data",
+   "label": "Consignee Delivery Center"
+  },
+  {
+   "fieldname": "consignee_number",
+   "fieldtype": "Data",
+   "label": "Consignee Number"
+  },
+  {
+   "fieldname": "consignee_name",
+   "fieldtype": "Data",
+   "label": "Consignee Name"
+  },
+  {
+   "fieldname": "consignee_contact_name",
+   "fieldtype": "Data",
+   "label": "Consignee Contact Name"
+  },
+  {
+   "fieldname": "consignee_building",
+   "fieldtype": "Data",
+   "label": "Consignee Building"
+  },
+  {
+   "fieldname": "consignee_street",
+   "fieldtype": "Data",
+   "label": "Consignee Street"
+  },
+  {
+   "fieldname": "consignee_city",
+   "fieldtype": "Data",
+   "label": "Consignee City"
+  },
+  {
+   "fieldname": "consignee_county",
+   "fieldtype": "Data",
+   "label": "Consignee County"
+  },
+  {
+   "fieldname": "consignee_state",
+   "fieldtype": "Data",
+   "label": "Consignee State"
+  },
+  {
+   "fieldname": "consignee_postal_code",
+   "fieldtype": "Data",
+   "label": "Consignee Postal Code"
+  },
+  {
+   "fieldname": "consignee_country_code",
+   "fieldtype": "Data",
+   "label": "Consignee Country Code"
+  },
+  {
+   "fieldname": "consignee_phone_number",
+   "fieldtype": "Data",
+   "label": "Consignee Phone Number"
+  },
+  {
+   "fieldname": "consignee_fax_number",
+   "fieldtype": "Data",
+   "label": "Consignee FAX Number"
+  },
+  {
+   "fieldname": "consignee_po_number",
+   "fieldtype": "Data",
+   "label": "Consignee P.O Number"
+  },
+  {
+   "fieldname": "consignee_bond_number",
+   "fieldtype": "Data",
+   "label": "Consignee Bond Number"
+  },
+  {
+   "fieldname": "consignee_vat_number",
+   "fieldtype": "Data",
+   "label": "Consignee VAT Number"
+  },
+  {
+   "fieldname": "consignee_pa_number",
+   "fieldtype": "Data",
+   "label": "Consignee PA Number"
+  },
+  {
+   "fieldname": "consignee_irs_number",
+   "fieldtype": "Data",
+   "label": "Consignee IRS Number"
+  },
+  {
+   "fieldname": "alternate_tracking_number_2",
+   "fieldtype": "Data",
+   "label": "Alternate Tracking Number 2"
+  },
+  {
+   "fieldname": "consignee_tax_id__number",
+   "fieldtype": "Data",
+   "label": "Consignee TAX ID  Number"
+  },
+  {
+   "fieldname": "consignee_po_number_suffix",
+   "fieldtype": "Data",
+   "label": "Consignee P.O Number Suffix"
+  },
+  {
+   "fieldname": "broker_code",
+   "fieldtype": "Data",
+   "label": "Broker Code"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-07-16 00:38:40.846219",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "R400000",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

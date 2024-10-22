@@ -1,0 +1,125 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-09-17 16:47:55.530458",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_empd",
+  "field_names_and_records",
+  "doctypes_with_child_records",
+  "country_and_surcharge_codes_field_names",
+  "country_codes_tab",
+  "country_codes",
+  "surcharges_code_excl_and_incl",
+  "charges_and_item_names_tab",
+  "fuel_charges",
+  "shipment_billing_charges",
+  "insurance_charges",
+  "other_charges",
+  "freight_charges"
+ ],
+ "fields": [
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "country_codes",
+   "fieldtype": "Table",
+   "label": "Country Codes",
+   "options": "Country Codes"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "field_names_and_records",
+   "fieldtype": "Table",
+   "label": "Field Names And Records",
+   "options": "Field and Record"
+  },
+  {
+   "fieldname": "section_break_empd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "doctypes_with_child_records",
+   "fieldtype": "Table",
+   "label": "Doctypes With Child Records",
+   "options": "Doctype with child records"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "country_and_surcharge_codes_field_names",
+   "fieldtype": "Table",
+   "label": "Country And Surcharge Codes Field Names",
+   "options": "Country And Surcharge Code Field Names"
+  },
+  {
+   "fieldname": "country_codes_tab",
+   "fieldtype": "Tab Break",
+   "label": "Country Codes"
+  },
+  {
+   "fieldname": "surcharges_code_excl_and_incl",
+   "fieldtype": "Table",
+   "label": "Surcharges Code EXCL and INCL",
+   "options": "Surcharge Codes INCL and EXCL"
+  },
+  {
+   "fieldname": "charges_and_item_names_tab",
+   "fieldtype": "Tab Break",
+   "label": "Charges And Item Names"
+  },
+  {
+   "fieldname": "fuel_charges",
+   "fieldtype": "Link",
+   "label": "Fuel Charges",
+   "options": "Item"
+  },
+  {
+   "fieldname": "shipment_billing_charges",
+   "fieldtype": "Link",
+   "label": "Shipment Billing Charges",
+   "options": "Item"
+  },
+  {
+   "fieldname": "insurance_charges",
+   "fieldtype": "Link",
+   "label": "Insurance Charges",
+   "options": "Item"
+  },
+  {
+   "fieldname": "other_charges",
+   "fieldtype": "Link",
+   "label": "Other Charges",
+   "options": "Item"
+  },
+  {
+   "fieldname": "freight_charges",
+   "fieldtype": "Link",
+   "label": "Freight Charges",
+   "options": "Item"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-10-01 16:10:08.573749",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Manifest Setting Definition",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

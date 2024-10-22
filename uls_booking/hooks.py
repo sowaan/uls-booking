@@ -53,6 +53,40 @@ fixtures = [
 
 
                                 "custom_service_types",
+                                "custom_consignee_number",
+                                "custom_shipper_number",
+                                "custom_tracking_number",
+                                "custom_shipper_postal_code",
+                                "custom_shipper_phone_number",
+                                "custom_shipper_name",
+                                "custom_shipper_country",
+                                "custom_shipper_contact_name",
+                                "custom_shipper_city",
+                                "custom_shipment_weight_unit",
+                                "custom_shipment_weight",
+                                "custom_shipment_type",
+                                "custom_shipment_number",
+                                "custom_service_type",
+                                "custom_selling_percentage",
+                                "custom_packages",
+                                "custom_manifest",
+                                "custom_insurance_charges",
+                                "custom_insurance_amount",
+                                "custom_date_shipped",
+                                "custom_consignee_postal_code",
+                                "custom_consignee_phone_number",
+                                "custom_consignee_name",
+                                "custom_consignee_country",
+                                "custom_consignee_contact_name",
+                                "custom_consignee_city",
+                                "custom_booking_date",
+                                "custom_billing_term",
+
+
+
+
+                                "custom_duty_and_taxes_sales_invoice_uploader",
+                                "custom_duty_and_taxes_template",
 
                                 
                                 )
@@ -183,7 +217,6 @@ fixtures = [
 # Override standard doctype classes
 
 # override_doctype_class = {
-
 # }
 
 
@@ -201,6 +234,12 @@ fixtures = [
 # 		"on_update": "method",
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
+# 	}
+# }
+
+# doc_events = {
+# 	"Sales Invoice": {
+# 		"before_save": "method",
 # 	}
 # }
 

@@ -1,0 +1,56 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-05-28 15:42:32.265009",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "record_type",
+  "definitions",
+  "charges_definitions"
+ ],
+ "fields": [
+  {
+   "fieldname": "record_type",
+   "fieldtype": "Link",
+   "label": "Record Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "definitions",
+   "fieldtype": "Table",
+   "label": "Definitions",
+   "options": "Sales Invoice def"
+  },
+  {
+   "fieldname": "charges_definitions",
+   "fieldtype": "Table",
+   "label": "Charges Definitions",
+   "options": "Charges Definition"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-06-25 12:22:54.672095",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Sales Invoice Definition",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

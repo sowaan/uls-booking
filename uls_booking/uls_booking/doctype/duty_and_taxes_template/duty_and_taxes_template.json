@@ -1,0 +1,218 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:DTT-{mawb_number}-{#######}",
+ "creation": "2024-10-10 15:43:39.827995",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "column_break_lzbg",
+  "column_break_wwsz",
+  "invoiced",
+  "details_section",
+  "date",
+  "mawb_number",
+  "flight_number",
+  "type",
+  "column_break_lofp",
+  "tracking_number",
+  "shipment_number",
+  "location",
+  "vendor",
+  "mno",
+  "section_break_qnfj",
+  "duty",
+  "po_tocken",
+  "do_and_hc",
+  "column_break_ztlx",
+  "caa",
+  "cfs",
+  "eto",
+  "section_break_maqj",
+  "clearance_type",
+  "column_break_qxzp",
+  "declare_value",
+  "section_break_tm8o",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_tm8o",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Duty and Taxes Template",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "tracking_number",
+   "fieldtype": "Data",
+   "label": "Tracking Number"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "label": "Location"
+  },
+  {
+   "default": "0",
+   "fieldname": "duty",
+   "fieldtype": "Currency",
+   "label": "Duty"
+  },
+  {
+   "default": "0",
+   "fieldname": "po_tocken",
+   "fieldtype": "Currency",
+   "label": "P/O Tocken"
+  },
+  {
+   "default": "0",
+   "fieldname": "do_and_hc",
+   "fieldtype": "Currency",
+   "label": "D/O and H/C"
+  },
+  {
+   "default": "0",
+   "fieldname": "caa",
+   "fieldtype": "Currency",
+   "label": "C.A.A"
+  },
+  {
+   "default": "0",
+   "fieldname": "cfs",
+   "fieldtype": "Currency",
+   "label": "CFS"
+  },
+  {
+   "default": "0",
+   "fieldname": "eto",
+   "fieldtype": "Currency",
+   "label": "ETO"
+  },
+  {
+   "default": "0",
+   "fieldname": "declare_value",
+   "fieldtype": "Currency",
+   "label": "Declare Value"
+  },
+  {
+   "fieldname": "clearance_type",
+   "fieldtype": "Data",
+   "label": "Clearance Type"
+  },
+  {
+   "fieldname": "column_break_lofp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_qnfj",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "column_break_ztlx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_maqj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_qxzp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "mawb_number",
+   "fieldtype": "Data",
+   "label": "MAWB Number"
+  },
+  {
+   "fieldname": "flight_number",
+   "fieldtype": "Data",
+   "label": "Flight Number"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Data",
+   "label": "Type"
+  },
+  {
+   "fieldname": "vendor",
+   "fieldtype": "Link",
+   "label": "Vendor",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "mno",
+   "fieldtype": "Data",
+   "label": "MNO"
+  },
+  {
+   "fieldname": "column_break_lzbg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_wwsz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "invoiced",
+   "fieldtype": "Check",
+   "label": "Invoiced",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shipment_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Shipment Number",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-10-15 16:57:30.109597",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Duty and Taxes Template",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,105 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-04-08 10:07:12.444682",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "origin_country",
+  "origin_port",
+  "shipment_type",
+  "record_type",
+  "shipment_number",
+  "shipper_freight_amount",
+  "consignee_freight_amount",
+  "hazmat_item_quantity",
+  "quantum_shipment_fee",
+  "quantum_bundle_fee",
+  "check"
+ ],
+ "fields": [
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Data",
+   "label": "Origin Country"
+  },
+  {
+   "fieldname": "origin_port",
+   "fieldtype": "Data",
+   "label": "Origin Port"
+  },
+  {
+   "fieldname": "shipment_type",
+   "fieldtype": "Data",
+   "label": "Shipment Type"
+  },
+  {
+   "fieldname": "record_type",
+   "fieldtype": "Data",
+   "label": "Record Type"
+  },
+  {
+   "fieldname": "shipment_number",
+   "fieldtype": "Data",
+   "label": "Shipment Number"
+  },
+  {
+   "fieldname": "shipper_freight_amount",
+   "fieldtype": "Data",
+   "label": "Shipper Freight Amount"
+  },
+  {
+   "fieldname": "consignee_freight_amount",
+   "fieldtype": "Data",
+   "label": "Consignee Freight Amount"
+  },
+  {
+   "fieldname": "hazmat_item_quantity",
+   "fieldtype": "Data",
+   "label": "HAZMAT Item Quantity"
+  },
+  {
+   "fieldname": "quantum_shipment_fee",
+   "fieldtype": "Data",
+   "label": "Quantum Shipment Fee"
+  },
+  {
+   "fieldname": "quantum_bundle_fee",
+   "fieldtype": "Data",
+   "label": "Quantum Bundle Fee"
+  },
+  {
+   "default": "0",
+   "fieldname": "check",
+   "fieldtype": "Check",
+   "label": "Check",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-09-11 14:47:11.904876",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "R202000",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

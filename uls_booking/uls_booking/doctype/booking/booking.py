@@ -3,11 +3,11 @@
 
 
 import frappe
-from frappe.model.document import Document
+from frappe.website.website_generator import WebsiteGenerator
 from frappe.utils import nowdate
 
 
-class Booking(Document):
+class Booking(WebsiteGenerator):
 
 
 
@@ -60,11 +60,11 @@ class Booking(Document):
 		flg = 0
 		icris_doc = frappe.get_doc("ICRIS Account", self.icris_account)
 		if icris_doc.rate_group :
-		    for row in icris_doc.rate_group:
-			    if row.service_type == self.service_type and str(self.posting_date) >= str(row.from_date) and str(self.posting_date) <= str(row.to_date) :
-				    rate_grp = row.rate_group
-				    flg = 1
-				    break
+			for row in icris_doc.rate_group:
+				if row.service_type == self.service_type and str(self.posting_date) >= str(row.from_date) and str(self.posting_date) <= str(row.to_date) :
+					rate_grp = row.rate_group
+					flg = 1
+					break
 
 		if flg == 0:
 			frappe.throw("The rate list for the given service type is not attached to the given ICRIS Account.")
@@ -220,12 +220,31 @@ class Booking(Document):
 
 		
 		# Extended / Remote Area
-		dest_postal_code = self.consignee_postal_code
+
+		other_postal_code = None
+		other_country = None
+		if self.imp__exp == 'Import' :
+			if self.is_customer1 == 1 :
+				other_postal_code = self.shipper_postal_code
+				other_country = self.shipper_country
+			else :
+				other_postal_code = self.consignee_postal_code
+				other_country = self.consignee_country
+
+		elif self.imp__exp == 'Export' :
+			if self.is_customer == 1 :
+				other_postal_code = self.shipper_postal_code
+				other_country = self.shipper_country
+			else :
+				other_postal_code = self.postal_code
+				other_country = self.country
+
+
 		c_doc = frappe.get_doc("Customer",self.customer)
 		pc_list = frappe.get_list('Postal Codes',
 						   filters = {
-							   'country' : self.consignee_country,
-							   'postal_code' : self.consignee_postal_code , 
+							   'country' : other_country,
+							   'postal_code' : other_postal_code , 
 						   }, ignore_permissions = True
 						   , fields=['name'])
 						
@@ -377,7 +396,7 @@ class Booking(Document):
 		if self.imp__exp == 'Export':
 			country = frappe.get_list('Country Names',
 								filters = {
-									'countries': self.consignee_country,
+									'countries': other_country,
 								},
 								fields = ['parent'],
 								ignore_permissions=True)
@@ -385,7 +404,7 @@ class Booking(Document):
 		else:
 			country = frappe.get_list('Country Names',
 								filters = {
-									'countries': self.consignee_country,
+									'countries': other_country,
 								},
 								fields = ['parent'],
 								ignore_permissions=True)
@@ -406,7 +425,7 @@ class Booking(Document):
 
 			for row in self.parcel_information:
 				rate_list = frappe.get_list("Selling Rate", filters={
-					'country': self.consignee_country,
+					'country': other_country,
 					'based_on': 'Country',
 					'import__export': self.imp__exp,
 					'mode_of_transportation': self.mode_of_transportation,
@@ -612,7 +631,7 @@ class Booking(Document):
 
 
 
-	def after_insert(self) :
-		self.submit()
+	# def after_insert(self) :
+		# self.submit()
 
 
