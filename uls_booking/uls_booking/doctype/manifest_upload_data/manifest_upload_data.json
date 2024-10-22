@@ -12,10 +12,7 @@
   "column_break_bvll",
   "shipment_number_to_index",
   "shipment_number_from_index",
-  "amended_from",
-  "section_break_mgdb",
-  "total_no_of_shipment_numbers",
-  "shipment_numbers"
+  "amended_from"
  ],
  "fields": [
   {
@@ -45,20 +42,6 @@
    "label": "To Index"
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "shipment_numbers",
-   "fieldtype": "Long Text",
-   "label": "Shipment Numbers",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "total_no_of_shipment_numbers",
-   "fieldtype": "Int",
-   "label": "Total No of Shipment Numbers",
-   "read_only": 1
-  },
-  {
    "default": "34",
    "fieldname": "shipment_number_from_index",
    "fieldtype": "Int",
@@ -73,16 +56,12 @@
   {
    "fieldname": "column_break_bvll",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_mgdb",
-   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-06 18:04:34.303049",
+ "modified": "2024-10-21 16:36:36.561804",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Upload Data",

@@ -12,20 +12,40 @@ def generate_sales_invoice_enqued(doc_str):
     try:
        
         doc = json.loads(doc_str)
+        name = doc['name']
+        sales_name= []
         final_rate = 0
         tarif = 0
         discounted_amount = 0
         selling_rate_zone = None
         selling_rate_country = 0
         arrayy=[]
+        declared_value = 0
         try:
             definition = frappe.get_doc("Sales Invoice Definition", "4f1330rq6u")
         except frappe.DoesNotExistError:
-            frappe.throw(frappe._("Sales Invoice Definition with ID '54mcf25ihm' does not exist"))
+            frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "Sales Invoice Definition Not Exist",
+                                            "error": f"Sales Invoice Definition with ID '54mcf25ihm' does not exist"""
+                                        }).insert()
+            
+            # frappe.throw(frappe._("Sales Invoice Definition with ID '54mcf25ihm' does not exist"))
         except frappe.PermissionError:
-            frappe.throw(frappe._("You do not have permission to access the Sales Invoice Definition"))
+
+            frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "Permission Error",
+                                            "error": f"You do not have permission to access the Sales Invoice Definition"""
+                                        }).insert()
+            # frappe.throw(frappe._("You do not have permission to access the Sales Invoice Definition"))
         except Exception as e:
-            frappe.throw(frappe._("Error fetching Sales Invoice Definition: ") + str(e))
+            frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "Exception",
+                                            "error": f"Error fetching Sales Invoice Definition: {str(e)}"""
+                                        }).insert()
+            # frappe.throw(frappe._("Error fetching Sales Invoice Definition: ") + str(e))
 
       
         shipment = doc.get("shipment_numbers", "")
@@ -114,18 +134,29 @@ def generate_sales_invoice_enqued(doc_str):
                 icris_account = frappe.get_doc("ICRIS Account", icris_number)
                 # print(icris_account)
             except frappe.DoesNotExistError:
-                
-                print("ICRIS Account does not exist. and the Icris number is :" , icris_number , "The shipment Number :", sales_invoice.custom_shipment_number,"\n \n")
+                frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "No Icris Account",
+                                            "error": f"ICRIS Account does not exist. and the Icris number is : {icris_number},The shipment Number : {sales_invoice.custom_shipment_number}"""
+                                        }).insert()
+                # print("ICRIS Account does not exist. and the Icris number is :" , icris_number , "The shipment Number :", sales_invoice.custom_shipment_number,"\n \n")
                 continue            
             except Exception as e:
-                print(f"An error occurred: {str(e)}")
+                frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "Exception",
+                                            "error": f"An error occurred: {str(e)}"""
+                                        }).insert()
+                # print(f"An error occurred: {str(e)}")
             
             
             
-            if sales_invoice.custom_billing_term in export_billing_term and sales_invoice.custom_shipper_country == definition.origin_country.upper():
-                check1 = frappe.get_list("ICRIS List",
+            if sales_invoice.custom_billing_term in export_billing_term and sales_invoice.custom_shipper_country == definition.origin_country.upper() and icris_number:
+                try:
+                    check1 = frappe.get_list("ICRIS List",
                                         filters = {"shipper_no":sales_invoice.custom_shipper_number})
-                
+                except:
+                    print("Not Icris list")
                 if check1:
                   
                     icris = frappe.get_doc("ICRIS List",check1[0].name)
@@ -135,7 +166,7 @@ def generate_sales_invoice_enqued(doc_str):
                         frappe.get_doc({
                                             "doctype": "Error Log",
                                             "method": "No Customer Found",
-                                            "error": f"""Shipment Number:,{shipment},Icris Number: {icris_number}"""
+                                            "error": f"""Shipment Number:{shipment},Icris Number: {icris_number}"""
                                         }).insert()
                     
 
@@ -278,19 +309,21 @@ def generate_sales_invoice_enqued(doc_str):
 
 
                             tarif = final_rate / (1- (final_discount_percentage/100))
-                    # else:
-                    #     print("No selling Group Found","Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Shipment NUmber:",shipment,"Icris Number:",icris_number)   
+                    
                     
 
 
 
-            elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
+            elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper() and icris_number:
                
-                
-                check = frappe.get_list("ICRIS List",
-                                        filters = {"shipper_no":sales_invoice.custom_consignee_number})
+                try:
+                    check = frappe.get_list("ICRIS List",
+                                filters = {"shipper_no":sales_invoice.custom_consignee_number})
+                except:
+                    print("Not Found")
                 if check:
-                    icris1 = frappe.get_doc("ICRIS List", {"shipper_no": check[0].name})
+                    print(check[0].name," 324: \n\n\n\n\n ")
+                    icris1 = frappe.get_doc("ICRIS List",check[0].name)
                     if icris1.shipper_name:
                         sales_invoice.customer = icris1.shipper_name
                     else:
@@ -410,8 +443,7 @@ def generate_sales_invoice_enqued(doc_str):
                                 continue            
                         
                         my_weight = float(sales_invoice.custom_shipment_weight)
-                        # print(" Selling Group :" ,selling_group,"service type:",service_type , "and the psoting date is ", posting_date, "Icris Number :", icris_number , "Selling Rate:",selling_rate , "Origin Country:",origin_country)       
-                        # print("Selling Group:",selling_group , "Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Shipment NUmber:",shipment,"Icris Number:",icris_number)
+                        
                         
 
                         if selling_rate :
@@ -435,8 +467,7 @@ def generate_sales_invoice_enqued(doc_str):
 
 
                             tarif = final_rate / (1- (final_discount_percentage/100))
-                    # else:
-                    #     print("No selling Group Found","Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Shipment NUmber:",shipment,"Icris Number:",icris_number) 
+                    
            
             
             
@@ -447,8 +478,8 @@ def generate_sales_invoice_enqued(doc_str):
             
             
             
-            currency = frappe.get_value("Customer" , sales_invoice.customer , "default_currency") 
-            sales_invoice.currency = currency
+            # currency = frappe.get_value("Customer" , sales_invoice.customer , "default_currency") 
+            # sales_invoice.currency = currency
 
 
 
@@ -543,7 +574,7 @@ def generate_sales_invoice_enqued(doc_str):
             declared_value = sales_invoice.custom_insurance_amount
 
 
-            decalred_value = 0  
+             
 
            
             if isinstance(declared_value, (int, float)):
@@ -566,11 +597,11 @@ def generate_sales_invoice_enqued(doc_str):
 
             if sales_invoice.customer != "UPS SCS PAKISTAN PVT LTD ( B )":
                 # print("Tarif :" , tarif , "Final Rate :", final_rate , "Percentage" , final_discount_percentage ,"Selling Rate :", selling_rate , "Additional Charges Percentage:",FSCpercentage , "Fuel INCL :",total_charges_incl_fuel , "FSC CHARGES" ,FSCcharges ,"Shipment Number:",shipment,"Icris:",icris_number,"Service Type:",service_type[0].get("name"),"Package TYpe :",sales_invoice.custom_shipment_type,"Zone:",origin_country,zone_with_out_country,"Selling Group",selling_group)
-                if decalred_value > 0:
+                if declared_value > 0:
                     
                     percent = frappe.db.get_value('Additional Charges', 'Declare Value', 'percentage')
                     minimum_amount = frappe.db.get_value('Additional Charges', 'Declare Value', 'minimum_amount')
-                    result = decalred_value * (percent / 100)
+                    result = declared_value * (percent / 100)
                     max_insured = max(result , minimum_amount)
                     # print(max_insured , " ", percent , " ", minimum_amount, " ", decalred_value)
                     if max_insured > 0 and sales_invoice.custom_shipment_type == "NON-DOCUMENTS":
@@ -584,7 +615,7 @@ def generate_sales_invoice_enqued(doc_str):
 
 
                 if total_charges_other_charges:
-                    rows = {'item_code': setting.other_charges, 'qty': 1} 
+                    rows = {'item_code': setting.other_charges, 'qty': 1,'rate':total_charges_other_charges} 
                     # print("OC")
                     sales_invoice.append('items', rows)
                 if FSCcharges:
@@ -650,9 +681,9 @@ def generate_sales_invoice_enqued(doc_str):
                     # print("Shipper Number : ",sales_invoice.custom_shipper_number, " not Found in the Icris", "Shipment Number :", shipment)
                     continue
                     # print(sales_invoice.billing_term_field," ",sales_invoice.shipment_type," ",imp_exp," ",import_compensation_amount + "Sufyan")
-                    rows = {'item_code': "CC", 'qty': '1', 'rate': 0}
-                    sales_invoice.append('items', rows)
-                    print("The Customer is UPS and the Shipment number is :", sales_invoice.custom_shipment_number,"\n \n")
+                    # rows = {'item_code': "CC", 'qty': '1', 'rate': 0}
+                    # sales_invoice.append('items', rows)
+                    # print("The Customer is UPS and the Shipment number is :", sales_invoice.custom_shipment_number,"\n \n")
             if not sales_invoice.items:
                 print("shipment number" , sales_invoice.custom_shipment_number , "Item table is empty, so cannot make Sales Invoice. \n \n \n")
                 continue
@@ -661,7 +692,11 @@ def generate_sales_invoice_enqued(doc_str):
             
             # print("Shipment Weight:",sales_invoice.custom_shipment_weight)
             discounted_amount = discounted_amount -1
+            # print("Custoner",sales_invoice.customer,"Due date", sales_invoice.due_date ,sales_invoice.currency , sales_invoice.conversion_rate , "Price list to Currency:", sales_invoice.price_list_currency,sales_invoice.plc_conversion_rate)
+            # print(sales_invoice.posting_date)
             sales_invoice.insert()
+            sales_name.append(sales_invoice.name)
+            
             sales_invoice.save()
             if sales_invoice.customer != "UPS SCS PAKISTAN PVT LTD ( B )":
                 for row in sales_invoice.items:
@@ -673,11 +708,12 @@ def generate_sales_invoice_enqued(doc_str):
                         frappe.db.set_value(row.doctype , row.name ,"base_rate" , total_charges_other_charges )
                 frappe.db.set_value(sales_invoice.doctype , sales_invoice.name ,"total" , total_charges_other_charges +  FSCcharges + tarif + max_insured + shipmentbillingamount )
                 frappe.db.set_value(sales_invoice.doctype , sales_invoice.name ,"grand_total" , total_charges_other_charges +  FSCcharges + tarif + max_insured + shipmentbillingamount)
-        
+        ship_numbers = ', '.join(sales_name)
+        frappe.db.set_value("Generate Sales Invoice",name,"sales_invoices",ship_numbers)  
                
 
 
-        print(discounted_amount)
+        # print(discounted_amount)
     except json.JSONDecodeError:
         frappe.throw(frappe._("Invalid JSON data"))
     except Exception as e:
@@ -710,13 +746,15 @@ def generate_sales_invoice(doc_str):
 
 
 def storing_shipment_number(arrays, frm, to, doc):
-    shipment_numbers = set() 
+
+    
+    shipment_numbers = set()  # Use a set to ensure uniqueness
 
     for line in arrays:
         try:
             shipment_num = line[frm:to].strip()
-            if shipment_num: 
-                shipment_numbers.add(shipment_num) 
+            if shipment_num:
+                shipment_numbers.add(shipment_num)  # Add to the set
         except IndexError:
             frappe.log_error(f"IndexError processing line: {line}", "Data Processing Error")
             continue
@@ -724,22 +762,78 @@ def storing_shipment_number(arrays, frm, to, doc):
             frappe.log_error(f"Unexpected error processing line: {line}. Error: {str(e)}", "Data Processing Error")
             continue
 
-    shipment_numbers_str = ', '.join(shipment_numbers) 
-    value = len(shipment_numbers)
+    unique_shipment_numbers = list(shipment_numbers)
+    defintion = frappe.get_doc("Sales Invoice Definition", "4f1330rq6u")
+    origin_country = defintion.origin_country
+    for shipment in unique_shipment_numbers:
+        # Check if the shipment number already exists
+        existing_doc = frappe.get_value("Shipment Number", {"shipment_number": shipment})
+        if existing_doc:
+            continue  # Skip if it already exists
 
-    try:
-        doc1 = frappe.get_doc("Manifest Upload Data", doc)
-        doc1.shipment_numbers = shipment_numbers_str
-        doc1.total_no_of_shipment_numbers = value  
-        doc1.save() 
+        date_shipped = frappe.get_value("R200000", {"shipment_number": shipment}, "date_shipped")
+        station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
+        customer = None
+        icris_number = None
+        billing_type = None
+        # Fetch export shipments
+        export_array_temp = frappe.get_list("R300000",
+            filters=[
+                ["shipper_country", "=", origin_country],
+                ["shipment_number", "=", shipment]
+            ],
+            fields=["shipment_number", "shipper_number"]
+        )
+
+        if export_array_temp:
+            shipper_number = export_array_temp[0].shipper_number
+            icris = frappe.get_list("ICRIS List",
+                filters=[
+                    ["shipper_no", "=", shipper_number]
+                ],
+                fields=["shipper_name", "shipper_no"]
+            )
+            if icris:
+                customer = icris[0].shipper_name
+                billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
+                icris_number = icris[0].shipper_no
+
+        # Fetch import shipments
+        import_array_temp = frappe.get_list("R300000",
+            filters=[
+                ["shipper_country", "!=", origin_country],
+                ["shipment_number", "=", shipment]
+            ],
+            fields=["shipment_number", "consignee_number"]
+        )
+
+        if import_array_temp:
+            consignee_number = import_array_temp[0].consignee_number
+            icris = frappe.get_list("ICRIS List",
+                filters=[
+                    ["shipper_no", "=", consignee_number]
+                ],
+                fields=["shipper_name", "shipper_no"]
+            )
+            if icris:
+                customer = icris[0].shipper_name
+                billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
+                icris_number = icris[0].shipper_no
+
+
+        # Create a new shipment document
+        shipment_doc = frappe.new_doc("Shipment Number")
+        shipment_doc.set("shipment_number", shipment)
+        shipment_doc.set("customer", customer)
+        shipment_doc.set("date_shipped", date_shipped)
+        shipment_doc.set("station", station)
+        shipment_doc.set("icris_number", icris_number)
+        shipment_doc.set("billing_type", billing_type)
+        shipment_doc.insert()
+        shipment_doc.save()
         frappe.db.commit()
-    except frappe.DoesNotExistError:
-        frappe.log_error(f"Document {doc} does not exist.", "Document Retrieval Error")
-    except Exception as e:
-        frappe.log_error(f"Error saving document {doc}: {str(e)}", "Document Save Error")
-        raise
 
-    frappe.db.commit()
+
 
 
 
@@ -904,7 +998,7 @@ class ManifestUploadData(Document):
             current_index = 0  
             
             
-            storing_shipment_number(arrays=arrays, frm=shipfrom, to=shipto, doc=self.name)
+            # storing_shipment_number(arrays=arrays, frm=shipfrom, to=shipto, doc=self.name)
            
             while current_index < len(arrays):
                 
@@ -913,6 +1007,7 @@ class ManifestUploadData(Document):
                 current_index += chunk_size
                 # insert_data(chunk,frm,to )
                 enqueue(insert_data, arrays=chunk,frm=frm, to=to, queue="default")
+            enqueue(storing_shipment_number,arrays=arrays, frm=shipfrom, to=shipto, doc=self.name ,queue="default")
                 
             
          
