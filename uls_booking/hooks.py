@@ -81,6 +81,7 @@ fixtures = [
                                 "custom_consignee_city",
                                 "custom_booking_date",
                                 "custom_billing_term",
+                                "custom_default_customer",
 
 
 
@@ -94,6 +95,17 @@ fixtures = [
         ]  
       ]
 	},
+    {
+        "doctype" : "Client Script",
+      "filters" : [
+        [  
+          "name" , "=" , "Selling Percentage"
+]
+      ]
+
+
+
+    }
     
 
 
@@ -217,6 +229,7 @@ fixtures = [
 # Override standard doctype classes
 
 # override_doctype_class = {
+
 # }
 
 

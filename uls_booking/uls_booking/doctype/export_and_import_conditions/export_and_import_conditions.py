@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class SalesInvoiceDefinition(Document):
+class ExportAndImportConditions(Document):
 	pass
