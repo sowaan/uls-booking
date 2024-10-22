@@ -1,0 +1,133 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-10-11 18:02:18.917859",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "cod_and_ups_customer_section",
+  "cod_service_provider_customer",
+  "ups_shipment_customer",
+  "column_break_yyhd",
+  "billing_term_for_cod_service_provider",
+  "billing_term_for_ups_shipment",
+  "corporate_customer_section",
+  "billing_term_for_corporate_customer",
+  "column_break_dkjn",
+  "unassign_customer",
+  "duty_and_taxes_item_table_section",
+  "duty_and_taxes_item",
+  "clearance_type_section",
+  "clearance_type_items"
+ ],
+ "fields": [
+  {
+   "fieldname": "cod_service_provider_customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "COD Service Provider Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ups_shipment_customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UPS Shipment Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_yyhd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "billing_term_for_cod_service_provider",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Billing Term for COD Service Provider",
+   "reqd": 1
+  },
+  {
+   "fieldname": "billing_term_for_ups_shipment",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Billing Term for UPS Shipment",
+   "reqd": 1
+  },
+  {
+   "fieldname": "corporate_customer_section",
+   "fieldtype": "Section Break",
+   "label": "Corporate Customer"
+  },
+  {
+   "fieldname": "billing_term_for_corporate_customer",
+   "fieldtype": "Data",
+   "label": "Billing Term For Corporate Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cod_and_ups_customer_section",
+   "fieldtype": "Section Break",
+   "label": "COD and UPS Customer"
+  },
+  {
+   "fieldname": "duty_and_taxes_item_table_section",
+   "fieldtype": "Section Break",
+   "label": "Duty and Taxes Item Table"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "duty_and_taxes_item",
+   "fieldtype": "Table",
+   "label": "Duty and Taxes Item",
+   "options": "Duty and Taxes Item Table"
+  },
+  {
+   "fieldname": "clearance_type_section",
+   "fieldtype": "Section Break",
+   "label": "Clearance Type"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "clearance_type_items",
+   "fieldtype": "Table",
+   "label": "Clearance Type Items",
+   "options": "Clearance Type Items"
+  },
+  {
+   "fieldname": "column_break_dkjn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "unassign_customer",
+   "fieldtype": "Link",
+   "label": "Unassign Customer",
+   "options": "Customer",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-10-21 17:22:37.125635",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Duty and Taxes Sales Invoice Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

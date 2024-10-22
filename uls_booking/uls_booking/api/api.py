@@ -4,6 +4,8 @@
 import frappe
 import json
 from frappe.model.mapper import get_mapped_doc
+import requests
+import base64
 
 
 
@@ -525,4 +527,280 @@ def create_rate(full_tariff , weight_slab, rate_type, rate_grp, rate_creation_to
         new_sell_rate.insert()
     frappe.msgprint("Rate Created.")
     # return 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@frappe.whitelist()
+def generate_token() :
+
+    # base_url = "https://onlinetools.ups.com"
+    # REMOVED
+    # REMOVED
+
+    booking_api_settings_doc = frappe.get_doc("Booking API Settings")
+
+    base_url = booking_api_settings_doc.base_url
+    client_id = booking_api_settings_doc.client_id
+    client_secret = booking_api_settings_doc.client_secret
+    version = booking_api_settings_doc.version
+
+
+    credentials = f"{client_id}:{client_secret}"
+    encoded_credentials = base64.b64encode(credentials.encode()).decode()
+
+    url = f"{base_url}/security/{version}/oauth/token"
+    # url = f"https://wwwcie.ups.com/security/{version}/oauth/token"
+    # url = "https://onlinetools.ups.com/security/v1/oauth/token"
+
+    payload = {
+        "grant_type": "client_credentials",
+    }
+
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": f"Basic {encoded_credentials}",
+    }
+
+    response = requests.post(url, data=payload, headers=headers, auth=(client_id, client_secret))
+
+    data = response.json()
+
+    # you also have to handle error message if the coming response is not correct
+
+
+    return data['access_token']
+
+
+
+
+
+
+
+
+@frappe.whitelist()
+def create_shipment(token , booking_name) :
+
+    # frappe.msgprint("Token = " + str(token) + " " + "Booking = " + str(booking_name))
+    booking_doc = frappe.get_doc("Booking", booking_name)
+    booking_api_settings_doc = frappe.get_doc("Booking API Settings")
+
+    query = {
+        'additionaladdressvalidation': 'string'
+    }
+
+    base_url = booking_api_settings_doc.base_url
+    version = booking_api_settings_doc.version
+
+    url = f"{base_url}/api/shipments/{version}/ship"
+    # url = f"https://wwwcie.ups.com/api/shipments/{version}/ship"
+    # url = f"https://onlinetools.ups.com/api/shipments/{version}/ship"
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+        # 'transId': 'string',
+        # 'transactionSrc': 'testing'
+    }
+
+
+
+
+
+    # Shipper Info
+    shipper = booking_doc.customer
+    shipper_name = booking_doc.customer_name
+    shipper_tax = frappe.db.get_value("Customer", booking_doc.customer , "tax_id")
+    shipper_phone = frappe.db.get_value("Address" , booking_doc.address , "phone" )
+    # shipper_number = booking_doc.icris_account
+    shipper_number = '89R881',
+    fax_number = frappe.db.get_value("Address" , booking_doc.address , "fax" )
+    shipper_add_line = booking_doc.shipper_address
+    shipper_city = booking_doc.shipper_city
+    shipper_postal_code = booking_doc.shipper_postal_code
+    shipper_country_code = frappe.db.get_value("Country" , booking_doc.shipper_country , "code" )
+
+
+
+    # ShipFrom Info
+    if booking_doc.is_customer1 == 1 :
+        shipfrom = shipper
+        shipfrom_name = shipper_name
+        shipfrom_phone = shipper_phone
+        shipfrom_fax_number = fax_number
+        shipfrom_add_line = shipper_add_line
+        shipfrom_city = shipper_city
+        shipfrom_postal_code = shipper_postal_code
+        shipfrom_country_code = shipper_country_code
+
+    else :
+        shipfrom = booking_doc.consignee_company_name
+        shipfrom_name = booking_doc.attention_name1
+        shipfrom_phone = booking_doc.consignee_phone
+        shipfrom_fax_number = booking_doc.fax1
+        shipfrom_add_line = booking_doc.consignee_address
+        shipfrom_city = booking_doc.consignee_city
+        shipfrom_postal_code = booking_doc.consignee_postal_code
+        shipfrom_country_code = booking_doc.country_code_ship_from
+
+
+    # ShipTo Info
+    if booking_doc.is_customer == 1 :
+        shipto = shipper
+        shipto_name = shipper_name
+        shipto_phone = shipper_phone
+        shipto_add_line = shipper_add_line
+        shipto_city = shipper_city
+        shipto_postal_code = shipper_postal_code
+        shipto_country_code = shipper_country_code
+        shipto_state_province_code = booking_doc.state_province_code1
+
+    else :
+        shipto = booking_doc.name1
+        shipto_name = booking_doc.attention_name
+        shipto_phone = booking_doc.phone
+        shipto_add_line = booking_doc.ship_to_address
+        shipto_city = booking_doc.city
+        shipto_postal_code = booking_doc.postal_code
+        shipto_country_code = booking_doc.country_code
+        shipto_state_province_code = booking_doc.state_province_code
+
+
+    package_array = []
+
+    for row in booking_doc.parcel_information :
+        package = {
+                        "Description": 'Package 1',
+                        "Packaging": {
+                            "Code": '02',
+                            "Description": row.packaging_type
+                        },
+                        "Dimensions": {
+                            "UnitOfMeasurement": {
+                                "Code": 'CM',
+                                "Description": 'Centimeters'
+                            },
+                            "Length": str(row.length),
+                            "Width": str(row.width),
+                            "Height": str(row.height)
+                        },
+                        "PackageWeight": {
+                            "UnitOfMeasurement": {
+                                "Code": 'KGS',
+                                "Description": 'Kilograms'
+                            },
+                            "Weight": str(row.actual_weight)
+                        }
+                  }
+
+        package_array.append(package)            
+
+
+
+     
+
+    body = {
+        "ShipmentRequest": {
+            "Request": {
+                "SubVersion": '1801',
+                "RequestOption": 'nonvalidate',
+                "TransactionReference": {"CustomerContext": ''}
+            },
+            "Shipment": {
+                "Description": 'Ship WS test',
+                "Shipper": {
+                    "Name": shipper,
+                    "AttentionName": shipper_name,
+                    "TaxIdentificationNumber": shipper_tax,
+                    "Phone": {
+                        "Number": shipper_phone,
+                        "Extension": ' '
+                    },
+                    "ShipperNumber": shipper_number,
+                    "FaxNumber": fax_number,
+                    "Address": {
+                        "AddressLine": [shipper_add_line],
+                        "City": shipper_city,
+                        # "StateProvinceCode": 'MD',
+                        "PostalCode": shipper_postal_code,
+                        "CountryCode": shipper_country_code
+                    }
+                },
+                "ShipTo": {
+                    "Name": shipto,
+                    "AttentionName": shipto_name,
+                    "Phone": {"Number": shipto_phone},
+                    "Address": {
+                        "AddressLine": [shipto_add_line],
+                        "City": shipto_city,
+                        "StateProvinceCode": shipto_state_province_code,
+                        "PostalCode": shipto_postal_code,
+                        "CountryCode": shipto_country_code
+                    },
+                    "Residential": ' '
+                },
+                "ShipFrom": {
+                    "Name": shipfrom,
+                    "AttentionName": shipfrom_name,
+                    "Phone": {"Number": shipfrom_phone},
+                    "FaxNumber": shipfrom_fax_number,
+                    "Address": {
+                        "AddressLine": [shipfrom_add_line],
+                        "City": shipfrom_city,
+                        # "StateProvinceCode": 'GA',
+                        "PostalCode": shipfrom_postal_code,
+                        "CountryCode": shipfrom_country_code
+                    }
+                },
+                "PaymentInformation": {
+                    "ShipmentCharge": {
+                        "Type": '01',
+                        "BillShipper": {"AccountNumber": shipper_number}
+                    }
+                },
+                "Service": {
+                    "Code": '65',
+                    "Description": 'Express'
+                },
+                "Package": package_array
+            },
+            "LabelSpecification": {
+                "LabelImageFormat": {
+                    "Code": "GIF",
+                    "Description": "GIF"
+                },
+                "HTTPUserAgent": 'Mozilla/4.5'
+            }
+        }
+    }
+
+
+
+    response = requests.post(url, headers=headers, params=query, json=body)
+
+    data = response.json()
+
+    if data['ShipmentResponse']['ShipmentResults']['ShipmentIdentificationNumber'] :
+        shipment_identification_number = data['ShipmentResponse']['ShipmentResults']['ShipmentIdentificationNumber']
+        frappe.db.set_value("Booking", booking_doc.name, "shipment_identification_number", shipment_identification_number)
+    
+    if data['ShipmentResponse']['ShipmentResults']['PackageResults']['TrackingNumber'] :
+        tracking_number = data['ShipmentResponse']['ShipmentResults']['PackageResults']['TrackingNumber']
+        frappe.db.set_value("Booking", booking_doc.name, "tracking_number", tracking_number)
+
+
 

@@ -70,8 +70,7 @@ frappe.ui.form.on("Booking", {
         frm.set_df_property("saturday_delivery", "read_only", 1);
         frm.set_df_property("direct_delivery", "read_only", 1);
         frm.set_df_property("signature_options", "read_only", 1);
-        
-
+            
 
 
     },
@@ -166,7 +165,7 @@ frappe.ui.form.on("Booking", {
 
 
             frm.set_value('address',null);
-            1.000
+            // 1.000
             await frappe.call({
                 method: "uls_booking.uls_booking.api.api.get_address",
                 args: {
@@ -905,8 +904,6 @@ frappe.ui.form.on("Booking", {
             frm.page.set_inner_btn_group_as_primary(__("Create"));
         }
 
-
-
         frm.set_df_property("ic_label", "read_only", 1);
         frm.set_df_property("return_electronic_label", "read_only", 1);
         frm.set_df_property("shipping_bill_charges", "read_only", 1);
@@ -915,7 +912,39 @@ frappe.ui.form.on("Booking", {
         frm.set_df_property("saturday_delivery", "read_only", 1);
         frm.set_df_property("direct_delivery", "read_only", 1);
         frm.set_df_property("signature_options", "read_only", 1);
+
         
+        if(frm.doc.docstatus == 1 && !frm.doc.shipment_identification_number && !frm.doc.tracking_number)
+        {
+                let token = ''
+                frm.add_custom_button(__('Post Shipment'), async function() {
+                        await frappe.call({
+                            method: "uls_booking.uls_booking.api.api.generate_token",
+                            args: {},
+                            async: true,
+                            callback: function (r) {
+                                if (r.message) {
+                                    token = r.message ;
+                                }
+                            },
+                        });
+                        await frappe.call({
+                            method: "uls_booking.uls_booking.api.api.create_shipment",
+                            args: {
+                                token : token ,
+                                booking_name : frm.doc.name ,
+                            },
+                            async: true,
+                            callback: function (r) {
+                                if (r.message) {
+                                    token = r.message ;
+                                }
+                            },
+                        });
+                });
+        }
+
+
         
     },
 

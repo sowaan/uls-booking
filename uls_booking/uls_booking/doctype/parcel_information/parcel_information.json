@@ -52,7 +52,7 @@
   },
   {
    "fieldname": "total_identical_parcels",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Total Identical Parcels",
    "reqd": 1
@@ -137,6 +137,7 @@
    "label": "Declare Value"
   },
   {
+   "default": "0",
    "fieldname": "declare_value",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -169,7 +170,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
    "fieldname": "actual_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -180,7 +180,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-07-20 15:24:41.842660",
+ "modified": "2024-10-04 18:10:06.885927",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Parcel Information",
