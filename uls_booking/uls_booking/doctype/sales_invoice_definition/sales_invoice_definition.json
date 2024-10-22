@@ -1,37 +1,62 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
- "creation": "2024-05-28 15:42:32.265009",
+ "creation": "2024-09-09 10:13:58.032582",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "record_type",
-  "definitions",
-  "charges_definitions"
+  "default_company",
+  "origin_country",
+  "sales_invoice_definition",
+  "surcharges",
+  "compensation_table",
+  "export_and_import_conditions"
  ],
  "fields": [
   {
-   "fieldname": "record_type",
-   "fieldtype": "Link",
-   "label": "Record Type",
-   "options": "DocType"
-  },
-  {
-   "fieldname": "definitions",
+   "allow_bulk_edit": 1,
+   "fieldname": "sales_invoice_definition",
    "fieldtype": "Table",
-   "label": "Definitions",
+   "label": "Sales Invoice Definition",
    "options": "Sales Invoice def"
   },
   {
-   "fieldname": "charges_definitions",
+   "allow_bulk_edit": 1,
+   "fieldname": "surcharges",
    "fieldtype": "Table",
-   "label": "Charges Definitions",
-   "options": "Charges Definition"
+   "label": "Surcharges",
+   "options": "Surcharge Codes"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "compensation_table",
+   "fieldtype": "Table",
+   "label": "Compensation Table",
+   "options": "Compensation Detail"
+  },
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Link",
+   "label": "Origin Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "default_company",
+   "fieldtype": "Link",
+   "label": "Default Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "export_and_import_conditions",
+   "fieldtype": "Table",
+   "label": "Export And Import Conditions",
+   "options": "Export And Import Conditions"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-25 12:22:54.672095",
+ "modified": "2024-10-14 16:24:26.858999",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice Definition",
@@ -52,5 +77,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }
