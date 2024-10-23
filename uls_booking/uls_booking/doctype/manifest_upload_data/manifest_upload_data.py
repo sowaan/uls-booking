@@ -14,10 +14,12 @@ def generate_sales_invoice_enqued(doc_str):
         doc = json.loads(doc_str)
         final_rate = 0
         tarif = 0
+        name = doc['name']
         discounted_amount = 0
         selling_rate_zone = None
         selling_rate_country = 0
         arrayy=[]
+        sales_name= []
         try:
             definition = frappe.get_doc("Sales Invoice Definition", "4f1330rq6u")
         except frappe.DoesNotExistError:
@@ -658,6 +660,7 @@ def generate_sales_invoice_enqued(doc_str):
             
             discounted_amount = discounted_amount -1
             sales_invoice.insert()
+            sales_name.append(sales_invoice.name)
             sales_invoice.save()
             if sales_invoice.customer != "UPS SCS PAKISTAN PVT LTD ( B )":
                 for row in sales_invoice.items:
@@ -669,7 +672,8 @@ def generate_sales_invoice_enqued(doc_str):
                         frappe.db.set_value(row.doctype , row.name ,"base_rate" , total_charges_other_charges )
                 frappe.db.set_value(sales_invoice.doctype , sales_invoice.name ,"total" , total_charges_other_charges +  FSCcharges + tarif + max_insured + shipmentbillingamount )
                 frappe.db.set_value(sales_invoice.doctype , sales_invoice.name ,"grand_total" , total_charges_other_charges +  FSCcharges + tarif + max_insured + shipmentbillingamount)
-        
+        ship_numbers = ', '.join(sales_name)
+        frappe.db.set_value("Generate Sales Invoice",name,"sales_invoices",ship_numbers)
                
 
 
