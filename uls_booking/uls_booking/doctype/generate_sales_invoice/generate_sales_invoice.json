@@ -8,7 +8,6 @@
   "start_date",
   "billing_type",
   "customer_wise",
-  "customer",
   "column_break_ornt",
   "end_date",
   "station",
@@ -87,27 +86,23 @@
    "label": "Icris Number"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "total_shipment_numbers",
    "fieldtype": "Int",
-   "label": "Total Shipment Numbers"
+   "label": "Total Shipment Numbers",
+   "read_only": 1
   },
   {
    "fieldname": "sales_invoices",
    "fieldtype": "Long Text",
    "label": "Sales Invoices",
    "read_only": 1
-  },
-  {
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "label": "Customer",
-   "options": "Customer"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-22 15:58:17.582116",
+ "modified": "2024-10-23 12:52:53.187401",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Generate Sales Invoice",
