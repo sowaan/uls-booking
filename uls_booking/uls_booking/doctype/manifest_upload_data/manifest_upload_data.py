@@ -919,7 +919,11 @@ def insert_data(arrays, frm, to):
 
 
                 docss.set(field_name, field_data)
+                # for field in setting.fields_to_divide:
+                #     if doctype_name == field.doctype_name and field_name == field.field_name:
 
+                #         field_data = float(field_data) / field.number_divide_with
+                # docss.set(field_name, field_data)
             docss.save()
             frappe.db.commit()
             print(doctype_name, shipment_num, "Updating")

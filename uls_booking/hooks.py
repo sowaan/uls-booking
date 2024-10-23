@@ -82,13 +82,9 @@ fixtures = [
                                 "custom_booking_date",
                                 "custom_billing_term",
                                 "custom_default_customer",
-
-
-
-
                                 "custom_duty_and_taxes_sales_invoice_uploader",
                                 "custom_duty_and_taxes_template",
-
+                                "custom_zone",
                                 
                                 )
 	  	  
