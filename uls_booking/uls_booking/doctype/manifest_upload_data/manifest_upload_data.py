@@ -218,7 +218,7 @@ def generate_sales_invoice_enqued(doc_str):
                         
                         flag = 0
                         if zones:
-                                                     
+                            sales_invoice.custom_zone = zones[0].name
                             selling_rate_name = frappe.get_list("Selling Rate",
                                 filters={
                                     "country": origin_country,
@@ -246,6 +246,7 @@ def generate_sales_invoice_enqued(doc_str):
                             if countries:
                                 zone_with_out_country = countries[0].parent
                                 if zone_with_out_country:
+                                    sales_invoice.custom_zone = zone_with_out_country
                                     selling_rate_name = frappe.get_list("Selling Rate",
                                         filters={
                                             "zone": zone_with_out_country,
@@ -377,7 +378,7 @@ def generate_sales_invoice_enqued(doc_str):
                         
                         flag = 0
                         if zones:
-                                                     
+                            sales_invoice.custom_zone = zones[0].name
                             selling_rate_name = frappe.get_list("Selling Rate",
                                 filters={
                                     "country": origin_country,
@@ -405,6 +406,7 @@ def generate_sales_invoice_enqued(doc_str):
                             if countries:
                                 zone_with_out_country = countries[0].parent
                                 if zone_with_out_country:
+                                    sales_invoice.custom_zone = zone_with_out_country
                                     selling_rate_name = frappe.get_list("Selling Rate",
                                         filters={
                                             "zone": zone_with_out_country,
@@ -473,6 +475,7 @@ def generate_sales_invoice_enqued(doc_str):
             
             currency = frappe.get_value("Customer" , sales_invoice.customer , "default_currency") 
             sales_invoice.currency = currency
+            
 
 
 
