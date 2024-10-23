@@ -58,6 +58,7 @@
    "label": "Country Codes"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "surcharges_code_excl_and_incl",
    "fieldtype": "Table",
    "label": "Surcharges Code EXCL and INCL",
@@ -102,7 +103,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-10-01 16:10:08.573749",
+ "modified": "2024-10-23 15:17:29.904530",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Setting Definition",
@@ -111,11 +112,8 @@
   {
    "create": 1,
    "delete": 1,
-   "email": 1,
-   "print": 1,
    "read": 1,
    "role": "System Manager",
-   "share": 1,
    "write": 1
   }
  ],

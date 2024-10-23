@@ -49,6 +49,7 @@
    "options": "Company"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "export_and_import_conditions",
    "fieldtype": "Table",
    "label": "Export And Import Conditions",
@@ -63,7 +64,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-22 17:20:55.161408",
+ "modified": "2024-10-23 15:50:02.744976",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice Definition",
