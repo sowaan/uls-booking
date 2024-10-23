@@ -19,9 +19,10 @@ def generate_sales_invoice_enqued(doc_str):
         selling_rate_zone = None
         selling_rate_country = 0
         arrayy=[]
+        definition_record = doc.get("sales_invoice_definition")
         sales_name= []
         try:
-            definition = frappe.get_doc("Sales Invoice Definition", "4f1330rq6u")
+            definition = frappe.get_doc("Sales Invoice Definition", definition_record)
         except frappe.DoesNotExistError:
             frappe.throw(frappe._("Sales Invoice Definition with ID '4f1330rq6u' does not exist"))
         except frappe.PermissionError:

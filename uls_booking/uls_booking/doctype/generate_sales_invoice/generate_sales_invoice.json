@@ -12,6 +12,7 @@
   "end_date",
   "station",
   "icris_number",
+  "sales_invoice_definition",
   "section_break_ebtp",
   "total_shipment_numbers",
   "shipment_numbers",
@@ -97,12 +98,19 @@
    "fieldtype": "Long Text",
    "label": "Sales Invoices",
    "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice_definition",
+   "fieldtype": "Link",
+   "label": "Sales Invoice Definition",
+   "options": "Sales Invoice Definition",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-23 12:52:53.187401",
+ "modified": "2024-10-23 14:47:15.026756",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Generate Sales Invoice",
