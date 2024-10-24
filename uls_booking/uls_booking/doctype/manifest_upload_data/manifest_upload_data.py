@@ -991,8 +991,8 @@ class ManifestUploadData(Document):
                 chunk = arrays[current_index:current_index + chunk_size]                
                 
                 current_index += chunk_size
-                insert_data(chunk,frm,to )
-                # enqueue(insert_data, arrays=chunk,frm=frm, to=to, queue="default")
+                # insert_data(chunk,frm,to )
+                enqueue(insert_data, arrays=chunk,frm=frm, to=to, queue="default")
             enqueue(storing_shipment_number,arrays=arrays, frm=shipfrom, to=shipto, doc=self.name ,queue="default")
                 
             
