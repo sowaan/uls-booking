@@ -918,12 +918,15 @@ def insert_data(arrays, frm, to):
                     print(f"Key {key} not found in replacement_map.")
 
 
-                docss.set(field_name, field_data)
-                # for field in setting.fields_to_divide:
-                #     if doctype_name == field.doctype_name and field_name == field.field_name:
-
-                #         field_data = float(field_data) / field.number_divide_with
                 # docss.set(field_name, field_data)
+                for field in setting.fields_to_divide:
+                    
+                    if doctype_name == field.doctype_name and field_name == field.field_name:
+                        # print(field_data , field_name,"OLD")
+                        field_data  = float(field_data) if field_data else 0.0
+                        field_data = field_data / field.number_divide_with
+                        # print(field_data , field_name,"NEW")
+                docss.set(field_name, field_data)
             docss.save()
             frappe.db.commit()
             print(doctype_name, shipment_num, "Updating")
@@ -947,7 +950,15 @@ def insert_data(arrays, frm, to):
                     field_data = replacement_map[key]
 
 
-                doc.set(field_name, field_data)
+                # doc.set(field_name, field_data)
+                for field in setting.fields_to_divide:
+                    
+                    if doctype_name == field.doctype_name and field_name == field.field_name:
+                        # print(field_data , field_name,"OLD")
+                        field_data  = float(field_data) if field_data else 0.0
+                        field_data = field_data / field.number_divide_with
+                        # print(field_data , field_name,"NEW")
+                docss.set(field_name, field_data)
 
             print(doctype_name, shipment_num, "Inserting")
             doc.insert()
@@ -980,8 +991,8 @@ class ManifestUploadData(Document):
                 chunk = arrays[current_index:current_index + chunk_size]                
                 
                 current_index += chunk_size
-                # insert_data(chunk,frm,to )
-                enqueue(insert_data, arrays=chunk,frm=frm, to=to, queue="default")
+                insert_data(chunk,frm,to )
+                # enqueue(insert_data, arrays=chunk,frm=frm, to=to, queue="default")
             enqueue(storing_shipment_number,arrays=arrays, frm=shipfrom, to=shipto, doc=self.name ,queue="default")
                 
             
