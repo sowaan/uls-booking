@@ -39,15 +39,15 @@ class R200000(Document):
             formatted_date_shipped = date_object_shipped.strftime("%Y-%m-%d")
             self.date_shipped = formatted_date_shipped
 
-            # Apply the helper functions to each relevant attribute
-            self.invoice_total = safe_divide_100(self.invoice_total)
-            self.expanded_invoice_total = safe_divide_100(self.expanded_invoice_total)
-            self.custom_weight_of_1st_package_in_shipment = safe_divide_10(self.custom_weight_of_1st_package_in_shipment)
-            self.custom_1st_package_revenue = safe_divide_100(self.custom_1st_package_revenue)
-            self.shipment_weight = safe_divide_10(self.shipment_weight)
-            self.freight_charges = safe_divide_100(self.freight_charges)
-            self.dimensional_weight = safe_divide_10(self.dimensional_weight)
-            self.declared_value = safe_divide_100(self.declared_value)
+            # # Apply the helper functions to each relevant attribute
+            # self.invoice_total = safe_divide_100(self.invoice_total)
+            # self.expanded_invoice_total = safe_divide_100(self.expanded_invoice_total)
+            # self.custom_weight_of_1st_package_in_shipment = safe_divide_10(self.custom_weight_of_1st_package_in_shipment)
+            # self.custom_1st_package_revenue = safe_divide_100(self.custom_1st_package_revenue)
+            # self.shipment_weight = safe_divide_10(self.shipment_weight)
+            # self.freight_charges = safe_divide_100(self.freight_charges)
+            # self.dimensional_weight = safe_divide_10(self.dimensional_weight)
+            # self.declared_value = safe_divide_100(self.declared_value)
 
-            # Update the check attribute
-            self.check = 1
+            # # Update the check attribute
+            # self.check = 1
