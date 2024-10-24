@@ -12,7 +12,7 @@
   "surcharges",
   "compensation_table",
   "export_and_import_conditions",
-  "unassigned_customer_manifest"
+  "unassigned_icris_number"
  ],
  "fields": [
   {
@@ -56,15 +56,14 @@
    "options": "Export And Import Conditions"
   },
   {
-   "fieldname": "unassigned_customer_manifest",
-   "fieldtype": "Link",
-   "label": "Unassigned Customer Manifest",
-   "options": "Customer"
+   "fieldname": "unassigned_icris_number",
+   "fieldtype": "Data",
+   "label": "Unassigned Icris Number"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-23 19:40:25.752619",
+ "modified": "2024-10-24 19:16:39.990050",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice Definition",

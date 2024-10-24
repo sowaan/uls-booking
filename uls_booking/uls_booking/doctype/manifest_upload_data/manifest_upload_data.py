@@ -24,7 +24,7 @@ def generate_sales_invoice_enqued(doc_str):
         try:
             definition = frappe.get_doc("Sales Invoice Definition", definition_record)
         except frappe.DoesNotExistError:
-            frappe.throw(frappe._("Sales Invoice Definition with ID '4f1330rq6u' does not exist"))
+            frappe.throw(frappe._("Sales Invoice Definition does not exist"))
         except frappe.PermissionError:
             frappe.throw(frappe._("You do not have permission to access the Sales Invoice Definition"))
         except Exception as e:
@@ -110,12 +110,18 @@ def generate_sales_invoice_enqued(doc_str):
             
             if sales_invoice.custom_shipper_country == definition.origin_country.upper():
                 imp_exp = "Export"
-                icris_number = sales_invoice.custom_shipper_number
+                if sales_invoice.custom_shipper_number:
+                    icris_number = sales_invoice.custom_shipper_number
+                else:
+                    icris_number = definition.unassigned_icris_number
 
-            else:
+            elif sales_invoice.custom_shipper_country != definition.origin_country.upper():
                 imp_exp = "Import"
-                icris_number = sales_invoice.custom_consignee_number
-            
+                if sales_invoice.custom_consignee_number:
+                    icris_number = sales_invoice.custom_consignee_number
+                else:
+                    icris_number = definition.unassigned_icris_number
+
             
             weight_frm_R200000 = frappe.get_value(
                 "R202000",
@@ -152,7 +158,7 @@ def generate_sales_invoice_enqued(doc_str):
             
             if sales_invoice.custom_billing_term in export_billing_term and sales_invoice.custom_shipper_country == definition.origin_country.upper():
                 check1 = frappe.get_list("ICRIS List",
-                                        filters = {"shipper_no":sales_invoice.custom_shipper_number})
+                                        filters = {"shipper_no":icris_number})
                 
                 if check1:
                     
@@ -166,7 +172,8 @@ def generate_sales_invoice_enqued(doc_str):
                                             "error": f"""Shipment Number:,{shipment},Icris Number: {icris_number}"""
                                         }).insert()
                     
-
+                
+                    print(sales_invoice.customer)
                     tt = frappe.get_doc("Territory", {"name": sales_invoice.custom_shipper_city})
                     pt = tt.parent_territory
                     if pt != "All Territories":
@@ -186,7 +193,7 @@ def generate_sales_invoice_enqued(doc_str):
                     if sales_invoice.custom_consignee_country:
                         origin_country = sales_invoice.custom_consignee_country
                         origin_country = origin_country.capitalize()
-                       
+                        
                     
                     zone_with_out_country = None
                     
@@ -231,7 +238,7 @@ def generate_sales_invoice_enqued(doc_str):
                             if selling_rate_name:        
                                 selling_rate_country = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
                                 selling_rate = selling_rate_country
-                               
+                                
                             else :
                                 
                                 flag = 1
@@ -316,9 +323,9 @@ def generate_sales_invoice_enqued(doc_str):
                
                 
                 check = frappe.get_list("ICRIS List",
-                                        filters = {"shipper_no":sales_invoice.custom_consignee_number})
+                                        filters = {"shipper_no":icris_number})
                 if check:
-                    icris1 = frappe.get_doc("ICRIS List", {"shipper_no": check[0].name})
+                    icris1 = frappe.get_doc("ICRIS List",check[0].name)
                     if icris1.shipper_name:
                         sales_invoice.customer = icris1.shipper_name
                     else:
@@ -328,7 +335,8 @@ def generate_sales_invoice_enqued(doc_str):
                                             "error": f"""Shipment Number:,{shipment},Icris Number: {icris_number}"""
                                         }).insert()
                         
-
+                
+                    print(sales_invoice.customer)
                     mm = frappe.get_doc("Territory", {"name": sales_invoice.custom_consignee_city})
                     vv = mm.parent_territory
                     
@@ -348,7 +356,7 @@ def generate_sales_invoice_enqued(doc_str):
                     if sales_invoice.custom_shipper_country:
                         origin_country = sales_invoice.custom_shipper_country
                         origin_country = origin_country.capitalize()
-                       
+                        
                     
                     zone_with_out_country = None
                     
@@ -369,7 +377,7 @@ def generate_sales_invoice_enqued(doc_str):
                                         "method": "No Selling Group For Import",
                                         "error": f"""Shipment Number:,{shipment},Selling Group: {selling_group} , Icris Number: {icris_number}"""
                                     }).insert()
-                           
+                            
                     
                     if selling_group:
                         
@@ -391,7 +399,7 @@ def generate_sales_invoice_enqued(doc_str):
                             if selling_rate_name:        
                                 selling_rate_country = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
                                 selling_rate = selling_rate_country
-                               
+                                
                             else :
                                 
                                 flag = 1
@@ -558,15 +566,19 @@ def generate_sales_invoice_enqued(doc_str):
 
             shipmentbillingcheck = 0
             shipmentbillingamount = 0
+            shipmentbillingchargesfromcustomer = 0
             if sales_invoice.customer:
                 shipmentbillingcheck = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipping_bill_charges_applicable')
-                if shipmentbillingcheck:
+                shipmentbillingchargesfromcustomer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipment_billing_charges')
+                if shipmentbillingcheck and not shipmentbillingchargesfromcustomer:
                     if imp_exp == "Export":
                         shipmentbillingamount = frappe.db.get_value('Additional Charges', 'Shipping Bill Charges', 'export_amount')
                         
                     elif imp_exp == "Import":
                         shipmentbillingamount = frappe.db.get_value('Additional Charges', 'Shipping Bill Charges', 'import_amount')
-                        
+                elif shipmentbillingcheck and shipmentbillingchargesfromcustomer:
+                    shipmentbillingamount = shipmentbillingchargesfromcustomer
+
             declared_value = sales_invoice.custom_insurance_amount
 
 
@@ -958,7 +970,7 @@ def insert_data(arrays, frm, to):
                         field_data  = float(field_data) if field_data else 0.0
                         field_data = field_data / field.number_divide_with
                         # print(field_data , field_name,"NEW")
-                docss.set(field_name, field_data)
+                doc.set(field_name, field_data)
 
             print(doctype_name, shipment_num, "Inserting")
             doc.insert()
