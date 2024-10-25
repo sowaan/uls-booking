@@ -11,6 +11,7 @@
   "country_and_surcharge_codes_field_names",
   "fields_to_divide",
   "insurance_shipment_type",
+  "origin_country",
   "country_codes_tab",
   "country_codes",
   "surcharges_code_excl_and_incl",
@@ -119,12 +120,17 @@
    "fieldname": "insurance_shipment_type",
    "fieldtype": "Data",
    "label": "Insurance Shipment Type"
+  },
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Data",
+   "label": "Origin Country"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-10-25 12:29:20.928536",
+ "modified": "2024-10-25 15:21:04.812117",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Setting Definition",
