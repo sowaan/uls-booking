@@ -770,8 +770,9 @@ def storing_shipment_number(arrays, frm, to, doc):
             continue
 
     unique_shipment_numbers = list(shipment_numbers)
-    defintion = frappe.get_doc("Sales Invoice Definition", "4f1330rq6u")
-    origin_country = defintion.origin_country
+    # defintion = frappe.get_doc("Sales Invoice Definition", "4f1330rq6u")
+    setting = frappe.get_doc("Manifest Setting Definition")
+    origin_country = setting.origin_country
     for shipment in unique_shipment_numbers:
         # Check if the shipment number already exists
         existing_doc = frappe.get_value("Shipment Number", {"shipment_number": shipment})
