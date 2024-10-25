@@ -68,6 +68,11 @@ def generate_sales_invoice_enqued(doc_str):
             checkship = frappe.get_list("Sales Invoice",
                                         filters = {"custom_shipment_number":shipment})
             if checkship:
+                frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "Sales Invoice Already present",
+                                            "error": f"""Shipment Number:,{shipment}"""
+                                        }).insert()
                 continue
             
             sales_invoice = frappe.new_doc("Sales Invoice")
@@ -84,6 +89,7 @@ def generate_sales_invoice_enqued(doc_str):
             total_charges_other_charges = 0
             FSCcharges = 0
             FSCpercentage = 0
+            shipment_type = 0
             for child_record in definition.sales_invoice_definition:
                 doctype_name = child_record.ref_doctype
                 field_name = child_record.field_name
@@ -142,7 +148,21 @@ def generate_sales_invoice_enqued(doc_str):
            
             selected_weight = max(weight_frm_R200000, weight_frm_R201000)
             sales_invoice.custom_shipment_weight = selected_weight
+
+            if sales_invoice.custom_package_type:
+                for code in definition.package_type_replacement:
+                    if sales_invoice.custom_package_type == code.package_type_code:
+                        sales_invoice.custom_package_type = code.package_type
+                        shipment_type = sales_invoice.custom_package_type
+                        break
             
+                
+            else:
+                shipment_type = sales_invoice.custom_shipment_type
+
+
+
+    
             
             try:
                 icris_account = frappe.get_doc("ICRIS Account", icris_number)
@@ -150,6 +170,11 @@ def generate_sales_invoice_enqued(doc_str):
             except frappe.DoesNotExistError:
                 
                 print("ICRIS Account does not exist. and the Icris number is :" , icris_number , "The shipment Number :", sales_invoice.custom_shipment_number,"\n \n")
+                frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "No ICRIS ACCOUNT",
+                                            "error": f"""Shipment Number:,{shipment},Icris Number: {icris_number}"""
+                                        }).insert()
                 continue            
             except Exception as e:
                 print(f"An error occurred: {str(e)}")
@@ -230,7 +255,7 @@ def generate_sales_invoice_enqued(doc_str):
                                 filters={
                                     "country": origin_country,
                                     "service_type": service_type[0].get("name"),
-                                    "package_type": sales_invoice.custom_shipment_type,
+                                    "package_type": shipment_type,
                                     "rate_group": selling_group 
                                 }
                             )
@@ -258,7 +283,7 @@ def generate_sales_invoice_enqued(doc_str):
                                         filters={
                                             "zone": zone_with_out_country,
                                             "service_type": service_type[0].get("name"),
-                                            "package_type": sales_invoice.custom_shipment_type,
+                                            "package_type": shipment_type,
                                             "rate_group": selling_group 
                                         }
                                     )
@@ -272,7 +297,7 @@ def generate_sales_invoice_enqued(doc_str):
                                         frappe.get_doc({
                                             "doctype": "Error Log",
                                             "method": "No Selling Rate Found",
-                                            "error": f"""No Selling Rate Found The shipment nummber is : ,{sales_invoice.custom_shipment_number} , Zone:, {zone_with_out_country} , Service Type : ,  {service_type[0].get("name")} , Package type :,{sales_invoice.custom_shipment_type }, Selling Group : {selling_group}, Icris Number : {icris_number}"""
+                                            "error": f"""No Selling Rate Found The shipment nummber is : ,{sales_invoice.custom_shipment_number} , Zone:, {zone_with_out_country} , Service Type : ,  {service_type[0].get("name")} , Package type :,{shipment_type }, Selling Group : {selling_group}, Icris Number : {icris_number}"""
                                         }).insert()
                                         
                                         continue
@@ -391,7 +416,7 @@ def generate_sales_invoice_enqued(doc_str):
                                 filters={
                                     "country": origin_country,
                                     "service_type": service_type[0].get("name"),
-                                    "package_type": sales_invoice.custom_shipment_type,
+                                    "package_type": shipment_type,
                                     "rate_group": selling_group 
                                 }
                             )
@@ -419,7 +444,7 @@ def generate_sales_invoice_enqued(doc_str):
                                         filters={
                                             "zone": zone_with_out_country,
                                             "service_type": service_type[0].get("name"),
-                                            "package_type": sales_invoice.custom_shipment_type,
+                                            "package_type": shipment_type,
                                             "rate_group": selling_group 
                                         }
                                     )
@@ -433,7 +458,7 @@ def generate_sales_invoice_enqued(doc_str):
                                         frappe.get_doc({
                                             "doctype": "Error Log",
                                             "method": "No Selling Rate Found",
-                                            "error": f"""No Selling Rate Found The shipment nummber is : ,{sales_invoice.custom_shipment_number} , Zone:, {zone_with_out_country} , Service Type : ,  {service_type[0].get("name")} , Package type :,{sales_invoice.custom_shipment_type }, Selling Group : {selling_group}, Icris Number : {icris_number}"""
+                                            "error": f"""No Selling Rate Found The shipment nummber is : ,{sales_invoice.custom_shipment_number} , Zone:, {zone_with_out_country} , Service Type : ,  {service_type[0].get("name")} , Package type :,{shipment_type }, Selling Group : {selling_group}, Icris Number : {icris_number}"""
                                         }).insert()
                                     
                                         
@@ -603,7 +628,7 @@ def generate_sales_invoice_enqued(doc_str):
             
 
 
-            if sales_invoice.customer != "UPS SCS PAKISTAN PVT LTD ( B )":
+            if sales_invoice.customer != customer.custom_default_customer:
                 
                 if decalred_value > 0:
                     
@@ -612,8 +637,8 @@ def generate_sales_invoice_enqued(doc_str):
                     result = decalred_value * (percent / 100)
                     max_insured = max(result , minimum_amount)
                     
-                    if max_insured > 0 and sales_invoice.custom_shipment_type == "NON-DOCUMENTS":
-                        rows = {'item_code': "INS", 'qty': '1', 'rate': max_insured}
+                    if max_insured > 0 and shipment_type == setting.insurance_shipment_type:
+                        rows = {'item_code': setting.insurance_charges, 'qty': '1', 'rate': max_insured}
                         
                         sales_invoice.append('items', rows)
 
@@ -644,34 +669,36 @@ def generate_sales_invoice_enqued(doc_str):
                     
             export_compensation_amount = 0
             
-
-
-
-
-            
-                
-            
-            
-            if sales_invoice.customer == "UPS SCS PAKISTAN PVT LTD ( B )":
+            if sales_invoice.customer == customer.custom_default_customer:
                 
                 sig = 0
                 for comp in definition.compensation_table:
-                    if sales_invoice.custom_billing_term == comp.shipment_billing_term and sales_invoice.custom_shipment_type == comp.shipping_billing_type and imp_exp == comp.case:
+                    if sales_invoice.custom_billing_term == comp.shipment_billing_term and shipment_type == comp.shipping_billing_type and imp_exp == comp.case:
                         export_compensation_amount = comp.document_amount
                         
-                        rows = {'item_code': "CC", 'qty': '1', 'rate': export_compensation_amount}
+                        rows = {'item_code': setting.compensation_charges , 'qty': '1', 'rate': export_compensation_amount}
                         sales_invoice.append('items', rows)
                         sig = 1
                         break
                     
-                if sig == 0:
+                # if sig == 0:
                     
-                    arrayy.append(sales_invoice.custom_shipper_number)
                     
-                    continue
+                    # frappe.get_doc({
+                    #                         "doctype": "Error Log",
+                    #                         "method": "NO Compensation Charges IN Customer",
+                    #                         "error": f"""Customer: {customer.custom_default_customer},{sales_invoice.custom_shipment_number}"""
+                    #                     }).insert()
+                    # continue
                     
             if not sales_invoice.items:
+                
                 print("shipment number" , sales_invoice.custom_shipment_number , "Item table is empty, so cannot make Sales Invoice. \n \n \n")
+                frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "N0 Items",
+                                            "error": f"""{sales_invoice.custom_shipment_number}"""
+                                        }).insert()
                 continue
             
             discounted_amount = discounted_amount -1
