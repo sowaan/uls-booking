@@ -45,9 +45,6 @@ def generate_sales_invoice_enqued(doc_str):
 
             elif term.export_check == 0:
                 import_billing_term.append(term.billing_term)
-
-        
-
         for code in setting.surcharges_code_excl_and_incl:
 
             excluded_codes.append(code.excluded_codes)
@@ -61,10 +58,6 @@ def generate_sales_invoice_enqued(doc_str):
             customer_signal =0
             final_discount_percentage = 0
             selected_weight = 0
-            
-            
-            
-          
             checkship = frappe.get_list("Sales Invoice",
                                         filters = {"custom_shipment_number":shipment})
             if checkship:
@@ -81,9 +74,6 @@ def generate_sales_invoice_enqued(doc_str):
             customer = frappe.get_doc("Company",company,
             fields = ["custom_default_customer"])
             sales_invoice.customer = customer.custom_default_customer
-        
-            
-           
             doctype_name =0
             total_charges_incl_fuel = 0
             total_charges_other_charges = 0
@@ -108,6 +98,7 @@ def generate_sales_invoice_enqued(doc_str):
                     sales_invoice.posting_date = sales_invoice.custom_date_shipped
                     posting_date = getdate(sales_invoice.posting_date)
                     sales_invoice.set_posting_time = 1
+                    # sales_invoice.due_date = sales_invoice.posting_date
                    
             
             icris_number = None
@@ -159,11 +150,6 @@ def generate_sales_invoice_enqued(doc_str):
                 
             else:
                 shipment_type = sales_invoice.custom_shipment_type
-
-
-
-    
-            
             try:
                 icris_account = frappe.get_doc("ICRIS Account", icris_number)
                
@@ -315,9 +301,6 @@ def generate_sales_invoice_enqued(doc_str):
                                 continue            
                         
                         my_weight = float(sales_invoice.custom_shipment_weight)
-                        
-                        
-
                         if selling_rate :
 
                             flg = 0
@@ -339,11 +322,6 @@ def generate_sales_invoice_enqued(doc_str):
 
 
                             tarif = final_rate / (1- (final_discount_percentage/100))
-                    
-                    
-
-
-
             elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
                
                 
@@ -472,9 +450,6 @@ def generate_sales_invoice_enqued(doc_str):
                                 continue            
                         
                         my_weight = float(sales_invoice.custom_shipment_weight)
-                        
-                        
-
                         if selling_rate :
 
                             flg = 0
@@ -496,22 +471,9 @@ def generate_sales_invoice_enqued(doc_str):
 
 
                             tarif = final_rate / (1- (final_discount_percentage/100))
-                    
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
             currency = frappe.get_value("Customer" , sales_invoice.customer , "default_currency") 
             sales_invoice.currency = currency
-            
-
-
-
             codes_incl_fuel = []
             amounts_incl_fuel = []
             surcharge_codes_incl_fuel = []
@@ -568,8 +530,6 @@ def generate_sales_invoice_enqued(doc_str):
                             "code": code,                
                             "amount": amount             
                         })
-
-               
                 sales_invoice.surcharges_and_amounts_incl_fuel = []
 
                 for surcharge_code, code, amount in zip(surcharge_codes_incl_fuel, codes_incl_fuel, amounts_incl_fuel):
@@ -585,10 +545,6 @@ def generate_sales_invoice_enqued(doc_str):
                 FSCpercentage = frappe.db.get_value('Additional Charges', 'Fuel Surcharge', 'percentage')
                 if FSCpercentage and tarif:
                         FSCcharges = (total_charges_incl_fuel + final_rate) * (FSCpercentage / 100 )
-                        
-                        
-            
-
             shipmentbillingcheck = 0
             shipmentbillingamount = 0
             shipmentbillingchargesfromcustomer = 0
@@ -605,11 +561,7 @@ def generate_sales_invoice_enqued(doc_str):
                     shipmentbillingamount = shipmentbillingchargesfromcustomer
 
             declared_value = sales_invoice.custom_insurance_amount
-
-
             decalred_value = 0  
-
-           
             if isinstance(declared_value, (int, float)):
                 declared_value = float(declared_value)
             elif isinstance(declared_value, str):
@@ -625,9 +577,6 @@ def generate_sales_invoice_enqued(doc_str):
                 print("")
                 
             max_insured = 0
-            
-
-
             if sales_invoice.customer != customer.custom_default_customer:
                 
                 if decalred_value > 0:
@@ -664,9 +613,6 @@ def generate_sales_invoice_enqued(doc_str):
                     
                     sales_invoice.append('items' , rows)
 
-
-
-                    
             export_compensation_amount = 0
             
             if sales_invoice.customer == customer.custom_default_customer:
@@ -680,17 +626,7 @@ def generate_sales_invoice_enqued(doc_str):
                         sales_invoice.append('items', rows)
                         sig = 1
                         break
-                    
-                # if sig == 0:
-                    
-                    
-                    # frappe.get_doc({
-                    #                         "doctype": "Error Log",
-                    #                         "method": "NO Compensation Charges IN Customer",
-                    #                         "error": f"""Customer: {customer.custom_default_customer},{sales_invoice.custom_shipment_number}"""
-                    #                     }).insert()
-                    # continue
-                    
+    
             if not sales_invoice.items:
                 
                 print("shipment number" , sales_invoice.custom_shipment_number , "Item table is empty, so cannot make Sales Invoice. \n \n \n")
@@ -705,9 +641,9 @@ def generate_sales_invoice_enqued(doc_str):
             sales_invoice.insert()
             sales_name.append(sales_invoice.name)
             sales_invoice.save()
-            if sales_invoice.customer != "UPS SCS PAKISTAN PVT LTD ( B )":
+            if sales_invoice.customer != customer.custom_default_customer:
                 for row in sales_invoice.items:
-                    if row.item_code == "OC":
+                    if row.item_code == setting.other_charges:
                     
                         frappe.db.set_value(row.doctype , row.name ,"rate" , total_charges_other_charges )
                         frappe.db.set_value(row.doctype , row.name ,"amount" , total_charges_other_charges )
