@@ -188,7 +188,7 @@ def generate_sales_invoice_enqued(doc_str):
                     tt = frappe.get_doc("Territory", {"name": sales_invoice.custom_shipper_city})
                     pt = tt.parent_territory
                     if pt != "All Territories":
-                        stc = frappe.get_doc("Sales Taxes and Charges Template", {"province": pt})
+                        stc = frappe.get_doc("Sales Taxes and Charges Template", {"custom_province": pt})
                         for sale in stc.taxes:
                             charge_type = sale.charge_type
                             description = sale.description
@@ -344,7 +344,7 @@ def generate_sales_invoice_enqued(doc_str):
                     vv = mm.parent_territory
                     
                     if vv != "All Territories":
-                        bb = frappe.get_doc("Sales Taxes and Charges Template", {"province": vv})
+                        bb = frappe.get_doc("Sales Taxes and Charges Template", {"custom_province": vv})
                         sales_invoice.set("taxes_and_charges", bb.name)
                         for sale in bb.taxes:
                             charge_type = sale.charge_type
