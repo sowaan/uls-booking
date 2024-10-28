@@ -91,6 +91,14 @@ fixtures = [
                                 "custom_package_type",
                                 "custom_billing_type",
                                 "custom_province",
+                                "custom_surchages_code_and_amount",
+                                "custom_surcharge_excl_fuel",
+                                "custom_total_surcharges_excl_fuel",
+                                "custom_column_break_en4jc",
+                                "custom_surcharge_incl_fuel",
+                                "custom_total_surcharges_incl_fuel",
+                                "custom_column_break_uzjnx",
+
                                 )
 	  	  
         ]  
