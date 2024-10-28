@@ -90,6 +90,7 @@ fixtures = [
                                 "custom_shipment_billing_charges",
                                 "custom_package_type",
                                 "custom_billing_type",
+                                "custom_province",
                                 )
 	  	  
         ]  
