@@ -525,7 +525,7 @@ def generate_sales_invoice_enqued(doc_str):
                 total_charges_other_charges = sum(amounts_other_charges)
                 for surcharge_code, code, amount in zip(surcharge_codes_other_charges, codes_other_charges, amounts_other_charges):
                     if code: 
-                        sales_invoice.append("surcharges_and_amounts", {
+                        sales_invoice.append("custom_surcharge_excl_fuel", {
                             "surcharge": surcharge_code, 
                             "code": code,                
                             "amount": amount             
@@ -534,14 +534,14 @@ def generate_sales_invoice_enqued(doc_str):
 
                 for surcharge_code, code, amount in zip(surcharge_codes_incl_fuel, codes_incl_fuel, amounts_incl_fuel):
                     if code: 
-                        sales_invoice.append("surcharges_and_amounts_incl_fuel", {
+                        sales_invoice.append("custom_surcharge_incl_fuel", {
                             "surcharge": surcharge_code,  
                             "code": code,                
                             "amount": amount            
                         })
                 
-                sales_invoice.total_surcharges_excl_fuel_charges = total_charges_other_charges
-                sales_invoice.total_surcharges_incl_fuel_charges = total_charges_incl_fuel
+                sales_invoice.custom_total_surcharges_excl_fuel = total_charges_other_charges
+                sales_invoice.custom_total_surcharges_incl_fuel = total_charges_incl_fuel
                 FSCpercentage = frappe.db.get_value('Additional Charges', 'Fuel Surcharge', 'percentage')
                 if FSCpercentage and tarif:
                         FSCcharges = (total_charges_incl_fuel + final_rate) * (FSCpercentage / 100 )
