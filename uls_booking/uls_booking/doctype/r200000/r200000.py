@@ -25,19 +25,50 @@ class R200000(Document):
             except (ValueError, TypeError):
                 return 0.0  # Return a default value in case of error
 
-        # Check the condition and process accordingly
-        if self.check == 0:
-            date_format = "%d%b%Y"
-            date_input = self.input_date
-            date_object_input = datetime.strptime(date_input, date_format)
-            formatted_input_date = date_object_input.strftime("%Y-%m-%d")
-            self.input_date = formatted_input_date
 
-            # Convert date_shipped
-            date_shipped = self.date_shipped
-            date_object_shipped = datetime.strptime(date_shipped, date_format)
-            formatted_date_shipped = date_object_shipped.strftime("%Y-%m-%d")
-            self.date_shipped = formatted_date_shipped
+
+
+        
+        
+        # Check the condition and process accordingly
+        # if self.check == 0:
+        #     date_format = "%d%b%Y"
+        #     date_input = self.input_date
+        #     date_object_input = datetime.strptime(date_input, date_format)
+        #     formatted_input_date = date_object_input.strftime("%Y-%m-%d")
+        #     self.input_date = formatted_input_date
+
+        #     # Convert date_shipped
+        #     date_shipped = self.date_shipped
+        #     date_object_shipped = datetime.strptime(date_shipped, date_format)
+        #     formatted_date_shipped = date_object_shipped.strftime("%Y-%m-%d")
+        #     self.date_shipped = formatted_date_shipped
+
+        def convert_date(date_input):
+            # Try parsing as dmy format without separators
+            try:
+                date_object = datetime.strptime(date_input, "%d%m%Y")  # e.g., '31102024'
+                return date_object.strftime("%Y-%m-%d")
+            except ValueError:
+                pass  # If it fails, try the next format
+
+            # Try parsing as dmy with month abbreviation
+            try:
+                date_object = datetime.strptime(date_input, "%d%b%Y")  # e.g., '31OCT2024'
+                return date_object.strftime("%Y-%m-%d")
+            except ValueError:
+                pass  # If it fails, try the next format
+
+            # Try parsing as dmy with hyphens
+            try:
+                date_object = datetime.strptime(date_input, "%d-%m-%Y")  # e.g., '31-10-2024'
+                return date_object.strftime("%Y-%m-%d")
+            except ValueError:
+                raise ValueError(f"Date format for '{date_input}' is invalid.")
+
+        if self.check == 0:
+            self.input_date = convert_date(self.input_date)
+            self.date_shipped = convert_date(self.date_shipped)
 
             # # Apply the helper functions to each relevant attribute
             # self.invoice_total = safe_divide_100(self.invoice_total)

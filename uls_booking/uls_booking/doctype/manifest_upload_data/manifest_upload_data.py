@@ -811,7 +811,7 @@ def insert_data(arrays, frm, to):
     for line in arrays:
        
         doctype_name = "R" + line[frm:to].strip()
-        old_doctype_name = doctype_name
+        old_doctype_name = line[frm:to].strip()
         
         
         prefix = doctype_name[:2]
