@@ -48,4 +48,8 @@ class GenerateSalesInvoice(Document):
 		results = frappe.db.sql(query, values)
 		shipment_numbers = [row[0] for row in results]
 		self.total_shipment_numbers = len(shipment_numbers)
-		self.shipment_numbers = ', '.join(shipment_numbers)
+		# self.shipment_numbers = ', '.join(shipment_numbers)
+		for i in shipment_numbers:
+			self.append('shipment_numbers_and_sales_invoices', {
+				'shipment_number': i  # Replace 'shipment_number' with the actual field name in your child table
+			})

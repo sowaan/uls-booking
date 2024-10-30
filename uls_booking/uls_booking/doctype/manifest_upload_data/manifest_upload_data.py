@@ -8,8 +8,8 @@ import re
 
 
 def generate_sales_invoice_enqued(doc_str):
-
     try:
+        
        
         doc = json.loads(doc_str)
         final_rate = 0
@@ -30,7 +30,7 @@ def generate_sales_invoice_enqued(doc_str):
         except Exception as e:
             frappe.throw(frappe._("Error fetching Sales Invoice Definition: ") + str(e))
 
-      
+        
         shipment = doc.get("shipment_numbers", "")
         shipments = [value.strip() for value in shipment.split(",") if value.strip()]
         setting = frappe.get_doc("Manifest Setting Definition")
@@ -49,8 +49,9 @@ def generate_sales_invoice_enqued(doc_str):
 
             excluded_codes.append(code.excluded_codes)
             included_codes.append(code.included_codes)
-
+        counter = 0
         for shipment in shipments:
+            counter = counter + 1
             discounted_amount = discounted_amount +1
             final_rate = 0
             tarif = 0
@@ -390,6 +391,7 @@ def generate_sales_invoice_enqued(doc_str):
                         flag = 0
                         if zones:
                             sales_invoice.custom_zone = zones[0].name
+                            print("Zone with Country :",zones[0].name)
                             selling_rate_name = frappe.get_list("Selling Rate",
                                 filters={
                                     "country": origin_country,
@@ -418,6 +420,7 @@ def generate_sales_invoice_enqued(doc_str):
                                 zone_with_out_country = countries[0].parent
                                 if zone_with_out_country:
                                     sales_invoice.custom_zone = zone_with_out_country
+                                    print("Zone with Out Country :",zone_with_out_country)
                                     selling_rate_name = frappe.get_list("Selling Rate",
                                         filters={
                                             "zone": zone_with_out_country,
@@ -520,7 +523,7 @@ def generate_sales_invoice_enqued(doc_str):
                             surcharge_codes_other_charges.append(code_name)
 
                 
-                sales_invoice.surcharges_and_amounts = []
+                sales_invoice.custom_surcharge_excl_fuel = []
                 total_charges_incl_fuel = sum(amounts_incl_fuel)
                 total_charges_other_charges = sum(amounts_other_charges)
                 for surcharge_code, code, amount in zip(surcharge_codes_other_charges, codes_other_charges, amounts_other_charges):
@@ -530,7 +533,7 @@ def generate_sales_invoice_enqued(doc_str):
                             "code": code,                
                             "amount": amount             
                         })
-                sales_invoice.surcharges_and_amounts_incl_fuel = []
+                sales_invoice.custom_surcharge_incl_fuel = []
 
                 for surcharge_code, code, amount in zip(surcharge_codes_incl_fuel, codes_incl_fuel, amounts_incl_fuel):
                     if code: 
@@ -629,18 +632,26 @@ def generate_sales_invoice_enqued(doc_str):
     
             if not sales_invoice.items:
                 
-                print("shipment number" , sales_invoice.custom_shipment_number , "Item table is empty, so cannot make Sales Invoice. \n \n \n")
+                print("shipment number" , sales_invoice.custom_shipment_number , "Item table is empty, so cannot make Sales Invoice. icris :",icris_number,"\n\n\n")
                 frappe.get_doc({
                                             "doctype": "Error Log",
                                             "method": "N0 Items",
-                                            "error": f"""{sales_invoice.custom_shipment_number}"""
+                                            "error": f"""{sales_invoice.custom_shipment_number}, Icris Number:{icris_number}"""
                                         }).insert()
                 continue
             
             discounted_amount = discounted_amount -1
             sales_invoice.insert()
             sales_name.append(sales_invoice.name)
+            
+            for row in doc["shipment_numbers_and_sales_invoices"]:
+                if sales_invoice.custom_shipment_number == row['shipment_number']:  # Change row.shipment_number to row['shipment_number']
+                    frappe.db.set_value("Shipment Numbers And Sales Invoices", row['name'], "sales_invoice", sales_invoice.name)
+
             sales_invoice.save()
+            if counter == 15:
+                counter = 0
+                frappe.db.commit()
             if sales_invoice.customer != customer.custom_default_customer:
                 for row in sales_invoice.items:
                     if row.item_code == setting.other_charges:
@@ -664,8 +675,8 @@ def generate_sales_invoice_enqued(doc_str):
 
 @frappe.whitelist()
 def generate_sales_invoice(doc_str):
-    # generate_sales_invoice_enqued(doc_str)
-    enqueue(generate_sales_invoice_enqued, doc_str=doc_str, queue="default")
+    generate_sales_invoice_enqued(doc_str)
+    # enqueue(generate_sales_invoice_enqued, doc_str=doc_str, queue="default")
     
    
 
