@@ -7,19 +7,19 @@ import json
 import re
 
 
-def generate_sales_invoice_enqued(doc_str):
+def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
     try:
         
        
-        doc = json.loads(doc_str)
+        # doc = json.loads(doc_str)
         final_rate = 0
         tarif = 0
-        name = doc['name']
+        # name = doc['name']
         discounted_amount = 0
         selling_rate_zone = None
         selling_rate_country = 0
         arrayy=[]
-        definition_record = doc.get("sales_invoice_definition")
+        # definition_record = doc.get("sales_invoice_definition")
         sales_name= []
         try:
             definition = frappe.get_doc("Sales Invoice Definition", definition_record)
@@ -50,9 +50,9 @@ def generate_sales_invoice_enqued(doc_str):
 
             excluded_codes.append(code.excluded_codes)
             included_codes.append(code.included_codes)
-        counter = 0
+       
         for shipment in shipments:
-            counter = counter + 1
+          
             discounted_amount = discounted_amount +1
             final_rate = 0
             tarif = 0
@@ -492,36 +492,36 @@ def generate_sales_invoice_enqued(doc_str):
                     "R201000",
                     filters={'shipment_number': shipment},
                 )
+                if r201:
+                    docn = frappe.get_doc("R201000", r201[0].name)
 
-                docn = frappe.get_doc("R201000", r201[0].name)
+                    for row in definition.surcharges:
+                        code_name = row.sur_cod_1
+                        amount_name = row.sur_amt_1
 
-                for row in definition.surcharges:
-                    code_name = row.sur_cod_1
-                    amount_name = row.sur_amt_1
+                        
+                        code = getattr(docn, code_name, None)
+                        amount = getattr(docn, amount_name, None)
+
+                        
+                        try:
+                            amount = float(amount)
+                        except (ValueError, TypeError):
+                            amount = 0 
 
                     
-                    code = getattr(docn, code_name, None)
-                    amount = getattr(docn, amount_name, None)
-
-                    
-                    try:
-                        amount = float(amount)
-                    except (ValueError, TypeError):
-                        amount = 0 
-
-                   
-                    if code in included_codes and code not in excluded_codes:
-                        
-                        if code: 
-                            codes_incl_fuel.append(code)
-                            amounts_incl_fuel.append(amount)
-                            surcharge_codes_incl_fuel.append(code_name)
-                    elif code not in excluded_codes and code not in included_codes:
-                        
-                        if code:  
-                            codes_other_charges.append(code)
-                            amounts_other_charges.append(amount)
-                            surcharge_codes_other_charges.append(code_name)
+                        if code in included_codes and code not in excluded_codes:
+                            
+                            if code: 
+                                codes_incl_fuel.append(code)
+                                amounts_incl_fuel.append(amount)
+                                surcharge_codes_incl_fuel.append(code_name)
+                        elif code not in excluded_codes and code not in included_codes:
+                            
+                            if code:  
+                                codes_other_charges.append(code)
+                                amounts_other_charges.append(amount)
+                                surcharge_codes_other_charges.append(code_name)
 
                 
                 sales_invoice.custom_surcharge_excl_fuel = []
@@ -650,9 +650,6 @@ def generate_sales_invoice_enqued(doc_str):
                     frappe.db.set_value("Shipment Numbers And Sales Invoices", row['name'], "sales_invoice", sales_invoice.name)
 
             sales_invoice.save()
-            if counter == 15:
-                counter = 0
-                frappe.db.commit()
             if sales_invoice.customer != customer.custom_default_customer:
                 for row in sales_invoice.items:
                     if row.item_code == setting.other_charges:
@@ -666,6 +663,7 @@ def generate_sales_invoice_enqued(doc_str):
         ship_numbers = ', '.join(sales_name)
         frappe.db.set_value("Generate Sales Invoice",name,"sales_invoices",ship_numbers)
         frappe.db.set_value("Generate Sales Invoice",name,"status","Generated")
+        
                
 
 
@@ -675,10 +673,39 @@ def generate_sales_invoice_enqued(doc_str):
     except Exception as e:
         frappe.throw(frappe._("An error occurred: ") + str(e))
 
+
+
+
+def chunk_list(lst, chunk_size):
+    """Split a list into chunks of a specified size."""
+    for i in range(0, len(lst), chunk_size):
+        yield lst[i:i + chunk_size]
+
+        
 @frappe.whitelist()
 def generate_sales_invoice(doc_str):
+    doc = json.loads(doc_str)
+    name = doc['name']
+    definition_record = doc.get("sales_invoice_definition")
+    shipment = doc.get("shipment_numbers", "")
+    shipments = [value.strip() for value in shipment.split(",") if value.strip()]
+    chunk_size = 15  # Adjust as needed
+
+    # Enqueue each chunk of shipments
+    for shipment_chunk in chunk_list(shipments, chunk_size):
+        enqueue(
+            generate_sales_invoice_enqued,
+            doc_str=doc_str,
+            doc=doc,
+            shipments=shipment_chunk,
+            definition_record=definition_record,
+            name=name,
+            queue="default"
+        )
+        frappe.db.commit()
+    
     # generate_sales_invoice_enqued(doc_str)
-    enqueue(generate_sales_invoice_enqued, doc_str=doc_str, queue="default")
+    # enqueue(generate_sales_invoice_enqued, doc_str=doc_str,doc = doc, shipments = shipments,definition_record = definition_record, name = name, queue="default")
     
    
 
@@ -911,9 +938,14 @@ def insert_data(arrays, frm, to):
                 for field in setting.fields_to_divide:
                     
                     if doctype_name == field.doctype_name and field_name == field.field_name:
-                        # print(field_data , field_name,"OLD")
-                        field_data  = float(field_data) if field_data else 0.0
-                        field_data = field_data / field.number_divide_with
+                        try:
+                            field_data = float(field_data) if field_data else 0.0
+                        except ValueError:
+                            # Handle the case where field_data is not a number
+                            frappe.log_error(f"Cannot convert field_data '{field_data}' to float", "Conversion Error")
+                            field_data = 0.0
+                        if field.number_divide_with:
+                            field_data = field_data / field.number_divide_with
                         # print(field_data , field_name,"NEW")
                 docss.set(field_name, field_data)
             docss.save()
@@ -943,10 +975,14 @@ def insert_data(arrays, frm, to):
                 for field in setting.fields_to_divide:
                     
                     if doctype_name == field.doctype_name and field_name == field.field_name:
-                        # print(field_data , field_name,"OLD")
-                        field_data  = float(field_data) if field_data else 0.0
-                        field_data = field_data / field.number_divide_with
-                        # print(field_data , field_name,"NEW")
+                        try:
+                            field_data = float(field_data) if field_data else 0.0
+                        except ValueError:
+                            # Handle the case where field_data is not a number
+                            frappe.log_error(f"Cannot convert field_data '{field_data}' to float", "Conversion Error")
+                            field_data = 0.0
+                        if field.number_divide_with:
+                            field_data = field_data / field.number_divide_with
                 doc.set(field_name, field_data)
 
             print(doctype_name, shipment_num, "Inserting")
