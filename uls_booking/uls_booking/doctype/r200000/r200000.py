@@ -60,11 +60,11 @@ class R200000(Document):
                 pass  # If it fails, try the next format
 
             # Try parsing as dmy with hyphens
-            try:
-                date_object = datetime.strptime(date_input, "%d-%m-%Y")  # e.g., '31-10-2024'
-                return date_object.strftime("%Y-%m-%d")
-            except ValueError:
-                raise ValueError(f"Date format for '{date_input}' is invalid.")
+            # try:
+            #     date_object = datetime.strptime(date_input, "%d-%m-%Y")  # e.g., '31-10-2024'
+            #     return date_object.strftime("%Y-%m-%d")
+            # except ValueError:
+            #     raise ValueError(f"Date format for '{date_input}' is invalid.")
 
         if self.check == 0:
             self.input_date = convert_date(self.input_date)
