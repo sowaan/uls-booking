@@ -32,6 +32,7 @@ def generate_sales_invoice_enqued(doc_str):
 
         
         shipment = doc.get("shipment_numbers", "")
+        frappe.db.set_value("Generate Sales Invoice",name,"status","In Progress")
         shipments = [value.strip() for value in shipment.split(",") if value.strip()]
         setting = frappe.get_doc("Manifest Setting Definition")
         excluded_codes = []
@@ -664,6 +665,7 @@ def generate_sales_invoice_enqued(doc_str):
                 frappe.db.set_value(sales_invoice.doctype , sales_invoice.name ,"grand_total" , total_charges_other_charges +  FSCcharges + tarif + max_insured + shipmentbillingamount)
         ship_numbers = ', '.join(sales_name)
         frappe.db.set_value("Generate Sales Invoice",name,"sales_invoices",ship_numbers)
+        frappe.db.set_value("Generate Sales Invoice",name,"status","Generated")
                
 
 
@@ -675,8 +677,8 @@ def generate_sales_invoice_enqued(doc_str):
 
 @frappe.whitelist()
 def generate_sales_invoice(doc_str):
-    generate_sales_invoice_enqued(doc_str)
-    # enqueue(generate_sales_invoice_enqued, doc_str=doc_str, queue="default")
+    # generate_sales_invoice_enqued(doc_str)
+    enqueue(generate_sales_invoice_enqued, doc_str=doc_str, queue="default")
     
    
 
