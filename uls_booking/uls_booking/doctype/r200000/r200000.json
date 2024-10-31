@@ -94,7 +94,8 @@
   "shipment_type_for_return_shipments",
   "expanded_packages_in_shipment",
   "payment_collection_service_flag",
-  "payment_collection_service_hold_flag"
+  "payment_collection_service_hold_flag",
+  "shipped_date"
  ],
  "fields": [
   {
@@ -417,7 +418,9 @@
   {
    "fieldname": "date_shipped",
    "fieldtype": "Data",
-   "label": "Date Shipped"
+   "hidden": 1,
+   "label": "Date Shipped",
+   "read_only": 1
   },
   {
    "fieldname": "pickup_time",
@@ -542,11 +545,16 @@
    "fieldname": "check",
    "fieldtype": "Check",
    "label": "Check"
+  },
+  {
+   "fieldname": "shipped_date",
+   "fieldtype": "Date",
+   "label": "Shipped Date"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-24 11:43:57.430588",
+ "modified": "2024-10-31 17:27:40.237517",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R200000",

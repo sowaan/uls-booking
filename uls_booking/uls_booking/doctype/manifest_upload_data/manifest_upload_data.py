@@ -756,7 +756,7 @@ def storing_shipment_number(arrays, frm, to, doc):
         if existing_doc:
             continue  # Skip if it already exists
 
-        date_shipped = frappe.get_value("R200000", {"shipment_number": shipment}, "date_shipped")
+        date_shipped = frappe.get_value("R200000", {"shipment_number": shipment}, "shipped_date")
         
         customer = None
         icris_number = None
@@ -936,9 +936,14 @@ def insert_data(arrays, frm, to,date_format):
 
                 for field in setting.date_conversion_field_names:
                     if field_name == field.field_name and doctype_name == field.doctype_name:
-                        date_object = datetime.strptime(field_data, date_format)
-                        output_date_format = "%d-%m-%Y"
-                        field_data = date_object.strftime(output_date_format)
+
+                        try:
+                            date_object = datetime.strptime(field_data, date_format)
+                            output_date_format = "%Y-%m-%d"
+                            field_data = date_object.strftime(output_date_format)
+
+                        except: 
+                            pass
         
                 for field in setting.fields_to_divide:
                     
@@ -977,10 +982,12 @@ def insert_data(arrays, frm, to,date_format):
 
                 for field in setting.date_conversion_field_names:
                     if field_name == field.field_name and doctype_name == field.doctype_name:
-                        date_object = datetime.strptime(field_data, date_format)
-                        output_date_format = "%d-%m-%Y"
-                        field_data = date_object.strftime(output_date_format)
-
+                        try:
+                            date_object = datetime.strptime(field_data, date_format)
+                            output_date_format = "%Y-%m-%d"
+                            field_data = date_object.strftime(output_date_format)
+                        except:
+                            pass
                 # doc.set(field_name, field_data)
                 for field in setting.fields_to_divide:
                     
