@@ -12,7 +12,8 @@
   "column_break_bvll",
   "shipment_number_to_index",
   "shipment_number_from_index",
-  "amended_from"
+  "amended_from",
+  "date_format"
  ],
  "fields": [
   {
@@ -56,12 +57,20 @@
   {
    "fieldname": "column_break_bvll",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date_format",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Date Format",
+   "options": "%d%m%Y\n%d%b%Y\n%d-%m-%Y\n%Y-%m-%d",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-21 16:36:36.561804",
+ "modified": "2024-10-31 12:46:11.319141",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Upload Data",

@@ -12,6 +12,7 @@
   "fields_to_divide",
   "insurance_shipment_type",
   "origin_country",
+  "date_conversion_field_names",
   "country_codes_tab",
   "country_codes",
   "surcharges_code_excl_and_incl",
@@ -125,12 +126,18 @@
    "fieldname": "origin_country",
    "fieldtype": "Data",
    "label": "Origin Country"
+  },
+  {
+   "fieldname": "date_conversion_field_names",
+   "fieldtype": "Table",
+   "label": "Date Conversion Field Names",
+   "options": "Date Conversion Fields"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-10-25 15:21:04.812117",
+ "modified": "2024-10-31 12:50:07.062539",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Setting Definition",

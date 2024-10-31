@@ -5,6 +5,7 @@ from frappe.utils.background_jobs import enqueue
 from frappe.utils import getdate
 import json
 import re
+from datetime import datetime
 
 
 def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
@@ -835,7 +836,7 @@ def storing_shipment_number(arrays, frm, to, doc):
 
 
 
-def insert_data(arrays, frm, to):
+def insert_data(arrays, frm, to,date_format):
     shipment_num = None
     pkg_trck = None
    
@@ -933,8 +934,12 @@ def insert_data(arrays, frm, to):
                 else:
                     print(f"Key {key} not found in replacement_map.")
 
-
-                # docss.set(field_name, field_data)
+                for field in setting.date_conversion_field_names:
+                    if field_name == field.field_name and doctype_name == field.doctype_name:
+                        date_object = datetime.strptime(field_data, date_format)
+                        output_date_format = "%d-%m-%Y"
+                        field_data = date_object.strftime(output_date_format)
+        
                 for field in setting.fields_to_divide:
                     
                     if doctype_name == field.doctype_name and field_name == field.field_name:
@@ -970,6 +975,11 @@ def insert_data(arrays, frm, to):
                 if key in replacement_map:
                     field_data = replacement_map[key]
 
+                for field in setting.date_conversion_field_names:
+                    if field_name == field.field_name and doctype_name == field.doctype_name:
+                        date_object = datetime.strptime(field_data, date_format)
+                        output_date_format = "%d-%m-%Y"
+                        field_data = date_object.strftime(output_date_format)
 
                 # doc.set(field_name, field_data)
                 for field in setting.fields_to_divide:
@@ -1007,7 +1017,7 @@ class ManifestUploadData(Document):
             shipto = int(self.shipment_number_to_index)
             chunk_size = 10  
             current_index = 0  
-            
+            date_format = self.date_format
             
             # storing_shipment_number(arrays=arrays, frm=shipfrom, to=shipto, doc=self.name)
            
@@ -1016,8 +1026,8 @@ class ManifestUploadData(Document):
                 chunk = arrays[current_index:current_index + chunk_size]                
                 
                 current_index += chunk_size
-                # insert_data(chunk,frm,to )
-                enqueue(insert_data, arrays=chunk,frm=frm, to=to, queue="default")
+                # insert_data(chunk,frm,to, date_format )
+                enqueue(insert_data, arrays=chunk,frm=frm, to=to, date_format = date_format, queue="default")
             enqueue(storing_shipment_number,arrays=arrays, frm=shipfrom, to=shipto, doc=self.name ,queue="default")
                 
             
