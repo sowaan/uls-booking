@@ -28,6 +28,7 @@ class SalesInvoicePDF(Document):
 			WHERE
 				sn.date_shipped BETWEEN %(start_date)s AND %(end_date)s 
 				AND si.customer = %(customer)s
+				AND si.docstatus = 1
 		"""
 
 		# Initialize a list for conditions
