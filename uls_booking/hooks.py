@@ -98,6 +98,7 @@ fixtures = [
                                 "custom_surcharge_incl_fuel",
                                 "custom_total_surcharges_incl_fuel",
                                 "custom_column_break_uzjnx",
+                                "custom_column_break_kwj1v",
 
                                 )
 	  	  
