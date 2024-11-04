@@ -11,7 +11,8 @@
   "date_shipped",
   "icris_number",
   "station",
-  "billing_type"
+  "billing_type",
+  "billing_term"
  ],
  "fields": [
   {
@@ -45,11 +46,16 @@
    "fieldname": "billing_type",
    "fieldtype": "Data",
    "label": "Billing Type"
+  },
+  {
+   "fieldname": "billing_term",
+   "fieldtype": "Data",
+   "label": "Billing Term"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-22 12:49:01.545216",
+ "modified": "2024-11-04 17:21:38.538203",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Shipment Number",
