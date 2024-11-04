@@ -754,6 +754,7 @@ def storing_shipment_number(arrays, frm, to, doc):
         # Check if the shipment number already exists
         existing_doc = frappe.get_value("Shipment Number", {"shipment_number": shipment})
         if existing_doc:
+            billing_term = frappe.get_value("R200000", {"shipment_number": shipment}, "billing_term_field")
             date_shipped = frappe.get_value("R200000", {"shipment_number": shipment}, "shipped_date")
             shipment_doc = frappe.get_doc("Shipment Number",shipment)
             customer = None
@@ -815,13 +816,14 @@ def storing_shipment_number(arrays, frm, to, doc):
             shipment_doc.set("station", station)
             shipment_doc.set("icris_number", icris_number)
             shipment_doc.set("billing_type", billing_type)
+            shipment_doc.set("billing_term",billing_term)
             # shipment_doc.insert()
             shipment_doc.save()
             frappe.db.commit()
                 # continue  # Skip if it already exists
         else:
             date_shipped = frappe.get_value("R200000", {"shipment_number": shipment}, "shipped_date")
-            
+            billing_term = frappe.get_value("R200000", {"shipment_number": shipment}, "billing_term_field")
             customer = None
             icris_number = None
             billing_type = None
@@ -877,6 +879,7 @@ def storing_shipment_number(arrays, frm, to, doc):
             shipment_doc = frappe.new_doc("Shipment Number")
             shipment_doc.set("shipment_number", shipment)
             shipment_doc.set("customer", customer)
+            shipment_doc.set("billing_term",billing_term)
             shipment_doc.set("date_shipped", date_shipped)
             shipment_doc.set("station", station)
             shipment_doc.set("icris_number", icris_number)
