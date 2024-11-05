@@ -86,7 +86,7 @@
    "depends_on": "eval: doc.manifest_modification_process == true;",
    "fieldname": "record_to_modify",
    "fieldtype": "Select",
-   "label": "Record To Modify",
+   "label": "DocType To Modify",
    "options": "R100000\nR200000\nR201000\nR202000\nR300000\nR400000\nR401000\nR402000\nR500000\nR600000\nR900000"
   },
   {
@@ -113,7 +113,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-05 15:35:24.468214",
+ "modified": "2024-11-05 19:10:07.731704",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Upload Data",
