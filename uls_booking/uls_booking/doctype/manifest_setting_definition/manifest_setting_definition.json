@@ -22,7 +22,9 @@
   "insurance_charges",
   "other_charges",
   "freight_charges",
-  "compensation_charges"
+  "compensation_charges",
+  "modified_definition_tab",
+  "definition"
  ],
  "fields": [
   {
@@ -132,12 +134,23 @@
    "fieldtype": "Table",
    "label": "Date Conversion Field Names",
    "options": "Date Conversion Fields"
+  },
+  {
+   "fieldname": "modified_definition_tab",
+   "fieldtype": "Tab Break",
+   "label": "Modified Definition"
+  },
+  {
+   "fieldname": "definition",
+   "fieldtype": "Table",
+   "label": "Definition",
+   "options": "r200000def"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-10-31 12:50:07.062539",
+ "modified": "2024-11-05 14:57:25.863050",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Setting Definition",
