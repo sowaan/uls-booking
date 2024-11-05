@@ -1075,7 +1075,7 @@ def insert_data(arrays, frm, to,date_format):
 
 
 
-def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to):
+def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
     setting = frappe.get_doc("Manifest Setting Definition")
     
     for line in arrays2:
@@ -1090,6 +1090,17 @@ def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to):
                 from_index = child.from_index - 1
                 to_index = child.to_index
                 field_data = line[from_index:to_index].strip()
+                for field in setting.date_conversion_field_names:
+                    if field_name == field.field_name and main_doc.record_to_modify == field.doctype_name:
+
+                        try:
+                            date_object = datetime.strptime(field_data, date_format)
+                            output_date_format = "%Y-%m-%d"
+                            field_data = date_object.strftime(output_date_format)
+
+                        except: 
+                            pass
+
                 doc.set(field_name,field_data)
                 print(field_name , "  ",field_data)
             doc.save()
@@ -1148,7 +1159,7 @@ class ManifestUploadData(Document):
                 chunk2 = arrays2[current2_index:current2_index + chunk2_size]
                 current2_index += chunk2_size
                 # modified_manifest_update(main_doc = self, arrays2 = chunk2, pkg_from = pkg_from , pkg_to= pkg_to)
-                enqueue(modified_manifest_update,main_doc = self, arrays2 = chunk2, pkg_from = pkg_from , pkg_to= pkg_to,  queue = "default")
+                enqueue(modified_manifest_update,main_doc = self, arrays2 = chunk2, pkg_from = pkg_from , pkg_to= pkg_to, date_format = self.date_format,  queue = "default")
                     
                 
             
