@@ -1079,9 +1079,9 @@ def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to):
     setting = frappe.get_doc("Manifest Setting Definition")
     
     for line in arrays2:
-        # pkg_trck = line[pkg_from:pkg_to].strip()
-        pkg_trck = "49455852868"
-        print("pkg_trck",pkg_trck,"\n\n")
+        pkg_trck = line[pkg_from:pkg_to].strip()
+        # pkg_trck = "49455852868"
+        # print("pkg_trck",pkg_trck,"\n\n")
         docl = frappe.get_list(main_doc.record_to_modify, filters={"package_tracking_number": pkg_trck })
         if docl:
             doc = frappe.get_doc(main_doc.record_to_modify , docl[0])
