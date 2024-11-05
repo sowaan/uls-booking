@@ -1072,7 +1072,40 @@ def insert_data(arrays, frm, to,date_format):
             print(doctype_name, shipment_num, "Inserting")
             doc.insert()
             doc.save()
-            
+
+
+
+def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to):
+    setting = frappe.get_doc("Manifest Setting Definition")
+    
+    for line in arrays2:
+        # pkg_trck = line[pkg_from:pkg_to].strip()
+        pkg_trck = "49455852868"
+        print("pkg_trck",pkg_trck,"\n\n")
+        docl = frappe.get_list(main_doc.record_to_modify, filters={"package_tracking_number": pkg_trck })
+        if docl:
+            doc = frappe.get_doc(main_doc.record_to_modify , docl[0])
+            for child in setting.definition:
+                field_name = child.field_name
+                from_index = child.from_index - 1
+                to_index = child.to_index
+                field_data = line[from_index:to_index].strip()
+                doc.set(field_name,field_data)
+                print(field_name , "  ",field_data)
+            doc.save()
+        else:
+            frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "Package tracking Number not found",
+                                            "error": f"""Package tracking Number:,{pkg_trck}"""
+    
+                                        }).insert()
+
+
+
+
+
+    
 
 class ManifestUploadData(Document):
     def on_submit(self):
@@ -1090,19 +1123,32 @@ class ManifestUploadData(Document):
             shipfrom = int(self.shipment_number_from_index)-1
             shipto = int(self.shipment_number_to_index)
             chunk_size = 10  
-            current_index = 0  
-            date_format = self.date_format
+            current_index = 0 
             
-            # storing_shipment_number(arrays=arrays, frm=shipfrom, to=shipto, doc=self.name)
-           
             while current_index < len(arrays):
-                
-                chunk = arrays[current_index:current_index + chunk_size]                
-                
+                chunk = arrays[current_index:current_index + chunk_size]             
                 current_index += chunk_size
-                # insert_data(chunk,frm,to, date_format )
                 enqueue(insert_data, arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
             enqueue(storing_shipment_number,arrays=arrays, frm=shipfrom, to=shipto, doc=self.name ,queue="default")
+
+
+
+        if self.manifest_modification_process and self.modified_file:
+
+            file_name2 = frappe.db.get_value("File", {"file_url": self.modified_file}, "name")
+            file_doc2 = frappe.get_doc("File", file_name2)
+            content2 = file_doc2.get_content()
+            arrays2 = content2.split('\n')
+            pkg_from = int(self.package_tracking_from_index)-1
+            pkg_to = int(self.package_tracking_to_index)-1
+            chunk2_size = 10
+            current2_index = 0
+
+            while current2_index < len(arrays2):
+                chunk2 = arrays2[current2_index:current2_index + chunk2_size]
+                current2_index += chunk2_size
+                # modified_manifest_update(main_doc = self, arrays2 = chunk2, pkg_from = pkg_from , pkg_to= pkg_to)
+                enqueue(modified_manifest_update,main_doc = self, arrays2 = chunk2, pkg_from = pkg_from , pkg_to= pkg_to,  queue = "default")
+                    
                 
             
-         

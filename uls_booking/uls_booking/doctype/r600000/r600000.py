@@ -5,7 +5,10 @@
 from frappe.model.document import Document
 import frappe
 class R600000(Document):
-    pass
+    def before_save(self):
+        self.custom_dws_dim = (float(self.package_length) * float(self.package_width) * float(self.package_height)) / 5000
+        time_str = f"{self.dws_hours:02}:{self.dws_minutes:02}:{self.dws_seconds:02}"
+        self.time_of_dws = time_str
     # def before_save(self):
     #     # Define helper functions for division outside of the if block
     #     def safe_divide_10(value):
