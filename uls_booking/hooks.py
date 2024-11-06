@@ -66,10 +66,6 @@ fixtures = [
                                 "custom_booking_date",
                                 "custom_billing_term",
                                 "custom_default_customer",
-
-
-
-
                                 "custom_duty_and_taxes_sales_invoice_uploader",
                                 "custom_duty_and_taxes_template",
                                 "custom_duty_and_taxes_invoice",
@@ -79,8 +75,22 @@ fixtures = [
                                 "custom_type",
                                 "custom_location",
                                 "custom_clearance_type",
+                                "custom_zone",
+                                "custom_strn",
+                                "custom_hs_code",
+                                "custom_shipment_billing_charges",
+                                "custom_package_type",
+                                "custom_billing_type",
+                                "custom_province",
+                                "custom_surchages_code_and_amount",
+                                "custom_surcharge_excl_fuel",
+                                "custom_total_surcharges_excl_fuel",
+                                "custom_column_break_en4jc",
+                                "custom_surcharge_incl_fuel",
+                                "custom_total_surcharges_incl_fuel",
+                                "custom_column_break_uzjnx",
+                                "custom_column_break_kwj1v",
 
-                                
                                 )
 	  	  
         ]  

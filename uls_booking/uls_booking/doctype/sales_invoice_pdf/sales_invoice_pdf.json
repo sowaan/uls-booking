@@ -1,0 +1,110 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-10-24 15:33:11.474953",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_wsps",
+  "start_date",
+  "customer",
+  "amended_from",
+  "column_break_waxl",
+  "end_date",
+  "icris_number",
+  "station",
+  "section_break_ecaf",
+  "total_invoices",
+  "sales_invoices"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_wsps",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sales Invoice PDF",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "icris_number",
+   "fieldtype": "Data",
+   "label": "Icris Number"
+  },
+  {
+   "fieldname": "column_break_waxl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "station",
+   "fieldtype": "Data",
+   "label": "Station"
+  },
+  {
+   "fieldname": "section_break_ecaf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_invoices",
+   "fieldtype": "Int",
+   "label": "Total Invoices",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoices",
+   "fieldtype": "Long Text",
+   "label": "Sales Invoices",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-10-24 16:47:30.716573",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Sales Invoice PDF",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

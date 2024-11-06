@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class ManifestData(Document):
+class ShipmentNumbersAndSalesInvoices(Document):
 	pass

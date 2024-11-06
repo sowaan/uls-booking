@@ -8,7 +8,7 @@ frappe.ui.form.on("Generate Sales Invoice", {
             // Add a custom button to the form
             frm.add_custom_button(__('Generate Sales Invoice'), function () {
                 // Show a message when the button is clicked
-              
+                
                 frappe.call({
                     method: "uls_booking.uls_booking.doctype.manifest_upload_data.manifest_upload_data.generate_sales_invoice",
                     args: { doc_str: frm.doc },

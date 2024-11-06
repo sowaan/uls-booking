@@ -9,13 +9,20 @@
   "from_index",
   "to_index",
   "attach_file",
+  "manifest_modification_process",
+  "record_to_modify",
+  "modified_file",
   "column_break_bvll",
   "shipment_number_to_index",
   "shipment_number_from_index",
-  "amended_from"
+  "amended_from",
+  "date_format",
+  "package_tracking_from_index",
+  "package_tracking_to_index"
  ],
  "fields": [
   {
+   "depends_on": "eval: doc.manifest_modification_process == false;",
    "fieldname": "attach_file",
    "fieldtype": "Attach",
    "label": "Attach File"
@@ -31,24 +38,28 @@
   },
   {
    "default": "45",
+   "depends_on": "eval: doc.manifest_modification_process == false;",
    "fieldname": "from_index",
    "fieldtype": "Int",
    "label": "From Index"
   },
   {
    "default": "50",
+   "depends_on": "eval: doc.manifest_modification_process == false;",
    "fieldname": "to_index",
    "fieldtype": "Data",
    "label": "To Index"
   },
   {
    "default": "34",
+   "depends_on": "eval: doc.manifest_modification_process == false;",
    "fieldname": "shipment_number_from_index",
    "fieldtype": "Int",
    "label": "Shipment Number From Index"
   },
   {
    "default": "44",
+   "depends_on": "eval: doc.manifest_modification_process == false;",
    "fieldname": "shipment_number_to_index",
    "fieldtype": "Int",
    "label": "Shipment Number To Index"
@@ -56,12 +67,53 @@
   {
    "fieldname": "column_break_bvll",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date_format",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Date Format",
+   "options": "%d%m%Y\n%d%b%Y\n%d-%m-%Y\n%Y-%m-%d",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "manifest_modification_process",
+   "fieldtype": "Check",
+   "label": "Manifest Modification Process"
+  },
+  {
+   "depends_on": "eval: doc.manifest_modification_process == true;",
+   "fieldname": "record_to_modify",
+   "fieldtype": "Select",
+   "label": "DocType To Modify",
+   "options": "R100000\nR200000\nR201000\nR202000\nR300000\nR400000\nR401000\nR402000\nR500000\nR600000\nR900000"
+  },
+  {
+   "depends_on": "eval: doc.manifest_modification_process == true;",
+   "fieldname": "modified_file",
+   "fieldtype": "Attach",
+   "label": "Modified File"
+  },
+  {
+   "default": "52",
+   "depends_on": "eval: doc.manifest_modification_process == true;",
+   "fieldname": "package_tracking_from_index",
+   "fieldtype": "Int",
+   "label": "Package Tracking From Index"
+  },
+  {
+   "default": "69",
+   "depends_on": "eval: doc.manifest_modification_process == true;",
+   "fieldname": "package_tracking_to_index",
+   "fieldtype": "Int",
+   "label": "Package tracking To Index"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-21 16:36:36.561804",
+ "modified": "2024-11-05 19:10:07.731704",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Upload Data",

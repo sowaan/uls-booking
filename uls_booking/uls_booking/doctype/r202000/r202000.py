@@ -6,53 +6,31 @@ from frappe.model.document import Document
 import frappe
 class R202000(Document):
 
-    def before_save(self):
-        # Define helper functions for division outside of the if block
-        def safe_divide_10(value):
-            try:
-                return float(value) / 10
-            except (ValueError, TypeError):
-                return 0.0  # Return a default value in case of error
+    # def before_save(self):
+    #     # Define helper functions for division outside of the if block
+    #     def safe_divide_10(value):
+    #         try:
+    #             return float(value) / 10
+    #         except (ValueError, TypeError):
+    #             return 0.0  # Return a default value in case of error
 
-        def safe_divide_100(value):
-            try:
-                return float(value) / 100
-            except (ValueError, TypeError):
-                return 0.0  # Return a default value in case of error
+    #     def safe_divide_100(value):
+    #         try:
+    #             return float(value) / 100
+    #         except (ValueError, TypeError):
+    #             return 0.0  # Return a default value in case of error
 
-        # Check the condition and process accordingly
-        if self.check == 0:
-            # Apply the helper functions to each relevant attribute
+    #     # Check the condition and process accordingly
+    #     if self.check == 0:
+    #         # Apply the helper functions to each relevant attribute
             
-            self.custom_expanded_1st_package_weight = safe_divide_10(self.custom_expanded_1st_package_weight)
-            self.shipper_freight_amount = safe_divide_100(self.shipper_freight_amount)
-            self.custom_pickup_compensation_amount = safe_divide_100(self.custom_pickup_compensation_amount)
-            self.custom_delivery_compensation_amount = safe_divide_100(self.custom_delivery_compensation_amount)
-            self.custom_expanded_shipment_weight = safe_divide_10(self.custom_expanded_shipment_weight)
+    #         self.custom_expanded_1st_package_weight = safe_divide_10(self.custom_expanded_1st_package_weight)
+    #         self.shipper_freight_amount = safe_divide_100(self.shipper_freight_amount)
+    #         self.custom_pickup_compensation_amount = safe_divide_100(self.custom_pickup_compensation_amount)
+    #         self.custom_delivery_compensation_amount = safe_divide_100(self.custom_delivery_compensation_amount)
+    #         self.custom_expanded_shipment_weight = safe_divide_10(self.custom_expanded_shipment_weight)
            
             
-            # Update the check attribute
-            self.check = 1
-        # setting = frappe.get_doc("Manifest Setting Definition")
-
-        # # for i in setting.manifest_setting:
-        # #     if i.record == self.name:
-        # #         field_value = getattr(self, i.field_name, None)
-        # #         if field_value == i.code:
-        # #             setattr(self, i.field_name, i.replacement)
-
-
-
-
-        # country_map = {j.code: j.country for j in setting.country_codes}
-
-        # doctype = self.doctype
-
-        # # Iterate over field names and records
-        # for field_info in setting.field_names_and_records:
-        #     if field_info.record == doctype:
-        #         field_value = getattr(self, field_info.field_name, None)
-        #         # Only set the attribute if the field value exists in the country map
-        #         if field_value in country_map:
-        #             # Directly set the country name if found
-        #             setattr(self, field_info.field_name, country_map[field_value])
+    #         # Update the check attribute
+    #         self.check = 1
+    pass

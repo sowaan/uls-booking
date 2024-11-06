@@ -8,10 +8,12 @@
  "field_order": [
   "default_company",
   "origin_country",
+  "unassigned_icris_number",
   "sales_invoice_definition",
   "surcharges",
   "compensation_table",
-  "export_and_import_conditions"
+  "export_and_import_conditions",
+  "package_type_replacement"
  ],
  "fields": [
   {
@@ -48,15 +50,27 @@
    "options": "Company"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "export_and_import_conditions",
    "fieldtype": "Table",
    "label": "Export And Import Conditions",
    "options": "Export And Import Conditions"
+  },
+  {
+   "fieldname": "unassigned_icris_number",
+   "fieldtype": "Data",
+   "label": "Unassigned Icris Number"
+  },
+  {
+   "fieldname": "package_type_replacement",
+   "fieldtype": "Table",
+   "label": "Package Type Replacement",
+   "options": "Package Type Replacement"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-14 16:24:26.858999",
+ "modified": "2024-10-25 12:11:06.359557",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice Definition",

@@ -13,7 +13,7 @@
   "shipment_type",
   "invoice_description",
   "bill_term_surcharge_indicator",
-  "split_duty_and_vat_flag",
+  "split_duty_and_vat_flag_master",
   "shipment_weight",
   "billable_weight",
   "dws_actual",
@@ -51,6 +51,7 @@
   "consignee_name",
   "consignee_building",
   "consignee_city",
+  "split_duty_and_vat_flag",
   "consignee_postal_code",
   "pricing_activitynew_doc_and_fields_section",
   "spot_rates_offered",
@@ -78,8 +79,10 @@
   "detained_status",
   "column_break_lwap",
   "reason_for_shipment_status",
-  "recovery_activity_section",
+  "f9_update",
+  "section_break_mmmm",
   "dispute_invoice_number",
+  "recovery_activity_section",
   "dispute_amount",
   "final_outcome",
   "column_break_pxjt",
@@ -135,7 +138,7 @@
   {
    "fieldname": "split_duty_and_vat_flag",
    "fieldtype": "Data",
-   "label": "Split Duty And VAT Flag"
+   "label": "Split Duty and VAT Flag"
   },
   {
    "fieldname": "shipment_weight",
@@ -159,7 +162,9 @@
   {
    "fieldname": "master_package_id",
    "fieldtype": "Data",
-   "label": "Master Package ID"
+   "in_list_view": 1,
+   "label": "Master Package ID",
+   "reqd": 1
   },
   {
    "fieldname": "destination_country",
@@ -382,8 +387,9 @@
   },
   {
    "fieldname": "abandon_reason",
-   "fieldtype": "Text",
-   "label": "Abandon Reason"
+   "fieldtype": "Select",
+   "label": "Abandon Reason",
+   "options": "\nConsignee Refused to Pay Duty & Taxed\nConsignee Refused to Receive\nIncomplete Address\nConsignee Moved"
   },
   {
    "fieldname": "package_abandon_id",
@@ -468,13 +474,13 @@
   },
   {
    "fieldname": "recovery_activity_section",
-   "fieldtype": "Section Break",
-   "label": "Recovery Activity"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "dispute_invoice_number",
-   "fieldtype": "Data",
-   "label": "Dispute Invoice Number"
+   "fieldtype": "Table",
+   "label": "Dispute Invoice Number",
+   "options": "Dispute Invoice Number"
   },
   {
    "fieldname": "dispute_amount",
@@ -532,12 +538,27 @@
    "fieldname": "credit_note_amount",
    "fieldtype": "Data",
    "label": "Credit note Amount"
+  },
+  {
+   "fieldname": "section_break_mmmm",
+   "fieldtype": "Section Break",
+   "label": "Recovery Activity"
+  },
+  {
+   "fieldname": "f9_update",
+   "fieldtype": "Small Text",
+   "label": "F9 Update"
+  },
+  {
+   "fieldname": "split_duty_and_vat_flag_master",
+   "fieldtype": "Data",
+   "label": "Split Duty And VAT Flag"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-11 15:15:00.875134",
+ "modified": "2024-11-05 12:58:09.254375",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Shipment Master Details",

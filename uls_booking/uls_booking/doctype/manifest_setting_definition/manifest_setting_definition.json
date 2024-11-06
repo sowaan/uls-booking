@@ -9,6 +9,10 @@
   "field_names_and_records",
   "doctypes_with_child_records",
   "country_and_surcharge_codes_field_names",
+  "fields_to_divide",
+  "insurance_shipment_type",
+  "origin_country",
+  "date_conversion_field_names",
   "country_codes_tab",
   "country_codes",
   "surcharges_code_excl_and_incl",
@@ -17,7 +21,10 @@
   "shipment_billing_charges",
   "insurance_charges",
   "other_charges",
-  "freight_charges"
+  "freight_charges",
+  "compensation_charges",
+  "modified_definition_tab",
+  "definition"
  ],
  "fields": [
   {
@@ -58,6 +65,7 @@
    "label": "Country Codes"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "surcharges_code_excl_and_incl",
    "fieldtype": "Table",
    "label": "Surcharges Code EXCL and INCL",
@@ -97,12 +105,52 @@
    "fieldtype": "Link",
    "label": "Freight Charges",
    "options": "Item"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "fields_to_divide",
+   "fieldtype": "Table",
+   "label": "Fields To Divide",
+   "options": "Fields To Divide"
+  },
+  {
+   "fieldname": "compensation_charges",
+   "fieldtype": "Link",
+   "label": "Compensation Charges",
+   "options": "Item"
+  },
+  {
+   "fieldname": "insurance_shipment_type",
+   "fieldtype": "Data",
+   "label": "Insurance Shipment Type"
+  },
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Data",
+   "label": "Origin Country"
+  },
+  {
+   "fieldname": "date_conversion_field_names",
+   "fieldtype": "Table",
+   "label": "Date Conversion Field Names",
+   "options": "Date Conversion Fields"
+  },
+  {
+   "fieldname": "modified_definition_tab",
+   "fieldtype": "Tab Break",
+   "label": "Modified Definition"
+  },
+  {
+   "fieldname": "definition",
+   "fieldtype": "Table",
+   "label": "Definition",
+   "options": "r200000def"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-10-01 16:10:08.573749",
+ "modified": "2024-11-05 14:57:25.863050",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Setting Definition",
@@ -111,11 +159,8 @@
   {
    "create": 1,
    "delete": 1,
-   "email": 1,
-   "print": 1,
    "read": 1,
    "role": "System Manager",
-   "share": 1,
    "write": 1
   }
  ],
