@@ -1026,7 +1026,7 @@ def insert_data(arrays, frm, to,date_format):
                         # print(field_data , field_name,"NEW")
                 docss.set(field_name, field_data)
             docss.save()
-            frappe.db.commit()
+            # frappe.db.commit()    
             print(doctype_name, shipment_num, "Updating")
         else:
             
