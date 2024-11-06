@@ -12,10 +12,13 @@
   "end_date",
   "station",
   "icris_number",
+  "sales_invoice_definition",
   "section_break_ebtp",
+  "status",
   "total_shipment_numbers",
-  "shipment_numbers",
   "amended_from",
+  "shipment_numbers_and_sales_invoices",
+  "shipment_numbers",
   "sales_invoices"
  ],
  "fields": [
@@ -47,20 +50,14 @@
   },
   {
    "fieldname": "station",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Station"
+   "label": "Station",
+   "options": "Territory"
   },
   {
    "fieldname": "section_break_ebtp",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "shipment_numbers",
-   "fieldtype": "Long Text",
-   "hidden": 1,
-   "label": "Shipment Numbers",
-   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -85,13 +82,47 @@
    "label": "Icris Number"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "total_shipment_numbers",
    "fieldtype": "Int",
-   "label": "Total Shipment Numbers"
+   "label": "Total Shipment Numbers",
+   "read_only": 1
   },
   {
+   "fieldname": "sales_invoice_definition",
+   "fieldtype": "Link",
+   "label": "Sales Invoice Definition",
+   "options": "Sales Invoice Definition",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "shipment_numbers_and_sales_invoices",
+   "fieldtype": "Table",
+   "label": "Shipment Numbers And Sales Invoices",
+   "options": "Shipment Numbers And Sales Invoices",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "label": "Status",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "shipment_numbers",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Shipment Numbers",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
    "fieldname": "sales_invoices",
    "fieldtype": "Long Text",
+   "hidden": 1,
    "label": "Sales Invoices",
    "read_only": 1
   }
@@ -99,7 +130,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-21 19:13:41.636888",
+ "modified": "2024-10-30 17:25:09.148933",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Generate Sales Invoice",

@@ -32,7 +32,16 @@
   "bypass_bag_or_container_flag",
   "expanded_package_tracking_number",
   "expanded_package_weight",
-  "check"
+  "check",
+  "shipment_tracking_status",
+  "time_of_dws",
+  "date_of_dws",
+  "package_length",
+  "package_width",
+  "package_height",
+  "dws_hours",
+  "dws_minutes",
+  "dws_seconds"
  ],
  "fields": [
   {
@@ -171,11 +180,56 @@
    "fieldtype": "Check",
    "label": "Check",
    "read_only": 1
+  },
+  {
+   "fieldname": "shipment_tracking_status",
+   "fieldtype": "Data",
+   "label": "Shipment Tracking Status"
+  },
+  {
+   "fieldname": "time_of_dws",
+   "fieldtype": "Data",
+   "label": "Time Of DWS"
+  },
+  {
+   "fieldname": "date_of_dws",
+   "fieldtype": "Date",
+   "label": "Date Of DWS"
+  },
+  {
+   "fieldname": "package_length",
+   "fieldtype": "Float",
+   "label": "Package Length"
+  },
+  {
+   "fieldname": "package_width",
+   "fieldtype": "Float",
+   "label": "Package Width"
+  },
+  {
+   "fieldname": "package_height",
+   "fieldtype": "Float",
+   "label": "Package Height"
+  },
+  {
+   "fieldname": "dws_hours",
+   "fieldtype": "Int",
+   "label": "DWS Hours"
+  },
+  {
+   "fieldname": "dws_minutes",
+   "fieldtype": "Int",
+   "label": "DWS Minutes"
+  },
+  {
+   "fieldname": "dws_seconds",
+   "fieldtype": "Int",
+   "label": "DWS Seconds"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-24 11:44:59.736594",
+ "modified": "2024-11-05 16:54:43.687764",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R600000",

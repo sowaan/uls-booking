@@ -4,30 +4,31 @@
 # import frappe
 from frappe.model.document import Document
 import frappe
-import json
 
-
-
-class GenerateSalesInvoice(Document):
-	
+class SalesInvoicePDF(Document):
 	def before_save(self):
 
 		values = {
 			"start_date": self.start_date,
 			"end_date": self.end_date,
 			"station": self.station,
-			"billing_type": self.billing_type,
-			"icris_number": self.icris_number
+			"icris_number": self.icris_number,
+			"customer": self.customer
 		}
 
 		# Begin the SQL query
 		query = """
 			SELECT 
-				shipment_number
+				si.name,
+				si.custom_shipment_number
 			FROM 
-				`tabShipment Number` as sn
+				`tabSales Invoice` as si
+			LEFT JOIN
+				`tabShipment Number` as sn ON si.custom_shipment_number = sn.name
 			WHERE
-				sn.date_shipped BETWEEN %(start_date)s AND %(end_date)s
+				sn.date_shipped BETWEEN %(start_date)s AND %(end_date)s 
+				AND si.customer = %(customer)s
+				AND si.docstatus = 1
 		"""
 
 		# Initialize a list for conditions
@@ -36,24 +37,15 @@ class GenerateSalesInvoice(Document):
 		# Add conditions dynamically based on provided values
 		if values["station"]:
 			conditions.append("sn.station = %(station)s")
-		if values["billing_type"]:
-			conditions.append("sn.billing_type = %(billing_type)s")
 		if values["icris_number"]:
 			conditions.append("sn.icris_number = %(icris_number)s")
-
+		
 		# If there are additional conditions, join them to the query
 		if conditions:
 			query += " AND " + " AND ".join(conditions)
 
 		# Execute the query with the provided values
 		results = frappe.db.sql(query, values)
-		shipment_numbers = [row[0] for row in results]
-		self.total_shipment_numbers = len(shipment_numbers)
-		self.shipment_numbers = ', '.join(shipment_numbers)
-		for i in shipment_numbers:
-			self.append('shipment_numbers_and_sales_invoices', {
-				'shipment_number': i  # Replace 'shipment_number' with the actual field name in your child table
-			})
-		
-	
-	 
+		sales_invoices = [row[0] for row in results]
+		self.total_invoices = len(sales_invoices)
+		self.sales_invoices = ', '.join(sales_invoices)

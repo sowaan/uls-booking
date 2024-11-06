@@ -1,0 +1,54 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-09-26 11:08:54.133362",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "shipment_billing_term",
+  "case",
+  "country",
+  "document_amount",
+  "shipping_billing_type"
+ ],
+ "fields": [
+  {
+   "fieldname": "shipment_billing_term",
+   "fieldtype": "Data",
+   "label": "Shipment Billing Term"
+  },
+  {
+   "fieldname": "case",
+   "fieldtype": "Data",
+   "label": "Case"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Data",
+   "label": "Country"
+  },
+  {
+   "fieldname": "document_amount",
+   "fieldtype": "Data",
+   "label": "Document Amount"
+  },
+  {
+   "fieldname": "shipping_billing_type",
+   "fieldtype": "Data",
+   "label": "Shipping Billing Type"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-10-22 18:05:52.148350",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Compensation Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
