@@ -1,7 +1,253 @@
+
+
+
 {% extends "templates/web.html" %}
 
 {% block page_content %}
-<h1>{{ title }}</h1>
+
+
+
+<div class="container my-4" style="font-size: 9pt;">
+
+
+    <h5 class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            {{ title }}
+            {% if document_status == 'Draft' %}
+                <span class="indicator-pill green">Draft</span>
+            {% elif document_status == 'Submitted' %}
+                <span class="indicator-pill blue">Submitted</span>
+            {% elif document_status == 'Request For Cancel' %}
+                <span class="indicator-pill orange">Request For Cancel</span>    
+            {% elif document_status == 'Cancelled' %}
+                <span class="indicator-pill red">Cancelled</span>
+            {% endif %}
+        </div>
+        {% if docstatus == 1 and document_status == 'Submitted' %}
+            <button type="button" onclick="cancelShipment('{{ name|escape }}')" class="btn btn-danger btn-sm">Cancel</button>
+        {% endif %}
+    </h5>
+
+    <hr>
+
+
+    <div class="text-left">
+        <h6><b>SHIPMENT</b></h6>
+    </div>
+
+
+    <div class="row">
+
+
+
+        <div class="col-md-4">
+            <!-- <h6><u>CUSTOMER</u></h6> -->
+            <div class="mb-2">
+                <label><b>Customer Name:</b></label>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ customer }}" readonly>
+            </div>
+            <div class="mb-2">
+                <label><b>ICRIS Account:</b></label>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ icris_account }}" readonly>
+            </div>
+            <div class="mb-2">
+                <label><b>Customer Country:</b></label>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ shipper_country }}" readonly>
+            </div>
+        </div>
+
+
+        <div class="col-md-4">
+            <!-- <h6><u>SHIP FROM</u></h6> -->
+            <div class="mb-2">
+                <label><b>Ship From:</b></label>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ consignee_company_name }}" readonly>
+            </div>
+            <div class="mb-2">
+                <label><b>Ship From Country:</b></label>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ consignee_country }}" readonly>
+            </div>
+            <div class="mb-2">
+                <label><b>Ship From City:</b></label>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ consignee_city }}" readonly>
+            </div>
+        </div>
+
+
+        <div class="col-md-4">
+            <div class="mb-2">
+                <label><b>Ship To:</b></label>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ name1 }}" readonly>
+            </div>
+            <div class="mb-2">
+                <label><b>Ship To Country:</b></label>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ country }}" readonly>
+            </div>
+            <div class="mb-2">
+                <label><b>Ship To City:</b></label>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ city }}" readonly>
+            </div>
+        </div>
+        
+    </div>
+
+    <hr>
+
+
+    <div class="text-left">
+        <h6><b>PARCEL INFORMATION</b></h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered text-center">
+            <thead class="table-light">
+                <tr>
+                    <th>Package Type</th>
+                    <th>Total Identical Parcels</th>
+                    <th>Weight Per Parcel (KG)</th>
+                    <th>Total Weight (KG)</th>
+                    <th>Length (CM)</th>
+                    <th>Width (CM)</th>
+                    <th>Height (CM)</th>
+                    <th>Actual Weight Per Parcel (KG)</th>
+                    <th>Total Actual Weight (KG)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in parcel_information %}
+                <tr>
+                    <td><input type="text" class="form-control bg-light border-0 text-center rounded" value="{{ row.packaging_type }}" readonly></td>
+                    <td><input type="text" class="form-control bg-light border-0 text-center rounded" value="{{ row.total_identical_parcels }}" readonly></td>
+                    <td><input type="text" class="form-control bg-light border-0 text-center rounded" value="{{ row.weight_per_parcel }}" readonly></td>
+                    <td><input type="text" class="form-control bg-light border-0 text-center rounded" value="{{ row.total_weight }}" readonly></td>
+                    <td><input type="text" class="form-control bg-light border-0 text-center rounded" value="{{ row.length }}" readonly></td>
+                    <td><input type="text" class="form-control bg-light border-0 text-center rounded" value="{{ row.width }}" readonly></td>
+                    <td><input type="text" class="form-control bg-light border-0 text-center rounded" value="{{ row.height }}" readonly></td>
+                    <td><input type="text" class="form-control bg-light border-0 text-center rounded" value="{{ row.actual_weight_per_parcel }}" readonly></td>
+                    <td><input type="text" class="form-control bg-light border-0 text-center rounded" value="{{ row.actual_weight }}" readonly></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <hr><br>
+
+
+
+    <div class="row">
+        <div class="col-md-4">
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-center">Tracking Numbers</th>
+                        <th class="text-center">Labels</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in tracking_numbers_and_images %}
+                    <tr>
+                        <td><input type="text" class="form-control bg-light border-0 text-center rounded" value="{{ row.tracking_number }}" readonly></td>
+                        <td><a href="{{ row.label }}" target="_blank">
+                            <img src="{{ row.label }}" alt="Label Image" class="img-thumbnail" style="max-width: 50px; max-height: 50px;"></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+        <div class="col-md-4">
+            <div class="mb-2"><b>SHIPMENT NUMBER:</b>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ shipment_identification_number }}" readonly>
+            </div>
+            <div class="mb-2"><b>Shipment Status:</b>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ current_status }}" readonly>
+            </div>
+            <div class="mb-2"><b>Status Code:</b>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ current_status_code }}" readonly>
+            </div>
+        </div>
+
+
+        <div class="col-md-4">
+            
+            
+            
+            <div class="mb-2"><b>SERVICE TYPE:</b>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ service_type }}" readonly>
+            </div>
+            <div class="mb-2"><b>ZONE:</b>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ zone }}" readonly>
+            </div>
+            <div class="mb-2"><b>AMOUNT ($):</b>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ amount_after_discount }}" readonly>
+            </div>           
+        </div>
+        
+
+        
+    </div>
+
+    <!-- <div class="row">
+
+        <div class="col-md-7">
+        </div>
+        
+        
+        <div class="col-md-5">
+            <div class="mb-2"><b>SERVICE TYPE:</b>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ service_type }}" readonly></div>
+            <div class="mb-2"><b>ZONE:</b>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ zone }}" readonly></div>
+            <div class="mb-2"><b>AMOUNT:</b>
+                <input type="text" class="form-control bg-light border-0 rounded" value="{{ amount_after_discount }}" readonly></div>
+        </div>
+    </div> -->
+
+</div>
+
+
+<script>
+    async function cancelShipment(name) {
+
+
+        await frappe.call({
+                    method: "uls_booking.uls_booking.api.api.request_for_cancel",
+                    args: {
+                        name : name ,
+                    },
+                    async: true,
+                    callback: function (r) {
+                        if (r.message) {
+                            token = r.message ;
+                            location.reload();
+                        }
+                    },
+        });
+        
+    }
+</script>
+
+
+
+
 {% endblock %}
 
-<!-- this is a sample default web page template -->
+this is a sample default web page template
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

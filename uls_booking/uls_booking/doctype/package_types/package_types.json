@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "package_type",
+  "code",
   "column_break_ihvl",
   "package",
   "section_break_wbgl",
@@ -38,11 +39,17 @@
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description"
+  },
+  {
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "label": "Code",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-18 19:05:39.435918",
+ "modified": "2024-10-29 12:36:45.929122",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Package Types",

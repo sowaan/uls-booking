@@ -1,4 +1,71 @@
-<div>
+<!-- <div>
 	<a href="{{ doc.route }}">{{ doc.title or doc.name }}</a>
-</div>
+</div> -->
 <!-- this is a sample default list template -->
+
+
+
+
+<!-- <table class="table table-striped" style="font-size:10pt; table-layout: auto; width: 100%;">
+    <tbody>
+        <tr>
+            <td class="p-1" style="width: 15%;">
+                <a href="{{ doc.route }}" class="text-primary font-weight-bold">{{ doc.title or doc.name }}</a>
+            </td>
+            <td class="p-1 text-muted" style="width: 15%;">
+                <p class="m-0">{{ doc.posting_date }}</p>
+            </td>
+            <td class="p-1" style="width: 15%;">
+                <p class="m-0">{{ doc.service_type }}</p>
+            </td>
+            <td class="p-1 text-left" style="width: 15%;">
+                {% if doc.document_status == 'Draft' %}
+                <span class="indicator-pill green">Draft</span>
+                {% elif doc.document_status == 'Submitted' %}
+                <span class="indicator-pill blue">Submitted</span>
+                {% elif doc.document_status == 'Request For Cancel' %}
+                <span class="indicator-pill orange">Request For Cancel</span>
+                {% elif doc.document_status == 'Cancelled' %}
+                <span class="indicator-pill red">Cancelled</span>
+                {% endif %}
+            </td>
+            <td class="p-1 text-muted" style="width: 40%;">
+                <p class="m-0">{{ doc.current_status }}</p>
+            </td>
+        </tr>
+    </tbody>
+</table> -->
+
+
+<div class="container-fluid" style="font-size:10pt; width: 100%;">
+    <div class="row table-striped" style="background-color: #F2F2F2; margin-bottom: 7px; border-top: 2px solid #e9e9e9;"> <!-- Adjust margin-bottom as needed -->
+        <div class="col p-1" style="flex: 0 0 15%; max-width: 15%;">
+            <a href="{{ doc.route }}" class="text-primary font-weight-bold">{{ doc.title or doc.name }}</a>
+        </div>
+        <div class="col p-1 text-muted" style="flex: 0 0 15%; max-width: 15%;">
+            <p class="m-0">{{ doc.posting_date }}</p>
+        </div>
+        <div class="col p-1" style="flex: 0 0 15%; max-width: 15%;">
+            <p class="m-0">{{ doc.service_type }}</p>
+        </div>
+        <div class="col p-1 text-left" style="flex: 0 0 15%; max-width: 15%;">
+            {% if doc.document_status == 'Draft' %}
+            <span class="indicator-pill green">Draft</span>
+            {% elif doc.document_status == 'Submitted' %}
+            <span class="indicator-pill blue">Submitted</span>
+            {% elif doc.document_status == 'Request For Cancel' %}
+            <span class="indicator-pill orange">Request For Cancel</span>
+            {% elif doc.document_status == 'Cancelled' %}
+            <span class="indicator-pill red">Cancelled</span>
+            {% endif %}
+        </div>
+        <div class="col p-1 text-muted" style="flex: 0 0 40%; max-width: 40%;">
+            <p class="m-0">{{ doc.current_status }}</p>
+        </div>
+    </div>
+</div>
+
+
+
+
+

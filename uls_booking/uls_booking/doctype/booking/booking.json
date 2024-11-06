@@ -107,18 +107,26 @@
   "mode_of_transportation",
   "balance_credit_limit_before_shipment",
   "invoice_submitted",
+  "booking_status",
+  "document_status",
   "column_break_otjo",
   "service_type",
+  "service_type_code",
   "item",
   "estimated_ship_date",
   "balance_credit_limit_after_shipment",
   "tracking_number_section",
   "shipment_identification_number",
-  "column_break_gmah",
-  "tracking_number",
-  "section_break_rvxq",
   "tracking_numbers_and_images",
-  "amended_from"
+  "section_break_jasc",
+  "current_status",
+  "column_break_ltia",
+  "current_status_code",
+  "section_break_rvxq",
+  "amended_from",
+  "tab_5_tab",
+  "error_logs_section",
+  "shipping_error_log"
  ],
  "fields": [
   {
@@ -221,8 +229,7 @@
    "fieldname": "shipper_postal_code",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Customer Postal Code",
-   "reqd": 1
+   "label": "Customer Postal Code"
   },
   {
    "fieldname": "consignee_section",
@@ -233,27 +240,27 @@
    "depends_on": "eval: doc.is_customer1 == false ;",
    "fieldname": "consignee_company_name",
    "fieldtype": "Data",
-   "label": "Name",
+   "label": "Ship From Name",
    "mandatory_depends_on": "eval: doc.is_customer1 == false ;"
   },
   {
    "depends_on": "eval: doc.is_customer1 == false ;",
    "fieldname": "consignee_address",
    "fieldtype": "Data",
-   "label": "Address",
+   "label": "Ship From Address",
    "mandatory_depends_on": "eval: doc.is_customer1 == false ;"
   },
   {
    "depends_on": "eval: doc.is_customer1 == false ;",
    "fieldname": "consignee_email",
    "fieldtype": "Data",
-   "label": "Email"
+   "label": "Ship From Email"
   },
   {
    "depends_on": "eval: doc.is_customer1 == false ;",
    "fieldname": "consignee_phone",
    "fieldtype": "Data",
-   "label": "Phone",
+   "label": "Ship From Phone",
    "mandatory_depends_on": "eval: doc.is_customer1 == false ;"
   },
   {
@@ -264,7 +271,7 @@
    "depends_on": "eval: doc.is_customer1 == false ;",
    "fieldname": "consignee_country",
    "fieldtype": "Link",
-   "label": "Country",
+   "label": "Ship From Country",
    "mandatory_depends_on": "eval: doc.is_customer1 == false ;",
    "options": "Country"
   },
@@ -272,7 +279,7 @@
    "depends_on": "eval: doc.is_customer1 == false ;",
    "fieldname": "consignee_city",
    "fieldtype": "Data",
-   "label": "City",
+   "label": "Ship From City",
    "mandatory_depends_on": "eval: doc.is_customer1 == false ;",
    "options": "City"
   },
@@ -280,7 +287,7 @@
    "depends_on": "eval: doc.is_customer1 == false ;",
    "fieldname": "consignee_postal_code",
    "fieldtype": "Data",
-   "label": "Postal Code",
+   "label": "Ship From Postal Code",
    "mandatory_depends_on": "eval: doc.is_customer1 == false ;"
   },
   {
@@ -607,6 +614,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "default": "Air Courier",
    "fieldname": "mode_of_transportation",
    "fieldtype": "Link",
    "label": "Mode of Transportation",
@@ -637,6 +645,7 @@
    "default": "0",
    "fieldname": "invoice_submitted",
    "fieldtype": "Check",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Invoice Submitted",
    "read_only": 1
@@ -679,11 +688,12 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "tracking_numbers_and_images",
    "fieldtype": "Table",
-   "hidden": 1,
    "label": "Tracking Numbers And Images",
-   "options": "Trackings"
+   "options": "Trackings",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -724,6 +734,7 @@
    "depends_on": "eval: doc.is_customer1 == false ;",
    "fieldname": "is_customer",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Customer"
   },
   {
@@ -731,55 +742,56 @@
    "depends_on": "eval: doc.is_customer == false ;",
    "fieldname": "is_customer1",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Customer"
   },
   {
    "depends_on": "eval: doc.is_customer == false ;",
    "fieldname": "name1",
    "fieldtype": "Data",
-   "label": "Name",
+   "label": "Ship To Name",
    "mandatory_depends_on": "eval: doc.is_customer == false ;"
   },
   {
    "depends_on": "eval: doc.is_customer == false ;",
    "fieldname": "attention_name",
    "fieldtype": "Data",
-   "label": "Attention Name",
+   "label": "Ship To Attention Name",
    "mandatory_depends_on": "eval: doc.is_customer == false ;"
   },
   {
    "depends_on": "eval: doc.is_customer == false ;",
    "fieldname": "phone",
    "fieldtype": "Data",
-   "label": "Phone",
+   "label": "Ship To Phone",
    "mandatory_depends_on": "eval: doc.is_customer == false ;"
   },
   {
    "depends_on": "eval: doc.is_customer == false ;",
    "fieldname": "ship_to_address",
    "fieldtype": "Data",
-   "label": "Address",
+   "label": "Ship To Address",
    "mandatory_depends_on": "eval: doc.is_customer == false ;"
   },
   {
    "depends_on": "eval: doc.is_customer == false ;",
    "fieldname": "city",
    "fieldtype": "Data",
-   "label": "City",
+   "label": "Ship To City",
    "mandatory_depends_on": "eval: doc.is_customer == false ;"
   },
   {
    "depends_on": "eval: doc.is_customer == false ;",
    "fieldname": "postal_code",
    "fieldtype": "Data",
-   "label": "Postal Code",
+   "label": "Ship To Postal Code",
    "mandatory_depends_on": "eval: doc.is_customer == false ;"
   },
   {
    "depends_on": "eval: doc.is_customer == false ;",
    "fieldname": "country",
    "fieldtype": "Link",
-   "label": "Country",
+   "label": "Ship To Country",
    "mandatory_depends_on": "eval: doc.is_customer == false ;",
    "options": "Country"
   },
@@ -787,7 +799,7 @@
    "depends_on": "eval: doc.is_customer1 == false ;",
    "fieldname": "attention_name1",
    "fieldtype": "Data",
-   "label": "Attention Name",
+   "label": "Ship From Attention Name",
    "mandatory_depends_on": "eval: doc.is_customer1 == false ;"
   },
   {
@@ -795,7 +807,7 @@
    "fetch_from": "country.code",
    "fieldname": "country_code",
    "fieldtype": "Data",
-   "label": "Country Code",
+   "label": "Ship To Country Code",
    "mandatory_depends_on": "eval: doc.is_customer == false ;",
    "read_only": 1
   },
@@ -803,7 +815,7 @@
    "depends_on": "eval: doc.is_customer1 == false ;",
    "fieldname": "fax1",
    "fieldtype": "Data",
-   "label": "Fax",
+   "label": "Ship From Fax",
    "mandatory_depends_on": "eval: doc.is_customer1 == false ;"
   },
   {
@@ -811,7 +823,7 @@
    "fetch_from": "consignee_country.code",
    "fieldname": "country_code_ship_from",
    "fieldtype": "Data",
-   "label": "Country Code",
+   "label": "Ship From Country Code",
    "mandatory_depends_on": "eval: doc.is_customer1 == false ;",
    "read_only": 1
   },
@@ -819,7 +831,7 @@
    "depends_on": "eval: doc.is_customer == false ;",
    "fieldname": "state_province_code",
    "fieldtype": "Data",
-   "label": "State Province Code",
+   "label": "Ship To State Province Code",
    "mandatory_depends_on": "eval: doc.is_customer == false ;"
   },
   {
@@ -832,7 +844,7 @@
   {
    "fieldname": "tracking_number_section",
    "fieldtype": "Section Break",
-   "label": "Tracking"
+   "label": "Tracking Numbers"
   },
   {
    "allow_on_submit": 1,
@@ -842,14 +854,68 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_gmah",
+   "fieldname": "section_break_jasc",
+   "fieldtype": "Section Break",
+   "label": "Shipment Status"
+  },
+  {
+   "fieldname": "column_break_ltia",
    "fieldtype": "Column Break"
   },
   {
    "allow_on_submit": 1,
-   "fieldname": "tracking_number",
+   "fieldname": "current_status",
    "fieldtype": "Data",
-   "label": "Tracking Number",
+   "label": "Current Status",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "current_status_code",
+   "fieldtype": "Data",
+   "label": "Current Status Code",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "service_type.code",
+   "fieldname": "service_type_code",
+   "fieldtype": "Data",
+   "label": "Service Type Code",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Not Completed",
+   "fieldname": "booking_status",
+   "fieldtype": "Select",
+   "label": "Booking Status",
+   "options": "Not Completed\nCompleted",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "document_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Document Status",
+   "options": "Draft\nSubmitted\nRequest For Cancel\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_5_tab",
+   "fieldtype": "Tab Break",
+   "label": "Error Logs"
+  },
+  {
+   "fieldname": "error_logs_section",
+   "fieldtype": "Section Break",
+   "label": "Error Logs"
+  },
+  {
+   "fieldname": "shipping_error_log",
+   "fieldtype": "Data",
+   "label": "Shipping Error Log",
    "read_only": 1
   }
  ],
@@ -857,7 +923,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-21 15:11:49.012288",
+ "modified": "2024-11-05 17:59:20.013162",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Booking",
