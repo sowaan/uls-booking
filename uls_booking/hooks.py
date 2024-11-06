@@ -32,25 +32,9 @@ fixtures = [
                                 "custom_dutytax_forwarding_surcharge",
                                 "custom_insurance_of_declared_value",
                                 "custom_over_maximum_limit",
-                                "custom__allow_delivery_confirmation_adult_signature",
-
-                                "custom_express_plus_exp",
-                                "custom_express",
-                                "custom_express_saver",
-                                "custom_expedited",
-                                "custom_express_freight",
-                                "custom_express_freight_midday",
-
-
-
 
                                 
-                                "custom_express_plus",
-                                "custom_express_imp",
-                                "custom_express_saver_imp",
-                                "custom_expedited_imp",
-                                "custom_express_freight_imp",
-
+                                
 
                                 "custom_service_types",
                                 "custom_consignee_number",
@@ -88,6 +72,13 @@ fixtures = [
 
                                 "custom_duty_and_taxes_sales_invoice_uploader",
                                 "custom_duty_and_taxes_template",
+                                "custom_duty_and_taxes_invoice",
+                                "custom_consignee_building",
+                                "custom_consignee_street",
+                                "custom_mawb_number",
+                                "custom_type",
+                                "custom_location",
+                                "custom_clearance_type",
 
                                 
                                 )
@@ -250,32 +241,32 @@ fixtures = [
 # 	}
 # }
 
-# doc_events = {
-# 	"Sales Invoice": {
-# 		"before_save": "method",
-# 	}
-# }
+doc_events = {
+	"Customer": {
+		"before_save": "uls_booking.uls_booking.api.api.check_user_permission",
+	}
+}
 
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"uls_booking.tasks.all"
-# 	],
+scheduler_events = {
+#	 "all": [
+#		 "uls_booking.tasks.daily"
+#	 ],
 # 	"daily": [
 # 		"uls_booking.tasks.daily"
 # 	],
-# 	"hourly": [
-# 		"uls_booking.tasks.hourly"
-# 	],
+	"hourly": [
+		"uls_booking.uls_booking.api.api.tracking_shipments"
+	],
 # 	"weekly": [
 # 		"uls_booking.tasks.weekly"
 # 	],
 # 	"monthly": [
 # 		"uls_booking.tasks.monthly"
 # 	],
-# }
+}
 
 # Testing
 # -------

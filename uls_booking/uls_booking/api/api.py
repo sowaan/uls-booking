@@ -6,6 +6,7 @@ import json
 from frappe.model.mapper import get_mapped_doc
 import requests
 import base64
+from frappe import _
 
 
 
@@ -587,15 +588,9 @@ def generate_token() :
 
 
 
-
-
-
-
-
 @frappe.whitelist()
 def create_shipment(token , booking_name) :
 
-    # frappe.msgprint("Token = " + str(token) + " " + "Booking = " + str(booking_name))
     booking_doc = frappe.get_doc("Booking", booking_name)
     booking_api_settings_doc = frappe.get_doc("Booking API Settings")
 
@@ -607,18 +602,11 @@ def create_shipment(token , booking_name) :
     version = booking_api_settings_doc.version
 
     url = f"{base_url}/api/shipments/{version}/ship"
-    # url = f"https://wwwcie.ups.com/api/shipments/{version}/ship"
-    # url = f"https://onlinetools.ups.com/api/shipments/{version}/ship"
 
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {token}',
-        # 'transId': 'string',
-        # 'transactionSrc': 'testing'
     }
-
-
-
 
 
     # Shipper Info
@@ -626,8 +614,8 @@ def create_shipment(token , booking_name) :
     shipper_name = booking_doc.customer_name
     shipper_tax = frappe.db.get_value("Customer", booking_doc.customer , "tax_id")
     shipper_phone = frappe.db.get_value("Address" , booking_doc.address , "phone" )
-    # shipper_number = booking_doc.icris_account
-    shipper_number = '89R881',
+    shipper_number = booking_doc.icris_account
+    # shipper_number = '89R881',
     fax_number = frappe.db.get_value("Address" , booking_doc.address , "fax" )
     shipper_add_line = booking_doc.shipper_address
     shipper_city = booking_doc.shipper_city
@@ -681,37 +669,37 @@ def create_shipment(token , booking_name) :
 
 
     package_array = []
+    pkg_nmbr = 0
 
     for row in booking_doc.parcel_information :
-        package = {
-                        "Description": 'Package 1',
-                        "Packaging": {
-                            "Code": '02',
-                            "Description": row.packaging_type
-                        },
-                        "Dimensions": {
-                            "UnitOfMeasurement": {
-                                "Code": 'CM',
-                                "Description": 'Centimeters'
+        for i in range(0,int(row.total_identical_parcels)) :
+            pkg_nmbr = pkg_nmbr + 1
+            package = {
+                            "Description": 'Package '+ str(pkg_nmbr) ,
+                            "Packaging": {
+                                "Code": row.code,
+                                "Description": row.packaging_type
                             },
-                            "Length": str(row.length),
-                            "Width": str(row.width),
-                            "Height": str(row.height)
-                        },
-                        "PackageWeight": {
-                            "UnitOfMeasurement": {
-                                "Code": 'KGS',
-                                "Description": 'Kilograms'
+                            "Dimensions": {
+                                "UnitOfMeasurement": {
+                                    "Code": 'CM',
+                                    "Description": 'Centimeters'
+                                },
+                                "Length": str(row.length),
+                                "Width": str(row.width),
+                                "Height": str(row.height)
                             },
-                            "Weight": str(row.actual_weight)
-                        }
-                  }
+                            "PackageWeight": {
+                                "UnitOfMeasurement": {
+                                    "Code": 'KGS',
+                                    "Description": 'Kilograms'
+                                },
+                                "Weight": str(row.actual_weight_per_parcel)
+                            }
+                    }
 
-        package_array.append(package)            
-
-
-
-     
+            package_array.append(package)
+        
 
     body = {
         "ShipmentRequest": {
@@ -773,7 +761,7 @@ def create_shipment(token , booking_name) :
                     }
                 },
                 "Service": {
-                    "Code": '65',
+                    "Code": booking_doc.service_type_code,
                     "Description": 'Express'
                 },
                 "Package": package_array
@@ -788,19 +776,213 @@ def create_shipment(token , booking_name) :
         }
     }
 
-
-
     response = requests.post(url, headers=headers, params=query, json=body)
 
     data = response.json()
 
-    if data['ShipmentResponse']['ShipmentResults']['ShipmentIdentificationNumber'] :
-        shipment_identification_number = data['ShipmentResponse']['ShipmentResults']['ShipmentIdentificationNumber']
-        frappe.db.set_value("Booking", booking_doc.name, "shipment_identification_number", shipment_identification_number)
+    if 'response' in data and 'errors' in data['response']:
+        error_message = data['response']['errors'][0]['message']
+        booking_doc.shipping_error_log = error_message
+        booking_doc.save()
+        frappe.db.commit()
+        frappe.throw(f"Shipment creation failed: {error_message}")
+
+    else :    
+        return data
+
+   
     
-    if data['ShipmentResponse']['ShipmentResults']['PackageResults']['TrackingNumber'] :
-        tracking_number = data['ShipmentResponse']['ShipmentResults']['PackageResults']['TrackingNumber']
-        frappe.db.set_value("Booking", booking_doc.name, "tracking_number", tracking_number)
+
+
+
+
+
+
+@frappe.whitelist()
+def label_recovery(token, booking_name) :
+    	
+    token = generate_token()
+
+    version = "v1"
+    url = "https://onlinetools.ups.com/api/labels/" + version + "/recovery"
+
+    payload = {
+    "LabelRecoveryRequest": {
+        "LabelDelivery": {
+        "LabelLinkIndicator": "",
+        "ResendEmailIndicator": ""
+        },
+        "LabelSpecification": {
+        "HTTPUserAgent": "Mozilla/4.5",
+        "LabelImageFormat": {
+            "Code": "ZPL"
+        },
+        "LabelStockSize": {
+            "Height": "6",
+            "Width": "4"
+        }
+        },
+        "Request": {
+        "RequestOption": "Non_Validate",
+        "SubVersion": "1903",
+        "TransactionReference": {
+            "CustomerContext": ""
+        }
+        },
+        "TrackingNumber": "1Z89R8810405766006",
+        "Translate": {
+        "Code": "01",
+        "DialectCode": "US",
+        "LanguageCode": "eng"
+        }
+    }
+    }
+
+    headers = {
+    "Content-Type": "application/json",
+    "transId": "string",
+    "transactionSrc": "testing",
+    "Authorization": "Bearer " + token
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+
+    data = response.json()
+    frappe.msgprint(str(data))
+   
+
+
+@frappe.whitelist()
+def tracking(token, shipment_number) :
+
+
+    booking_api_settings_doc = frappe.get_doc("Booking API Settings")
+    inquiry_number = shipment_number
+    version = booking_api_settings_doc.version
+    base_url = booking_api_settings_doc.base_url
+
+    url = base_url + "/api/track/" + version + "/details/" + inquiry_number
+
+    query = {
+    "locale": "en_US",
+    "returnSignature": "false",
+    "returnMilestones": "false",
+    "returnPOD": "false"
+    }
+
+    headers = {
+    "transId": "string",
+    "transactionSrc": "testing",
+    "Authorization": f"Bearer {token}"
+    }
+
+    response = requests.get(url, headers=headers, params=query)
+
+    data = response.json()
+    return data
+
+
+
+@frappe.whitelist()
+def cancel_shipment(token , booking_name) :
+
+
+    booking_api_settings_doc = frappe.get_doc("Booking API Settings")
+    booking_doc = frappe.get_doc("Booking" , booking_name)
+
+
+    version = booking_api_settings_doc.version
+    shipment_identification_number = frappe.db.get_value("Booking",booking_name,"shipment_identification_number")
+
+
+    url = booking_api_settings_doc.base_url + "/api/shipments/" + version + "/void/cancel/" + shipment_identification_number
+    headers = {
+    'Content-Type': 'application/json',
+    "Authorization": f'Bearer {token}'
+    }
+
+    response = requests.delete(url, headers=headers)
+
+    data = response.json()
+
+
+@frappe.whitelist()
+def tracking_shipments() :
+    
+    booking_list = frappe.db.get_all("Booking",
+                        filters={
+                            'docstatus' : 1 ,
+                            'booking_status' : 'Not Completed' ,
+                        })
+
+    if booking_list :
+        for booking in booking_list :
+            
+            token = generate_token()
+            inq_number = frappe.db.get_value("Booking",booking.name,"shipment_identification_number")                    
+            data = tracking(token , inq_number)
+
+            shipment_data = data.get('trackResponse', {}).get('shipment', [{}])[0].get('package', [{}])[0]
+
+            current_status = shipment_data.get('currentStatus', {}).get('description')
+            if current_status:
+                frappe.db.set_value("Booking", booking.name, "current_status", current_status)
+
+            current_status_code = shipment_data.get('currentStatus', {}).get('code')
+            if current_status_code:
+                frappe.db.set_value("Booking", booking.name, "current_status_code", current_status_code)
+
+
+@frappe.whitelist()
+def request_for_cancel(name) :
+    frappe.db.set_value("Booking" , name , "document_status" , "Request For Cancel")
+    return 1
+
+
+
+@frappe.whitelist()
+def check_user_permission(doc, method=None) :
+
+    usrs = []
+    for row in doc.portal_users :
+        
+        usrs.append(row.user)
+        res = frappe.db.exists({"doctype": "User Permission", "user": row.user , "allow" : "Customer" , "for_value" : doc.name , "apply_to_all_doctypes" : 1})
+        if not res :
+            # frappe.msgprint("kon talha")
+            us_p_doc = frappe.new_doc("User Permission")
+            us_p_doc.user = row.user
+            us_p_doc.allow = "Customer"
+            us_p_doc.for_value = doc.name
+            us_p_doc.apply_to_all_doctypes = 1
+            us_p_doc.insert()
+
+
+
+    us_p_list = frappe.db.get_list("User Permission",
+                    filters={
+                        "allow" : "Customer" ,
+                        "for_value" : doc.name ,
+                        "apply_to_all_doctypes" : 1 ,
+                    },
+                    fields=["name","user"]) 
+
+    if us_p_list :
+        
+        for rec in us_p_list :
+            if rec.user not in usrs :
+                frappe.delete_doc('User Permission', rec.name)
+
+            
+
+        
+        
+
+
+
+
+
+
 
 
 

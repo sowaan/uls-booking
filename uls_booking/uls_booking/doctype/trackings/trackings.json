@@ -11,9 +11,12 @@
  ],
  "fields": [
   {
+   "allow_on_submit": 1,
    "fieldname": "tracking_number",
    "fieldtype": "Data",
-   "label": "Tracking Number"
+   "in_list_view": 1,
+   "label": "Tracking Number",
+   "read_only": 1
   },
   {
    "fieldname": "label",
@@ -24,7 +27,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-07-18 18:47:15.687944",
+ "modified": "2024-10-24 11:00:05.908027",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Trackings",

@@ -135,6 +135,21 @@ class DutyandTaxesSalesInvoiceUploader(Document):
 
 			billing_term = r2_list[0].billing_term_field
 			customer = None
+			attn_name = None
+			consignee_building = None
+			consignee_street = None
+			consignee_city = None
+			consignee_phone = None
+
+			r4_list = frappe.db.get_list("R400000",
+							filters={
+								'shipment_number' : row.shipment_number ,
+							},
+							fields = ["name","consignee_number","consignee_contact_name","consignee_building","consignee_street","consignee_city","consignee_phone_number"],
+				          )
+
+
+
 			if billing_term == dtt_settings_doc.billing_term_for_cod_service_provider :
 				customer = dtt_settings_doc.cod_service_provider_customer
 
@@ -142,12 +157,7 @@ class DutyandTaxesSalesInvoiceUploader(Document):
 				customer = dtt_settings_doc.ups_shipment_customer
 			
 			elif billing_term == dtt_settings_doc.billing_term_for_corporate_customer :
-				r4_list = frappe.db.get_list("R400000",
-							filters={
-								'shipment_number' : row.shipment_number ,
-							},
-							fields = ["name","consignee_number"],
-				          )
+				
 				if not r4_list :
 					row.logs = "No respected record found in R400000 for Corporate Customer."
 					continue
@@ -155,8 +165,6 @@ class DutyandTaxesSalesInvoiceUploader(Document):
 				consignee_number = r4_list[0].consignee_number
 				if not consignee_number :
 					customer = dtt_settings_doc.unassign_customer
-					# row.logs = "Consignee Number not found in R400000 for Corporate Customer."
-					# continue
 
 
 				else :
@@ -169,8 +177,6 @@ class DutyandTaxesSalesInvoiceUploader(Document):
 
 					if not icr_list :
 						customer = dtt_settings_doc.unassign_customer
-						# row.logs = "No respected record in ICRIS List found for Corporate Customer."
-						# continue
 
 					else :
 						customer = icr_list[0].shipper_name
@@ -178,21 +184,38 @@ class DutyandTaxesSalesInvoiceUploader(Document):
 			if customer == None :
 				row.logs = "No customer found."
 				continue
+
+			attn_name = r4_list[0].consignee_contact_name
+			consignee_building = r4_list[0].consignee_building
+			consignee_street = r4_list[0].consignee_street
+			consignee_city = r4_list[0].consignee_city
+			consignee_phone = r4_list[0].consignee_phone_number
 			
 
 			itm_sig = 0
+			si_doc = frappe.new_doc("Sales Invoice")
+			si_doc.customer = customer
+			si_doc.posting_date = frappe.utils.today()
+			si_doc.due_date = frappe.utils.today()
+			si_doc.custom_duty_and_taxes_sales_invoice_uploader = self.name
+			si_doc.custom_duty_and_taxes_template = dtt_doc.name
+			si_doc.custom_billing_term = billing_term
+			si_doc.custom_shipment_number = dtt_doc.shipment_number
+			si_doc.custom_tracking_number = dtt_doc.tracking_number
+			si_doc.custom_consignee_contact_name = attn_name
+			si_doc.custom_consignee_building = consignee_building
+			si_doc.custom_consignee_street = consignee_street
+			si_doc.custom_consignee_city = consignee_city
+			si_doc.custom_consignee_phone_number = consignee_phone
+			si_doc.custom_duty_and_taxes_invoice = 1
+			si_doc.custom_mawb_number = dtt_doc.mawb_number
+			si_doc.custom_type = dtt_doc.type
+			si_doc.custom_location = dtt_doc.location
+			si_doc.custom_clearance_type = dtt_doc.clearance_type
+
+
 			if dtt_settings_doc.duty_and_taxes_item :
 				itm_sig = 1
-
-				si_doc = frappe.new_doc("Sales Invoice")
-				si_doc.customer = customer
-				si_doc.posting_date = frappe.utils.today()
-				si_doc.due_date = frappe.utils.today()
-				si_doc.custom_duty_and_taxes_sales_invoice_uploader = self.name
-				si_doc.custom_duty_and_taxes_template = dtt_doc.name
-				si_doc.custom_billing_term = billing_term
-				si_doc.custom_shipment_number = dtt_doc.shipment_number
-				si_doc.custom_tracking_number = dtt_doc.tracking_number
 
 				for x in dtt_settings_doc.duty_and_taxes_item :
 					rate_value = getattr(dtt_doc, x.field_name, 0) 

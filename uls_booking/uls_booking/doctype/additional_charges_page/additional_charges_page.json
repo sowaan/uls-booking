@@ -1,0 +1,424 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-11-02 14:23:12.731942",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "additional_handling_charges_section",
+  "add_handling_amount_per_package",
+  "add_handling_minimum_amount",
+  "column_break_udsj",
+  "add_handling_max_weight",
+  "add_handling_max_length_longest_side_in_cm",
+  "add_handling_max_width_second_longest_side_in_cm",
+  "declare_value_section",
+  "percentage_on_declare_value",
+  "column_break_uflj",
+  "minimum_amount_for_declare_value",
+  "direct_delivery_section",
+  "direct_delivery_amount_per_package",
+  "column_break_ffux",
+  "duty_and_tax_forwarding_section",
+  "duty_and_tax_forwarding_amount_per_shipment",
+  "column_break_kldo",
+  "delivery_confirmation_signature_section",
+  "delivery_confimation_signature_amount_per_shipment",
+  "column_break_sdyn",
+  "delivery_confirmation_adult_signature_section",
+  "delivery_confimation_adult_signature_amount_per_shipment",
+  "column_break_lezs",
+  "extended_area_section",
+  "extended_area_amount_per_shipment",
+  "column_break_oeus",
+  "extended_area_amount_per_kg",
+  "feul_surcharge_section",
+  "feul_surcharge_percentage_on_freight_amount",
+  "column_break_xlit",
+  "feul_surcharge_minimum_amount",
+  "import_control_label_section",
+  "import_control_amount_per_shipment",
+  "column_break_swun",
+  "large_package_surcharge_section",
+  "large_package_surcharge_amount",
+  "large_package_surcharge_max_weight",
+  "column_break_lzza",
+  "large_package_surcharge_minimum_amount",
+  "large_package_surcharge_max_length_plus_girth_in_cm",
+  "over_maximum_limit_section",
+  "over_maximum_limit_amount_per_package",
+  "over_maximum_limit_minimum_amount",
+  "column_break_toud",
+  "over_maximum_limit_max_weight",
+  "over_maximum_limit_max_length_longest_side_in_cm",
+  "over_maximum_limit_max_length_plus_girth_in_cm",
+  "remote_area_section",
+  "remote_area_amount_per_shipment",
+  "column_break_ohoq",
+  "remote_area_amount_per_kg",
+  "residential_surcharge_section",
+  "residential_surcharge_amount_per_shipment",
+  "column_break_hqru",
+  "return_electronic_label_section",
+  "return_electronic_amount_per_shipment",
+  "column_break_tshs",
+  "saturday_delivery_section",
+  "saturday_delivery_amount_per_shipment",
+  "column_break_vvjm",
+  "shipping_bill_charges_section",
+  "import_amount_per_shipment",
+  "column_break_yuuz",
+  "export_amount_per_shipment",
+  "minimum_amount_per_shipment"
+ ],
+ "fields": [
+  {
+   "collapsible": 1,
+   "fieldname": "import_control_label_section",
+   "fieldtype": "Section Break",
+   "label": "Import Control Label"
+  },
+  {
+   "fieldname": "column_break_swun",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "import_control_amount_per_shipment",
+   "fieldtype": "Currency",
+   "label": "Import Control Amount Per Shipment"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "return_electronic_label_section",
+   "fieldtype": "Section Break",
+   "label": "Return Electronic Label"
+  },
+  {
+   "fieldname": "column_break_tshs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "return_electronic_amount_per_shipment",
+   "fieldtype": "Currency",
+   "label": "Return Electronic Amount Per Shipment"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "additional_handling_charges_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Handling Charges"
+  },
+  {
+   "fieldname": "add_handling_amount_per_package",
+   "fieldtype": "Currency",
+   "label": "Add Handling Amount Per Package"
+  },
+  {
+   "fieldname": "column_break_udsj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "declare_value_section",
+   "fieldtype": "Section Break",
+   "label": "Declare Value"
+  },
+  {
+   "fieldname": "percentage_on_declare_value",
+   "fieldtype": "Float",
+   "label": "Percentage on Declare Value"
+  },
+  {
+   "fieldname": "column_break_uflj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "minimum_amount_for_declare_value",
+   "fieldtype": "Currency",
+   "label": "Minimum Amount For Declare Value"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "delivery_confirmation_adult_signature_section",
+   "fieldtype": "Section Break",
+   "label": "Delivery Confirmation Adult Signature"
+  },
+  {
+   "fieldname": "delivery_confimation_adult_signature_amount_per_shipment",
+   "fieldtype": "Currency",
+   "label": "Delivery Confimation Adult Signature Amount Per Shipment"
+  },
+  {
+   "fieldname": "column_break_lezs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "delivery_confirmation_signature_section",
+   "fieldtype": "Section Break",
+   "label": "Delivery Confirmation Signature"
+  },
+  {
+   "fieldname": "delivery_confimation_signature_amount_per_shipment",
+   "fieldtype": "Currency",
+   "label": "Delivery Confimation Signature Amount Per Shipment"
+  },
+  {
+   "fieldname": "column_break_sdyn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "direct_delivery_section",
+   "fieldtype": "Section Break",
+   "label": "Direct Delivery"
+  },
+  {
+   "fieldname": "column_break_ffux",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "duty_and_tax_forwarding_section",
+   "fieldtype": "Section Break",
+   "label": "Duty and Tax Forwarding"
+  },
+  {
+   "fieldname": "duty_and_tax_forwarding_amount_per_shipment",
+   "fieldtype": "Currency",
+   "label": "Duty and Tax Forwarding Amount Per Shipment"
+  },
+  {
+   "fieldname": "column_break_kldo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "extended_area_section",
+   "fieldtype": "Section Break",
+   "label": "Extended Area"
+  },
+  {
+   "fieldname": "extended_area_amount_per_shipment",
+   "fieldtype": "Currency",
+   "label": "Extended Area Amount Per Shipment"
+  },
+  {
+   "fieldname": "column_break_oeus",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "extended_area_amount_per_kg",
+   "fieldtype": "Currency",
+   "label": "Extended Area Amount Per KG"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "feul_surcharge_section",
+   "fieldtype": "Section Break",
+   "label": "Feul Surcharge"
+  },
+  {
+   "fieldname": "feul_surcharge_percentage_on_freight_amount",
+   "fieldtype": "Float",
+   "label": "Feul Surcharge Percentage on Freight Amount"
+  },
+  {
+   "fieldname": "column_break_xlit",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "feul_surcharge_minimum_amount",
+   "fieldtype": "Currency",
+   "label": "Feul Surcharge Minimum Amount"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "large_package_surcharge_section",
+   "fieldtype": "Section Break",
+   "label": "Large Package Surcharge"
+  },
+  {
+   "fieldname": "large_package_surcharge_amount",
+   "fieldtype": "Currency",
+   "label": "Large Package Surcharge Amount"
+  },
+  {
+   "fieldname": "column_break_lzza",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "large_package_surcharge_minimum_amount",
+   "fieldtype": "Currency",
+   "label": "Large Package Surcharge Minimum Amount"
+  },
+  {
+   "fieldname": "large_package_surcharge_max_weight",
+   "fieldtype": "Float",
+   "label": "Large Package Surcharge Max Weight"
+  },
+  {
+   "fieldname": "large_package_surcharge_max_length_plus_girth_in_cm",
+   "fieldtype": "Float",
+   "label": "Large Package Surcharge Max Length Plus Girth (In CM)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "over_maximum_limit_section",
+   "fieldtype": "Section Break",
+   "label": "Over Maximum Limit"
+  },
+  {
+   "fieldname": "over_maximum_limit_amount_per_package",
+   "fieldtype": "Currency",
+   "label": "Over Maximum Limit Amount Per Package"
+  },
+  {
+   "fieldname": "column_break_toud",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "over_maximum_limit_max_weight",
+   "fieldtype": "Float",
+   "label": "Over Maximum Limit Max Weight"
+  },
+  {
+   "fieldname": "over_maximum_limit_max_length_longest_side_in_cm",
+   "fieldtype": "Float",
+   "label": "Over Maximum Limit Max Length (Longest Side in cm)"
+  },
+  {
+   "fieldname": "over_maximum_limit_max_length_plus_girth_in_cm",
+   "fieldtype": "Float",
+   "label": "Over Maximum Limit Max Length Plus Girth (In CM)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "remote_area_section",
+   "fieldtype": "Section Break",
+   "label": "Remote Area"
+  },
+  {
+   "fieldname": "remote_area_amount_per_shipment",
+   "fieldtype": "Currency",
+   "label": "Remote Area Amount Per Shipment"
+  },
+  {
+   "fieldname": "column_break_ohoq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remote_area_amount_per_kg",
+   "fieldtype": "Currency",
+   "label": "Remote Area Amount Per KG"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "residential_surcharge_section",
+   "fieldtype": "Section Break",
+   "label": "Residential Surcharge"
+  },
+  {
+   "fieldname": "residential_surcharge_amount_per_shipment",
+   "fieldtype": "Currency",
+   "label": "Residential Surcharge Amount Per Shipment"
+  },
+  {
+   "fieldname": "column_break_hqru",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "shipping_bill_charges_section",
+   "fieldtype": "Section Break",
+   "label": "Shipping Bill Charges"
+  },
+  {
+   "fieldname": "import_amount_per_shipment",
+   "fieldtype": "Currency",
+   "label": "Import Amount Per Shipment"
+  },
+  {
+   "fieldname": "column_break_yuuz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "export_amount_per_shipment",
+   "fieldtype": "Currency",
+   "label": "Export Amount Per Shipment"
+  },
+  {
+   "fieldname": "minimum_amount_per_shipment",
+   "fieldtype": "Currency",
+   "label": "Minimum Amount Per Shipment"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "saturday_delivery_section",
+   "fieldtype": "Section Break",
+   "label": "Saturday Delivery"
+  },
+  {
+   "fieldname": "saturday_delivery_amount_per_shipment",
+   "fieldtype": "Currency",
+   "label": "Saturday Delivery Amount Per Shipment"
+  },
+  {
+   "fieldname": "column_break_vvjm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "add_handling_minimum_amount",
+   "fieldtype": "Currency",
+   "label": "Add Handling Minimum Amount"
+  },
+  {
+   "fieldname": "over_maximum_limit_minimum_amount",
+   "fieldtype": "Currency",
+   "label": "Over Maximum Limit Minimum Amount"
+  },
+  {
+   "fieldname": "add_handling_max_weight",
+   "fieldtype": "Float",
+   "label": "Add Handling Max Weight"
+  },
+  {
+   "fieldname": "add_handling_max_length_longest_side_in_cm",
+   "fieldtype": "Float",
+   "label": "Add Handling Max Length (Longest Side in cm)"
+  },
+  {
+   "fieldname": "add_handling_max_width_second_longest_side_in_cm",
+   "fieldtype": "Float",
+   "label": "Add Handling Max Width (Second Longest Side in cm)"
+  },
+  {
+   "fieldname": "direct_delivery_amount_per_package",
+   "fieldtype": "Currency",
+   "label": "Direct Delivery Amount Per Package"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-11-02 19:29:08.354429",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Additional Charges Page",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

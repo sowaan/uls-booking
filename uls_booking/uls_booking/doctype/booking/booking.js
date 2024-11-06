@@ -914,35 +914,35 @@ frappe.ui.form.on("Booking", {
         frm.set_df_property("signature_options", "read_only", 1);
 
         
-        if(frm.doc.docstatus == 1 && !frm.doc.shipment_identification_number && !frm.doc.tracking_number)
-        {
-                let token = ''
-                frm.add_custom_button(__('Post Shipment'), async function() {
-                        await frappe.call({
-                            method: "uls_booking.uls_booking.api.api.generate_token",
-                            args: {},
-                            async: true,
-                            callback: function (r) {
-                                if (r.message) {
-                                    token = r.message ;
-                                }
-                            },
-                        });
-                        await frappe.call({
-                            method: "uls_booking.uls_booking.api.api.create_shipment",
-                            args: {
-                                token : token ,
-                                booking_name : frm.doc.name ,
-                            },
-                            async: true,
-                            callback: function (r) {
-                                if (r.message) {
-                                    token = r.message ;
-                                }
-                            },
-                        });
-                });
-        }
+        // if(frm.doc.docstatus == 1 && !frm.doc.shipment_identification_number && !frm.doc.tracking_number)
+        // {
+        //         let token = ''
+        //         frm.add_custom_button(__('Post Shipment'), async function() {
+        //                 await frappe.call({
+        //                     method: "uls_booking.uls_booking.api.api.generate_token",
+        //                     args: {},
+        //                     async: true,
+        //                     callback: function (r) {
+        //                         if (r.message) {
+        //                             token = r.message ;
+        //                         }
+        //                     },
+        //                 });
+        //                 await frappe.call({
+        //                     method: "uls_booking.uls_booking.api.api.create_shipment",
+        //                     args: {
+        //                         token : token ,
+        //                         booking_name : frm.doc.name ,
+        //                     },
+        //                     async: true,
+        //                     callback: function (r) {
+        //                         if (r.message) {
+        //                             token = r.message ;
+        //                         }
+        //                     },
+        //                 });
+        //         });
+        // }
 
 
         

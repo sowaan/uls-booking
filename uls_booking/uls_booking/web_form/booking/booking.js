@@ -197,7 +197,6 @@ frappe.ready(async function() {
 						callback: function (r) {
 							if (r.message) {
 								var balance_before_ship = r.message;
-								// console.log(balance_before_ship);
 								frappe.web_form.set_value("balance_credit_limit_before_shipment", balance_before_ship);
 								var field = frappe.web_form.get_field("balance_credit_limit_before_shipment");
 								field.refresh();
