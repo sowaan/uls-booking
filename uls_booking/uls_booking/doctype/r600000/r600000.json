@@ -41,7 +41,8 @@
   "package_height",
   "dws_hours",
   "dws_minutes",
-  "dws_seconds"
+  "dws_seconds",
+  "file_name"
  ],
  "fields": [
   {
@@ -225,11 +226,16 @@
    "fieldname": "dws_seconds",
    "fieldtype": "Int",
    "label": "DWS Seconds"
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-05 16:54:43.687764",
+ "modified": "2024-11-07 13:26:29.329642",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R600000",

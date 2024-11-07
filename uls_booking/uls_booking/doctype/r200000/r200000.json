@@ -66,6 +66,7 @@
   "over_70_lbs_flag",
   "currency_code_for_register_charge_amount",
   "other_charges_amount",
+  "file_name",
   "column_break_ivkpa",
   "currency_code_for_other_charge_amt",
   "shipment_agreement_type",
@@ -550,11 +551,16 @@
    "fieldname": "shipped_date",
    "fieldtype": "Date",
    "label": "Shipped Date"
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-31 17:27:40.237517",
+ "modified": "2024-11-07 13:22:17.886144",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R200000",

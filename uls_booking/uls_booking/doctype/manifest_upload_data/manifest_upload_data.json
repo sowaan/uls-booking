@@ -8,6 +8,7 @@
  "field_order": [
   "from_index",
   "to_index",
+  "total_shipment_numbers",
   "attach_file",
   "manifest_modification_process",
   "record_to_modify",
@@ -108,12 +109,19 @@
    "fieldname": "package_tracking_to_index",
    "fieldtype": "Int",
    "label": "Package tracking To Index"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_shipment_numbers",
+   "fieldtype": "Int",
+   "label": "Total Shipment Numbers",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-05 19:10:07.731704",
+ "modified": "2024-11-07 12:34:45.852404",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Upload Data",

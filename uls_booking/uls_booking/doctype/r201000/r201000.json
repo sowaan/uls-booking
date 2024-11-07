@@ -15,7 +15,8 @@
   "import_date",
   "mawb_number",
   "shipment_number",
-  "check"
+  "check",
+  "file_name"
  ],
  "fields": [
   {
@@ -65,11 +66,16 @@
    "fieldtype": "Check",
    "label": "Check",
    "read_only": 1
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-11 14:46:29.500911",
+ "modified": "2024-11-07 13:22:40.845015",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R201000",
