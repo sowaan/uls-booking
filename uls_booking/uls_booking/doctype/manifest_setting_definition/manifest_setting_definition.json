@@ -141,6 +141,7 @@
    "label": "Modified Definition"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "definition",
    "fieldtype": "Table",
    "label": "Definition",
@@ -150,7 +151,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-11-05 14:57:25.863050",
+ "modified": "2024-11-07 18:30:54.140707",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Setting Definition",
