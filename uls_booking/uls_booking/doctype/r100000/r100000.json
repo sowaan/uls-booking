@@ -11,7 +11,8 @@
   "destination_country",
   "destination_port",
   "import_date",
-  "shipment_number"
+  "shipment_number",
+  "file_name"
  ],
  "fields": [
   {
@@ -44,11 +45,16 @@
    "fieldname": "import_date",
    "fieldtype": "Data",
    "label": "Import Date"
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-16 00:34:24.898640",
+ "modified": "2024-11-07 13:21:41.285266",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R100000",

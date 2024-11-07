@@ -19,7 +19,8 @@
   "operator_id",
   "system_date",
   "system_time",
-  "special_instruction_field"
+  "special_instruction_field",
+  "file_name"
  ],
  "fields": [
   {
@@ -92,11 +93,16 @@
    "fieldname": "special_instruction_field",
    "fieldtype": "Data",
    "label": "Special Instruction Field"
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-16 00:41:48.389068",
+ "modified": "2024-11-07 13:26:53.419779",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R900000",

@@ -23,7 +23,8 @@
   "invoice_1_commodity_code",
   "invoice_1_license_number",
   "country_of_ultimate_destination",
-  "check"
+  "check",
+  "file_name"
  ],
  "fields": [
   {
@@ -117,11 +118,16 @@
    "fieldtype": "Check",
    "label": "Check",
    "read_only": 1
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-24 11:44:37.187851",
+ "modified": "2024-11-07 13:25:16.881806",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R500000",

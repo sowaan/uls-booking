@@ -887,6 +887,7 @@ def storing_shipment_number(arrays, frm, to, doc):
             shipment_doc.insert()
             shipment_doc.save()
             frappe.db.commit()
+    frappe.db.set_value("Manifest Upload Data",doc.name,"total_shipment_numbers" , len(unique_shipment_numbers))
 
 
 
@@ -902,11 +903,10 @@ def storing_shipment_number(arrays, frm, to, doc):
 
 
 
-
-def insert_data(arrays, frm, to,date_format):
+def insert_data(arrays, frm, to,date_format,file_proper_name):
     shipment_num = None
     pkg_trck = None
-   
+    
     setting = frappe.get_doc("Manifest Setting Definition")
     country_map = {j.code: j.country for j in setting.country_codes}
     replacement_map = {
@@ -975,9 +975,11 @@ def insert_data(arrays, frm, to,date_format):
 
         
         if docs:
+            
             print("Doc found:", docs[0])
             docss = frappe.get_doc(doctype_name, docs[0])
             docss.set("check", 0)
+            docss.set("file_name",file_proper_name)
             for child_record in definition.definitions:
                 field_name = child_record.field_name
                 from_index = child_record.from_index - 1
@@ -1025,12 +1027,14 @@ def insert_data(arrays, frm, to,date_format):
                             field_data = field_data / field.number_divide_with
                         # print(field_data , field_name,"NEW")
                 docss.set(field_name, field_data)
+            
             docss.save()
             # frappe.db.commit()    
             print(doctype_name, shipment_num, "Updating")
         else:
             
             doc = frappe.new_doc(doctype_name)
+            doc.set("file_name",file_proper_name)
             for child_record in definition.definitions:
                 field_name = child_record.field_name
                 from_index = child_record.from_index - 1
@@ -1068,10 +1072,12 @@ def insert_data(arrays, frm, to,date_format):
                         if field.number_divide_with:
                             field_data = field_data / field.number_divide_with
                 doc.set(field_name, field_data)
-
+            
             print(doctype_name, shipment_num, "Inserting")
             doc.insert()
             doc.save()
+       
+        
 
 
 
@@ -1125,7 +1131,8 @@ class ManifestUploadData(Document):
             
            
             file_name = frappe.db.get_value("File", {"file_url": self.attach_file}, "name")
-           
+            file_proper_name = frappe.get_value("File",file_name,"file_name")
+            # print("File Name",file_proper_name,"\n\n\n\n\n")
             file_doc = frappe.get_doc("File", file_name)
             content = file_doc.get_content()
             arrays = content.split('\n')
@@ -1139,8 +1146,9 @@ class ManifestUploadData(Document):
             while current_index < len(arrays):
                 chunk = arrays[current_index:current_index + chunk_size]             
                 current_index += chunk_size
-                enqueue(insert_data, arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
-            enqueue(storing_shipment_number,arrays=arrays, frm=shipfrom, to=shipto, doc=self.name ,queue="default")
+                # insert_data(main_doc = self , arrays=chunk,frm=frm, to=to, date_format = self.date_format)
+                enqueue(insert_data, file_proper_name = file_proper_name , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
+            enqueue(storing_shipment_number,arrays=arrays, frm=shipfrom, to=shipto, doc=self ,queue="default")
 
 
 

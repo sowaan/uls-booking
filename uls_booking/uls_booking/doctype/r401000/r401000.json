@@ -29,7 +29,8 @@
   "sold_to_fax_number",
   "gcc_number",
   "shipment_total_quantity",
-  "gcc_clearance_country"
+  "gcc_clearance_country",
+  "file_name"
  ],
  "fields": [
   {
@@ -147,11 +148,16 @@
    "fieldname": "gcc_clearance_country",
    "fieldtype": "Data",
    "label": "GCC Clearance Country"
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-15 21:27:40.836535",
+ "modified": "2024-11-07 13:24:25.619568",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R401000",

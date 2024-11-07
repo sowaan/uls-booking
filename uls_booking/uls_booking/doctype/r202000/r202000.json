@@ -16,7 +16,8 @@
   "hazmat_item_quantity",
   "quantum_shipment_fee",
   "quantum_bundle_fee",
-  "check"
+  "check",
+  "file_name"
  ],
  "fields": [
   {
@@ -75,11 +76,16 @@
    "fieldtype": "Check",
    "label": "Check",
    "read_only": 1
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-11 14:47:11.904876",
+ "modified": "2024-11-07 13:23:00.543555",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R202000",
