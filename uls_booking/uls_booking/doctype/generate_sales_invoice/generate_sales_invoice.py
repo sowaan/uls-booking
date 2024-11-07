@@ -17,7 +17,9 @@ class GenerateSalesInvoice(Document):
 			"end_date": self.end_date,
 			"station": self.station,
 			"billing_type": self.billing_type,
-			"icris_number": self.icris_number
+			"icris_number": self.icris_number,
+			"customer":self.customer,
+			"import__export" : self.import__export
 		}
 
 		# Begin the SQL query
@@ -40,6 +42,10 @@ class GenerateSalesInvoice(Document):
 			conditions.append("sn.billing_type = %(billing_type)s")
 		if values["icris_number"]:
 			conditions.append("sn.icris_number = %(icris_number)s")
+		if values["import__export"]:
+			conditions.append("sn.import__export = %(import__export)s")
+		if values["customer"]:
+			conditions.append("sn.customer = %(customer)s")
 
 		# If there are additional conditions, join them to the query
 		if conditions:
@@ -50,6 +56,7 @@ class GenerateSalesInvoice(Document):
 		shipment_numbers = [row[0] for row in results]
 		self.total_shipment_numbers = len(shipment_numbers)
 		self.shipment_numbers = ', '.join(shipment_numbers)
+		self.shipment_numbers_and_sales_invoices = []
 		for i in shipment_numbers:
 			self.append('shipment_numbers_and_sales_invoices', {
 				'shipment_number': i  # Replace 'shipment_number' with the actual field name in your child table
