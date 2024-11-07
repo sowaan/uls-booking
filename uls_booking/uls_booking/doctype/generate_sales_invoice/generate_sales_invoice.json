@@ -8,11 +8,13 @@
   "start_date",
   "billing_type",
   "customer_wise",
+  "customer",
   "column_break_ornt",
   "end_date",
   "station",
   "icris_number",
   "sales_invoice_definition",
+  "import__export",
   "section_break_ebtp",
   "status",
   "total_shipment_numbers",
@@ -125,12 +127,24 @@
    "hidden": 1,
    "label": "Sales Invoices",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.customer_wise == true;",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "import__export",
+   "fieldtype": "Data",
+   "label": "Import / Export"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-30 17:25:09.148933",
+ "modified": "2024-11-07 16:21:59.805101",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Generate Sales Invoice",

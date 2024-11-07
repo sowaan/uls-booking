@@ -7,12 +7,15 @@
  "engine": "InnoDB",
  "field_order": [
   "shipment_number",
+  "icris_number",
+  "billing_type",
+  "billing_term",
+  "file_name",
+  "column_break_zarc",
+  "station",
   "customer",
   "date_shipped",
-  "icris_number",
-  "station",
-  "billing_type",
-  "billing_term"
+  "import__export"
  ],
  "fields": [
   {
@@ -51,11 +54,25 @@
    "fieldname": "billing_term",
    "fieldtype": "Data",
    "label": "Billing Term"
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name"
+  },
+  {
+   "fieldname": "column_break_zarc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "import__export",
+   "fieldtype": "Data",
+   "label": "Import / Export"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-04 17:21:38.538203",
+ "modified": "2024-11-07 16:24:59.907455",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Shipment Number",

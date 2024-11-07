@@ -757,10 +757,12 @@ def storing_shipment_number(arrays, frm, to, doc):
             billing_term = frappe.get_value("R200000", {"shipment_number": shipment}, "billing_term_field")
             date_shipped = frappe.get_value("R200000", {"shipment_number": shipment}, "shipped_date")
             shipment_doc = frappe.get_doc("Shipment Number",shipment)
+            file_name = frappe.get_value("R200000",{"shipment_number":shipment},"file_name")
             customer = None
             icris_number = None
             billing_type = None
             station = None
+            import_export = None
             # Fetch export shipments
             export_array_temp = frappe.get_list("R300000",
                 filters=[
@@ -773,6 +775,7 @@ def storing_shipment_number(arrays, frm, to, doc):
             if export_array_temp:
                 station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
                 shipper_number = export_array_temp[0].shipper_number
+                import_export = "Export"
                 icris = frappe.get_list("ICRIS List",
                     filters=[
                         ["shipper_no", "=", shipper_number]
@@ -796,6 +799,7 @@ def storing_shipment_number(arrays, frm, to, doc):
             if import_array_temp:
                 station = frappe.get_value("R400000", {"shipment_number": shipment}, "consignee_city")
                 consignee_number = import_array_temp[0].consignee_number
+                import_export = "Import"
                 icris = frappe.get_list("ICRIS List",
                     filters=[
                         ["shipper_no", "=", consignee_number]
@@ -817,17 +821,22 @@ def storing_shipment_number(arrays, frm, to, doc):
             shipment_doc.set("icris_number", icris_number)
             shipment_doc.set("billing_type", billing_type)
             shipment_doc.set("billing_term",billing_term)
+            shipment_doc.set("file_name",file_name)
+            shipment_doc.set("import__export",import_export)
+
             # shipment_doc.insert()
             shipment_doc.save()
-            frappe.db.commit()
+            # frappe.db.commit()
                 # continue  # Skip if it already exists
         else:
             date_shipped = frappe.get_value("R200000", {"shipment_number": shipment}, "shipped_date")
             billing_term = frappe.get_value("R200000", {"shipment_number": shipment}, "billing_term_field")
+            file_name = frappe.get_value("R200000",{"shipment_number":shipment},"file_name")
             customer = None
             icris_number = None
             billing_type = None
             station = None
+            import_export = None
             # Fetch export shipments
             export_array_temp = frappe.get_list("R300000",
                 filters=[
@@ -840,6 +849,7 @@ def storing_shipment_number(arrays, frm, to, doc):
             if export_array_temp:
                 station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
                 shipper_number = export_array_temp[0].shipper_number
+                import_export = "Export"
                 icris = frappe.get_list("ICRIS List",
                     filters=[
                         ["shipper_no", "=", shipper_number]
@@ -863,6 +873,7 @@ def storing_shipment_number(arrays, frm, to, doc):
             if import_array_temp:
                 station = frappe.get_value("R400000", {"shipment_number": shipment}, "consignee_city")
                 consignee_number = import_array_temp[0].consignee_number
+                import_export = "Import"
                 icris = frappe.get_list("ICRIS List",
                     filters=[
                         ["shipper_no", "=", consignee_number]
@@ -884,9 +895,12 @@ def storing_shipment_number(arrays, frm, to, doc):
             shipment_doc.set("station", station)
             shipment_doc.set("icris_number", icris_number)
             shipment_doc.set("billing_type", billing_type)
+            shipment_doc.set("file_name",file_name)
+            shipment_doc.set("import__export",import_export)
+
             shipment_doc.insert()
             shipment_doc.save()
-            frappe.db.commit()
+            # frappe.db.commit()
     frappe.db.set_value("Manifest Upload Data",doc.name,"total_shipment_numbers" , len(unique_shipment_numbers))
 
 
