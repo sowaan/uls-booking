@@ -119,7 +119,7 @@ class DutyandTaxesSalesInvoiceUploader(Document):
 						filters={
 							'shipment_number' : row.shipment_number ,
 						},
-						fields = ["billing_term_field"],
+						fields = ["billing_term_field","shipment_type","shipment_weight","custom_shipment_weight_unit","currency_code_for_invoice_total","expanded_invoice_total","shipped_date","input_date","number_of_packages_in_shipment"],
 					 )
 			
 			if not r2_list :
@@ -145,7 +145,7 @@ class DutyandTaxesSalesInvoiceUploader(Document):
 							filters={
 								'shipment_number' : row.shipment_number ,
 							},
-							fields = ["name","consignee_number","consignee_contact_name","consignee_building","consignee_street","consignee_city","consignee_phone_number"],
+							fields = ["name","consignee_number","consignee_contact_name","consignee_building","consignee_street","consignee_city","consignee_phone_number","consignee_number","consignee_postal_code","consignee_county","consignee_name"],
 				          )
 
 
@@ -185,11 +185,12 @@ class DutyandTaxesSalesInvoiceUploader(Document):
 				row.logs = "No customer found."
 				continue
 
-			attn_name = r4_list[0].consignee_contact_name
-			consignee_building = r4_list[0].consignee_building
-			consignee_street = r4_list[0].consignee_street
-			consignee_city = r4_list[0].consignee_city
-			consignee_phone = r4_list[0].consignee_phone_number
+			if r4_list :
+				attn_name = r4_list[0].consignee_contact_name
+				consignee_building = r4_list[0].consignee_building
+				consignee_street = r4_list[0].consignee_street
+				consignee_city = r4_list[0].consignee_city
+				consignee_phone = r4_list[0].consignee_phone_number
 			
 
 			itm_sig = 0
@@ -209,9 +210,49 @@ class DutyandTaxesSalesInvoiceUploader(Document):
 			si_doc.custom_consignee_phone_number = consignee_phone
 			si_doc.custom_duty_and_taxes_invoice = 1
 			si_doc.custom_mawb_number = dtt_doc.mawb_number
+			si_doc.custom_arrival_date = dtt_doc.arrival_date
 			si_doc.custom_type = dtt_doc.type
 			si_doc.custom_location = dtt_doc.location
 			si_doc.custom_clearance_type = dtt_doc.clearance_type
+
+
+			if r4_list :
+				si_doc.custom_consignee_number = r4_list[0].consignee_number
+				si_doc.custom_consignee_postal_code = r4_list[0].consignee_postal_code
+				si_doc.custom_consignee_country = r4_list[0].consignee_county
+				si_doc.custom_consignee_name = r4_list[0].consignee_name
+
+
+
+
+
+			r3_list = frappe.db.get_list("R300000",
+							filters={
+								'shipment_number' : row.shipment_number ,
+							},
+							fields = ["name","shipper_name","shipper_contact_name","shipper_country","shipper_city","shipper_postal_code","shipper_phone_number","shipper_number"],
+				          )
+
+			if r3_list :
+				si_doc.custom_shipper_name = r3_list[0].shipper_name
+				si_doc.custom_shipper_contact_name = r3_list[0].shipper_contact_name
+				si_doc.custom_shipper_country = r3_list[0].shipper_country
+				si_doc.custom_shipper_city = r3_list[0].shipper_city
+				si_doc.custom_shipper_postal_code = r3_list[0].shipper_postal_code
+				si_doc.custom_shipper_phone_number = r3_list[0].shipper_phone_number
+				si_doc.custom_shipper_number = r3_list[0].shipper_number
+
+
+
+			si_doc.custom_shipment_type = r2_list[0].shipment_type
+			si_doc.custom_shipment_weight = r2_list[0].shipment_weight
+			si_doc.custom_shipment_weight_unit = r2_list[0].custom_shipment_weight_unit
+			si_doc.custom_currency_code_for_invoice_total = r2_list[0].currency_code_for_invoice_total
+			si_doc.custom_expanded_invoice_total = r2_list[0].expanded_invoice_total
+			si_doc.custom_date_shipped = r2_list[0].shipped_date
+			si_doc.custom_booking_date = r2_list[0].input_date
+			si_doc.custom_packages = r2_list[0].number_of_packages_in_shipment
+
 
 
 			if dtt_settings_doc.duty_and_taxes_item :
