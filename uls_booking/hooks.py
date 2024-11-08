@@ -93,7 +93,9 @@ fixtures = [
                                 "custom_column_break_vg9j9",
                                 "custom_arrival_date",
                                 "custom_expanded_invoice_total",
-                                "custom_currency_code_for_invoice_total"
+                                "custom_currency_code_for_invoice_total",
+                                "custom_compensation_invoices",
+                                "custom_freight_invoices"
 
                                 )
 	  	  
