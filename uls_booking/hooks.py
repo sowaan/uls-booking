@@ -90,6 +90,10 @@ fixtures = [
                                 "custom_total_surcharges_incl_fuel",
                                 "custom_column_break_uzjnx",
                                 "custom_column_break_kwj1v",
+                                "custom_column_break_vg9j9",
+                                "custom_arrival_date",
+                                "custom_expanded_invoice_total",
+                                "custom_currency_code_for_invoice_total"
 
                                 )
 	  	  
