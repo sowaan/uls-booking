@@ -18,6 +18,19 @@ frappe.ui.form.on("Generate Sales Invoice", {
             
             });
         }
+
+        // if (frm.doc.docstatus == 1) {
+        //     // Add a custom button to the form
+        //     frm.add_custom_button(__('Reload'), function () {
+        //         frappe.call({
+        //             method: "uls_booking.uls_booking.doctype.manifest_upload_data.manifest_upload_data.generate_sales_invoice",
+        //             args: { doc_str: frm.doc },
+        //             freeze : true ,
+
+        //         });
+            
+        //     });
+        // }
         
 	},
     on_submit(frm) {
