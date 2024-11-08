@@ -600,7 +600,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
                 
             max_insured = 0
             if sales_invoice.customer != customer.custom_default_customer:
-                
+                sales_invoice.custom_freight_invoices = 1
                 if decalred_value > 0:
                     
                     percent = frappe.db.get_value('Additional Charges', 'Declare Value', 'percentage')
@@ -638,7 +638,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
             export_compensation_amount = 0
             
             if sales_invoice.customer == customer.custom_default_customer:
-                
+                sales_invoice.custom_compensation_invoices = 1
                 sig = 0
                 for comp in definition.compensation_table:
                     if sales_invoice.custom_billing_term == comp.shipment_billing_term and shipment_type == comp.shipping_billing_type and imp_exp == comp.case:
