@@ -6,6 +6,7 @@ from frappe.utils import getdate
 import json
 import re
 from datetime import datetime
+import random
 
 
 def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
@@ -188,20 +189,27 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
                     
                 
                     print(sales_invoice.customer)
-                    tt = frappe.get_doc("Territory", {"name": sales_invoice.custom_shipper_city})
-                    pt = tt.parent_territory
-                    if pt != "All Territories":
-                        stc = frappe.get_doc("Sales Taxes and Charges Template", {"custom_province": pt})
-                        for sale in stc.taxes:
-                            charge_type = sale.charge_type
-                            description = sale.description
-                            account_head = sale.account_head
-                            cost_center = sale.cost_center
-                            rate = sale.rate
-                            account_currency = sale.account_currency
-                        sales_invoice.set("taxes_and_charges", stc.name)
-                        rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
-                        sales_invoice.append('taxes', rows)
+                    try:
+                        tt = frappe.get_doc("Territory", {"name": sales_invoice.custom_shipper_city})
+                        pt = tt.parent_territory
+                        if pt != "All Territories":
+                            stc = frappe.get_doc("Sales Taxes and Charges Template", {"custom_province": pt})
+                            for sale in stc.taxes:
+                                charge_type = sale.charge_type
+                                description = sale.description
+                                account_head = sale.account_head
+                                cost_center = sale.cost_center
+                                rate = sale.rate
+                                account_currency = sale.account_currency
+                            sales_invoice.set("taxes_and_charges", stc.name)
+                            rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
+                            sales_invoice.append('taxes', rows)
+                    except:
+                        frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "No Territory Found",
+                                            "error": f"""Territory:,{sales_invoice.custom_shipper_city}"""
+                                        }).insert()
 
                     
                     if sales_invoice.custom_consignee_country:
@@ -343,21 +351,30 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
                         
                 
                     print(sales_invoice.customer)
-                    mm = frappe.get_doc("Territory", {"name": sales_invoice.custom_consignee_city})
-                    vv = mm.parent_territory
+                    try:
+                        mm = frappe.get_doc("Territory", {"name": sales_invoice.custom_consignee_city})
                     
-                    if vv != "All Territories":
-                        bb = frappe.get_doc("Sales Taxes and Charges Template", {"custom_province": vv})
-                        sales_invoice.set("taxes_and_charges", bb.name)
-                        for sale in bb.taxes:
-                            charge_type = sale.charge_type
-                            description = sale.description
-                            account_head = sale.account_head
-                            cost_center = sale.cost_center
-                            rate = sale.rate
-                            account_currency = sale.account_currency
-                        rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
-                        sales_invoice.append('taxes', rows)
+
+                        vv = mm.parent_territory
+                        
+                        if vv != "All Territories":
+                            bb = frappe.get_doc("Sales Taxes and Charges Template", {"custom_province": vv})
+                            sales_invoice.set("taxes_and_charges", bb.name)
+                            for sale in bb.taxes:
+                                charge_type = sale.charge_type
+                                description = sale.description
+                                account_head = sale.account_head
+                                cost_center = sale.cost_center
+                                rate = sale.rate
+                                account_currency = sale.account_currency
+                            rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
+                            sales_invoice.append('taxes', rows)
+                    except:
+                        frappe.get_doc({
+                                            "doctype": "Error Log",
+                                            "method": "No Territory Found",
+                                            "error": f"""Territory:,{sales_invoice.custom_consignee_city}"""
+                                        }).insert()
 
                     if sales_invoice.custom_shipper_country:
                         origin_country = sales_invoice.custom_shipper_country
@@ -690,7 +707,7 @@ def generate_sales_invoice(doc_str):
     definition_record = doc.get("sales_invoice_definition")
     shipment = doc.get("shipment_numbers", "")
     shipments = [value.strip() for value in shipment.split(",") if value.strip()]
-    chunk_size = 15  # Adjust as needed
+    chunk_size = 50  # Adjust as needed
 
     # Enqueue each chunk of shipments
     for shipment_chunk in chunk_list(shipments, chunk_size):
