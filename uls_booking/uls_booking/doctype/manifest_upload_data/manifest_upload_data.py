@@ -333,6 +333,9 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
 
 
                             tarif = final_rate / (1- (final_discount_percentage/100))
+                else:
+                    continue
+
             elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
                
                 
@@ -493,6 +496,8 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
 
 
                             tarif = final_rate / (1- (final_discount_percentage/100))
+                else:
+                    continue
 
             currency = frappe.get_value("Customer" , sales_invoice.customer , "default_currency") 
             sales_invoice.currency = currency
@@ -711,6 +716,14 @@ def generate_sales_invoice(doc_str):
 
     # Enqueue each chunk of shipments
     for shipment_chunk in chunk_list(shipments, chunk_size):
+
+        # generate_sales_invoice_enqued(doc_str=doc_str,
+        #     doc=doc,
+        #     shipments=shipment_chunk,
+        #     definition_record=definition_record,
+        #     name=name)
+
+
         enqueue(
             generate_sales_invoice_enqued,
             doc_str=doc_str,
