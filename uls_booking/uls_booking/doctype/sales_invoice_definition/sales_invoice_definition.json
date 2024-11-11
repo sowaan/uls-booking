@@ -9,6 +9,7 @@
   "default_company",
   "origin_country",
   "unassigned_icris_number",
+  "default_selling_rate",
   "sales_invoice_definition",
   "surcharges",
   "compensation_table",
@@ -66,11 +67,17 @@
    "fieldtype": "Table",
    "label": "Package Type Replacement",
    "options": "Package Type Replacement"
+  },
+  {
+   "fieldname": "default_selling_rate",
+   "fieldtype": "Link",
+   "label": "Default Selling Rate",
+   "options": "Selling Rate"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-25 12:11:06.359557",
+ "modified": "2024-11-11 18:55:42.974190",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice Definition",
