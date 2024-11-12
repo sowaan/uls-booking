@@ -8,7 +8,7 @@ import re
 from datetime import datetime
 
 
-def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
+def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,end_date):
     try:
         
        
@@ -99,12 +99,15 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
                 if docs:
                    
                     sales_invoice.set(sales_field_name, docs[0][field_name])
-                    sales_invoice.posting_date = sales_invoice.custom_date_shipped
-                    posting_date = getdate(sales_invoice.posting_date)
-                    sales_invoice.set_posting_time = 1
+                    # sales_invoice.posting_date = sales_invoice.custom_date_shipped
+                    # posting_date = getdate(sales_invoice.posting_date)
+                    # sales_invoice.set_posting_time = 1
                     # sales_invoice.due_date = sales_invoice.posting_date
                    
-            
+            date2 = getdate(end_date)
+            sales_invoice.posting_date = date2
+            posting_date = getdate(sales_invoice.posting_date)
+            sales_invoice.set_posting_time = 1
             icris_number = None
             selling_group = None
             selling_rate = None
@@ -508,7 +511,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
                             if flg == 0 :
                                 final_rate = ( last_row.rate / last_row.weight ) * my_weight
                                 final_discount_percentage = last_row.discount_percentage
-                                
+
                             tarif = final_rate / (1- (final_discount_percentage/100))
                 
 
@@ -736,6 +739,7 @@ def generate_sales_invoice(doc_str):
     name = doc['name']
     definition_record = doc.get("sales_invoice_definition")
     shipment = doc.get("shipment_numbers", "")
+    end_date = doc.get("end_date")
     shipments = [value.strip() for value in shipment.split(",") if value.strip()]
     chunk_size = 50  # Adjust as needed
 
@@ -756,6 +760,7 @@ def generate_sales_invoice(doc_str):
             shipments=shipment_chunk,
             definition_record=definition_record,
             name=name,
+            end_date =end_date,
             queue="default"
         )
         frappe.db.commit()
