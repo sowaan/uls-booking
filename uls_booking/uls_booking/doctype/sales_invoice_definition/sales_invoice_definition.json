@@ -11,6 +11,7 @@
   "unassigned_icris_number",
   "default_selling_rate",
   "default_sales_tax",
+  "default_selling_group",
   "sales_invoice_definition",
   "surcharges",
   "compensation_table",
@@ -80,11 +81,17 @@
    "fieldtype": "Link",
    "label": "Default Sales Tax",
    "options": "Sales Taxes and Charges Template"
+  },
+  {
+   "fieldname": "default_selling_group",
+   "fieldtype": "Link",
+   "label": "Default Selling Group",
+   "options": "Selling Rate Group"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-12 13:11:15.438063",
+ "modified": "2024-11-12 15:25:15.603479",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice Definition",
