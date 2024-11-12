@@ -206,7 +206,18 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
                             rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
                             sales_invoice.append('taxes', rows)
                     except:
-                        log_text = "No Territory Found" +" "+ f"""Territory:,{sales_invoice.custom_shipper_city}"""
+                        stc = frappe.get_doc("Sales Taxes and Charges Template", definition.default_sales_tax)
+                        for sale in stc.taxes:
+                            charge_type = sale.charge_type
+                            description = sale.description
+                            account_head = sale.account_head
+                            cost_center = sale.cost_center
+                            rate = sale.rate
+                            account_currency = sale.account_currency
+                        sales_invoice.set("taxes_and_charges", stc.name)
+                        rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
+                        sales_invoice.append('taxes', rows)
+                        log_text = "No Territory Found so Using Default sales Tax and charges Template" +" "+ f"""Territory:,{sales_invoice.custom_shipper_city}"""
                         log.append(log_text)
                     
                     if sales_invoice.custom_consignee_country:
@@ -377,9 +388,20 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
                             rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
                             sales_invoice.append('taxes', rows)
                     except:
-                        
-                        log_text = "No Territory Found" +" "+ f"""Territory:,{sales_invoice.custom_consignee_city}"""
+                        stc = frappe.get_doc("Sales Taxes and Charges Template", definition.default_sales_tax)
+                        for sale in stc.taxes:
+                            charge_type = sale.charge_type
+                            description = sale.description
+                            account_head = sale.account_head
+                            cost_center = sale.cost_center
+                            rate = sale.rate
+                            account_currency = sale.account_currency
+                        sales_invoice.set("taxes_and_charges", stc.name)
+                        rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
+                        sales_invoice.append('taxes', rows)
+                        log_text = "No Territory Found so Using Default sales Tax and charges Template" +" "+ f"""Territory:,{sales_invoice.custom_consignee_city}"""
                         log.append(log_text)
+                        
                     if sales_invoice.custom_shipper_country:
                         origin_country = sales_invoice.custom_shipper_country
                         origin_country = origin_country.capitalize()

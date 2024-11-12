@@ -95,7 +95,8 @@ fixtures = [
                                 "custom_expanded_invoice_total",
                                 "custom_currency_code_for_invoice_total",
                                 "custom_compensation_invoices",
-                                "custom_freight_invoices"
+                                "custom_freight_invoices",
+                                "custom_amount_after_discount"
 
                                 )
 	  	  
