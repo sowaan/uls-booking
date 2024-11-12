@@ -284,7 +284,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
                                         
                                     else :
                                         if definition.default_selling_rate:
-                                            selling_rate = definition.default_selling_rate
+                                            selling_rate = frappe.get_doc("Selling Rate",definition.default_selling_rate)
                                         else:
                                             continue
                                         # log_text = "No Selling Rate Found" +" "+ f"""No Selling Rate Found The shipment nummber is : ,{sales_invoice.custom_shipment_number} , Zone:, {zone_with_out_country} , Service Type : ,  {service_type[0].get("name")} , Package type :,{shipment_type }, Selling Group : {selling_group}, Icris Number : {icris_number}"""
@@ -456,7 +456,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
                                         
                                     else :
                                         if definition.default_selling_rate:
-                                            selling_rate = definition.default_selling_rate
+                                            selling_rate = frappe.get_doc("Selling Rate",definition.default_selling_rate)
                                         else:
                                             continue
                                                                                
@@ -639,6 +639,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name):
 
                 
                 sales_invoice.discount_amount = tarif - final_rate
+                sales_invoice.custom_amount_after_discount = tarif - sales_invoice.discount_amount
                 sales_invoice.custom_selling_percentage = final_discount_percentage
 
 
