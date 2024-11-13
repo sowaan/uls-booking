@@ -31,7 +31,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
         except Exception as e:
             frappe.throw(frappe._("Error fetching Sales Invoice Definition: ") + str(e))
 
-        
+        charges_doc = frappe.get_doc("Additional Charges Page")
         shipment = doc.get("shipment_numbers", "")
         frappe.db.set_value("Generate Sales Invoice",name,"status","In Progress")
         shipments = [value.strip() for value in shipment.split(",") if value.strip()]
@@ -585,7 +585,8 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
                 
                 sales_invoice.custom_total_surcharges_excl_fuel = total_charges_other_charges
                 sales_invoice.custom_total_surcharges_incl_fuel = total_charges_incl_fuel
-                FSCpercentage = frappe.db.get_value('Additional Charges Page','feul_surcharge_percentage_on_freight_amount')
+                # FSCpercentage = frappe.db.get_value('Additional Charges Page','feul_surcharge_percentage_on_freight_amount')
+                FSCpercentage = charges_doc.feul_surcharge_percentage_on_freight_amount
                 if FSCpercentage and tarif:
                         FSCcharges = (total_charges_incl_fuel + final_rate) * (float(FSCpercentage) / 100 )
             shipmentbillingcheck = 0
@@ -596,10 +597,12 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
                 shipmentbillingchargesfromcustomer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipment_billing_charges')
                 if shipmentbillingcheck and not shipmentbillingchargesfromcustomer:
                     if imp_exp == "Export":
-                        shipmentbillingamount = frappe.db.get_value('Additional Charges Page', 'export_amount_per_shipment')
+                        # shipmentbillingamount = frappe.db.get_value('Additional Charges Page', 'export_amount_per_shipment')
+                        shipmentbillingamount = charges_doc.export_amount_per_shipment
                         
                     elif imp_exp == "Import":
-                        shipmentbillingamount = frappe.db.get_value('Additional Charges Page', 'import_amount_per_shipment')
+                        # shipmentbillingamount = frappe.db.get_value('Additional Charges Page', 'import_amount_per_shipment')
+                        shipmentbillingamount = charges_doc.import_amount_per_shipment
                 elif shipmentbillingcheck and shipmentbillingchargesfromcustomer:
                     shipmentbillingamount = shipmentbillingchargesfromcustomer
 
@@ -624,8 +627,10 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
                 sales_invoice.custom_freight_invoices = 1
                 if decalred_value > 0:
                     
-                    percent = frappe.db.get_value('Additional Charges Page', 'percentage_on_declare_value')
-                    minimum_amount = frappe.db.get_value('Additional Charges Page', 'minimum_amount_for_declare_value')
+                    # percent = frappe.db.get_value('Additional Charges Page', 'percentage_on_declare_value')
+                    percent = charges_doc.percentage_on_declare_value
+                    # minimum_amount = frappe.db.get_value('Additional Charges Page', 'minimum_amount_for_declare_value')
+                    minimum_amount = charges_doc.minimum_amount_for_declare_value
                     result = decalred_value * (percent / 100)
                     max_insured = max(result , minimum_amount)
                     
