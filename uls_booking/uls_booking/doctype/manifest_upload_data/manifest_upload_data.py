@@ -297,7 +297,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
                                     
                                         
                                         if selling_rate_name:        
-                                            selling_rate_zone = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
+                                            # selling_rate_zone = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
                                             selling_rate = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
                                             
                                             # selling_rate = selling_rate_zone
@@ -471,7 +471,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
                                     
                                         
                                         if selling_rate_name:        
-                                            selling_rate_zone = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
+                                            # selling_rate_zone = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
                                             selling_rate = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
                                             # selling_rate = selling_rate_zone
                                             
