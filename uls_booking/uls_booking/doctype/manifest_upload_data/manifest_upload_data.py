@@ -588,7 +588,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
                 # FSCpercentage = frappe.db.get_value('Additional Charges Page','feul_surcharge_percentage_on_freight_amount')
                 FSCpercentage = charges_doc.feul_surcharge_percentage_on_freight_amount
                 if FSCpercentage and tarif:
-                        FSCcharges = (total_charges_incl_fuel + final_rate) * (float(FSCpercentage) / 100 )
+                        SCcharges = (total_charges_incl_fuel + final_rate) * (FSCpercentage / 100 )
             shipmentbillingcheck = 0
             shipmentbillingamount = 0
             shipmentbillingchargesfromcustomer = 0
