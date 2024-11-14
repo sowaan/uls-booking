@@ -63,14 +63,38 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
             selected_weight = 0
             origin_country = None
             # checkship = frappe.get_list("Sales Invoice",
-            #                             filters = {"custom_shipment_number":shipment})
-            if frappe.db.exists("Sales Invoice", {"custom_shipment_number": shipment}):
-                frappe.get_doc({
-                                            "doctype": "Error Log",
-                                            "method": "Sales Invoice Already present",
-                                            "error": f"""Shipment Number:,{shipment}"""
-                                        }).insert()
-                continue
+            #                             filters = {"custom_shipment_number":shipment}, fields=["name"])
+            # if frappe.db.exists("Sales Invoice", {"custom_shipment_number": shipment}):
+            existing_invoice = frappe.db.sql(
+                        """SELECT name FROM `tabSales Invoice`
+                        WHERE custom_shipment_number = %s
+                        FOR UPDATE""",
+                        shipment,
+                        as_dict=True
+                    )
+
+            if existing_invoice:
+                        print("Present In Sales Invocie")
+                        continue
+            # if checkship:
+            #     print(checkship)
+            #     print("Sales Invoice Is Already Present\n\n\n\n")
+            #     log_text = "Sales Invoice Already Present" + " " + f"{shipment}"
+            #     log.append(log_text)
+
+            #     # Iterate through the rows and only log if 'sales_invoice' is genuinely missing
+            #     for row in doc["shipment_numbers_and_sales_invoices"]:
+            #         if shipment == row['shipment_number']:
+            #             if not row.get('sales_invoice'):  # This ensures only empty `sales_invoice` rows are logged
+            #                 if log:
+            #                     code = ["500 :"]
+            #                     code.extend(log)
+            #                     code_str = " ".join(code)
+            #                     frappe.db.set_value("Shipment Numbers And Sales Invoices", row['name'], "log", code_str)
+            #             else:
+            #                 # Optional: Debugging statement to confirm when `sales_invoice` is present
+            #                 print(f"Sales Invoice {row['sales_invoice']} is already present for shipment {shipment}")
+            #     continue
             
             sales_invoice = frappe.new_doc("Sales Invoice")
             
@@ -747,15 +771,16 @@ def generate_sales_invoice(doc_str):
     end_date = doc.get("end_date")
     shipments = [value.strip() for value in shipment.split(",") if value.strip()]
     chunk_size = 50  # Adjust as needed
-
+   
+   
     # Enqueue each chunk of shipments
     for shipment_chunk in chunk_list(shipments, chunk_size):
-
+        
         # generate_sales_invoice_enqued(doc_str=doc_str,
         #     doc=doc,
         #     shipments=shipment_chunk,
         #     definition_record=definition_record,
-        #     name=name)
+        #     name=name,end_date=end_date)
 
 
         enqueue(
