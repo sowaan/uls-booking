@@ -695,6 +695,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
             sales_invoice.run_method("set_missing_values")
             sales_invoice.run_method("calculate_taxes_and_totals")
             sales_invoice.insert()
+            frappe.db.commit()
             total_invoices  += 1
             sales_name.append(sales_invoice.name)
             for row in doc["shipment_numbers_and_sales_invoices"]:
