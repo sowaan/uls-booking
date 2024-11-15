@@ -18,6 +18,8 @@
   "section_break_ebtp",
   "status",
   "total_shipment_numbers",
+  "total_sales_invoices_generated",
+  "chunk_size",
   "amended_from",
   "shipment_numbers_and_sales_invoices",
   "shipment_numbers",
@@ -139,12 +141,24 @@
    "fieldname": "import__export",
    "fieldtype": "Data",
    "label": "Import / Export"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_sales_invoices_generated",
+   "fieldtype": "Int",
+   "label": "Total Sales Invoices Generated",
+   "read_only": 1
+  },
+  {
+   "fieldname": "chunk_size",
+   "fieldtype": "Int",
+   "label": "Chunk Size"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-08 17:17:24.076266",
+ "modified": "2024-11-15 17:04:47.384138",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Generate Sales Invoice",

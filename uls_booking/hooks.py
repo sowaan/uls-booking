@@ -275,7 +275,8 @@ scheduler_events = {
 # 		"uls_booking.tasks.daily"
 # 	],
 	"hourly": [
-		"uls_booking.uls_booking.api.api.tracking_shipments"
+		"uls_booking.uls_booking.api.api.tracking_shipments",
+    "uls_booking.uls_booking.doctype.manifest_upload_data.manifest_upload_data.generate_remaining_sales_invoice"
 	],
 # 	"weekly": [
 # 		"uls_booking.tasks.weekly"
