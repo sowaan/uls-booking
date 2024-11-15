@@ -770,7 +770,8 @@ def generate_sales_invoice(doc_str):
                     "parent": name,
                     "sales_invoice": ["is", "not set"] 
                 },
-                pluck="shipment_number"
+                pluck="shipment_number",
+                ignore_permissions=True
             )
     
     # chunk_process(doc_str=doc_str,doc = doc,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size)
@@ -800,7 +801,8 @@ def generate_remaining_sales_invoice():
                     "parent": name,
                     "sales_invoice": ["is", "not set"] 
                 },
-                pluck="shipment_number"
+                pluck="shipment_number",
+                ignore_permissions=True
             )
         
         # chunk_process(doc_str=doc_str,doc = doc,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size)
