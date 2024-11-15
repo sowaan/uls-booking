@@ -51,7 +51,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
 
             excluded_codes.append(code.excluded_codes)
             included_codes.append(code.included_codes)
-       
+        total_invoices = 0
         for shipment in shipments:
             log = []
             discounted_amount = discounted_amount +1
@@ -649,7 +649,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
 
 
                 if total_charges_other_charges:
-                    rows = {'item_code': setting.other_charges, 'qty': 1} 
+                    rows = {'item_code': setting.other_charges, 'qty': 1 , 'rate' :total_charges_other_charges} 
                     
                     sales_invoice.append('items', rows)
                 if FSCcharges:
@@ -692,10 +692,11 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
                 continue
             
             discounted_amount = discounted_amount -1
-            
+            sales_invoice.run_method("set_missing_values")
+            sales_invoice.run_method("calculate_taxes_and_totals")
             sales_invoice.insert()
+            total_invoices  += 1
             sales_name.append(sales_invoice.name)
-            
             for row in doc["shipment_numbers_and_sales_invoices"]:
                 if sales_invoice.custom_shipment_number == row['shipment_number']:  # Change row.shipment_number to row['shipment_number']
                     frappe.db.set_value("Shipment Numbers And Sales Invoices", row['name'], "sales_invoice", sales_invoice.name)
@@ -708,25 +709,26 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
                         code = "200 :"
                         frappe.db.set_value("Shipment Numbers And Sales Invoices", row['name'], "log", code)
 
-            sales_invoice.save()
-            if sales_invoice.customer != customer.custom_default_customer:
-                for row in sales_invoice.items:
-                    if row.item_code == setting.other_charges:
+            # sales_invoice.save()
+
+            # if sales_invoice.customer != customer.custom_default_customer:
+            #     for row in sales_invoice.items:
+            #         if row.item_code == setting.other_charges:
                     
-                        frappe.db.set_value(row.doctype , row.name ,"rate" , total_charges_other_charges )
-                        frappe.db.set_value(row.doctype , row.name ,"amount" , total_charges_other_charges )
-                        frappe.db.set_value(row.doctype , row.name ,"base_amount" , total_charges_other_charges )
-                        frappe.db.set_value(row.doctype , row.name ,"base_rate" , total_charges_other_charges )
-                frappe.db.set_value(sales_invoice.doctype , sales_invoice.name ,"total" , total_charges_other_charges +  FSCcharges + tarif + max_insured + shipmentbillingamount )
-                frappe.db.set_value(sales_invoice.doctype , sales_invoice.name ,"grand_total" , total_charges_other_charges +  FSCcharges + tarif + max_insured + shipmentbillingamount)
+            #             frappe.db.set_value(row.doctype , row.name ,"rate" , total_charges_other_charges )
+            #             frappe.db.set_value(row.doctype , row.name ,"amount" , total_charges_other_charges )
+            #             frappe.db.set_value(row.doctype , row.name ,"base_amount" , total_charges_other_charges )
+            #             frappe.db.set_value(row.doctype , row.name ,"base_rate" , total_charges_other_charges )
+            #     frappe.db.set_value(sales_invoice.doctype , sales_invoice.name ,"total" , total_charges_other_charges +  FSCcharges + tarif + max_insured + shipmentbillingamount )
+            #     frappe.db.set_value(sales_invoice.doctype , sales_invoice.name ,"grand_total" , total_charges_other_charges +  FSCcharges + tarif + max_insured + shipmentbillingamount)
+            frappe.db.set_value("Generate Sales Invoice",name,"total_sales_invoices_generated",total_invoices)
         ship_numbers = ', '.join(sales_name)
         frappe.db.set_value("Generate Sales Invoice",name,"sales_invoices",ship_numbers)
         frappe.db.set_value("Generate Sales Invoice",name,"status","Generated")
         
-               
+        # total_invoices=len(sales_name)
 
-
-        print(discounted_amount)
+    
     except json.JSONDecodeError:
         frappe.throw(frappe._("Invalid JSON data"))
     except Exception as e:
@@ -740,44 +742,71 @@ def chunk_list(lst, chunk_size):
     for i in range(0, len(lst), chunk_size):
         yield lst[i:i + chunk_size]
 
+def chunk_process(doc_str,doc,shipments,definition_record,name,end_date,chunk_size):
+    for shipment_chunk in chunk_list(shipments, chunk_size):
         
+        generate_sales_invoice_enqued(doc_str=doc_str,
+        doc=doc,
+        shipments=shipment_chunk,
+        definition_record=definition_record,
+        name=name,end_date=end_date)
+
+        frappe.db.commit()
+
+
+
 @frappe.whitelist()
 def generate_sales_invoice(doc_str):
     doc = json.loads(doc_str)
     name = doc['name']
     definition_record = doc.get("sales_invoice_definition")
-    shipment = doc.get("shipment_numbers", "")
     end_date = doc.get("end_date")
-    shipments = [value.strip() for value in shipment.split(",") if value.strip()]
-    chunk_size = 50  # Adjust as needed
-   
-   
-    # Enqueue each chunk of shipments
-    for shipment_chunk in chunk_list(shipments, chunk_size):
-        
-        # generate_sales_invoice_enqued(doc_str=doc_str,
-        #     doc=doc,
-        #     shipments=shipment_chunk,
-        #     definition_record=definition_record,
-        #     name=name,end_date=end_date)
-
-
-        enqueue(
-            generate_sales_invoice_enqued,
-            doc_str=doc_str,
-            doc=doc,
-            shipments=shipment_chunk,
-            definition_record=definition_record,
-            name=name,
-            end_date =end_date,
-            queue="default"
-        )
-        frappe.db.commit()
+    chunk_size = doc.get("chunk_size")
+    shipment_numbers_without_invoice = []
+    
+    shipment_numbers_without_invoice = frappe.get_list(
+                "Shipment Numbers And Sales Invoices",
+                filters={
+                    "parent": name,
+                    "sales_invoice": ["is", "not set"] 
+                },
+                pluck="shipment_number"
+            )
+    
+    # chunk_process(doc_str=doc_str,doc = doc,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size)
+    enqueue(chunk_process,doc_str=doc_str,doc = doc,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size,queue="default")
     
    
 
+@frappe.whitelist()
+def generate_remaining_sales_invoice():
+    records = frappe.get_all(
+    "Generate Sales Invoice",
+    filters={
+        "total_sales_invoices_generated": ["<", "total_shipment_numbers"]
+    }
+    )
 
-
+    for record in records:
+        doc = frappe.get_doc("Generate Sales Invoice", record.name)
+        name = doc.name
+        definition_record = doc.sales_invoice_definition
+        end_date = doc.end_date
+        chunk_size = doc.get("chunk_size")
+        shipment_numbers_without_invoice = []
+        shipment_numbers_without_invoice = frappe.get_list(
+                "Shipment Numbers And Sales Invoices",
+                filters={
+                    "parent": name,
+                    "sales_invoice": ["is", "not set"] 
+                },
+                pluck="shipment_number"
+            )
+        
+        # chunk_process(doc_str=doc_str,doc = doc,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size)
+        
+        enqueue(chunk_process,doc_str=doc,doc = doc,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size,queue="default")
+        
 
 
 
