@@ -800,6 +800,7 @@ def generate_remaining_sales_invoice():
                 SELECT name
                 FROM `tabGenerate Sales Invoice`
                 WHERE total_sales_invoices_generated < total_shipment_numbers
+                AND docstatus = 1
             """, as_dict=True)
     
     for record in records:
