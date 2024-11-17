@@ -8,7 +8,7 @@ import re
 from datetime import datetime
 
 
-def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,end_date):
+def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,end_date,chunk_size):
     try:
         
        
@@ -52,6 +52,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
             excluded_codes.append(code.excluded_codes)
             included_codes.append(code.included_codes)
         total_invoices = 0
+        actual_invoices = 0
         for shipment in shipments:
             log = []
             discounted_amount = discounted_amount +1
@@ -695,8 +696,8 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
             sales_invoice.run_method("set_missing_values")
             sales_invoice.run_method("calculate_taxes_and_totals")
             sales_invoice.insert()
-            frappe.db.commit()
             total_invoices  += 1
+            actual_invoices +=1 
             sales_name.append(sales_invoice.name)
             for row in doc["shipment_numbers_and_sales_invoices"]:
                 if sales_invoice.custom_shipment_number == row['shipment_number']:  # Change row.shipment_number to row['shipment_number']
@@ -709,6 +710,13 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
                     else:
                         code = "200 :"
                         frappe.db.set_value("Shipment Numbers And Sales Invoices", row['name'], "log", code)
+            if total_invoices == chunk_size:
+                frappe.db.commit()
+                total_invoices =0
+            # frappe.db.set_value("Generate Sales Invoice",name,"total_sales_invoices_generated",actual_invoices)
+        frappe.db.set_value("Generate Sales Invoice",name,"status","Generated")
+            # frappe.db.set_value("Generate Sales Invoice",name,"total_sales_invoices_generated",total_invoices)
+            # frappe.db.commit()
 
             # sales_invoice.save()
 
@@ -722,10 +730,9 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
             #             frappe.db.set_value(row.doctype , row.name ,"base_rate" , total_charges_other_charges )
             #     frappe.db.set_value(sales_invoice.doctype , sales_invoice.name ,"total" , total_charges_other_charges +  FSCcharges + tarif + max_insured + shipmentbillingamount )
             #     frappe.db.set_value(sales_invoice.doctype , sales_invoice.name ,"grand_total" , total_charges_other_charges +  FSCcharges + tarif + max_insured + shipmentbillingamount)
-            frappe.db.set_value("Generate Sales Invoice",name,"total_sales_invoices_generated",total_invoices)
-        ship_numbers = ', '.join(sales_name)
-        frappe.db.set_value("Generate Sales Invoice",name,"sales_invoices",ship_numbers)
-        frappe.db.set_value("Generate Sales Invoice",name,"status","Generated")
+        # ship_numbers = ', '.join(sales_name)
+        # frappe.db.set_value("Generate Sales Invoice",name,"sales_invoices",ship_numbers)
+        
         
         # total_invoices=len(sales_name)
 
@@ -744,15 +751,22 @@ def chunk_list(lst, chunk_size):
         yield lst[i:i + chunk_size]
 
 def chunk_process(doc_str,doc,shipments,definition_record,name,end_date,chunk_size):
+    # count=0
     for shipment_chunk in chunk_list(shipments, chunk_size):
-        
+        # count += 1
         generate_sales_invoice_enqued(doc_str=doc_str,
         doc=doc,
         shipments=shipment_chunk,
         definition_record=definition_record,
-        name=name,end_date=end_date)
+        name=name,end_date=end_date,chunk_size=chunk_size)
 
-        frappe.db.commit()
+        # enqueue(generate_sales_invoice_enqued,doc_str=doc_str,
+        # doc=doc,
+        # shipments=shipment_chunk,
+        # definition_record=definition_record,
+        # name=name,end_date=end_date,queue = "default")
+        # frappe.db.commit()
+        
 
 
 
@@ -782,20 +796,20 @@ def generate_sales_invoice(doc_str):
 
 @frappe.whitelist()
 def generate_remaining_sales_invoice():
-    records = frappe.get_all(
-    "Generate Sales Invoice",
-    filters={
-        "total_sales_invoices_generated": ["<", "total_shipment_numbers"]
-    }
-    )
-
+    records = frappe.db.sql("""
+                SELECT name
+                FROM `tabGenerate Sales Invoice`
+                WHERE total_sales_invoices_generated < total_shipment_numbers
+            """, as_dict=True)
+    
     for record in records:
         doc = frappe.get_doc("Generate Sales Invoice", record.name)
-        name = doc.name
-        definition_record = doc.sales_invoice_definition
-        end_date = doc.end_date
-        chunk_size = doc.get("chunk_size")
-        shipment_numbers_without_invoice = []
+        doc_dict = doc.as_dict()
+        name = doc_dict.get('name')
+        # frappe.throw(str(name))
+        definition_record = doc_dict.get('sales_invoice_definition')
+        end_date = doc_dict.get('end_date')
+        chunk_size = doc_dict.get('chunk_size')
         shipment_numbers_without_invoice = frappe.get_list(
                 "Shipment Numbers And Sales Invoices",
                 filters={
@@ -805,12 +819,10 @@ def generate_remaining_sales_invoice():
                 pluck="shipment_number",
                 ignore_permissions=True
             )
+    
+    # chunk_process(doc_str=doc_str,doc = doc,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size)
+        enqueue(chunk_process,doc_str=doc_dict,doc = doc_dict,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size,queue="default")
         
-        # chunk_process(doc_str=doc_str,doc = doc,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size)
-        
-        enqueue(chunk_process,doc_str=doc,doc = doc,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size,queue="default")
-        
-
 
 
 

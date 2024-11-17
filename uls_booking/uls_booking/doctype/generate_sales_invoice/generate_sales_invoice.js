@@ -17,6 +17,18 @@ frappe.ui.form.on("Generate Sales Invoice", {
                 });
             
             });
+
+            let count = 0;
+            
+            // Loop through the rows in the child table
+            frm.doc.shipment_numbers_and_sales_invoices.forEach(function(row) {
+                if (row.sales_invoice) {
+                    count++;  // Increment the counter if sales_invoice is set
+                }
+            });
+            console.log(count)
+            frm.set_value('total_sales_invoices_generated', count)
+            // frm.save()
         }
 
         // if (frm.doc.docstatus == 1) {
