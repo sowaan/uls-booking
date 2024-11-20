@@ -820,9 +820,9 @@ def generate_remaining_sales_invoice():
                 pluck="shipment_number",
                 ignore_permissions=True
             )
-    
+        chunk_process(doc_str=doc_dict,doc = doc_dict,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size)
     # chunk_process(doc_str=doc_str,doc = doc,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size)
-        enqueue(chunk_process,doc_str=doc_dict,doc = doc_dict,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size,queue="default")
+        # enqueue(chunk_process,doc_str=doc_dict,doc = doc_dict,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size,queue="default")
         
 
 
