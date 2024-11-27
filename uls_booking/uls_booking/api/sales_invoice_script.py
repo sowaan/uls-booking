@@ -90,26 +90,22 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
             definition = frappe.get_doc("Sales Invoice Definition", sales_invoice_definition)
         except frappe.DoesNotExistError:
             # Log the error and display a message to the console
-            logs.append(f"Sales Invoice Already present")
-            message = "Sales Invoice Definition does not exist"
-            print(message)  # Output to console
-            logging.error(message)  # Log the error
-            return logs
+            logs.append(f"Sales Invoice Definition does not exist")
+            return {"message":logs}
             pass
             
-        except frappe.PermissionError:
-            # Log the error and display a message to the console
-            logs.append(f"You do not have permission to access the Sales Invoice Definition")
-            message = "You do not have permission to access the Sales Invoice Definition"
-            print(message)  # Output to console
-            logging.error(message)  # Log the error
-        except Exception as e:
-            # Log the error and display a message to the console
-            logs.append(f"Error fetching Sales Invoice Definition: {str(e)}")
-            message = f"Error fetching Sales Invoice Definition: {str(e)}"
-            print(message)  # Output to console
-            logging.error(message)  # Log the error
+        existing_invoice = frappe.db.sql(
+                        """SELECT name FROM `tabSales Invoice`
+                        WHERE custom_shipment_number = %s
+                        FOR UPDATE""",
+                        shipment_number,
+                        as_dict=True
+                    )
 
+        if existing_invoice:
+            logs.append(f"Already Present In Sales Invocie")
+            return {"message":logs}
+        
         setting = frappe.get_doc("Manifest Setting Definition")
         excluded_codes = []
         included_codes=[]
@@ -690,13 +686,13 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         if not sales_invoice.items:
             logs.append(f"No Items shipment number {shipment_number}, icris number {icris_number}")
             print("No Items")
-            return logs
+            return {"message":logs}
         discounted_amount = discounted_amount -1
         sales_invoice.run_method("set_missing_values")
         sales_invoice.run_method("calculate_taxes_and_totals")
         sales_invoice.insert()
         frappe.db.commit()
-        return sales_invoice.name , logs
+        return {"name":sales_invoice.name , "message":logs}
            
     except json.JSONDecodeError:
         # Instead of throwing an error, use print() for command-line output
