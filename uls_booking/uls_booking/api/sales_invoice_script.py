@@ -218,13 +218,16 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         
         selected_weight = max(weight_frm_R200000, weight_frm_R201000)
         sales_invoice.custom_shipment_weight = selected_weight
-
+        pkg_flg=0
         if sales_invoice.custom_package_type:
             for code in definition.package_type_replacement:
                 if sales_invoice.custom_package_type == code.package_type_code:
                     sales_invoice.custom_package_type = code.package_type
                     shipment_type = sales_invoice.custom_package_type
+                    pkg_flg=1
                     break
+            if pkg_flg==0:
+                shipment_type = sales_invoice.custom_shipment_type
         
             
         else:
