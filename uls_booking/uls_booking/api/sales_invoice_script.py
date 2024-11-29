@@ -431,7 +431,7 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                     sales_invoice.set("taxes_and_charges", stc.name)
                     rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
                     sales_invoice.append('taxes', rows)
-                    logs.append(f"No Territory Found {sales_invoice.custom_shipper_city} so Using default Tax")
+                    logs.append(f"No Territory Found {sales_invoice.custom_consignee_city} so Using default Tax")
                     print("No Territory Found Thats Why using Default Sales Tax and Template")
                     
                 if sales_invoice.custom_shipper_country:

@@ -8,10 +8,11 @@ import re
 from datetime import datetime
 
 
+
 def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,end_date,chunk_size):
     try:
         
-       
+        
         # doc = json.loads(doc_str)
         final_rate = 0
         tarif = 0
@@ -369,7 +370,7 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
                         log_text = "No Customer Found" +" "+ f"""Shipment Number:,{shipment},Icris Number: {icris_number}"""
                         log.append(log_text)
                 
-                    print(sales_invoice.customer)
+                    # print(sales_invoice.customer)
                     try:
                         mm = frappe.get_doc("Territory", {"name": sales_invoice.custom_consignee_city})
                     
