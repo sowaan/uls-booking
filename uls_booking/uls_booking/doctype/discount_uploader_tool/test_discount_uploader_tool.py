@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestDutyandTaxesSalesInvoiceUploader(FrappeTestCase):
+class TestDiscountUploaderTool(FrappeTestCase):
 	pass

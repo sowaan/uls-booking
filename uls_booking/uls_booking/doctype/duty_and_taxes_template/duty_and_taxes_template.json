@@ -10,6 +10,7 @@
   "column_break_wwsz",
   "invoiced",
   "details_section",
+  "customer",
   "date",
   "mawb_number",
   "flight_number",
@@ -21,6 +22,7 @@
   "location",
   "vendor",
   "mno",
+  "unassing_customer",
   "section_break_qnfj",
   "duty",
   "po_tocken",
@@ -193,12 +195,24 @@
    "fieldname": "arrival_date",
    "fieldtype": "Date",
    "label": "Arrival Date"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "default": "0",
+   "fieldname": "unassing_customer",
+   "fieldtype": "Check",
+   "label": "Unassing Customer"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-08 15:53:25.138099",
+ "modified": "2024-11-29 16:25:11.689660",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Duty and Taxes Template",

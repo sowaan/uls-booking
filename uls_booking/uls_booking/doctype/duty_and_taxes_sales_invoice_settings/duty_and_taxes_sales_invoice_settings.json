@@ -5,16 +5,14 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "cod_and_ups_customer_section",
-  "cod_service_provider_customer",
-  "ups_shipment_customer",
-  "column_break_yyhd",
-  "billing_term_for_cod_service_provider",
-  "billing_term_for_ups_shipment",
+  "purchase_invoice_item_section",
+  "purchase_invoice_item",
+  "column_break_mtmf",
   "corporate_customer_section",
-  "billing_term_for_corporate_customer",
-  "column_break_dkjn",
   "unassign_customer",
+  "column_break_dkjn",
+  "unassigned_cod_dt_customer_section",
+  "unassigned_cod_dt_customer",
   "duty_and_taxes_item_table_section",
   "duty_and_taxes_item",
   "clearance_type_section",
@@ -22,54 +20,9 @@
  ],
  "fields": [
   {
-   "fieldname": "cod_service_provider_customer",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "COD Service Provider Customer",
-   "options": "Customer",
-   "reqd": 1
-  },
-  {
-   "fieldname": "ups_shipment_customer",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "UPS Shipment Customer",
-   "options": "Customer",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_yyhd",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "billing_term_for_cod_service_provider",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Billing Term for COD Service Provider",
-   "reqd": 1
-  },
-  {
-   "fieldname": "billing_term_for_ups_shipment",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Billing Term for UPS Shipment",
-   "reqd": 1
-  },
-  {
    "fieldname": "corporate_customer_section",
    "fieldtype": "Section Break",
-   "label": "Corporate Customer"
-  },
-  {
-   "fieldname": "billing_term_for_corporate_customer",
-   "fieldtype": "Data",
-   "label": "Billing Term For Corporate Customer",
-   "reqd": 1
-  },
-  {
-   "fieldname": "cod_and_ups_customer_section",
-   "fieldtype": "Section Break",
-   "label": "COD and UPS Customer"
+   "label": "Unassign Customer"
   },
   {
    "fieldname": "duty_and_taxes_item_table_section",
@@ -102,15 +55,43 @@
   {
    "fieldname": "unassign_customer",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Unassign Customer",
    "options": "Customer",
    "reqd": 1
+  },
+  {
+   "fieldname": "unassigned_cod_dt_customer_section",
+   "fieldtype": "Section Break",
+   "label": "Unassigned COD DT Customer"
+  },
+  {
+   "fieldname": "unassigned_cod_dt_customer",
+   "fieldtype": "Table",
+   "label": "Unassigned COD DT Customer",
+   "options": "Unassigned COD DT Customer"
+  },
+  {
+   "fieldname": "purchase_invoice_item",
+   "fieldtype": "Link",
+   "label": "Purchase Invoice Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_mtmf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "purchase_invoice_item_section",
+   "fieldtype": "Section Break",
+   "label": "Purchase Invoice Item"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-10-21 17:22:37.125635",
+ "modified": "2024-12-02 12:46:25.397285",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Duty and Taxes Sales Invoice Settings",
