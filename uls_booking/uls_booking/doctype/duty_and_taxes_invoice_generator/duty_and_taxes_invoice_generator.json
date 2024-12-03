@@ -1,19 +1,24 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{date}-{mawb_number}-{flight_number}-{type}-{mno}-{######}",
+ "autoname": "format:{mawb_number}-{######}",
  "creation": "2024-10-10 16:14:26.317487",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "sales_invoice_uploader_tab",
   "filters_section",
-  "date",
   "mawb_number",
-  "flight_number",
   "column_break_hsht",
-  "type",
-  "mno",
+  "purchase_invoice_section",
+  "purchase_invoice_created",
+  "column_break_dacg",
+  "purchase_invoice_amount",
+  "sales_invoice_section",
   "number_of_dtt_fetched",
+  "submit_invoices",
+  "all_sales_invoice_created",
+  "column_break_bbak",
   "number_of_sales_invoice_created",
   "section_break_ezpw",
   "duty_and_taxes_template",
@@ -30,7 +35,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Duty and Taxes Sales Invoice Uploader",
+   "options": "Duty and Taxes Invoice Generator",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -38,31 +43,18 @@
   {
    "fieldname": "filters_section",
    "fieldtype": "Section Break",
-   "label": "Filters"
-  },
-  {
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "label": "Date"
+   "label": "Detail"
   },
   {
    "fieldname": "mawb_number",
    "fieldtype": "Data",
-   "label": "MAWB Number"
-  },
-  {
-   "fieldname": "flight_number",
-   "fieldtype": "Data",
-   "label": "Flight Number"
+   "in_list_view": 1,
+   "label": "MAWB Number",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_hsht",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "type",
-   "fieldtype": "Data",
-   "label": "Type"
   },
   {
    "fieldname": "number_of_dtt_fetched",
@@ -71,15 +63,11 @@
    "read_only": 1
   },
   {
-   "fieldname": "mno",
-   "fieldtype": "Data",
-   "label": "MNO"
-  },
-  {
    "fieldname": "section_break_ezpw",
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "duty_and_taxes_template",
    "fieldtype": "Table",
    "label": "Duty and Taxes Template",
@@ -91,15 +79,65 @@
    "fieldtype": "Int",
    "label": "Number of Sales Invoice Created",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "submit_invoices",
+   "fieldtype": "Check",
+   "label": "Submit Invoices"
+  },
+  {
+   "fieldname": "sales_invoice_uploader_tab",
+   "fieldtype": "Tab Break",
+   "label": "Sales Invoice Uploader"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "purchase_invoice_section",
+   "fieldtype": "Section Break",
+   "label": "Purchase Invoice"
+  },
+  {
+   "default": "0",
+   "fieldname": "purchase_invoice_created",
+   "fieldtype": "Check",
+   "label": "Purchase Invoice Created",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_dacg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "purchase_invoice_amount",
+   "fieldtype": "Currency",
+   "label": "Purchase Invoice Amount"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sales_invoice_section",
+   "fieldtype": "Section Break",
+   "label": "Sales Invoice"
+  },
+  {
+   "fieldname": "column_break_bbak",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "all_sales_invoice_created",
+   "fieldtype": "Check",
+   "label": "All Sales Invoice Created",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-15 15:44:06.244349",
+ "modified": "2024-12-03 15:23:16.302942",
  "modified_by": "Administrator",
  "module": "ULS Booking",
- "name": "Duty and Taxes Sales Invoice Uploader",
+ "name": "Duty and Taxes Invoice Generator",
  "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [

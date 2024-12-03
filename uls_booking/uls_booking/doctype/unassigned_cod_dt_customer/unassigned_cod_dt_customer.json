@@ -1,0 +1,57 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-11-29 17:14:38.608814",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "location",
+  "billing_term",
+  "consignee_city",
+  "customer"
+ ],
+ "fields": [
+  {
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Location",
+   "reqd": 1
+  },
+  {
+   "fieldname": "billing_term",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Billing Term",
+   "reqd": 1
+  },
+  {
+   "fieldname": "consignee_city",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Consignee City",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-11-29 17:30:41.280284",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Unassigned COD DT Customer",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

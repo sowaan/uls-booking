@@ -96,7 +96,13 @@ fixtures = [
                                 "custom_currency_code_for_invoice_total",
                                 "custom_compensation_invoices",
                                 "custom_freight_invoices",
-                                "custom_amount_after_discount"
+                                "custom_amount_after_discount",
+
+                                "custom_duty_and_taxes",
+                                "custom_mawb_number",
+                                "custom_flight_number",
+                                "custom_column_break_dpuye",
+                                "custom_arrival_date"
 
                                 )
 	  	  
