@@ -643,10 +643,10 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         max_insured = 0
         if sales_invoice.customer != customer.custom_default_customer:
             sales_invoice.custom_freight_invoices = 1
-            if decalred_value > 0: 
+            if declared_value > 0: 
                 percent = frappe.db.get_single_value('Additional Charges Page', 'percentage_on_declare_value')
                 minimum_amount = frappe.db.get_single_value('Additional Charges Page', 'minimum_amount_for_declare_value')
-                result = decalred_value * (percent / 100)
+                result = declared_value * (percent / 100)
                 max_insured = max(result , minimum_amount)
                 if max_insured > 0 and shipment_type == setting.insurance_shipment_type:
                     rows = {'item_code': setting.insurance_charges, 'qty': '1', 'rate': max_insured}
