@@ -17,6 +17,9 @@
   "shipment_weight",
   "billable_weight",
   "dws_actual",
+  "container_type_code",
+  "reference_number_1",
+  "reference_number_3",
   "column_break_fxse",
   "master_package_id",
   "destination_country",
@@ -25,10 +28,12 @@
   "billing_term",
   "invoice_value",
   "shipment_tracking_status",
-  "terms_of_shipment",
+  "shipment_billing_type",
   "shipment_weight_unit",
   "number_of_packages_in_shipment",
   "dws_dim",
+  "rating_pkg_2_type_code",
+  "reference_number_2",
   "amended_from",
   "shipper_details_section",
   "shipper_number",
@@ -40,19 +45,21 @@
   "shipper_name",
   "shipper_building",
   "shipper_city",
+  "shipper_phone_number",
   "shipper_email_address",
   "consignee_details_section",
   "consignee_number",
   "consignee_contact_name",
   "consignee_street",
   "consignee_country",
-  "consignee_email_address",
+  "consignee_postal_code",
+  "split_duty_and_vat_flag",
   "column_break_mdzg",
   "consignee_name",
   "consignee_building",
   "consignee_city",
-  "split_duty_and_vat_flag",
-  "consignee_postal_code",
+  "consignee_email_address",
+  "consignee_phone_number",
   "pricing_activitynew_doc_and_fields_section",
   "spot_rates_offered",
   "column_break_yzwc",
@@ -74,6 +81,7 @@
   "cs_ern_purpose",
   "cs_investigation_outcome",
   "cs_exception_details",
+  "f9_update_customer_service",
   "brokerage__import_activities_section",
   "shipment_status",
   "detained_status",
@@ -195,11 +203,6 @@
    "fieldname": "shipment_tracking_status",
    "fieldtype": "Data",
    "label": "Shipment Tracking Status"
-  },
-  {
-   "fieldname": "terms_of_shipment",
-   "fieldtype": "Data",
-   "label": "Terms Of Shipment"
   },
   {
    "fieldname": "shipment_weight_unit",
@@ -367,7 +370,7 @@
   },
   {
    "fieldname": "shipment_abandoned_date",
-   "fieldtype": "Data",
+   "fieldtype": "Date",
    "label": "Shipment Abandoned Date"
   },
   {
@@ -553,12 +556,56 @@
    "fieldname": "split_duty_and_vat_flag_master",
    "fieldtype": "Data",
    "label": "Split Duty And VAT Flag"
+  },
+  {
+   "fieldname": "container_type_code",
+   "fieldtype": "Data",
+   "label": "Container Type Code"
+  },
+  {
+   "fieldname": "rating_pkg_2_type_code",
+   "fieldtype": "Data",
+   "label": "Rating Pkg 2 Type Code"
+  },
+  {
+   "fieldname": "reference_number_1",
+   "fieldtype": "Data",
+   "label": "Reference Number 1"
+  },
+  {
+   "fieldname": "reference_number_3",
+   "fieldtype": "Data",
+   "label": "Reference Number 3"
+  },
+  {
+   "fieldname": "reference_number_2",
+   "fieldtype": "Data",
+   "label": "Reference Number 2"
+  },
+  {
+   "fieldname": "shipper_phone_number",
+   "fieldtype": "Data",
+   "label": "Shipper Phone Number"
+  },
+  {
+   "fieldname": "f9_update_customer_service",
+   "fieldtype": "Small Text",
+   "label": "F9 Update"
+  },
+  {
+   "fieldname": "shipment_billing_type",
+   "fieldtype": "Data",
+   "label": "Shipment Billing Type"
+  },
+  {
+   "fieldname": "consignee_phone_number",
+   "fieldtype": "Data",
+   "label": "Consignee Phone Number"
   }
  ],
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2024-11-05 12:58:09.254375",
+ "modified": "2024-12-03 12:02:11.335957",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Shipment Master Details",
@@ -574,7 +621,6 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],
