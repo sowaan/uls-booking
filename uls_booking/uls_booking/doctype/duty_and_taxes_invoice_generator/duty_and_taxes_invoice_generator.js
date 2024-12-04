@@ -12,6 +12,7 @@ frappe.ui.form.on("Duty and Taxes Invoice Generator", {
             frm.add_custom_button('Sales Invoices', () => {
                 console.log("Create Sales Invoies");
                 // frm.create_sales_invoices();
+                
                 frappe.call({
                     method: "uls_booking.uls_booking.doctype.duty_and_taxes_invoice_generator.duty_and_taxes_invoice_generator.create_sales_invoices",
                     args: {
@@ -31,6 +32,17 @@ frappe.ui.form.on("Duty and Taxes Invoice Generator", {
         {
             frm.add_custom_button('Purchase Invoice', () => {
                 console.log("Create Purchase Invoice");
+                frappe.call({
+                    method: "uls_booking.uls_booking.doctype.duty_and_taxes_invoice_generator.duty_and_taxes_invoice_generator.create_purchase_invoice",
+                    args: {
+                        rec_name : frm.doc.name ,
+                    },
+                    callback: function (r) {
+                        if (!r.exc) {
+                            frm.reload_doc();
+                        }
+                    }
+                });
             },'Create')
         }
 

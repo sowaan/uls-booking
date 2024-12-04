@@ -36,6 +36,7 @@ class DutyandTaxesInvoiceGenerator(Document):
 						"duty_and_taxes_template": result[i][0],
 						"tracking_number": result[i][1],
 						"shipment_number": result[i][4],
+						'docstatus' : 1 ,
 					}
 					self.append('duty_and_taxes_template', row)
 					count = count + 1
@@ -84,14 +85,34 @@ def create_sales_invoices(rec_name) :
 
 	si_count = 0
 	for row in self.duty_and_taxes_template :
+		values = {
+			'dt_inv_gen' : self.name ,
+			'shipment_numb' : row.shipment_number
+		}
+
+		# frappe.msgprint(str(row))
 
 		dtt_doc = frappe.get_doc("Duty and Taxes Template",row.duty_and_taxes_template)
 
 		if dtt_doc.invoiced == 1 :
-			frappe.db.set_value( row.doctype , row.name , "logs" , "Invoice already created before." )
+			# frappe.msgprint( str("Duty and Taxes Template Records Table") + "  " +str(row.name))
+			# frappe.db.set_value( "Duty and Taxes Template Records Table" , row.name , "logs" , "Invoice already created before." )
+			query = """
+				UPDATE `tabDuty and Taxes Template Records Table`
+				SET logs = 'Invoice already created before.'
+				WHERE parent = %(dt_inv_gen)s and shipment_number = %(shipment_numb)s
+			"""
+			frappe.db.sql(query , values=values, as_dict=0)
 			continue
 		elif dtt_doc.docstatus != 1 :
-			frappe.db.set_value( row.doctype , row.name , "logs" , "This is Cancelled record." )
+			# frappe.msgprint( str("Duty and Taxes Template Records Table") + "  " +str(row.name))
+			# frappe.db.set_value( "Duty and Taxes Template Records Table" , row.name , "logs" , "This is Cancelled record." )
+			query = """
+				UPDATE `tabDuty and Taxes Template Records Table`
+				SET logs = 'This is Cancelled record.'
+				WHERE parent = %(dt_inv_gen)s and shipment_number = %(shipment_numb)s
+			"""
+			frappe.db.sql(query , values=values, as_dict=0)
 			continue
 
 		r2_list = frappe.db.get_list("R200000",
@@ -242,35 +263,77 @@ def create_sales_invoices(rec_name) :
 				si_doc.submit()
 				
 			if unassign_cust_flag == 0 :
-				frappe.db.set_value(row.doctype , row.name , "logs" , "Invoice Created.")
+				# frappe.msgprint( str("Duty and Taxes Template Records Table") + "  " +str(row.name))
+				# frappe.db.set_value("Duty and Taxes Template Records Table" , row.name , "logs" , "Invoice Created.")
+				query = """
+				UPDATE `tabDuty and Taxes Template Records Table`
+				SET logs = 'Invoice Created.'
+				WHERE parent = %(dt_inv_gen)s and shipment_number = %(shipment_numb)s
+				"""
+				frappe.db.sql(query , values=values, as_dict=0)
+			
 			elif unassign_cust_flag == 1 :
-				frappe.db.set_value(row.doctype , row.name , "logs" , "Invoice Created with Unassign Customer.")
+				# frappe.msgprint( str("Duty and Taxes Template Records Table") + "  " +str(row.name))
+				# frappe.db.set_value("Duty and Taxes Template Records Table" , row.name , "logs" , "Invoice Created with Unassign Customer.")
+				query = """
+				UPDATE `tabDuty and Taxes Template Records Table`
+				SET logs = 'Invoice Created with Unassign Customer.'
+				WHERE parent = %(dt_inv_gen)s and shipment_number = %(shipment_numb)s
+				"""
+				frappe.db.sql(query , values=values, as_dict=0)
 			frappe.db.set_value("Duty and Taxes Template", dtt_doc.name , "invoiced" , 1)
 			si_count = si_count + 1
 			
 
 
 		else :
-			frappe.db.set_value( row.doctype , row.name , "logs" , "No Item found from 'Duty and Tax Sales Invoice Settings' page that is why Item table of Sales Invoice is not creating.")
+			# frappe.msgprint( str("Duty and Taxes Template Records Table") + "  " +str(row.name))
+			# frappe.db.set_value( "Duty and Taxes Template Records Table" , row.name , "logs" , "No Item found from 'Duty and Tax Sales Invoice Settings' page that is why Item table of Sales Invoice is not creating.")
+			query = """
+				UPDATE `tabDuty and Taxes Template Records Table`
+				SET logs = 'No Item found from 'Duty and Tax Sales Invoice Settings' page that is why Item table of Sales Invoice is not creating.'
+				WHERE parent = %(dt_inv_gen)s and shipment_number = %(shipment_numb)s
+			"""
+			frappe.db.sql(query , values=values, as_dict=0)
 
 	frappe.db.set_value(self.doctype , self.name , "number_of_sales_invoice_created" , si_count)
 	frappe.db.set_value(self.doctype , self.name , "all_sales_invoice_created" , 1)
 
 	return True
 
-	# if self.supplier :
-	# 	pi_doc = frappe.new_doc("Purchase Invoice")
-	# 	pi_doc.posting_date = frappe.utils.today()
-	# 	pi_doc.supplier = self.supplier
-	# 	pi_doc.custom_mawb_number = self.mawb_number_for_purchase_invoice
-	# 	pi_doc.custom_flight_number = self.flight_number1
-	# 	pi_doc.custom_arrival_date = self.arrival_date
-	# 	pi_row1 = {'item_code': dtt_settings_doc.purchase_invoice_item , 'qty': 1 , 'rate': self.amount }
-	# 	pi_doc.items = []
-	# 	pi_doc.append('items',pi_row1)
-	# 	pi_doc.insert()
-	# else :
-	# 	frappe.throw("Enter Supplier.")	
+@frappe.whitelist()
+def create_purchase_invoice(rec_name):
+	self = frappe.get_doc("Duty and Taxes Invoice Generator", rec_name)
+	supplier_record = frappe.get_list(
+    "Duty and Taxes Template",
+    filters={'mawb_number': self.mawb_number},
+    fields=["vendor", "flight_number", "arrival_date"]
+		)
+	
+
+
+	
+	if supplier_record[0].vendor :
+
+		dtt_settings_doc = frappe.get_doc("Duty and Taxes Sales Invoice Settings")
+		if frappe.db.exists("Purchase Invoice", {"mawb_number": self.mawb_number}):
+			frappe.db.set_value("Duty and Taxes Invoice Generator",self.name,"log","Purchase invoice already created before.")
+		else:
+			
+			pi_doc = frappe.new_doc("Purchase Invoice")
+			pi_doc.posting_date = frappe.utils.today()
+			pi_doc.supplier = supplier_record[0].vendor
+			pi_doc.custom_mawb_number = self.mawb_number
+			pi_doc.custom_flight_number = supplier_record[0].flight_number1
+			pi_doc.custom_arrival_date = supplier_record[0].arrival_date
+			print(dtt_settings_doc.purchase_invoice_item)
+			pi_row1 = {'item_code': dtt_settings_doc.purchase_invoice_item , 'qty': 1 , 'rate': self.purchase_invoice_amount }
+			pi_doc.items = []
+			pi_doc.append('items',pi_row1)
+			pi_doc.insert()
+			frappe.db.set_value("Duty and Taxes Invoice Generator",self.name,"purchase_invoice_created",1)
+	else :
+		frappe.db.set_value("Duty and Taxes Invoice Generator",self.name,"log","Supplier Not Found")
 
 
 
