@@ -66,6 +66,7 @@
    "label": "Unassigned COD DT Customer"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "unassigned_cod_dt_customer",
    "fieldtype": "Table",
    "label": "Unassigned COD DT Customer",
@@ -91,7 +92,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-12-02 12:46:25.397285",
+ "modified": "2024-12-05 12:01:35.781636",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Duty and Taxes Sales Invoice Settings",

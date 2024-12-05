@@ -121,6 +121,7 @@ def create_sales_invoices(rec_name) :
 					},
 					fields = ["billing_term_field","shipment_type","shipment_weight","custom_shipment_weight_unit","currency_code_for_invoice_total","expanded_invoice_total","shipped_date","input_date","number_of_packages_in_shipment"],
 					)
+		
 
 		r4_list = frappe.db.get_list("R400000",
 						filters={
@@ -150,6 +151,9 @@ def create_sales_invoices(rec_name) :
 		consignee_city = None
 		consignee_phone = None
 		unassign_cust_flag = 0
+
+		if r2_list :
+			billing_term = r2_list[0].billing_term_field
 
 		
 
@@ -307,12 +311,8 @@ def create_purchase_invoice(rec_name):
 	supplier_record = frappe.get_list(
     "Duty and Taxes Template",
     filters={'mawb_number': self.mawb_number},
-    fields=["vendor", "flight_number", "arrival_date"]
+    fields=["vendor", "flight_number", "arrival_date","mno"]
 		)
-	
-
-
-	
 	if supplier_record[0].vendor :
 
 		dtt_settings_doc = frappe.get_doc("Duty and Taxes Sales Invoice Settings")
@@ -324,13 +324,15 @@ def create_purchase_invoice(rec_name):
 			pi_doc.posting_date = frappe.utils.today()
 			pi_doc.supplier = supplier_record[0].vendor
 			pi_doc.custom_mawb_number = self.mawb_number
-			pi_doc.custom_flight_number = supplier_record[0].flight_number1
+			pi_doc.custom_flight_number = supplier_record[0].flight_number
 			pi_doc.custom_arrival_date = supplier_record[0].arrival_date
-			print(dtt_settings_doc.purchase_invoice_item)
+			pi_doc.custom_mno = supplier_record[0].mno
 			pi_row1 = {'item_code': dtt_settings_doc.purchase_invoice_item , 'qty': 1 , 'rate': self.purchase_invoice_amount }
 			pi_doc.items = []
 			pi_doc.append('items',pi_row1)
+			pi_doc.custom_duty_and_taxes_invoice = 1
 			pi_doc.insert()
+			
 			frappe.db.set_value("Duty and Taxes Invoice Generator",self.name,"purchase_invoice_created",1)
 	else :
 		frappe.db.set_value("Duty and Taxes Invoice Generator",self.name,"log","Supplier Not Found")

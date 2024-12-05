@@ -102,7 +102,9 @@ fixtures = [
                                 "custom_mawb_number",
                                 "custom_flight_number",
                                 "custom_column_break_dpuye",
-                                "custom_arrival_date"
+                                "custom_arrival_date",
+                                "custom_mno",
+                                "custom_duty_and_taxes_invoice"
 
                                 )
 	  	  
