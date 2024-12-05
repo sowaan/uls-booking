@@ -1212,9 +1212,7 @@ def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
     
     for line in arrays2:
         pkg_trck = line[pkg_from:pkg_to].strip()
-        # pkg_trck = "49455852868"
-        # print("pkg_trck",pkg_trck,"\n\n")
-        docl = frappe.get_list(main_doc.record_to_modify, filters={"package_tracking_number": pkg_trck })
+        docl = frappe.get_list(main_doc.record_to_modify, filters={"expanded_package_tracking_number": pkg_trck })
         if docl:
             doc = frappe.get_doc(main_doc.record_to_modify , docl[0])
             for child in setting.definition:
@@ -1292,7 +1290,7 @@ class ManifestUploadData(Document):
             while current2_index < len(arrays2):
                 chunk2 = arrays2[current2_index:current2_index + chunk2_size]
                 current2_index += chunk2_size
-                # modified_manifest_update(main_doc = self, arrays2 = chunk2, pkg_from = pkg_from , pkg_to= pkg_to)
+                # modified_manifest_update(main_doc = self, arrays2 = chunk2, pkg_from = pkg_from , pkg_to= pkg_to, date_format = self.date_format)
                 enqueue(modified_manifest_update,main_doc = self, arrays2 = chunk2, pkg_from = pkg_from , pkg_to= pkg_to, date_format = self.date_format,  queue = "default")
                     
                 

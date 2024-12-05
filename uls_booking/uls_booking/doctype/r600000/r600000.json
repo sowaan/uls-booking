@@ -43,7 +43,6 @@
   "dws_minutes",
   "dws_seconds",
   "file_name",
-  "dws_actual",
   "dws_dim"
  ],
  "fields": [
@@ -235,11 +234,6 @@
    "label": "File Name"
   },
   {
-   "fieldname": "dws_actual",
-   "fieldtype": "Data",
-   "label": "DWS Actual"
-  },
-  {
    "fieldname": "dws_dim",
    "fieldtype": "Float",
    "label": "DWS DIM"
@@ -247,7 +241,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-27 10:39:01.732944",
+ "modified": "2024-12-05 12:55:03.454422",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R600000",

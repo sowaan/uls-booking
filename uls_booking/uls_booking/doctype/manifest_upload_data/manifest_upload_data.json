@@ -84,6 +84,7 @@
    "label": "Manifest Modification Process"
   },
   {
+   "default": "R600000",
    "depends_on": "eval: doc.manifest_modification_process == true;",
    "fieldname": "record_to_modify",
    "fieldtype": "Select",
@@ -104,7 +105,7 @@
    "label": "Package Tracking From Index"
   },
   {
-   "default": "69",
+   "default": "70",
    "depends_on": "eval: doc.manifest_modification_process == true;",
    "fieldname": "package_tracking_to_index",
    "fieldtype": "Int",
@@ -112,6 +113,7 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "eval: doc.manifest_modification_process == false;",
    "fieldname": "total_shipment_numbers",
    "fieldtype": "Int",
    "label": "Total Shipment Numbers",
@@ -121,7 +123,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-07 12:34:45.852404",
+ "modified": "2024-12-05 14:34:05.958836",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Upload Data",

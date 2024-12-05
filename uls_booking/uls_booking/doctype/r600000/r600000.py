@@ -7,9 +7,13 @@ import frappe
 class R600000(Document):
     def before_save(self):
         if self.package_length and self.package_width and self.package_height :
-            self.custom_dws_dim = (float(self.package_length) * float(self.package_width) * float(self.package_height)) / 5000
+            self.package_length = float(self.package_length) / 10
+            self.package_width = float(self.package_width) / 10
+            self.package_height = float(self.package_height) / 10
+            self.dws_dim = (float(self.package_length) * float(self.package_width) * float(self.package_height)) / 5000
             time_str = f"{self.dws_hours:02}:{self.dws_minutes:02}:{self.dws_seconds:02}"
             self.time_of_dws = time_str
+            self.dws_actual = float(self.dws_actual) / 10
     # def before_save(self):
     #     # Define helper functions for division outside of the if block
     #     def safe_divide_10(value):
