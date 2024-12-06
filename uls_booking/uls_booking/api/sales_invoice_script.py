@@ -182,7 +182,8 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         icris_number = None
         selling_group = None
         selling_rate = None
-        
+        shipped_date = getdate(sales_invoice.custom_date_shipped)
+        print(shipped_date)
         if sales_invoice.custom_shipper_country == definition.origin_country.upper():
             imp_exp = "Export"
             if sales_invoice.custom_shipper_number:
@@ -299,7 +300,7 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                 if service_type:
                     for icris in icris_account.rate_group:
 
-                        if  icris.service_type == service_type[0].get("name")  and icris.from_date <= posting_date and posting_date <= icris.to_date :
+                        if  icris.service_type == service_type[0].get("name")  and icris.from_date <= shipped_date and shipped_date <= icris.to_date :
                             selling_group = icris.rate_group
                             break
                         
@@ -447,7 +448,7 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                 
                 if service_type:
                     for icris in icris_account.rate_group:
-                        if  icris.service_type == service_type[0].get("name")  and icris.from_date <= posting_date <= icris.to_date:
+                        if  icris.service_type == service_type[0].get("name")  and icris.from_date <= shipped_date <= icris.to_date:
                             selling_group = icris.rate_group
                             break
                 if not selling_group:
