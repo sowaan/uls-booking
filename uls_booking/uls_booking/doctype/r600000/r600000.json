@@ -26,6 +26,7 @@
   "curency_code_for_register_charge",
   "scanning_information",
   "inbound_container_number",
+  "column_break_qwys",
   "inbound_flight_number",
   "outbound_flight_number",
   "incomplete_shipment_flag",
@@ -43,7 +44,9 @@
   "dws_minutes",
   "dws_seconds",
   "file_name",
-  "dws_dim"
+  "dws_dim",
+  "dws_actual",
+  "dws_actual_weight"
  ],
  "fields": [
   {
@@ -237,11 +240,27 @@
    "fieldname": "dws_dim",
    "fieldtype": "Float",
    "label": "DWS DIM"
+  },
+  {
+   "fieldname": "column_break_qwys",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dws_actual",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "DWS Actual",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dws_actual_weight",
+   "fieldtype": "Float",
+   "label": "DWS Actual Weight"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-05 12:55:03.454422",
+ "modified": "2024-12-06 12:09:49.768167",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R600000",
