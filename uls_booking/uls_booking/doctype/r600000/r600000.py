@@ -12,8 +12,10 @@ class R600000(Document):
             self.package_height = float(self.package_height) / 10
             self.dws_dim = (float(self.package_length) * float(self.package_width) * float(self.package_height)) / 5000
             time_str = f"{self.dws_hours:02}:{self.dws_minutes:02}:{self.dws_seconds:02}"
+
             self.time_of_dws = time_str
-            self.dws_actual = float(self.dws_actual) / 10
+            if self.dws_actual_weight:
+                self.dws_actual = float(self.dws_actual_weight) / 10
     # def before_save(self):
     #     # Define helper functions for division outside of the if block
     #     def safe_divide_10(value):

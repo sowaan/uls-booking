@@ -26,7 +26,7 @@ function clear_form_fields(frm) {
     const fields_to_clear = [
         'shipment_number', 'origin_country', 'date_shipped', 'shipment_type','origin_port','destination_port','shipment_tracking_status',
         'bill_term_surcharge_indicator', 'split_duty_and_vat_flag', 'split_duty_and_vat_flag_master','billable_weight',
-        'shipment_weight', 'destination_country', 'import_date', 'billing_term','dws_actual','dws_dim',
+        'shipment_weight', 'destination_country', 'import_date', 'billing_term','dws_actual_weight','dws_dim',
         'shipment_weight_unit', 'number_of_packages_in_shipment','reference_number_1','reference_number_3',
         'shipper_number', 'shipper_contact_name', 'shipper_street', 'shipper_country','consignee_phone_number',
         'shipper_postal_code', 'shipper_name', 'shipper_building', 'shipper_city','reference_number_2','container_type_code',
@@ -50,7 +50,7 @@ async function get_records(frm) {
         // Fetch R600000 records to get shipment number and other values
         const r6 = await frappe.db.get_list('R600000', {
             filters: { 'expanded_package_tracking_number': tracking_number },
-            fields: ["shipment_number", "shipment_tracking_status", "dws_actual", "dws_dim"]
+            fields: ["shipment_number", "shipment_tracking_status", "dws_actual_weight", "dws_dim"]
         });
         
         if (r6 && r6.length > 0) {
@@ -58,7 +58,7 @@ async function get_records(frm) {
             const ship_num = r6_record.shipment_number;
             frm.set_value('shipment_number', r6_record.shipment_number || '');
             frm.set_value('shipment_tracking_status', r6_record.shipment_tracking_status || '');
-            frm.set_value('dws_actual', r6_record.dws_actual || '');
+            frm.set_value('dws_actual_weight', r6_record.dws_actual_weight || '');
             frm.set_value('dws_dim', r6_record.dws_dim || '');
             
 
