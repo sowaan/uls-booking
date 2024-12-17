@@ -15,7 +15,7 @@ class R600000(Document):
 
             self.time_of_dws = time_str
             if self.dws_actual_weight:
-                self.dws_actual = float(self.dws_actual_weight) / 10
+                self.dws_actual_weight = float(self.dws_actual_weight) / 10
     # def before_save(self):
     #     # Define helper functions for division outside of the if block
     #     def safe_divide_10(value):

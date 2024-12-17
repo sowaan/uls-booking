@@ -13,6 +13,7 @@
   "insurance_shipment_type",
   "origin_country",
   "date_conversion_field_names",
+  "sbc_charges_package_types",
   "country_codes_tab",
   "country_codes",
   "surcharges_code_excl_and_incl",
@@ -145,13 +146,19 @@
    "fieldname": "definition",
    "fieldtype": "Table",
    "label": "Definition",
-   "options": "r200000def"
+   "options": "Definition Table"
+  },
+  {
+   "fieldname": "sbc_charges_package_types",
+   "fieldtype": "Table",
+   "label": "SBC Charges Package Types",
+   "options": "SBC Charges Package Types"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-11-07 18:30:54.140707",
+ "modified": "2024-12-17 16:04:26.658842",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Setting Definition",
