@@ -107,6 +107,11 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
             return {"message":logs}
         
         setting = frappe.get_doc("Manifest Setting Definition")
+        sbc_included= []
+        sbc_excluded = []
+        for code in setting.sbc_charges_package_types:
+            sbc_included.append(code.sales_invoice_package_type)
+            sbc_excluded.append(code.excluded_package_types_in_sales_invoice)
         excluded_codes = []
         included_codes=[]
     
@@ -618,7 +623,7 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         if sales_invoice.customer:
             shipmentbillingcheck = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipping_bill_charges_applicable')
             shipmentbillingchargesfromcustomer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipment_billing_charges')
-            if shipmentbillingcheck and not shipmentbillingchargesfromcustomer:
+            if shipmentbillingcheck and not shipmentbillingchargesfromcustomer and shipment_type in sbc_included and shipment_type not in sbc_excluded:
                 if imp_exp == "Export":
                     shipmentbillingamount = frappe.db.get_single_value('Additional Charges Page', 'export_amount_per_shipment')
                     
