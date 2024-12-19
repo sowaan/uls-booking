@@ -24,6 +24,7 @@
   "other_charges",
   "freight_charges",
   "compensation_charges",
+  "include_fuel_charges",
   "modified_definition_tab",
   "definition"
  ],
@@ -32,7 +33,7 @@
    "allow_bulk_edit": 1,
    "fieldname": "country_codes",
    "fieldtype": "Table",
-   "label": "Country Codes",
+   "label": "Country Codes And Surcharges Codes",
    "options": "Country Codes"
   },
   {
@@ -153,12 +154,18 @@
    "fieldtype": "Table",
    "label": "SBC Charges Package Types",
    "options": "SBC Charges Package Types"
+  },
+  {
+   "fieldname": "include_fuel_charges",
+   "fieldtype": "Link",
+   "label": "Include Fuel Charges",
+   "options": "Item"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-12-17 16:04:26.658842",
+ "modified": "2024-12-18 16:23:00.076052",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Setting Definition",

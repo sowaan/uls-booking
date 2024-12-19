@@ -677,6 +677,10 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                 rows = {'item_code' : setting.shipment_billing_charges , 'qty' : '1' , 'rate' : shipmentbillingamount}
                 
                 sales_invoice.append('items' , rows)
+            if total_charges_incl_fuel:
+                rows = {'item_code' : setting.include_fuel_charges , 'qty' : '1' , 'rate' : total_charges_incl_fuel}
+                
+                sales_invoice.append('items' , rows)
 
         export_compensation_amount = 0
         

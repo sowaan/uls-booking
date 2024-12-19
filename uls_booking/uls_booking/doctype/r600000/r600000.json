@@ -33,7 +33,6 @@
   "bypass_bag_or_container_flag",
   "expanded_package_tracking_number",
   "expanded_package_weight",
-  "check",
   "shipment_tracking_status",
   "time_of_dws",
   "date_of_dws",
@@ -180,13 +179,6 @@
    "label": "Expanded Package Weight"
   },
   {
-   "default": "0",
-   "fieldname": "check",
-   "fieldtype": "Check",
-   "label": "Check",
-   "read_only": 1
-  },
-  {
    "fieldname": "shipment_tracking_status",
    "fieldtype": "Data",
    "label": "Shipment Tracking Status"
@@ -260,7 +252,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-06 12:09:49.768167",
+ "modified": "2024-12-18 20:07:31.725496",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R600000",

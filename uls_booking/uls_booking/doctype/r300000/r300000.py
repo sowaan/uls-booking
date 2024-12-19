@@ -8,7 +8,9 @@ import frappe
 class R300000(Document):
     #   pass
 	def before_save(self):
-		self.shipper_city = self.shipper_city.capitalize()
+		if not self.name:
+			if self.shipper_city:
+				self.shipper_city = self.shipper_city.capitalize()
             
 		
 				
