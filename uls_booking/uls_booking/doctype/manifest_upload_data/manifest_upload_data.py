@@ -1019,9 +1019,22 @@ def storing_shipment_number(arrays, frm, to, doc):
 
 
 
+def make_R300000(self):
+    self.shipper_city = self.shipper_city.capitalize()
 
+def make_R400000(self):
+    self.consignee_city = self.consignee_city.capitalize()
 
+def make_R600000(self):
+    self.package_length = float(self.package_length) / 10
+    self.package_width = float(self.package_width) / 10
+    self.package_height = float(self.package_height) / 10
+    self.dws_dim = (float(self.package_length) * float(self.package_width) * float(self.package_height)) / 5000
+    time_str = f"{self.dws_hours:02}:{self.dws_minutes:02}:{self.dws_seconds:02}"
 
+    self.time_of_dws = time_str
+    if self.dws_actual_weight:
+        self.dws_actual_weight = float(self.dws_actual_weight) / 10
 
 
 
@@ -1063,7 +1076,7 @@ def insert_data(arrays, frm, to,date_format,file_proper_name):
                     shipto = row.to_index
                     shipment_num = line[shipst:shipto].strip()
                 
-                if row.field_name == "package_tracking_number":
+                if row.field_name == "expanded_package_tracking_number":
                     pkg_trckt = row.from_index - 1
                     pkg_trckto = row.to_index
                     pkg_trck = line[pkg_trckt:pkg_trckto].strip()
@@ -1104,7 +1117,7 @@ def insert_data(arrays, frm, to,date_format,file_proper_name):
             
             print("Doc found:", docs[0])
             docss = frappe.get_doc(doctype_name, docs[0])
-            docss.set("check", 0)
+            # docss.set("check", 0)
             docss.set("file_name",file_proper_name)
             for child_record in definition.definitions:
                 field_name = child_record.field_name
@@ -1154,6 +1167,19 @@ def insert_data(arrays, frm, to,date_format,file_proper_name):
                         # print(field_data , field_name,"NEW")
                 docss.set(field_name, field_data)
             
+            
+            if doctype_name == "R600000":
+               if docss.package_length and docss.package_width and docss.package_height:
+                   make_R600000(docss)
+
+            elif doctype_name == "R300000":
+                if docss.shipper_city:
+                    make_R300000(docss)
+            elif doctype_name == "R400000":
+                if docss.consignee_city:
+                    make_R400000(docss)
+
+
             docss.save()
             # frappe.db.commit()    
             print(doctype_name, shipment_num, "Updating")
@@ -1199,6 +1225,17 @@ def insert_data(arrays, frm, to,date_format,file_proper_name):
                             field_data = field_data / field.number_divide_with
                 doc.set(field_name, field_data)
             
+            if doctype_name == "R600000":
+                if doc.package_length and docss.package_width and doc.package_height:
+                   make_R600000(doc)
+
+            elif doctype_name == "R300000":
+                if doc.shipper_city:
+                    make_R300000(doc)
+            elif doctype_name == "R400000":
+                if doc.consignee_city:
+                    make_R400000(doc)
+            
             print(doctype_name, shipment_num, "Inserting")
             doc.insert()
             doc.save()
@@ -1238,7 +1275,7 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3):
                     shipto = row.to_index
                     shipment_num = line[shipst:shipto].strip()
                 
-                if row.field_name == "package_tracking_number":
+                if row.field_name == "expanded_package_tracking_number":
                     pkg_trckt = row.from_index - 1
                     pkg_trckto = row.to_index
                     pkg_trck = line[pkg_trckt:pkg_trckto].strip()
@@ -1281,7 +1318,7 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3):
             
             print("Doc found:", docs[0])
             docss = frappe.get_doc(doctype_name, docs[0])
-            docss.set("check", 0)
+            # docss.set("check", 0)
             docss.set("file_name",file_proper_name3)
             for child_record in definition.opsys_definitions:
                 field_name = child_record.field_name
@@ -1330,7 +1367,20 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3):
                             field_data = field_data / field.number_divide_with
                         # print(field_data , field_name,"NEW")
                 docss.set(field_name, field_data)
-            
+
+
+            if doctype_name == "R600000":
+               if docss.package_length and docss.package_width and docss.package_height:
+                   make_R600000(docss)
+
+            elif doctype_name == "R300000":
+                if docss.shipper_city:
+                    make_R300000(docss)
+            elif doctype_name == "R400000":
+                if docss.consignee_city:
+                    make_R400000(docss)
+
+
             docss.save()
             # frappe.db.commit()
             print(doctype_name, shipment_num, "Updating")
@@ -1376,6 +1426,22 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3):
                 doc.set(field_name, field_data)
             
             print(doctype_name, shipment_num, "Inserting")
+
+
+            if doctype_name == "R600000":
+                if doc.package_length and docss.package_width and doc.package_height:
+                   make_R600000(doc)
+
+            elif doctype_name == "R300000":
+                if doc.shipper_city:
+                    make_R300000(doc)
+            elif doctype_name == "R400000":
+                if doc.consignee_city:
+                    make_R400000(doc)
+
+
+
+            print(doctype_name,"\n")
             doc.insert()
             doc.save()
 

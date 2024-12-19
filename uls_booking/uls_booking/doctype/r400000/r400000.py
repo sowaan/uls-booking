@@ -6,10 +6,10 @@ from frappe.model.document import Document
 import frappe
 
 class R400000(Document):
-    # pass
-	def before_save(self):
-		if not self.name:
-			if self.consignee_city:
-				self.consignee_city = self.consignee_city.capitalize()
+    pass
+	# def before_save(self):
+	# 	if not self.name:
+	# 		if self.consignee_city:
+	# 			self.consignee_city = self.consignee_city.capitalize()
 		
 				

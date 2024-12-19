@@ -5,6 +5,5 @@
 from frappe.model.document import Document
 import frappe
 class R401000(Document):
-	
 	pass
 	
