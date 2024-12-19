@@ -5,5 +5,4 @@
 from frappe.model.document import Document
 import frappe
 class R900000(Document):
-
         pass

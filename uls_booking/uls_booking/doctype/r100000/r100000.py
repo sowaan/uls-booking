@@ -8,7 +8,7 @@ from uls_booking.uls_booking.api.sales_invoice_script import generate_single_inv
 class R100000(Document):
     pass
 	# def before_save(self):
-	# 	shipment_number = "WA1865BCDWY"
+	# 	shipment_number = "X3W337JS9SJ"
 	# 	sales_invoice_definition = "Default"
 	# 	end_date = "2024-07-11"
 	# 	generate_single_invoice(shipment_number,sales_invoice_definition,end_date)
