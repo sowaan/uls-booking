@@ -23,7 +23,6 @@
   "invoice_1_commodity_code",
   "invoice_1_license_number",
   "country_of_ultimate_destination",
-  "check",
   "file_name"
  ],
  "fields": [
@@ -113,13 +112,6 @@
    "label": "Invoice 1 Country Of Origin"
   },
   {
-   "default": "0",
-   "fieldname": "check",
-   "fieldtype": "Check",
-   "label": "Check",
-   "read_only": 1
-  },
-  {
    "fieldname": "file_name",
    "fieldtype": "Data",
    "label": "File Name"
@@ -127,7 +119,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-07 13:25:16.881806",
+ "modified": "2024-12-18 20:00:40.631798",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R500000",

@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-12-17 19:37:56.626988",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "from_index",
+  "to_index",
+  "field_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "from_index",
+   "fieldtype": "Int",
+   "label": "From Index"
+  },
+  {
+   "fieldname": "to_index",
+   "fieldtype": "Int",
+   "label": "To Index"
+  },
+  {
+   "fieldname": "field_name",
+   "fieldtype": "Data",
+   "label": "Field Name"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-12-17 19:37:56.626988",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "OPSYS Definition Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

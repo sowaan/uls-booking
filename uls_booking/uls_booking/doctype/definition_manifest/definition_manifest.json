@@ -7,9 +7,12 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "isps_tab",
   "record_type",
   "child_record",
-  "definitions"
+  "definitions",
+  "opsys_tab",
+  "opsys_definitions"
  ],
  "fields": [
   {
@@ -31,11 +34,28 @@
    "fieldname": "child_record",
    "fieldtype": "Check",
    "label": "Child Record"
+  },
+  {
+   "fieldname": "isps_tab",
+   "fieldtype": "Tab Break",
+   "label": "ISPS"
+  },
+  {
+   "fieldname": "opsys_tab",
+   "fieldtype": "Tab Break",
+   "label": "OPSYS"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "opsys_definitions",
+   "fieldtype": "Table",
+   "label": "OPSYS Definitions",
+   "options": "OPSYS Definition Table"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-07 12:03:36.195375",
+ "modified": "2024-12-17 19:38:16.594562",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Definition Manifest",

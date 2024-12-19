@@ -36,7 +36,6 @@
   "insurance_charges",
   "currency_code_for_insurance_charges",
   "freight_charges",
-  "check",
   "column_break_r16sy",
   "currency_code_for_freight_charges",
   "invoice_total",
@@ -542,12 +541,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fieldname": "check",
-   "fieldtype": "Check",
-   "label": "Check"
-  },
-  {
    "fieldname": "shipped_date",
    "fieldtype": "Date",
    "label": "Shipped Date"
@@ -560,7 +553,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-07 13:22:17.886144",
+ "modified": "2024-12-18 19:58:29.433307",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R200000",

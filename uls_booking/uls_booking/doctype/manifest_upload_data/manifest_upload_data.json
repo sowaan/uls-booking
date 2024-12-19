@@ -13,6 +13,8 @@
   "manifest_modification_process",
   "record_to_modify",
   "modified_file",
+  "opsys_upload_data",
+  "opsys_file",
   "column_break_bvll",
   "shipment_number_to_index",
   "shipment_number_from_index",
@@ -23,7 +25,7 @@
  ],
  "fields": [
   {
-   "depends_on": "eval: doc.manifest_modification_process == false;",
+   "depends_on": "eval: doc.manifest_modification_process == false && doc.opsys_upload_data == false;",
    "fieldname": "attach_file",
    "fieldtype": "Attach",
    "label": "Attach File"
@@ -79,6 +81,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval: doc.opsys_upload_data == false;",
    "fieldname": "manifest_modification_process",
    "fieldtype": "Check",
    "label": "Manifest Modification Process"
@@ -118,12 +121,25 @@
    "fieldtype": "Int",
    "label": "Total Shipment Numbers",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.manifest_modification_process==false;",
+   "fieldname": "opsys_upload_data",
+   "fieldtype": "Check",
+   "label": "OPSYS Upload Data"
+  },
+  {
+   "depends_on": "eval:doc.opsys_upload_data == true;",
+   "fieldname": "opsys_file",
+   "fieldtype": "Attach",
+   "label": "OPSYS File"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-12-05 14:34:05.958836",
+ "modified": "2024-12-17 19:17:02.020670",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Upload Data",
