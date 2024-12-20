@@ -43,9 +43,9 @@
   "dws_minutes",
   "dws_seconds",
   "file_name",
+  "dws_actual_weight",
   "dws_dim",
-  "dws_actual",
-  "dws_actual_weight"
+  "dws_actual"
  ],
  "fields": [
   {
@@ -247,12 +247,14 @@
   {
    "fieldname": "dws_actual_weight",
    "fieldtype": "Float",
+   "in_filter": 1,
+   "in_list_view": 1,
    "label": "DWS Actual Weight"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-18 20:07:31.725496",
+ "modified": "2024-12-20 10:44:33.000178",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R600000",

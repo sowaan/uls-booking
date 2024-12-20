@@ -1026,13 +1026,14 @@ def make_R400000(self):
     self.consignee_city = self.consignee_city.capitalize()
 
 def make_R600000(self):
-    self.package_length = float(self.package_length) / 10
-    self.package_width = float(self.package_width) / 10
-    self.package_height = float(self.package_height) / 10
-    self.dws_dim = (float(self.package_length) * float(self.package_width) * float(self.package_height)) / 5000
-    time_str = f"{self.dws_hours:02}:{self.dws_minutes:02}:{self.dws_seconds:02}"
-
-    self.time_of_dws = time_str
+    if self.package_length and self.package_width and self.package_height:
+        self.package_length = float(self.package_length) / 10
+        self.package_width = float(self.package_width) / 10
+        self.package_height = float(self.package_height) / 10
+        self.dws_dim = (float(self.package_length) * float(self.package_width) * float(self.package_height)) / 5000
+    if self.dws_hours and self.dws_minutes and self.dws_seconds:
+        time_str = f"{self.dws_hours:02}:{self.dws_minutes:02}:{self.dws_seconds:02}"
+        self.time_of_dws = time_str
     if self.dws_actual_weight:
         self.dws_actual_weight = float(self.dws_actual_weight) / 10
 
@@ -1166,13 +1167,8 @@ def insert_data(arrays, frm, to,date_format,file_proper_name):
                             field_data = field_data / field.number_divide_with
                         # print(field_data , field_name,"NEW")
                 docss.set(field_name, field_data)
-            
-            
-            if doctype_name == "R600000":
-               if docss.package_length and docss.package_width and docss.package_height:
-                   make_R600000(docss)
 
-            elif doctype_name == "R300000":
+            if doctype_name == "R300000":
                 if docss.shipper_city:
                     make_R300000(docss)
             elif doctype_name == "R400000":
@@ -1224,12 +1220,8 @@ def insert_data(arrays, frm, to,date_format,file_proper_name):
                         if field.number_divide_with:
                             field_data = field_data / field.number_divide_with
                 doc.set(field_name, field_data)
-            
-            if doctype_name == "R600000":
-                if doc.package_length and docss.package_width and doc.package_height:
-                   make_R600000(doc)
-
-            elif doctype_name == "R300000":
+    
+            if doctype_name == "R300000":
                 if doc.shipper_city:
                     make_R300000(doc)
             elif doctype_name == "R400000":
@@ -1369,11 +1361,7 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3):
                 docss.set(field_name, field_data)
 
 
-            if doctype_name == "R600000":
-               if docss.package_length and docss.package_width and docss.package_height:
-                   make_R600000(docss)
-
-            elif doctype_name == "R300000":
+            if doctype_name == "R300000":
                 if docss.shipper_city:
                     make_R300000(docss)
             elif doctype_name == "R400000":
@@ -1427,12 +1415,7 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3):
             
             print(doctype_name, shipment_num, "Inserting")
 
-
-            if doctype_name == "R600000":
-                if doc.package_length and docss.package_width and doc.package_height:
-                   make_R600000(doc)
-
-            elif doctype_name == "R300000":
+            if doctype_name == "R300000":
                 if doc.shipper_city:
                     make_R300000(doc)
             elif doctype_name == "R400000":
@@ -1472,6 +1455,7 @@ def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
 
                 doc.set(field_name,field_data)
                 print(field_name , "  ",field_data)
+            make_R600000(doc)
             doc.save()
         else:
             frappe.get_doc({
