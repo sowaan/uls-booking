@@ -216,7 +216,7 @@
    "collapsible": 1,
    "fieldname": "feul_surcharge_section",
    "fieldtype": "Section Break",
-   "label": "Feul Surcharge"
+   "label": "Fuel Surcharge"
   },
   {
    "fieldname": "feul_surcharge_percentage_on_freight_amount",
@@ -401,7 +401,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-11-02 19:29:08.354429",
+ "modified": "2024-12-20 09:25:11.035658",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Additional Charges Page",
