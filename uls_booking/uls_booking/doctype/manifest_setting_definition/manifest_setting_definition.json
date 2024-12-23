@@ -64,7 +64,7 @@
   {
    "fieldname": "country_codes_tab",
    "fieldtype": "Tab Break",
-   "label": "Country Codes"
+   "label": "Country And Surcharges Codes"
   },
   {
    "allow_bulk_edit": 1,
@@ -165,7 +165,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-12-18 16:23:00.076052",
+ "modified": "2024-12-20 16:45:21.247262",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Setting Definition",
