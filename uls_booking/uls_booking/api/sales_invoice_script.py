@@ -555,41 +555,55 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         surcharge_codes_other_charges = []
 
         if doctype_name:
-            
+    
             r201 = frappe.get_list(
                 "R201000",
                 filters={'shipment_number': shipment_number},
             )
+            
             if r201:
                 docn = frappe.get_doc("R201000", r201[0].name)
+                
+                # Fetch customer applicable surcharges using sales_invoice.customer
+                customer_surcharges = frappe.get_all(
+                    "Customer Surcharges Table",
+                    filters={'parent': sales_invoice.customer},  # Fetch by customer
+                    fields=['surcharge', 'amount']
+                )
+                
+                # Create a dictionary of customer surcharges (code: amount)
+                surcharge_dict = {item['surcharge']: item['amount'] for item in customer_surcharges}
 
                 for row in definition.surcharges:
                     code_name = row.sur_cod_1
                     amount_name = row.sur_amt_1
 
-                    
+                    # Fetch surcharge code and amount from the document
                     code = getattr(docn, code_name, None)
                     amount = getattr(docn, amount_name, None)
 
+                    # Only process surcharges if present in customer table, else skip
+                    if code not in surcharge_dict:
+                        continue  # Skip if no match in customer surcharges
                     
+                    # Use customer surcharge amount if available
+                    if surcharge_dict[code] and surcharge_dict[code] > 0:
+                        amount = surcharge_dict[code]
+
                     try:
                         amount = float(amount)
                     except (ValueError, TypeError):
-                        amount = 0 
+                        amount = 0  
 
-                
+                    # Categorize surcharges
                     if code in included_codes and code not in excluded_codes:
-                        
-                        if code: 
-                            codes_incl_fuel.append(code)
-                            amounts_incl_fuel.append(amount)
-                            surcharge_codes_incl_fuel.append(code_name)
-                    elif code not in excluded_codes and code not in included_codes:
-                        
-                        if code:  
-                            codes_other_charges.append(code)
-                            amounts_other_charges.append(amount)
-                            surcharge_codes_other_charges.append(code_name)
+                        codes_incl_fuel.append(code)
+                        amounts_incl_fuel.append(amount)
+                        surcharge_codes_incl_fuel.append(code_name)
+                    else:
+                        codes_other_charges.append(code)
+                        amounts_other_charges.append(amount)
+                        surcharge_codes_other_charges.append(code_name)
 
             
             sales_invoice.custom_surcharge_excl_fuel = []

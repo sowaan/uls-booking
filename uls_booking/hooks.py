@@ -16,10 +16,11 @@ fixtures = [
         [  
           "fieldname" , "in" , (
 
-                                "custom_booking","custom_icris_account",
+                                "custom_booking",
+                                "custom_icris_account",
 
                                 "custom_import_control",
-                                "custom_allow_delivery_confirmation_signature",
+                               
                                 "custom_extended_area_surcharge",
                                 "custom_additional_handling_charges",
                                 "custom_shipping_bill_charges_applicable",
@@ -32,7 +33,7 @@ fixtures = [
                                 "custom_dutytax_forwarding_surcharge",
                                 "custom_insurance_of_declared_value",
                                 "custom_over_maximum_limit",
-
+                                "custom_applicable_surcharges_and_amount",
                                 
                                 
 
