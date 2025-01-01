@@ -20,7 +20,7 @@ fixtures = [
                                 "custom_icris_account",
 
                                 "custom_import_control",
-                               
+                                "custom_exempt_codes",
                                 "custom_extended_area_surcharge",
                                 "custom_additional_handling_charges",
                                 "custom_shipping_bill_charges_applicable",
