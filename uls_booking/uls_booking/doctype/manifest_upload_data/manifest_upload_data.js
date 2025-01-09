@@ -1,28 +1,28 @@
 // Copyright (c) 2024, fariz and contributors
 // For license information, please see license.txt
 
-// frappe.ui.form.on('Manifest Upload Data', {
-//     refresh: function (frm) {
-
-//         if (frm.doc.docstatus == 1) {
-//             // Add a custom button to the form
-//             frm.add_custom_button(__('Generate Sales Invoice'), function () {
-//                 // Show a message when the button is clicked
-              
-//                 frappe.call({
-//                     method: "uls_booking.uls_booking.doctype.manifest_upload_data.manifest_upload_data.generate_sales_invoice",
-//                     args: { doc_str: frm.doc },
-//                     freeze : true ,
-
-//                 });
-            
-//             });
-//         }
-
-//     },
 
 
+frappe.ui.form.on('Manifest Upload Data', {
+    manifest_modification_process: function (frm) {
+        if (frm.doc.manifest_modification_process == 1) {
+            frm.set_value("date_format", "%Y-%m-%d");
+        }
+        else{
+            frm.set_value("date_format", "%d%b%Y");
+        }
+    },
 
+
+    opsys_upload_data: function(frm){
+        if (frm.doc.opsys_upload_data == 1){
+            frm.set_value("date_format","%d%b%Y")
+        }
+        else{
+            frm.set_value("date_format", "%d%b%Y");
+        }
+    }
+});
 
 
 //     on_submit: function (frm) {
