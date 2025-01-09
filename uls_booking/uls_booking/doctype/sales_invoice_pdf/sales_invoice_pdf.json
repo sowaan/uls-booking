@@ -8,6 +8,7 @@
   "section_break_wsps",
   "start_date",
   "customer",
+  "billing_type",
   "amended_from",
   "column_break_waxl",
   "end_date",
@@ -15,12 +16,13 @@
   "station",
   "section_break_ecaf",
   "total_invoices",
-  "sales_invoices"
+  "customer_with_sales_invoice"
  ],
  "fields": [
   {
    "fieldname": "section_break_wsps",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Details"
   },
   {
    "fieldname": "amended_from",
@@ -37,8 +39,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Customer",
-   "options": "Customer",
-   "reqd": 1
+   "options": "Customer"
   },
   {
    "fieldname": "start_date",
@@ -75,16 +76,28 @@
    "read_only": 1
   },
   {
-   "fieldname": "sales_invoices",
-   "fieldtype": "Long Text",
-   "label": "Sales Invoices",
-   "read_only": 1
+   "allow_on_submit": 1,
+   "fieldname": "customer_with_sales_invoice",
+   "fieldtype": "Table",
+   "label": "Customer With Sales Invoice",
+   "options": "Sales Invoice PDF table"
+  },
+  {
+   "fieldname": "billing_type",
+   "fieldtype": "Select",
+   "label": "Billing Type",
+   "options": "\nWeekly\nMonthly\nDaily"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2024-10-24 16:47:30.716573",
+ "links": [
+  {
+   "link_doctype": "Customer Shipment Invoice",
+   "link_fieldname": "sales_invoice_pdf"
+  }
+ ],
+ "modified": "2025-01-07 11:17:31.180428",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice PDF",

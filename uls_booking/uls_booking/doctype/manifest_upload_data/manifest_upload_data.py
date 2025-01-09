@@ -1030,7 +1030,7 @@ def make_R600000(self):
         self.package_length = float(self.package_length) / 10
         self.package_width = float(self.package_width) / 10
         self.package_height = float(self.package_height) / 10
-        self.dws_dim = (float(self.package_length) * float(self.package_width) * float(self.package_height)) / 5000
+        self.dws_dim = (float(self.package_length) * float(self.package_width) * float(self.package_height)) / 5000.0
     if self.dws_hours and self.dws_minutes and self.dws_seconds:
         time_str = f"{self.dws_hours:02}:{self.dws_minutes:02}:{self.dws_seconds:02}"
         self.time_of_dws = time_str
