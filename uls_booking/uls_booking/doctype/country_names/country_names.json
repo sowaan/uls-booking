@@ -12,6 +12,7 @@
   {
    "fieldname": "countries",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Countries",
    "options": "Country"
   }
@@ -19,7 +20,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-07-18 18:41:37.595804",
+ "modified": "2024-12-31 11:22:21.447279",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Country Names",

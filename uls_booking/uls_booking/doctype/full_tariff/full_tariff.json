@@ -6,10 +6,12 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "full_tariff_group",
   "service_type",
   "based_on",
   "zone",
   "country",
+  "code",
   "mode_of_transportation",
   "column_break_ipoa",
   "package_type",
@@ -21,6 +23,7 @@
  ],
  "fields": [
   {
+   "fetch_from": "full_tariff_group.service_type",
    "fieldname": "service_type",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -54,7 +57,7 @@
    "options": "Country"
   },
   {
-   "default": "Air",
+   "default": "Courier Air",
    "fieldname": "mode_of_transportation",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -104,11 +107,26 @@
    "label": "Packa Rate",
    "options": "Package Rate",
    "reqd": 1
+  },
+  {
+   "fieldname": "full_tariff_group",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Full Tariff Group",
+   "options": "Full Tariff Group"
+  },
+  {
+   "depends_on": "eval: doc.based_on == 'Country' ;",
+   "fetch_from": "country.code",
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "label": "Code",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-24 13:18:38.889697",
+ "modified": "2025-01-02 18:34:29.940326",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Full Tariff",
