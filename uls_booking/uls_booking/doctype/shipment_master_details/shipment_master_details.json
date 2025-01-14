@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:master_package_id",
  "creation": "2024-10-04 12:38:32.152670",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -14,12 +15,15 @@
   "invoice_description",
   "bill_term_surcharge_indicator",
   "split_duty_and_vat_flag_master",
-  "shipment_weight",
-  "billable_weight",
-  "dws_actual",
+  "shipment_weight_",
+  "billable_weight_",
   "container_type_code",
   "reference_number_1",
   "reference_number_3",
+  "dws_actual_",
+  "dws_dim_",
+  "dws_time",
+  "dws_date",
   "column_break_fxse",
   "master_package_id",
   "destination_country",
@@ -27,15 +31,18 @@
   "import_date",
   "billing_term",
   "invoice_value",
+  "currency_code_for_invoice_total",
   "shipment_tracking_status",
   "shipment_billing_type",
   "shipment_weight_unit",
   "number_of_packages_in_shipment",
-  "dws_dim",
   "rating_pkg_2_type_code",
   "reference_number_2",
   "amended_from",
+  "declared_value",
+  "currency_code_of_insured_amount",
   "shipper_details_section",
+  "customer_shipper",
   "shipper_number",
   "shipper_contact_name",
   "shipper_street",
@@ -48,6 +55,7 @@
   "shipper_phone_number",
   "shipper_email_address",
   "consignee_details_section",
+  "customer_consignee",
   "consignee_number",
   "consignee_contact_name",
   "consignee_street",
@@ -101,7 +109,9 @@
   "revised_invoice_or_credit_note_number",
   "column_break_waom",
   "settlement",
-  "credit_note_amount"
+  "credit_note_amount",
+  "section_break_ofar",
+  "dispute_invoice_number_billing"
  ],
  "fields": [
   {
@@ -149,21 +159,6 @@
    "label": "Split Duty and VAT Flag"
   },
   {
-   "fieldname": "shipment_weight",
-   "fieldtype": "Data",
-   "label": "Shipment Weight"
-  },
-  {
-   "fieldname": "billable_weight",
-   "fieldtype": "Data",
-   "label": "Billable Weight"
-  },
-  {
-   "fieldname": "dws_actual",
-   "fieldtype": "Data",
-   "label": "DWS Actual"
-  },
-  {
    "fieldname": "column_break_fxse",
    "fieldtype": "Column Break"
   },
@@ -172,7 +167,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Master Package ID",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "destination_country",
@@ -212,12 +208,7 @@
   {
    "fieldname": "number_of_packages_in_shipment",
    "fieldtype": "Data",
-   "label": "Number Of Packages In Shipment"
-  },
-  {
-   "fieldname": "dws_dim",
-   "fieldtype": "Data",
-   "label": "DWS DIM"
+   "label": "Number of Packages In Shipment"
   },
   {
    "fieldname": "amended_from",
@@ -601,14 +592,95 @@
    "fieldname": "consignee_phone_number",
    "fieldtype": "Data",
    "label": "Consignee Phone Number"
+  },
+  {
+   "fieldname": "customer_shipper",
+   "fieldtype": "Data",
+   "label": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer_consignee",
+   "fieldtype": "Data",
+   "label": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shipment_weight_",
+   "fieldtype": "Float",
+   "label": "Shipment Weight",
+   "precision": "1",
+   "read_only": 1
+  },
+  {
+   "fieldname": "billable_weight_",
+   "fieldtype": "Float",
+   "label": "Billable Weight",
+   "precision": "1",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dws_actual_",
+   "fieldtype": "Float",
+   "label": "Package DWS Actual in KG",
+   "precision": "1",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dws_dim_",
+   "fieldtype": "Float",
+   "label": "Package DWS DIM in KG",
+   "precision": "1",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_ofar",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "dispute_invoice_number_billing",
+   "fieldtype": "Table",
+   "label": "Dispute Invoice Number",
+   "options": "Dispute Invoice Number"
+  },
+  {
+   "fieldname": "declared_value",
+   "fieldtype": "Data",
+   "label": "Declared Value",
+   "read_only": 1
+  },
+  {
+   "fieldname": "currency_code_of_insured_amount",
+   "fieldtype": "Data",
+   "label": "Currency Code of Insured Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dws_time",
+   "fieldtype": "Data",
+   "label": "DWS Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dws_date",
+   "fieldtype": "Date",
+   "label": "DWS Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "currency_code_for_invoice_total",
+   "fieldtype": "Data",
+   "label": "Currency Code of Invoice Value",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-03 12:02:11.335957",
+ "modified": "2025-01-03 17:45:16.064876",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Shipment Master Details",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -624,6 +696,7 @@
    "write": 1
   }
  ],
+ "search_fields": "master_package_id",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
