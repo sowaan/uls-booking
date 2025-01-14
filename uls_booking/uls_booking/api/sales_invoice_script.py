@@ -224,29 +224,35 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         
         selected_weight = max(weight_frm_R200000, weight_frm_R201000)
         sales_invoice.custom_shipment_weight = selected_weight
-        pkg_flg=0
-        if sales_invoice.custom_package_type:
-            for code in definition.package_type_replacement:
-                if sales_invoice.custom_package_type == code.package_type_code:
-                    sales_invoice.custom_package_type = code.package_type
-                    shipment_type = sales_invoice.custom_package_type
-                    pkg_flg=1
-                    break
-            if pkg_flg==0:
-                shipment_type = sales_invoice.custom_shipment_type
+        # pkg_flg=0
+        # if sales_invoice.custom_package_type:
+        #     for code in definition.package_type_replacement:
+        #         if sales_invoice.custom_package_type == code.package_type_code:
+        #             sales_invoice.custom_package_type = code.package_type
+        #             shipment_type = sales_invoice.custom_package_type
+        #             pkg_flg=1
+        #             break
+        #     if pkg_flg==0:
+        #         shipment_type = sales_invoice.custom_shipment_type
         
             
+        # else:
+        #     shipment_type = sales_invoice.custom_shipment_type
+
+        if sales_invoice.custom_package_type:
+            shipment_type = sales_invoice.custom_package_type
         else:
             shipment_type = sales_invoice.custom_shipment_type
+            
         try:
             icris_account = frappe.get_doc("ICRIS Account", icris_number)
-            
+        
         except frappe.DoesNotExistError:
             logs.append(f"No icris Account Found {icris_number}")
             print("No icris Account Found")
             if definition.unassigned_icris_number:
                 icris_account = frappe.get_doc("ICRIS Account", definition.unassigned_icris_number)
-              
+        print(shipment_type)
         if sales_invoice.custom_billing_term in export_billing_term and sales_invoice.custom_shipper_country == definition.origin_country.upper():
             check1 = frappe.get_list("ICRIS List",
                                     filters = {"shipper_no":icris_number})
@@ -594,8 +600,10 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                     
                     surcharge_amount = surcharge_dict.get(code)
 
-                    if surcharge_amount is not None and surcharge_amount > 0:
-                        amount = surcharge_amount
+                    
+                    if surcharge_amount is not None:
+                        if surcharge_amount > 0:
+                            amount = surcharge_amount
                     else:
                         # If the code is not found or the amount is 0 or negative, use the amount from the document
                         if amount is not None:
@@ -671,7 +679,8 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                 shipmentbillingamount = shipmentbillingchargesfromcustomer
 
         declared_value = sales_invoice.custom_insurance_amount
-        decalred_value = 0  
+        if declared_value is None:
+            declared_value = 0  
         if isinstance(declared_value, (int, float)):
             declared_value = float(declared_value)
         elif isinstance(declared_value, str):
@@ -687,11 +696,13 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         if sales_invoice.customer != customer.custom_default_customer:
             sales_invoice.custom_freight_invoices = 1
             if declared_value > 0: 
+                print("Declared Value")
                 percent = frappe.db.get_single_value('Additional Charges Page', 'percentage_on_declare_value')
                 minimum_amount = frappe.db.get_single_value('Additional Charges Page', 'minimum_amount_for_declare_value')
                 result = declared_value * (percent / 100)
                 max_insured = max(result , minimum_amount)
                 if max_insured > 0 and shipment_type == setting.insurance_shipment_type:
+                    print("Max Insured")
                     rows = {'item_code': setting.insurance_charges, 'qty': '1', 'rate': max_insured}
                     sales_invoice.append('items', rows)
             sales_invoice.discount_amount = tarif - final_rate
