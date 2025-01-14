@@ -19,6 +19,7 @@
   "import__export",
   "full_tariff",
   "rate_creation_tool",
+  "full_tariff_group",
   "section_break_oyzq",
   "package_rate"
  ],
@@ -51,6 +52,7 @@
    "read_only": 1
   },
   {
+   "default": "Air Courier",
    "fieldname": "mode_of_transportation",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -127,11 +129,18 @@
    "hidden": 1,
    "label": "Naming Series",
    "read_only": 1
+  },
+  {
+   "fieldname": "full_tariff_group",
+   "fieldtype": "Link",
+   "label": "Full Tariff Group",
+   "options": "Full Tariff Group",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-27 15:25:32.272857",
+ "modified": "2025-01-11 18:32:54.221430",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Selling Rate",

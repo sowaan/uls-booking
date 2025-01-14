@@ -19,6 +19,7 @@
   "import__export",
   "full_tariff",
   "rate_creation_tool",
+  "full_tariff_group",
   "section_break_oyzq",
   "package_rate"
  ],
@@ -127,11 +128,18 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Naming Series"
+  },
+  {
+   "fieldname": "full_tariff_group",
+   "fieldtype": "Link",
+   "label": "Full Tariff Group",
+   "options": "Full Tariff Group",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-27 16:09:09.857752",
+ "modified": "2025-01-11 18:35:35.626539",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Buying Rate",
