@@ -976,6 +976,7 @@ def check_user_permission(doc, method=None) :
 
 
 
+
 @frappe.whitelist()
 def get_full_tariff_with_rate_grp_wise(rate_group) :
 
@@ -1116,6 +1117,72 @@ def insert_rate_grp_from_erp(rec, full_tariff_group, doctype, rate_group) :
 
 
     return "Success"
+
+
+
+
+@frappe.whitelist()
+def insert_add_discount_rate_grp_from_erp(rec, full_tariff_group, doctype, rate_group) :
+    
+    rec = json.loads(rec)
+    country_code = rec["country"]
+
+    country_list = frappe.get_list("Country", filters={
+                        'code' : country_code
+                    })
+    if country_list :          
+        country = country_list[0].name
+
+        zone_list = frappe.get_list("Country Names", 
+                        filters={
+                            'countries' : country
+                        },fields=['parent'],
+                        ignore_permissions=True)
+        
+        # return zone_list
+        if zone_list :
+            zone = zone_list[0].parent
+            
+            existing_rec = frappe.db.exists({"doctype": "Full Tariff", "full_tariff_group": full_tariff_group , "based_on":"Zone", "zone": zone , "service_type": rec["service_type"] , "package_type": rec["package_type"] , })
+            if existing_rec :
+                existing_rec_doc = frappe.get_doc('Full Tariff' , existing_rec)
+
+                existing_rec_in_b_s = frappe.db.exists({"doctype": doctype, "rate_group": rate_group , "based_on":"Country", "country": country , "service_type": rec["service_type"] , "package_type": rec["package_type"] , })
+
+                if not existing_rec_in_b_s :
+
+                    new_rate = frappe.new_doc(doctype)
+                    new_rate.rate_group = rate_group
+                    new_rate.full_tariff_group = full_tariff_group
+                    new_rate.based_on = 'Country'
+                    new_rate.country = country
+                    new_rate.service_type = rec["service_type"]
+                    new_rate.package_type = rec["package_type"]
+                    
+                    for package in rec["package_rate"]:
+                        weight = package.get("weight")
+                        discount = package.get("percentage")
+                        rate = package.get("rate")
+
+                        for r in existing_rec_doc.package_rate :
+                            if float(r.weight) == float(weight) :
+                                rate = float(r.rate) * ( 1 - float(discount) / 100 )
+
+                                new_rate.append('package_rate', {
+                                    'weight': float(weight),
+                                    'discount_percentage': float(discount),
+                                    'rate': float(rate),
+                                    'docstatus' : 0,
+                                })
+                                break
+
+                    new_rate.insert()
+                    new_rate.save()
+                    frappe.db.commit()
+
+    return "Success"
+
+
 
 
 
