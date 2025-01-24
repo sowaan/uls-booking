@@ -105,7 +105,8 @@ fixtures = [
                                 "custom_column_break_dpuye",
                                 "custom_arrival_date",
                                 "custom_mno",
-                                "custom_duty_and_taxes_invoice"
+                                "custom_duty_and_taxes_invoice",
+                                "custom_dt_vendor"
 
                                 )
 	  	  

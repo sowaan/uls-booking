@@ -209,6 +209,7 @@ def create_sales_invoices(rec_name) :
 		si_doc.custom_consignee_phone_number = consignee_phone
 		si_doc.custom_duty_and_taxes_invoice = 1
 		si_doc.custom_mawb_number = dtt_doc.mawb_number
+		si_doc.custom_dt_vendor = dtt_doc.vendor
 		si_doc.custom_arrival_date = dtt_doc.arrival_date
 		si_doc.custom_type = dtt_doc.type
 		si_doc.custom_location = dtt_doc.location
