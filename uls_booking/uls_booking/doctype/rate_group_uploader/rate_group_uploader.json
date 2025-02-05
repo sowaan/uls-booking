@@ -1,0 +1,145 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{rate_group}-{#####}",
+ "creation": "2025-02-05 14:05:55.581287",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "rate_group_type_section",
+  "rate_group_type",
+  "column_break_unnf",
+  "posting_date",
+  "section_break_dkrv",
+  "rate_group_column",
+  "rate_group",
+  "column_break_gcad",
+  "from_date",
+  "column_break_zbob",
+  "to_date",
+  "icris_account_section",
+  "icris_account_table",
+  "column_break_zdtw",
+  "section_break_7fbi",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_7fbi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rate Group Uploader",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "rate_group_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Rate Group Type",
+   "options": "\nSelling Rate Group\nBuying Rate Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_dkrv",
+   "fieldtype": "Section Break",
+   "label": "Rate Group"
+  },
+  {
+   "fieldname": "rate_group",
+   "fieldtype": "Dynamic Link",
+   "label": "Rate Group",
+   "options": "rate_group_type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_gcad",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rate_group_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rate_group_type_section",
+   "fieldtype": "Section Break",
+   "label": "Rate Group Type"
+  },
+  {
+   "fieldname": "column_break_zbob",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "icris_account_section",
+   "fieldtype": "Section Break",
+   "label": "ICRIS Account"
+  },
+  {
+   "fieldname": "column_break_unnf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_zdtw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "icris_account_table",
+   "fieldtype": "Table",
+   "label": "ICRIS Account",
+   "options": "ICRIS Account Table",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-02-05 15:03:20.557134",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Rate Group Uploader",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
