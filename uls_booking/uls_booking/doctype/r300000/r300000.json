@@ -31,7 +31,8 @@
   "shipper_customs",
   "alternate_tracking_number_1",
   "shipper_contact_name",
-  "file_name"
+  "file_name",
+  "file_type"
  ],
  "fields": [
   {
@@ -164,11 +165,18 @@
    "fieldname": "file_name",
    "fieldtype": "Data",
    "label": "File Name"
+  },
+  {
+   "fieldname": "file_type",
+   "fieldtype": "Select",
+   "label": "File Type",
+   "options": "\nOPSYS\nISPS",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-03 12:07:47.466176",
+ "modified": "2025-02-06 14:38:16.190857",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R300000",

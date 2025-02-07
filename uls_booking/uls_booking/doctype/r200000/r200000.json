@@ -36,6 +36,7 @@
   "insurance_charges",
   "currency_code_for_insurance_charges",
   "freight_charges",
+  "manifest_import_date",
   "column_break_r16sy",
   "currency_code_for_freight_charges",
   "invoice_total",
@@ -66,6 +67,7 @@
   "currency_code_for_register_charge_amount",
   "other_charges_amount",
   "file_name",
+  "manifest_input_date",
   "column_break_ivkpa",
   "currency_code_for_other_charge_amt",
   "shipment_agreement_type",
@@ -95,7 +97,8 @@
   "expanded_packages_in_shipment",
   "payment_collection_service_flag",
   "payment_collection_service_hold_flag",
-  "shipped_date"
+  "shipped_date",
+  "file_type"
  ],
  "fields": [
   {
@@ -128,7 +131,9 @@
   {
    "fieldname": "import_date",
    "fieldtype": "Data",
-   "label": "Import Date"
+   "hidden": 1,
+   "label": "Import Date",
+   "read_only": 1
   },
   {
    "fieldname": "destination_country",
@@ -303,7 +308,9 @@
   {
    "fieldname": "input_date",
    "fieldtype": "Data",
-   "label": "Input Date"
+   "hidden": 1,
+   "label": "Input Date",
+   "read_only": 1
   },
   {
    "fieldname": "shipment_type_hold",
@@ -549,11 +556,28 @@
    "fieldname": "file_name",
    "fieldtype": "Data",
    "label": "File Name"
+  },
+  {
+   "fieldname": "file_type",
+   "fieldtype": "Select",
+   "label": "File Type",
+   "options": "\nOPSYS\nISPS",
+   "read_only": 1
+  },
+  {
+   "fieldname": "manifest_import_date",
+   "fieldtype": "Date",
+   "label": "Manifest Import Date"
+  },
+  {
+   "fieldname": "manifest_input_date",
+   "fieldtype": "Date",
+   "label": "Manifest Input Date"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-18 19:58:29.433307",
+ "modified": "2025-02-07 12:18:51.311430",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R200000",
