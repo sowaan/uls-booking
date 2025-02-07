@@ -16,7 +16,8 @@
   "customer",
   "date_shipped",
   "import__export",
-  "import_date"
+  "import_date",
+  "manifest_file_type"
  ],
  "fields": [
   {
@@ -74,11 +75,16 @@
    "fieldname": "import_date",
    "fieldtype": "Date",
    "label": "Import Date"
+  },
+  {
+   "fieldname": "manifest_file_type",
+   "fieldtype": "Data",
+   "label": "Manifest File Type"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-07 18:06:53.564844",
+ "modified": "2025-02-07 18:23:16.213108",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Shipment Number",

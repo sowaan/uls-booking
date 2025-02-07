@@ -869,6 +869,7 @@ def storing_shipment_number(arrays, frm, to, doc):
             billing_term = frappe.get_value("R200000", {"shipment_number": shipment}, "billing_term_field")
             date_shipped = frappe.get_value("R200000", {"shipment_number": shipment}, "shipped_date")
             import_date = frappe.get_value("R200000", {"shipment_number": shipment}, "manifest_import_date")
+            file_type = frappe.get_value("R200000", {"shipment_number": shipment}, "file_type")
             shipment_doc = frappe.get_doc("Shipment Number",shipment)
             file_name = frappe.get_value("R200000",{"shipment_number":shipment},"file_name")
             customer = None
@@ -937,6 +938,7 @@ def storing_shipment_number(arrays, frm, to, doc):
             shipment_doc.set("file_name",file_name)
             shipment_doc.set("import__export",import_export)
             shipment_doc.set("import_date",import_date)
+            shipment_doc.set("manifest_file_type",file_type)
 
             # shipment_doc.insert()
             shipment_doc.save()
@@ -945,6 +947,7 @@ def storing_shipment_number(arrays, frm, to, doc):
         else:
             date_shipped = frappe.get_value("R200000", {"shipment_number": shipment}, "shipped_date")
             import_date = frappe.get_value("R200000", {"shipment_number": shipment}, "manifest_import_date")
+            file_type = frappe.get_value("R200000", {"shipment_number": shipment}, "file_type")
             billing_term = frappe.get_value("R200000", {"shipment_number": shipment}, "billing_term_field")
             file_name = frappe.get_value("R200000",{"shipment_number":shipment},"file_name")
             customer = None
@@ -1013,6 +1016,7 @@ def storing_shipment_number(arrays, frm, to, doc):
             shipment_doc.set("file_name",file_name)
             shipment_doc.set("import__export",import_export)
             shipment_doc.set("import_date",import_date)
+            shipment_doc.set("manifest_file_type",file_type)
 
             shipment_doc.insert()
             shipment_doc.save()
