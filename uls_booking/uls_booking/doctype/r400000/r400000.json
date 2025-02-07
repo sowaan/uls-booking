@@ -37,7 +37,8 @@
   "consignee_tax_id__number",
   "consignee_po_number_suffix",
   "broker_code",
-  "file_name"
+  "file_name",
+  "file_type"
  ],
  "fields": [
   {
@@ -200,11 +201,18 @@
    "fieldname": "consignee_po_number",
    "fieldtype": "Data",
    "label": "Reference Number 3"
+  },
+  {
+   "fieldname": "file_type",
+   "fieldtype": "Select",
+   "label": "File Type",
+   "options": "\nOPSYS\nISPS",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-03 14:35:03.674084",
+ "modified": "2025-02-06 14:38:41.640946",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R400000",

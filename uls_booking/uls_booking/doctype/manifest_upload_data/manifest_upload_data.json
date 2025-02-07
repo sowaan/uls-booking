@@ -6,6 +6,19 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_break_wqxl",
+  "column_break_bvll",
+  "shipment_number_to_index",
+  "shipment_number_from_index",
+  "amended_from",
+  "date_format",
+  "package_tracking_from_index",
+  "package_tracking_to_index",
+  "manifest_file_type",
+  "export_import",
+  "shipped_date",
+  "import_date",
+  "column_break_xpdh",
   "from_index",
   "to_index",
   "total_shipment_numbers",
@@ -14,18 +27,11 @@
   "record_to_modify",
   "modified_file",
   "opsys_upload_data",
-  "opsys_file",
-  "column_break_bvll",
-  "shipment_number_to_index",
-  "shipment_number_from_index",
-  "amended_from",
-  "date_format",
-  "package_tracking_from_index",
-  "package_tracking_to_index"
+  "opsys_file"
  ],
  "fields": [
   {
-   "depends_on": "eval: doc.manifest_modification_process == false && doc.opsys_upload_data == false;",
+   "depends_on": "eval: doc.manifest_file_type == \"ISPS\";",
    "fieldname": "attach_file",
    "fieldtype": "Attach",
    "label": "ISPS File"
@@ -41,28 +47,28 @@
   },
   {
    "default": "45",
-   "depends_on": "eval: doc.manifest_modification_process == false;",
+   "depends_on": "eval: doc.manifest_file_type == \"ISPS\" || doc.manifest_file_type == \"OPSYS\";",
    "fieldname": "from_index",
    "fieldtype": "Int",
    "label": "From Index"
   },
   {
    "default": "50",
-   "depends_on": "eval: doc.manifest_modification_process == false;",
+   "depends_on": "eval: doc.manifest_file_type == \"ISPS\" || doc.manifest_file_type == \"OPSYS\";",
    "fieldname": "to_index",
    "fieldtype": "Data",
    "label": "To Index"
   },
   {
    "default": "34",
-   "depends_on": "eval: doc.manifest_modification_process == false;",
+   "depends_on": "eval: doc.manifest_file_type == \"ISPS\" || doc.manifest_file_type == \"OPSYS\";",
    "fieldname": "shipment_number_from_index",
    "fieldtype": "Int",
    "label": "Shipment Number From Index"
   },
   {
    "default": "44",
-   "depends_on": "eval: doc.manifest_modification_process == false;",
+   "depends_on": "eval: doc.manifest_file_type == \"ISPS\" || doc.manifest_file_type == \"OPSYS\";",
    "fieldname": "shipment_number_to_index",
    "fieldtype": "Int",
    "label": "Shipment Number To Index"
@@ -77,46 +83,46 @@
    "in_list_view": 1,
    "label": "Date Format",
    "options": "%d%m%Y\n%d%b%Y\n%d-%m-%Y\n%Y-%m-%d",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "default": "0",
-   "depends_on": "eval: doc.opsys_upload_data == false;",
    "fieldname": "manifest_modification_process",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Manifest Modification Process"
   },
   {
    "default": "R600000",
-   "depends_on": "eval: doc.manifest_modification_process == true;",
+   "depends_on": "eval: doc.manifest_file_type == \"DWS\";",
    "fieldname": "record_to_modify",
    "fieldtype": "Select",
    "label": "DocType To Modify",
    "options": "R100000\nR200000\nR201000\nR202000\nR300000\nR400000\nR401000\nR402000\nR500000\nR600000\nR900000"
   },
   {
-   "depends_on": "eval: doc.manifest_modification_process == true;",
+   "depends_on": "eval: doc.manifest_file_type == \"DWS\";",
    "fieldname": "modified_file",
    "fieldtype": "Attach",
    "label": "Modified File"
   },
   {
    "default": "52",
-   "depends_on": "eval: doc.manifest_modification_process == true;",
+   "depends_on": "eval: doc.manifest_file_type == \"DWS\";",
    "fieldname": "package_tracking_from_index",
    "fieldtype": "Int",
    "label": "Package Tracking From Index"
   },
   {
    "default": "70",
-   "depends_on": "eval: doc.manifest_modification_process == true;",
+   "depends_on": "eval: doc.manifest_file_type == \"DWS\";",
    "fieldname": "package_tracking_to_index",
    "fieldtype": "Int",
    "label": "Package tracking To Index"
   },
   {
    "allow_on_submit": 1,
-   "depends_on": "eval: doc.manifest_modification_process == false;",
    "fieldname": "total_shipment_numbers",
    "fieldtype": "Int",
    "label": "Total Shipment Numbers",
@@ -124,22 +130,57 @@
   },
   {
    "default": "0",
-   "depends_on": "eval: doc.manifest_modification_process==false;",
    "fieldname": "opsys_upload_data",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "OPSYS Upload Data"
   },
   {
-   "depends_on": "eval:doc.opsys_upload_data == true;",
+   "depends_on": "eval: doc.manifest_file_type == \"OPSYS\";",
    "fieldname": "opsys_file",
    "fieldtype": "Attach",
    "label": "OPSYS File"
+  },
+  {
+   "fieldname": "manifest_file_type",
+   "fieldtype": "Select",
+   "label": "Manifest File Type",
+   "options": "\nDWS\nISPS\nOPSYS",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval: doc.manifest_file_type === \"ISPS\" || doc.manifest_file_type === \"OPSYS\";",
+   "fieldname": "export_import",
+   "fieldtype": "Select",
+   "label": "Export/ Import",
+   "mandatory_depends_on": "eval: doc.manifest_file_type === \"ISPS\" || doc.manifest_file_type === \"OPSYS\";",
+   "options": "\nExport\nImport"
+  },
+  {
+   "depends_on": "eval: doc.export_import == \"Export\";",
+   "fieldname": "shipped_date",
+   "fieldtype": "Date",
+   "label": "Shipped Date"
+  },
+  {
+   "depends_on": "eval: doc.export_import == \"Import\";",
+   "fieldname": "import_date",
+   "fieldtype": "Date",
+   "label": "Import Date"
+  },
+  {
+   "fieldname": "column_break_xpdh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_wqxl",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-01-07 15:05:43.788876",
+ "modified": "2025-02-06 12:55:59.555626",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Upload Data",

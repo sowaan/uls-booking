@@ -23,7 +23,8 @@
   "invoice_1_commodity_code",
   "invoice_1_license_number",
   "country_of_ultimate_destination",
-  "file_name"
+  "file_name",
+  "file_type"
  ],
  "fields": [
   {
@@ -115,11 +116,18 @@
    "fieldname": "file_name",
    "fieldtype": "Data",
    "label": "File Name"
+  },
+  {
+   "fieldname": "file_type",
+   "fieldtype": "Select",
+   "label": "File Type",
+   "options": "\nOPSYS\nISPS",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-18 20:00:40.631798",
+ "modified": "2025-02-06 14:40:40.050433",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R500000",

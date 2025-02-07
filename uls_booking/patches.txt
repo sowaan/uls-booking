@@ -2,6 +2,10 @@
 # Patches added in this section will be executed after doctypes are migrated
 
 uls_booking.uls_booking.doctype.manifest_upload_data.patches.set_date_shipped
+uls_booking.uls_booking.doctype.manifest_upload_data.patches.set_manifest_fields
+uls_booking.uls_booking.doctype.manifest_upload_data.patches.set_importdate_r200000
+uls_booking.uls_booking.doctype.manifest_upload_data.patches.set_input_date
+
 
 
 

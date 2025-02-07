@@ -45,7 +45,8 @@
   "file_name",
   "dws_actual_weight",
   "dws_dim",
-  "dws_actual"
+  "dws_actual",
+  "file_type"
  ],
  "fields": [
   {
@@ -250,11 +251,18 @@
    "in_filter": 1,
    "in_list_view": 1,
    "label": "DWS Actual Weight"
+  },
+  {
+   "fieldname": "file_type",
+   "fieldtype": "Select",
+   "label": "File Type",
+   "options": "\nOPSYS\nISPS",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-20 10:44:33.000178",
+ "modified": "2025-02-06 14:41:05.413695",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R600000",

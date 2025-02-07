@@ -1043,7 +1043,7 @@ def make_R600000(self):
 
 
 
-def insert_data(arrays, frm, to,date_format,file_proper_name):
+def insert_data(arrays, frm, to,date_format,file_proper_name,shipped_date,import_date):
     shipment_num = None
     pkg_trck = None
     
@@ -1145,15 +1145,14 @@ def insert_data(arrays, frm, to,date_format,file_proper_name):
 
                 for field in setting.date_conversion_field_names:
                     if field_name == field.field_name and doctype_name == field.doctype_name:
-
                         try:
-                            date_object = datetime.strptime(field_data, date_format)
+                            date_object = datetime.strptime(field_data, field.date_format)
                             output_date_format = "%Y-%m-%d"
                             field_data = date_object.strftime(output_date_format)
 
                         except: 
                             pass
-        
+                            
                 for field in setting.fields_to_divide:
                     
                     if doctype_name == field.doctype_name and field_name == field.field_name:
@@ -1166,6 +1165,11 @@ def insert_data(arrays, frm, to,date_format,file_proper_name):
                         if field.number_divide_with:
                             field_data = field_data / field.number_divide_with
                         # print(field_data , field_name,"NEW")
+                if shipped_date and field_name == "shipped_date":
+                    field_data = shipped_date
+                if import_date and field_name == "manifest_import_date":
+                    field_data = import_date
+
                 docss.set(field_name, field_data)
 
             if doctype_name == "R300000":
@@ -1174,11 +1178,13 @@ def insert_data(arrays, frm, to,date_format,file_proper_name):
             elif doctype_name == "R400000":
                 if docss.consignee_city:
                     make_R400000(docss)
+            if not docss.file_type:
+                docss.file_type = "ISPS"
 
 
             docss.save()
             # frappe.db.commit()    
-            print(doctype_name, shipment_num, "Updating")
+            # print(doctype_name, shipment_num, "Updating")
         else:
             
             doc = frappe.new_doc(doctype_name)
@@ -1201,11 +1207,18 @@ def insert_data(arrays, frm, to,date_format,file_proper_name):
 
                 for field in setting.date_conversion_field_names:
                     if field_name == field.field_name and doctype_name == field.doctype_name:
+                        # try:
+                        #     date_object = datetime.strptime(field_data, date_format)
+                        #     output_date_format = "%Y-%m-%d"
+                        #     field_data = date_object.strftime(output_date_format)
+                        # except:
+                        #     pass
                         try:
-                            date_object = datetime.strptime(field_data, date_format)
+                            date_object = datetime.strptime(field_data, field.date_format)
                             output_date_format = "%Y-%m-%d"
                             field_data = date_object.strftime(output_date_format)
-                        except:
+
+                        except: 
                             pass
                 # doc.set(field_name, field_data)
                 for field in setting.fields_to_divide:
@@ -1219,6 +1232,10 @@ def insert_data(arrays, frm, to,date_format,file_proper_name):
                             field_data = 0.0
                         if field.number_divide_with:
                             field_data = field_data / field.number_divide_with
+                if shipped_date and field_name == "manifest_shipped_date":
+                    field_data = shipped_date
+                if import_date and field_name == "manifest_import_date":
+                    field_data = import_date
                 doc.set(field_name, field_data)
     
             if doctype_name == "R300000":
@@ -1227,13 +1244,15 @@ def insert_data(arrays, frm, to,date_format,file_proper_name):
             elif doctype_name == "R400000":
                 if doc.consignee_city:
                     make_R400000(doc)
+            if not doc.file_type:
+                doc.file_type = "ISPS"
             
-            print(doctype_name, shipment_num, "Inserting")
+            # print(doctype_name, shipment_num, "Inserting")
             doc.insert()
             doc.save()
        
         
-def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3):
+def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3,shipped_date,import_date):
     shipment_num = None
     pkg_trck = None
     
@@ -1339,7 +1358,7 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3):
                     if field_name == field.field_name and doctype_name == field.doctype_name:
 
                         try:
-                            date_object = datetime.strptime(field_data, date_format)
+                            date_object = datetime.strptime(field_data, field.date_format)
                             output_date_format = "%Y-%m-%d"
                             field_data = date_object.strftime(output_date_format)
 
@@ -1353,11 +1372,16 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3):
                             field_data = float(field_data) if field_data else 0.0
                         except ValueError:
                             # Handle the case where field_data is not a number
-                            frappe.log_error(f"Cannot convert field_data '{field_data}' to float", "Conversion Error")
+                            frappe.log_error(f"Cannot convert field_data '{field_data}' to float", f"Conversion Error , Shipment Number '{shipment_num}' , Package Tracking '{pkg_trck}'")
+                            print(shipment_num,"  ",pkg_trck)
                             field_data = 0.0
                         if field.number_divide_with:
                             field_data = field_data / field.number_divide_with
                         # print(field_data , field_name,"NEW")
+                if shipped_date and field_name == "shipped_date":
+                    field_data = shipped_date
+                if import_date and field_name == "manifest_import_date":
+                    field_data = import_date
                 docss.set(field_name, field_data)
 
 
@@ -1367,11 +1391,12 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3):
             elif doctype_name == "R400000":
                 if docss.consignee_city:
                     make_R400000(docss)
-
+            if not docss.file_type:
+                docss.file_type = "OPSYS"
 
             docss.save()
             # frappe.db.commit()
-            print(doctype_name, shipment_num, "Updating")
+            # print(doctype_name, shipment_num, "Updating")
         else:
             
             doc = frappe.new_doc(doctype_name)
@@ -1395,7 +1420,7 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3):
                 for field in setting.date_conversion_field_names:
                     if field_name == field.field_name and doctype_name == field.doctype_name:
                         try:
-                            date_object = datetime.strptime(field_data, date_format)
+                            date_object = datetime.strptime(field_data, field.date_format)
                             output_date_format = "%Y-%m-%d"
                             field_data = date_object.strftime(output_date_format)
                         except:
@@ -1407,10 +1432,14 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3):
                             field_data = float(field_data) if field_data else 0.0
                         except ValueError:
                             # Handle the case where field_data is not a number
-                            frappe.log_error(f"Cannot convert field_data '{field_data}' to float", "Conversion Error")
+                            frappe.log_error(f"Cannot convert field_data '{field_data}' to float", f"Conversion Error , Shipment Number '{shipment_num}' , Package Tracking '{pkg_trck}'")
                             field_data = 0.0
                         if field.number_divide_with:
                             field_data = field_data / field.number_divide_with
+                if shipped_date and field_name == "shipped_date":
+                    field_data = shipped_date
+                if import_date and field_name == "manifest_import_date":
+                    field_data = import_date
                 doc.set(field_name, field_data)
             
             print(doctype_name, shipment_num, "Inserting")
@@ -1421,10 +1450,8 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3):
             elif doctype_name == "R400000":
                 if doc.consignee_city:
                     make_R400000(doc)
-
-
-
-            print(doctype_name,"\n")
+            if not doc.file_type:
+                doc.file_type = "OPSYS"
             doc.insert()
             doc.save()
 
@@ -1474,8 +1501,9 @@ def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
 
 class ManifestUploadData(Document):
     def on_submit(self):
-       
-        if self.attach_file:
+        shipped_date = self.shipped_date if self.shipped_date else None
+        import_date = self.import_date if self.import_date else None
+        if self.attach_file and self.manifest_file_type == "ISPS":
             
            
             file_name = frappe.db.get_value("File", {"file_url": self.attach_file}, "name")
@@ -1495,12 +1523,12 @@ class ManifestUploadData(Document):
                 chunk = arrays[current_index:current_index + chunk_size]             
                 current_index += chunk_size
                 # insert_data(main_doc = self , arrays=chunk,frm=frm, to=to, date_format = self.date_format)
-                enqueue(insert_data, file_proper_name = file_proper_name , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
+                enqueue(insert_data,shipped_date = shipped_date , import_date = import_date , file_proper_name = file_proper_name , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
             enqueue(storing_shipment_number,arrays=arrays, frm=shipfrom, to=shipto, doc=self ,queue="default")
 
 
 
-        if self.manifest_modification_process and self.modified_file:
+        if self.manifest_file_type == "DWS" and self.modified_file:
 
             file_name2 = frappe.db.get_value("File", {"file_url": self.modified_file}, "name")
             file_doc2 = frappe.get_doc("File", file_name2)
@@ -1518,7 +1546,7 @@ class ManifestUploadData(Document):
                 enqueue(modified_manifest_update,main_doc = self, arrays2 = chunk2, pkg_from = pkg_from , pkg_to= pkg_to, date_format = self.date_format,  queue = "default")
         
 
-        if self.opsys_file and self.opsys_upload_data:
+        if self.manifest_file_type == "OPSYS" and self.opsys_file:
             file_name3 = frappe.db.get_value("File", {"file_url": self.opsys_file}, "name")
             file_doc3 = frappe.get_doc("File", file_name3)
             file_proper_name3 = file_doc3.file_name
@@ -1535,7 +1563,7 @@ class ManifestUploadData(Document):
                 chunk = arrays3[current_index3:current_index3 + chunk_size3]             
                 current_index3 += chunk_size3
                 # opsys_insert_data( file_proper_name3 = file_proper_name3 , arrays=chunk,frm=frm, to=to, date_format = self.date_format)
-                enqueue(opsys_insert_data, file_proper_name3 = file_proper_name3 , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
+                enqueue(opsys_insert_data,shipped_date = shipped_date, import_date = import_date, file_proper_name3 = file_proper_name3 , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
             enqueue(storing_shipment_number,arrays=arrays3, frm=shipfrom, to=shipto, doc=self ,queue="default")
                 
             

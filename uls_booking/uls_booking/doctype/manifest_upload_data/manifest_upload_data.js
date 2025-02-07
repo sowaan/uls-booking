@@ -4,24 +4,38 @@
 
 
 frappe.ui.form.on('Manifest Upload Data', {
-    manifest_modification_process: function (frm) {
-        if (frm.doc.manifest_modification_process == 1) {
+    // manifest_modification_process: function (frm) {
+    //     if (frm.doc.manifest_modification_process == 1) {
+    //         frm.set_value("date_format", "%Y-%m-%d");
+    //     }
+    //     else{
+    //         frm.set_value("date_format", "%d%b%Y");
+    //     }
+    // },
+
+
+    // opsys_upload_data: function(frm){
+    //     if (frm.doc.opsys_upload_data == 1){
+    //         frm.set_value("date_format","%d%b%Y")
+    //     }
+    //     else{
+    //         frm.set_value("date_format", "%d%b%Y");
+    //     }
+    // },
+
+    manifest_file_type: function(frm){
+        if (frm.doc.manifest_file_type == "DWS"){
             frm.set_value("date_format", "%Y-%m-%d");
         }
-        else{
+        else if (frm.doc.manifest_file_type == "OPSYS"){
+            frm.set_value("date_format","%d%b%Y")
+        }
+
+        else if (frm.doc.manifest_file_type == "ISPS"){
             frm.set_value("date_format", "%d%b%Y");
         }
     },
 
-
-    opsys_upload_data: function(frm){
-        if (frm.doc.opsys_upload_data == 1){
-            frm.set_value("date_format","%d%b%Y")
-        }
-        else{
-            frm.set_value("date_format", "%d%b%Y");
-        }
-    }
 });
 
 

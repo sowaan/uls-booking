@@ -623,7 +623,7 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                     # try:
                     #     amount = float(amount)
                     # except (ValueError, TypeError):
-                    #     amount = 0  
+                    #     amount = 0
 
                     # Categorize surcharges
                     if code in included_codes and code not in excluded_codes:

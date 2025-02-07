@@ -7,7 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "field_name",
-  "doctype_name"
+  "doctype_name",
+  "date_format"
  ],
  "fields": [
   {
@@ -19,12 +20,17 @@
    "fieldname": "doctype_name",
    "fieldtype": "Data",
    "label": "Doctype Name"
+  },
+  {
+   "fieldname": "date_format",
+   "fieldtype": "Data",
+   "label": "Date Format"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-10-31 12:48:56.155272",
+ "modified": "2025-02-07 12:45:07.623701",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Date Conversion Fields",
