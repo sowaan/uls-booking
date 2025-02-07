@@ -15,7 +15,8 @@
   "station",
   "customer",
   "date_shipped",
-  "import__export"
+  "import__export",
+  "import_date"
  ],
  "fields": [
   {
@@ -68,11 +69,16 @@
    "fieldname": "import__export",
    "fieldtype": "Data",
    "label": "Import / Export"
+  },
+  {
+   "fieldname": "import_date",
+   "fieldtype": "Date",
+   "label": "Import Date"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-07 16:24:59.907455",
+ "modified": "2025-02-07 18:06:53.564844",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Shipment Number",
