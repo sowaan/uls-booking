@@ -86,5 +86,65 @@ frappe.ui.form.on('Sales Invoice', {
                 console.error("Error fetching Declare Value:", error);
             }
         }
+    },
+
+    custom_shipper_city: function(frm) {
+        // Get the custom shipper city from the form
+        let shipper_city = frm.doc.custom_shipper_city;
+
+        // Check if the custom shipper city is not empty
+        if (shipper_city) {
+            // Make an AJAX call to get the territory based on the custom shipper city
+            frappe.call({
+                method: 'frappe.client.get',
+                args: {
+                    doctype: 'Territory',
+                    filters: { 'name': shipper_city }
+                },
+                callback: function(response) {
+                    let territory = response.message;
+                    
+                    if (territory) {
+                        let parent_territory = territory.parent_territory;
+
+                        if (parent_territory && parent_territory !== "All Territories") {
+                            // Fetch the Sales Taxes and Charges Template based on the parent territory
+                            frappe.call({
+                                method: 'frappe.client.get',
+                                args: {
+                                    doctype: 'Sales Taxes and Charges Template',
+                                    filters: { 'custom_province': parent_territory }
+                                },
+                                callback: function(tax_response) {
+                                    let tax_template = tax_response.message;
+
+                                    if (tax_template) {
+                                        // Set the tax template on the Sales Invoice form
+                                        frm.set_value('taxes_and_charges', tax_template.name);
+
+                                        // Clear existing tax rows
+                                        frm.clear_table('taxes');
+
+                                        // Loop through the tax rows of the fetched tax template
+                                        $.each(tax_template.taxes, function(index, row) {
+                                            // Add each tax row to the Sales Invoice
+                                            let new_row = frm.add_child('taxes');
+                                            new_row.charge_type = row.charge_type;
+                                            new_row.description = row.description;
+                                            new_row.account_head = row.account_head;
+                                            new_row.cost_center = row.cost_center;
+                                            new_row.rate = row.rate;
+                                            new_row.account_currency = row.account_currency;
+                                        });
+
+                                        frm.refresh_field('taxes');
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }
     }
 });
