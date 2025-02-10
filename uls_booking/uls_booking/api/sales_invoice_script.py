@@ -666,6 +666,7 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         shipmentbillingamount = 0
         shipmentbillingchargesfromcustomer = 0
         if sales_invoice.customer:
+            customer_doc = frappe.get_doc("Customer",sales_invoice.customer)
             shipmentbillingcheck = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipping_bill_charges_applicable')
             shipmentbillingchargesfromcustomer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipment_billing_charges')
             if shipmentbillingcheck and not shipmentbillingchargesfromcustomer and shipment_type in sbc_included and shipment_type not in sbc_excluded:
@@ -675,8 +676,19 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                 elif imp_exp == "Import":
                     shipmentbillingamount = frappe.db.get_single_value('Additional Charges Page', 'import_amount_per_shipment')
                    
-            elif shipmentbillingcheck and shipmentbillingchargesfromcustomer:
-                shipmentbillingamount = shipmentbillingchargesfromcustomer
+            elif shipmentbillingcheck and customer_doc.custom_shipping_billing_charges:
+                # shipmentbillingamount = shipmentbillingchargesfromcustomer
+                for row in customer_doc.custom_shipping_billing_charges:
+                   if float(row.from_weight) <= float(sales_invoice.custom_shipment_weight) <= float(row.to_weight):
+                       shipmentbillingamount = row.amount
+                       break
+                       
+
+
+
+
+
+
 
         declared_value = sales_invoice.custom_insurance_amount
         if declared_value is None:

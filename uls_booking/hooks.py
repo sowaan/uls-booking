@@ -106,29 +106,33 @@ fixtures = [
                                 "custom_arrival_date",
                                 "custom_mno",
                                 "custom_duty_and_taxes_invoice",
-                                "custom_dt_vendor"
+                                "custom_dt_vendor",
+                                "custom_shipping_billing_charges"
 
                                 )
 	  	  
         ]  
       ]
-	},
-    {
-        "doctype" : "Client Script",
-      "filters" : [
-        [  
-          "name" , "=" , "Selling Percentage"
+	}
+#   ,
+#     {
+#         "doctype" : "Client Script",
+#       "filters" : [
+#         [  
+#           "name" , "=" , "Selling Percentage"
+# ]
+#       ]
+
+
+
+#     }
+
+
+
 ]
-      ]
 
-
-
-    }
-
-
-
-]
-
+# include js in doctype views
+doctype_js = {"Sales Invoice" : "uls_booking/client_scripts/sales_invoice.js"}
 
 
 

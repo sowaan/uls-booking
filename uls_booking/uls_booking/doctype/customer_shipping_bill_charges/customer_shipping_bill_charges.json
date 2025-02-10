@@ -1,34 +1,42 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2024-12-23 11:56:47.151809",
+ "creation": "2025-02-10 14:56:47.549135",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "surcharge",
+  "from_weight",
+  "to_weight",
   "amount"
  ],
  "fields": [
   {
-   "fieldname": "surcharge",
-   "fieldtype": "Link",
-   "label": "Surcharge",
-   "options": "Surcharges"
+   "fieldname": "from_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "From Weight"
+  },
+  {
+   "fieldname": "to_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "To Weight"
   },
   {
    "fieldname": "amount",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Amount"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-02-10 12:26:48.494001",
+ "modified": "2025-02-10 14:57:30.183948",
  "modified_by": "Administrator",
  "module": "ULS Booking",
- "name": "Customer Surcharges Table",
+ "name": "Customer Shipping Bill Charges",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

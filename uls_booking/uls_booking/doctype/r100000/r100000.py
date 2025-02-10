@@ -14,9 +14,9 @@ class R100000(Document):
 		# condition = "customer.custom_allow_direct_delivery_only and True"
 		# result = frappe.safe_eval(condition,context)
 		# frappe.msgprint(str(result))
-    pass
+    # pass
 	# def before_save(self):
-	# 	shipment_number = "X34007LRMQW"
+	# 	shipment_number = "X3W337NFFLJ"
 	# 	sales_invoice_definition = "Default"
 	# 	end_date = "2024-07-11"
 	# 	generate_single_invoice(shipment_number,sales_invoice_definition,end_date)
