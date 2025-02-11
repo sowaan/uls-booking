@@ -107,7 +107,8 @@ fixtures = [
                                 "custom_mno",
                                 "custom_duty_and_taxes_invoice",
                                 "custom_dt_vendor",
-                                "custom_shipping_billing_charges"
+                                "custom_shipping_billing_charges",
+                                "custom_exempt_gst"
 
                                 )
 	  	  
