@@ -745,6 +745,21 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                 rows = {'item_code' : setting.include_fuel_charges , 'qty' : '1' , 'rate' : total_charges_incl_fuel}
                 
                 sales_invoice.append('items' , rows)
+            additional_surcharges_page = frappe.get_doc("Additional Charges Page")
+            peak_amount = 0
+            if additional_surcharges_page.peak_charges_duration_and_amount:    
+                for row in additional_surcharges_page.peak_charges_duration_and_amount:
+                    if row.from_date <= shipped_date <= row.to_date:
+                        if sales_invoice.custom_shipment_weight <= 0.5:
+                            peak_amount = row.amount
+                            break
+                        elif sales_invoice.custom_shipment_weight > 0.5:
+                            peak_amount = sales_invoice.custom_shipment_weight * (row.amount)
+            if peak_amount:
+                rows = {'item_code' : setting.peak_charges , 'qty' : '1' , 'rate' : peak_amount}
+                sales_invoice.append('items' , rows)
+
+
 
         export_compensation_amount = 0
         

@@ -25,6 +25,7 @@
   "freight_charges",
   "compensation_charges",
   "include_fuel_charges",
+  "peak_charges",
   "modified_definition_tab",
   "definition"
  ],
@@ -160,12 +161,18 @@
    "fieldtype": "Link",
    "label": "Include Fuel Charges",
    "options": "Item"
+  },
+  {
+   "fieldname": "peak_charges",
+   "fieldtype": "Link",
+   "label": "Peak Charges",
+   "options": "Item"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-12-20 16:45:21.247262",
+ "modified": "2025-02-11 18:41:05.417922",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Setting Definition",

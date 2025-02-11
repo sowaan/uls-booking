@@ -69,7 +69,9 @@
   "import_amount_per_shipment",
   "column_break_yuuz",
   "export_amount_per_shipment",
-  "minimum_amount_per_shipment"
+  "minimum_amount_per_shipment",
+  "peak_charges_section",
+  "peak_charges_duration_and_amount"
  ],
  "fields": [
   {
@@ -396,12 +398,24 @@
    "fieldname": "direct_delivery_amount_per_package",
    "fieldtype": "Currency",
    "label": "Direct Delivery Amount Per Package"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "peak_charges_section",
+   "fieldtype": "Section Break",
+   "label": "Peak Charges"
+  },
+  {
+   "fieldname": "peak_charges_duration_and_amount",
+   "fieldtype": "Table",
+   "label": "Peak Charges Duration And Amount",
+   "options": "Peak Charges Table"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-12-20 09:25:11.035658",
+ "modified": "2025-02-11 18:37:29.463332",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Additional Charges Page",
