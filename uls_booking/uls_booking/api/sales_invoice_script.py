@@ -94,17 +94,17 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
             return {"message":logs}
             pass
             
-        existing_invoice = frappe.db.sql(
-                        """SELECT name FROM `tabSales Invoice`
-                        WHERE custom_shipment_number = %s
-                        FOR UPDATE""",
-                        shipment_number,
-                        as_dict=True
-                    )
+        # existing_invoice = frappe.db.sql(
+        #                 """SELECT name FROM `tabSales Invoice`
+        #                 WHERE custom_shipment_number = %s
+        #                 FOR UPDATE""",
+        #                 shipment_number,
+        #                 as_dict=True
+        #             )
 
-        if existing_invoice:
-            logs.append(f"Already Present In Sales Invocie")
-            return {"message":logs}
+        # if existing_invoice:
+        #     logs.append(f"Already Present In Sales Invocie")
+        #     return {"message":logs}
         
         setting = frappe.get_doc("Manifest Setting Definition")
         sbc_included= []
@@ -138,17 +138,17 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         final_discount_percentage = 0
         selected_weight = 0
         origin_country = None
-        
-        existing_invoice = frappe.db.sql(
-                    """SELECT name FROM `tabSales Invoice`
-                    WHERE custom_shipment_number = %s
-                    FOR UPDATE""",
-                    shipment_number,
-                    as_dict=True
-                )
 
-        if existing_invoice:
-                    frappe.throw("Present In Sales Invocie")
+        # existing_invoice = frappe.db.sql(
+        #             """SELECT name FROM `tabSales Invoice`
+        #             WHERE custom_shipment_number = %s
+        #             FOR UPDATE""",
+        #             shipment_number,
+        #             as_dict=True
+        #         )
+
+        # if existing_invoice:
+        #             frappe.throw("Present In Sales Invocie")
                    
         
         sales_invoice = frappe.new_doc("Sales Invoice")
@@ -224,21 +224,7 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         
         selected_weight = max(weight_frm_R200000, weight_frm_R201000)
         sales_invoice.custom_shipment_weight = selected_weight
-        # pkg_flg=0
-        # if sales_invoice.custom_package_type:
-        #     for code in definition.package_type_replacement:
-        #         if sales_invoice.custom_package_type == code.package_type_code:
-        #             sales_invoice.custom_package_type = code.package_type
-        #             shipment_type = sales_invoice.custom_package_type
-        #             pkg_flg=1
-        #             break
-        #     if pkg_flg==0:
-        #         shipment_type = sales_invoice.custom_shipment_type
-        
-            
-        # else:
-        #     shipment_type = sales_invoice.custom_shipment_type
-
+ 
         if sales_invoice.custom_package_type:
             shipment_type = sales_invoice.custom_package_type
         else:
@@ -269,11 +255,25 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                 else:
                     logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}")
                     print("No Customer Found")
-                try:
-                    tt = frappe.get_doc("Territory", {"name": sales_invoice.custom_shipper_city})
-                    pt = tt.parent_territory
-                    if pt != "All Territories":
-                        stc = frappe.get_doc("Sales Taxes and Charges Template", {"custom_province": pt})
+                exempt_customer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst')
+                if exempt_customer == 0:
+                    try:
+                        tt = frappe.get_doc("Territory", {"name": sales_invoice.custom_shipper_city})
+                        pt = tt.parent_territory
+                        if pt != "All Territories":
+                            stc = frappe.get_doc("Sales Taxes and Charges Template", {"custom_province": pt})
+                            for sale in stc.taxes:
+                                charge_type = sale.charge_type
+                                description = sale.description
+                                account_head = sale.account_head
+                                cost_center = sale.cost_center
+                                rate = sale.rate
+                                account_currency = sale.account_currency
+                            sales_invoice.set("taxes_and_charges", stc.name)
+                            rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
+                            sales_invoice.append('taxes', rows)
+                    except:
+                        stc = frappe.get_doc("Sales Taxes and Charges Template", definition.default_sales_tax)
                         for sale in stc.taxes:
                             charge_type = sale.charge_type
                             description = sale.description
@@ -284,20 +284,8 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                         sales_invoice.set("taxes_and_charges", stc.name)
                         rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
                         sales_invoice.append('taxes', rows)
-                except:
-                    stc = frappe.get_doc("Sales Taxes and Charges Template", definition.default_sales_tax)
-                    for sale in stc.taxes:
-                        charge_type = sale.charge_type
-                        description = sale.description
-                        account_head = sale.account_head
-                        cost_center = sale.cost_center
-                        rate = sale.rate
-                        account_currency = sale.account_currency
-                    sales_invoice.set("taxes_and_charges", stc.name)
-                    rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
-                    sales_invoice.append('taxes', rows)
-                    logs.append(f"No Territory Found {sales_invoice.custom_shipper_city} so Using default Tax")
-                    print("No Territory Found so Using default Tax")
+                        logs.append(f"No Territory Found {sales_invoice.custom_shipper_city} so Using default Tax")
+                        print("No Territory Found so Using default Tax")
                 
                 if sales_invoice.custom_consignee_country:
                     origin_country = sales_invoice.custom_consignee_country
@@ -419,35 +407,37 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                 else:
                     logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}") 
                     print("No Customer Found")
-                try:
-                    mm = frappe.get_doc("Territory", {"name": sales_invoice.custom_consignee_city})
-                    vv = mm.parent_territory
-                    if vv != "All Territories":
-                        bb = frappe.get_doc("Sales Taxes and Charges Template", {"custom_province": vv})
-                        sales_invoice.set("taxes_and_charges", bb.name)
-                        for sale in bb.taxes:
+                exempt_customer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst')
+                if exempt_customer == 0:
+                    try:
+                        mm = frappe.get_doc("Territory", {"name": sales_invoice.custom_consignee_city})
+                        vv = mm.parent_territory
+                        if vv != "All Territories":
+                            bb = frappe.get_doc("Sales Taxes and Charges Template", {"custom_province": vv})
+                            sales_invoice.set("taxes_and_charges", bb.name)
+                            for sale in bb.taxes:
+                                charge_type = sale.charge_type
+                                description = sale.description
+                                account_head = sale.account_head
+                                cost_center = sale.cost_center
+                                rate = sale.rate
+                                account_currency = sale.account_currency
+                            rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
+                            sales_invoice.append('taxes', rows)
+                    except:
+                        stc = frappe.get_doc("Sales Taxes and Charges Template", definition.default_sales_tax)
+                        for sale in stc.taxes:
                             charge_type = sale.charge_type
                             description = sale.description
                             account_head = sale.account_head
                             cost_center = sale.cost_center
                             rate = sale.rate
                             account_currency = sale.account_currency
+                        sales_invoice.set("taxes_and_charges", stc.name)
                         rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
                         sales_invoice.append('taxes', rows)
-                except:
-                    stc = frappe.get_doc("Sales Taxes and Charges Template", definition.default_sales_tax)
-                    for sale in stc.taxes:
-                        charge_type = sale.charge_type
-                        description = sale.description
-                        account_head = sale.account_head
-                        cost_center = sale.cost_center
-                        rate = sale.rate
-                        account_currency = sale.account_currency
-                    sales_invoice.set("taxes_and_charges", stc.name)
-                    rows = {'charge_type': charge_type, 'description': description, 'account_head': account_head, 'cost_center':cost_center, 'rate':rate, 'account_currency':account_currency}
-                    sales_invoice.append('taxes', rows)
-                    logs.append(f"No Territory Found {sales_invoice.custom_consignee_city} so Using default Tax")
-                    print("No Territory Found Thats Why using Default Sales Tax and Template")
+                        logs.append(f"No Territory Found {sales_invoice.custom_consignee_city} so Using default Tax")
+                        print("No Territory Found Thats Why using Default Sales Tax and Template")
                     
                 if sales_invoice.custom_shipper_country:
                     origin_country = sales_invoice.custom_shipper_country
@@ -668,8 +658,8 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         if sales_invoice.customer:
             customer_doc = frappe.get_doc("Customer",sales_invoice.customer)
             shipmentbillingcheck = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipping_bill_charges_applicable')
-            shipmentbillingchargesfromcustomer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipment_billing_charges')
-            if shipmentbillingcheck and not shipmentbillingchargesfromcustomer and shipment_type in sbc_included and shipment_type not in sbc_excluded:
+            # shipmentbillingchargesfromcustomer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipment_billing_charges')
+            if shipmentbillingcheck and shipment_type in sbc_included and shipment_type not in sbc_excluded:
                 if imp_exp == "Export":
                     shipmentbillingamount = frappe.db.get_single_value('Additional Charges Page', 'export_amount_per_shipment')
                     
@@ -707,6 +697,19 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         max_insured = 0
         if sales_invoice.customer != customer.custom_default_customer:
             sales_invoice.custom_freight_invoices = 1
+            existing_invoice = frappe.db.sql(
+                        """SELECT name FROM `tabSales Invoice`
+                        WHERE custom_shipment_number = %s
+                        AND custom_freight_invoices = 1
+                        FOR UPDATE""",
+                        shipment_number,
+                        as_dict=True
+                    )
+
+            if existing_invoice:
+                logs.append(f"Already Present In Sales Invocie")
+                return {"message":logs}
+            
             if declared_value > 0: 
                 print("Declared Value")
                 percent = frappe.db.get_single_value('Additional Charges Page', 'percentage_on_declare_value')
@@ -748,6 +751,19 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         if sales_invoice.customer == customer.custom_default_customer:
             sales_invoice.custom_compensation_invoices = 1
             sig = 0
+            existing_invoice = frappe.db.sql(
+                        """SELECT name FROM `tabSales Invoice`
+                        WHERE custom_shipment_number = %s
+                        AND custom_compensation_invoices = 1
+                        FOR UPDATE""",
+                        shipment_number,
+                        as_dict=True
+                    )
+
+            if existing_invoice:
+                logs.append(f"Already Present In Sales Invocie")
+                return {"message":logs}
+            
             for comp in definition.compensation_table:
                 if sales_invoice.custom_billing_term == comp.shipment_billing_term and shipment_type == comp.shipping_billing_type and imp_exp == comp.case:
                     export_compensation_amount = comp.document_amount

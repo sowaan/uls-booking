@@ -89,12 +89,10 @@ frappe.ui.form.on('Sales Invoice', {
     },
 
     custom_shipper_city: function(frm) {
-        // Get the custom shipper city from the form
         let shipper_city = frm.doc.custom_shipper_city;
 
-        // Check if the custom shipper city is not empty
         if (shipper_city) {
-            // Make an AJAX call to get the territory based on the custom shipper city
+            // Fetch territory based on shipper city
             frappe.call({
                 method: 'frappe.client.get',
                 args: {
@@ -108,36 +106,46 @@ frappe.ui.form.on('Sales Invoice', {
                         let parent_territory = territory.parent_territory;
 
                         if (parent_territory && parent_territory !== "All Territories") {
-                            // Fetch the Sales Taxes and Charges Template based on the parent territory
+                            // Fetch the 'custom_exempt_gst' from Customer doctype
                             frappe.call({
-                                method: 'frappe.client.get',
+                                method: 'frappe.client.get_value',
                                 args: {
-                                    doctype: 'Sales Taxes and Charges Template',
-                                    filters: { 'custom_province': parent_territory }
+                                    doctype: 'Customer',
+                                    filters: { 'name': frm.doc.customer },
+                                    fieldname: 'custom_exempt_gst'
                                 },
-                                callback: function(tax_response) {
-                                    let tax_template = tax_response.message;
+                                callback: function(cust_response) {
+                                    let exempt_customer = cust_response.message.custom_exempt_gst;
 
-                                    if (tax_template) {
-                                        // Set the tax template on the Sales Invoice form
-                                        frm.set_value('taxes_and_charges', tax_template.name);
+                                    // Proceed only if 'custom_exempt_gst' is 0
+                                    if (exempt_customer == 0) {
+                                        frappe.call({
+                                            method: 'frappe.client.get',
+                                            args: {
+                                                doctype: 'Sales Taxes and Charges Template',
+                                                filters: { 'custom_province': parent_territory }
+                                            },
+                                            callback: function(tax_response) {
+                                                let tax_template = tax_response.message;
 
-                                        // Clear existing tax rows
-                                        frm.clear_table('taxes');
+                                                if (tax_template) {
+                                                    frm.set_value('taxes_and_charges', tax_template.name);
+                                                    frm.clear_table('taxes');
 
-                                        // Loop through the tax rows of the fetched tax template
-                                        $.each(tax_template.taxes, function(index, row) {
-                                            // Add each tax row to the Sales Invoice
-                                            let new_row = frm.add_child('taxes');
-                                            new_row.charge_type = row.charge_type;
-                                            new_row.description = row.description;
-                                            new_row.account_head = row.account_head;
-                                            new_row.cost_center = row.cost_center;
-                                            new_row.rate = row.rate;
-                                            new_row.account_currency = row.account_currency;
+                                                    $.each(tax_template.taxes, function(index, row) {
+                                                        let new_row = frm.add_child('taxes');
+                                                        new_row.charge_type = row.charge_type;
+                                                        new_row.description = row.description;
+                                                        new_row.account_head = row.account_head;
+                                                        new_row.cost_center = row.cost_center;
+                                                        new_row.rate = row.rate;
+                                                        new_row.account_currency = row.account_currency;
+                                                    });
+
+                                                    frm.refresh_field('taxes');
+                                                }
+                                            }
                                         });
-
-                                        frm.refresh_field('taxes');
                                     }
                                 }
                             });
@@ -147,4 +155,8 @@ frappe.ui.form.on('Sales Invoice', {
             });
         }
     }
+        // else{
+        //     frappe.msgprint("No Tax Template Found for this Territory");
+        // }
+    
 });
