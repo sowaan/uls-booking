@@ -34,6 +34,7 @@
   "extended_area_amount_per_kg",
   "feul_surcharge_section",
   "feul_surcharge_percentage_on_freight_amount",
+  "fuel_surcharge_percentages_on_freight_amount",
   "column_break_xlit",
   "feul_surcharge_minimum_amount",
   "import_control_label_section",
@@ -223,7 +224,7 @@
   {
    "fieldname": "feul_surcharge_percentage_on_freight_amount",
    "fieldtype": "Float",
-   "label": "Feul Surcharge Percentage on Freight Amount"
+   "label": "Fuel Surcharge Percentage on Freight Amount"
   },
   {
    "fieldname": "column_break_xlit",
@@ -232,7 +233,7 @@
   {
    "fieldname": "feul_surcharge_minimum_amount",
    "fieldtype": "Currency",
-   "label": "Feul Surcharge Minimum Amount"
+   "label": "Fuel Surcharge Minimum Amount"
   },
   {
    "collapsible": 1,
@@ -410,12 +411,18 @@
    "fieldtype": "Table",
    "label": "Peak Charges Duration And Amount",
    "options": "Peak Charges Table"
+  },
+  {
+   "fieldname": "fuel_surcharge_percentages_on_freight_amount",
+   "fieldtype": "Table",
+   "label": "Fuel Surcharge Percentages on Freight Amount",
+   "options": "Fuel Surcharge Percentage on Freight Amount"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-02-11 18:37:29.463332",
+ "modified": "2025-02-13 15:21:55.191123",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Additional Charges Page",
