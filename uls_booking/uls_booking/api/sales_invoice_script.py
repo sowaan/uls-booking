@@ -162,6 +162,7 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         total_charges_other_charges = 0
         FSCcharges = 0
         FSCpercentage = 0
+        latest_valid_percentage = 0
         shipment_type = 0
         for child_record in definition.sales_invoice_definition:
             doctype_name = child_record.ref_doctype
@@ -307,7 +308,107 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                         logs.append(f"No selling group Found thats why using Default Selling group")
                         print("No selling group Found thats why using Default Selling group")
                         selling_group = definition.default_selling_group 
-                if selling_group:
+                full_tariff_flag = 0
+                full_tariff = None
+                print(selling_group , " = ", definition.default_selling_group)
+
+
+
+                if selling_group == definition.default_selling_group:
+                    # print("Default Selling Group")
+                    # Look for Full Tariff
+                    zones = frappe.get_list("Zone",
+                                            filters = {"country" : origin_country , "is_single_country":1})
+                    flag = 0
+                    
+                    if zones:
+                        sales_invoice.custom_zone = zones[0].name
+                        print("Zone with Country:", zones[0].name)
+
+                        full_tariff_query = """
+                            SELECT name
+                            FROM `tabFull Tariff`
+                            WHERE country = %s
+                            AND service_type = %s
+                            AND package_type = %s
+                            AND valid_from <= %s
+                            AND expiry_date >= %s
+                        """
+                        params = (origin_country, service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
+                        full_tariff_name = frappe.db.sql(full_tariff_query, params, as_dict=True)
+
+                        if full_tariff_name:
+                            full_tariff = frappe.get_doc("Full Tariff", full_tariff_name[0]["name"])
+                            full_tariff_flag = 1
+
+                        else:
+                            flag = 1  # No Full Tariff found
+
+                    elif not zones:
+                        flag = 1  # No country-based zones found
+
+                    # If no Full Tariff found, try finding it by region
+                    if flag == 1:
+                        try:
+                            countries = frappe.db.get_all("Country Names", filters={"countries":origin_country} , fields = ['parent'])
+                            
+                            if countries:
+                                zone_with_out_country = countries[0].parent
+                                if zone_with_out_country:
+                                    sales_invoice.custom_zone = zone_with_out_country
+
+                                    full_tariff_query = """
+                                        SELECT name
+                                        FROM `tabFull Tariff`
+                                        WHERE zone = %s
+                                        AND service_type = %s
+                                        AND package_type = %s
+                                        AND valid_from <= %s
+                                        AND expiry_date >= %s
+                                    """
+                                    params = (zone_with_out_country, service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
+                                    full_tariff_name = frappe.db.sql(full_tariff_query, params, as_dict=True)
+
+                                    if full_tariff_name:
+                                        full_tariff = frappe.get_doc("Full Tariff", full_tariff_name[0]["name"])
+                                        full_tariff_flag = 1
+
+                        except:
+                            logs.append("No Full Tariff Found. Using Default Tariff")
+                            print("No Full Tariff Found. Using Default Tariff")
+
+                    # **Calculate Rate if Full Tariff is Found**
+                    if full_tariff:
+                        my_weight = float(sales_invoice.custom_shipment_weight)
+                        flg = 0
+                        last_row = {}
+
+                        for row in full_tariff.package_rate:
+                            if my_weight <= row.weight:
+                                final_rate = row.rate
+                                flg = 1
+                                break
+                            else:
+                                last_row = row
+
+                        if flg == 0:
+                            final_rate = (last_row.rate / last_row.weight) * my_weight
+                            final_discount_percentage = 0.00
+                        tarif = final_rate / (1- (final_discount_percentage/100))
+                        
+                        
+
+                        print(f"Final Rate from Full Tariff: {tarif}")
+
+                    else:
+                        # **If Full Tariff is NOT found, switch to Selling Rate Logic**
+                        print("Full Tariff Not Found, Switching to Selling Rate Logic")
+
+
+
+
+                if selling_group and full_tariff_flag == 0:
+
                     zones = frappe.get_list("Zone",
                                             filters = {"country" : origin_country , "is_single_country":1})
                     flag = 0
@@ -333,7 +434,7 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                     elif not zones:
                         flag = 1
 
-                    if flag == 1 :
+                    if flag == 1:
                         try:
                             countries = frappe.db.get_all("Country Names", filters={"countries":origin_country} , fields = ['parent'])
                             
@@ -389,6 +490,9 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                             final_rate = ( last_row.rate / last_row.weight ) * my_weight
                             final_discount_percentage = last_row.discount_percentage
                         tarif = final_rate / (1- (final_discount_percentage/100))
+
+
+
             
         elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
             check = frappe.get_list("ICRIS List",
@@ -456,7 +560,103 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                     logs.append(f"No selling group Found thats why using Default Selling group")
                     print("No Selling Group Found Thats why using Default Selling Group")
                     selling_group = definition.default_selling_group
-                if selling_group:
+                full_tariff_flag = 0
+                print(selling_group , " = ", definition.default_selling_group)
+
+
+
+                if selling_group == definition.default_selling_group:
+                    # print("Default Selling Group")
+                    # Look for Full Tariff
+                    zones = frappe.get_list("Zone", filters={"country": origin_country, "is_single_country": 1})
+                    flag = 0
+                    
+                    if zones:
+                        sales_invoice.custom_zone = zones[0].name
+                        print("Zone with Country:", zones[0].name)
+
+                        full_tariff_query = """
+                            SELECT name
+                            FROM `tabFull Tariff`
+                            WHERE country = %s
+                            AND service_type = %s
+                            AND package_type = %s
+                            AND valid_from <= %s
+                            AND expiry_date >= %s
+                        """
+                        params = (origin_country, service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
+                        full_tariff_name = frappe.db.sql(full_tariff_query, params, as_dict=True)
+
+                        if full_tariff_name:
+                            full_tariff = frappe.get_doc("Full Tariff", full_tariff_name[0]["name"])
+                            full_tariff_flag = 1
+                        else:
+                            flag = 1  # No Full Tariff found
+
+                    else:
+                        flag = 1  # No country-based zones found
+
+                    # If no Full Tariff found, try finding it by region
+                    if flag == 1:
+                        try:
+                            countries = frappe.db.get_all("Country Names", filters={"countries": origin_country}, fields=['parent'])
+                            
+                            if countries:
+                                zone_with_out_country = countries[0].parent
+                                if zone_with_out_country:
+                                    sales_invoice.custom_zone = zone_with_out_country
+
+                                    full_tariff_query = """
+                                        SELECT name
+                                        FROM `tabFull Tariff`
+                                        WHERE zone = %s
+                                        AND service_type = %s
+                                        AND package_type = %s
+                                        AND valid_from <= %s
+                                        AND expiry_date >= %s
+                                    """
+                                    params = (zone_with_out_country, service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
+                                    full_tariff_name = frappe.db.sql(full_tariff_query, params, as_dict=True)
+
+                                    if full_tariff_name:
+                                        full_tariff = frappe.get_doc("Full Tariff", full_tariff_name[0]["name"])
+                                        full_tariff_flag = 1
+
+                        except:
+                            logs.append("No Full Tariff Found. Using Default Tariff")
+                            print("No Full Tariff Found. Using Default Tariff")
+                            full_tariff = frappe.get_doc("Full Tariff", definition.default_selling_rate)
+
+                    # **Calculate Rate if Full Tariff is Found**
+                    if full_tariff:
+                        my_weight = float(sales_invoice.custom_shipment_weight)
+                        flg = 0
+                        last_row = {}
+
+                        for row in full_tariff.package_rate:
+                            if my_weight <= row.weight:
+                                final_rate = row.rate
+                                flg = 1
+                                break
+                            else:
+                                last_row = row
+
+                        if flg == 0:
+                            final_rate = (last_row.rate / last_row.weight) * my_weight
+                            final_discount_percentage = 0.00
+                        tarif = final_rate / (1- (final_discount_percentage/100))
+                        
+
+                        print(f"Final Rate from Full Tariff: {tarif}")
+
+                    else:
+                        # **If Full Tariff is NOT found, switch to Selling Rate Logic**
+                        print("Full Tariff Not Found, Switching to Selling Rate Logic")
+
+
+
+
+                if selling_group and full_tariff_flag == 0:
                     
                     zones = frappe.get_list("Zone",
                                             filters = {"country" : origin_country , "is_single_country":1})
@@ -491,6 +691,7 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
                             
                             if countries:
                                 zone_with_out_country = countries[0].parent
+                                print("Zone with Country :",zone_with_out_country)
                                 if zone_with_out_country:
                                     sales_invoice.custom_zone = zone_with_out_country
                                 
@@ -650,7 +851,19 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
             sales_invoice.custom_total_surcharges_excl_fuel = total_charges_other_charges
             sales_invoice.custom_total_surcharges_incl_fuel = total_charges_incl_fuel
             FSCpercentage = frappe.db.get_single_value('Additional Charges Page','feul_surcharge_percentage_on_freight_amount')
-            if FSCpercentage and tarif:
+            additional_page = frappe.get_doc("Additional Charges Page")
+            for row in additional_page.fuel_surcharge_percentages_on_freight_amount:
+                if row.expiry_date < shipped_date:  
+                    latest_valid_percentage = row.fuel_surcharge_percentage_on_freight_amount  # Keep track of the last valid percentage
+                
+                if row.from_date <= shipped_date <= row.expiry_date:
+                    FSCpercentage = row.fuel_surcharge_percentage_on_freight_amount
+                    break
+            if FSCpercentage == 0 and latest_valid_percentage != 0:
+                FSCpercentage = latest_valid_percentage
+            
+            if FSCpercentage and final_rate:
+                    print(FSCpercentage)
                     FSCcharges = (total_charges_incl_fuel + final_rate) * (FSCpercentage / 100 )
         shipmentbillingcheck = 0
         shipmentbillingamount = 0
