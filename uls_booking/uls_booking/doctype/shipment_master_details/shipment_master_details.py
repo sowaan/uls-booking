@@ -10,7 +10,8 @@ from frappe.model.document import Document
 
 class ShipmentMasterDetails(Document):
     
-	def before_save(self) :
+	def before_save(self):
+		send_notification(self)
 		get_records(self)
 
 	@frappe.whitelist()
@@ -18,17 +19,85 @@ class ShipmentMasterDetails(Document):
 		get_records(self)
 
 
+
+
+
+################################################ Notification Work ################################################
+def send_notification(self):
+	if not frappe.db.exists('Shipment Master Details', self.name):
+		return
+
+	old_values = frappe.db.get_value(
+		'Shipment Master Details', 
+		self.name, 
+		['spot_rates_offered', 'spot_rate_', 'absolute_freight_rate'], 
+		as_dict=True
+	) or {}
+
+
+	changed_fields = {
+		k: (old, new) for k in ["spot_rates_offered", "spot_rate_", "absolute_freight_rate"]
+		if (old := (old_values.get(k) or "").strip()) != (new := (getattr(self, k) or "").strip())
+	}
+
+	
+
+
+	if not changed_fields:
+		return
+	
+	notify_billing_agents(changed_fields)
+
+
+def notify_billing_agents(changed_fields):
+	billing_agent_emails = frappe.get_all(
+        "User",
+        filters={
+            "enabled": 1,
+            "name": ["in", frappe.get_all("Has Role", filters={"role": "Billing Agent", "parenttype": "User"}, pluck="parent")]
+        },
+        pluck="name"
+    )
+
+	# frappe.throw(str(billing_agent_emails) + " " + str(changed_fields))
+
+	if not billing_agent_emails:
+		return
+	
+
+	message = f"""
+		<p>Pricing Activity section has been updated:</p>
+		<ul>
+			{"".join(f"<li><b>{field.replace('_', ' ').title()}:</b> {old} ➝ {new}</li>" for field, (old, new) in changed_fields.items())}
+		</ul>
+	"""
+	# print(message)
+	# frappe.throw(str(billing_agent_emails) + " " + str(changed_fields) + " " + str(message))
+	frappe.sendmail(
+		recipients=billing_agent_emails,
+		subject="Pricing Activity Updated",
+		message=message,
+	)
+
+
+
+
+
+
+
+################################################ Get Records ################################################
 def get_records(doc):
 	doc = frappe.get_doc(doc)
 
 	if not doc.master_package_id:
 		return
 
-	r6 = frappe.get_list('R600000', filters={
-		'expanded_package_tracking_number': doc.master_package_id
-	}, fields=['shipment_number', 'shipment_tracking_status', 'dws_actual_weight', 'dws_dim','time_of_dws','date_of_dws'])
+	r6 = frappe.get_list(
+        'R600000', 
+        filters={'expanded_package_tracking_number': doc.master_package_id}, 
+        fields=['shipment_number', 'shipment_tracking_status', 'dws_actual_weight', 'dws_dim', 'time_of_dws', 'date_of_dws']
+    )
 
-	shipment_number = None  
 
 	if r6:
 		r6_record = r6[0]

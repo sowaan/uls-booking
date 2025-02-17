@@ -70,6 +70,7 @@
   "consignee_phone_number",
   "pricing_activitynew_doc_and_fields_section",
   "spot_rates_offered",
+  "absolute_freight_rate",
   "column_break_yzwc",
   "spot_rate_",
   "ground_operations_activity_section",
@@ -672,11 +673,17 @@
    "fieldtype": "Data",
    "label": "Currency Code of Invoice Value",
    "read_only": 1
+  },
+  {
+   "fieldname": "absolute_freight_rate",
+   "fieldtype": "Data",
+   "label": "Absolute Freight Rate",
+   "translatable": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-01-03 17:45:16.064876",
+ "modified": "2025-02-13 14:26:26.257987",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Shipment Master Details",
