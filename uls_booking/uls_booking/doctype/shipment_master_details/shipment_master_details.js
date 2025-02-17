@@ -42,6 +42,16 @@ frappe.ui.form.on('Shipment Master Details', {
             });
         
         });
+
+        frm.add_custom_button('Tracking', function () {
+            if (frm.doc.master_package_id) {
+                let tracking_url = `https://tracking.ulspakistan.com/shipment-details?trackingNumber=${frm.doc.master_package_id}`;
+                window.open(tracking_url, '_blank', 'noopener');
+
+            } else {
+                frappe.msgprint(__('Master Package ID is missing.'));
+            }
+        });
     }
 });
 

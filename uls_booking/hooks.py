@@ -34,6 +34,7 @@ fixtures = [
                                 "custom_insurance_of_declared_value",
                                 "custom_over_maximum_limit",
                                 "custom_applicable_surcharges_and_amount",
+
                                 
                                 
 
@@ -108,7 +109,11 @@ fixtures = [
                                 "custom_duty_and_taxes_invoice",
                                 "custom_dt_vendor",
                                 "custom_shipping_billing_charges",
-                                "custom_exempt_gst"
+                                "custom_exempt_gst",
+
+
+
+                                "custom_shipment_master"
 
                                 )
 	  	  
@@ -133,7 +138,10 @@ fixtures = [
 ]
 
 # include js in doctype views
-doctype_js = {"Sales Invoice" : "uls_booking/client_scripts/sales_invoice.js"}
+doctype_js = {
+    "Sales Invoice" : "uls_booking/client_scripts/sales_invoice.js",
+    "HD Ticket" : "uls_booking/client_scripts/hd_ticket.js"
+}
 
 
 
