@@ -868,23 +868,31 @@ def generate_single_invoice(shipment_number,sales_invoice_definition,end_date):
         shipmentbillingcheck = 0
         shipmentbillingamount = 0
         shipmentbillingchargesfromcustomer = 0
+        sbc_flag = 0
         if sales_invoice.customer:
             customer_doc = frappe.get_doc("Customer",sales_invoice.customer)
             shipmentbillingcheck = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipping_bill_charges_applicable')
             # shipmentbillingchargesfromcustomer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipment_billing_charges')
             if shipmentbillingcheck and shipment_type in sbc_included and shipment_type not in sbc_excluded:
-                if imp_exp == "Export":
+                if shipmentbillingcheck and customer_doc.custom_shipping_billing_charges:
+                        # shipmentbillingamount = shipmentbillingchargesfromcustomer
+                        for row in customer_doc.custom_shipping_billing_charges:
+                            if float(row.from_weight) <= float(sales_invoice.custom_shipment_weight) <= float(row.to_weight):
+                                shipmentbillingamount = row.amount
+                                sbc_flag = 1
+                                break
+                if imp_exp == "Export" and sbc_flag == 0:
                     shipmentbillingamount = frappe.db.get_single_value('Additional Charges Page', 'export_amount_per_shipment')
                     
-                elif imp_exp == "Import":
+                elif imp_exp == "Import" and sbc_flag == 0:
                     shipmentbillingamount = frappe.db.get_single_value('Additional Charges Page', 'import_amount_per_shipment')
                    
-            elif shipmentbillingcheck and customer_doc.custom_shipping_billing_charges:
-                # shipmentbillingamount = shipmentbillingchargesfromcustomer
-                for row in customer_doc.custom_shipping_billing_charges:
-                   if float(row.from_weight) <= float(sales_invoice.custom_shipment_weight) <= float(row.to_weight):
-                       shipmentbillingamount = row.amount
-                       break
+            # elif shipmentbillingcheck and customer_doc.custom_shipping_billing_charges:
+            #     # shipmentbillingamount = shipmentbillingchargesfromcustomer
+            #     for row in customer_doc.custom_shipping_billing_charges:
+            #        if float(row.from_weight) <= float(sales_invoice.custom_shipment_weight) <= float(row.to_weight):
+            #            shipmentbillingamount = row.amount
+            #            break
                        
 
 
