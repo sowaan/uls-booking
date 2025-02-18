@@ -110,10 +110,7 @@ fixtures = [
                                 "custom_dt_vendor",
                                 "custom_shipping_billing_charges",
                                 "custom_exempt_gst",
-
-
-
-                                "custom_shipment_master"
+                                "custom_sales_invoice_definition"
 
                                 )
 	  	  
@@ -283,7 +280,10 @@ doctype_js = {
 doc_events = {
 	"Customer": {
 		"before_save": "uls_booking.uls_booking.api.api.check_user_permission",
-	}
+	},
+  "Sales Invoice": {
+    "before_save": "uls_booking.uls_booking.events.sales_invoice.generate_invoice",
+  },
 }
 
 # Scheduled Tasks
