@@ -110,7 +110,9 @@ fixtures = [
                                 "custom_dt_vendor",
                                 "custom_shipping_billing_charges",
                                 "custom_exempt_gst",
-                                "custom_sales_invoice_definition"
+                                "custom_sales_invoice_definition",
+                                "custom_invoice_logs",
+                                "custom_sales_invoice_log"
 
                                 )
 	  	  
