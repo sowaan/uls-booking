@@ -668,7 +668,7 @@ def generate_invoice( self, method):
                 # # Only process surcharges if present in customer table, else skip
                 # if code not in surcharge_dict:
                 #     continue  # Skip if no match in customer surcharges
-                DOCUMENTS
+                # DOCUMENTS
                 
                 surcharge_amount = surcharge_dict.get(code)
 
