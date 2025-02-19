@@ -88,7 +88,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
             logs.append("Sales Invoice Definition does not exist")
             return {"message": logs}
 
-        # # Check if invoice already exists
+        # Check if invoice already exists
         # existing_invoice = frappe.db.sql(
         #     """SELECT name FROM `tabSales Invoice`
         #        WHERE custom_shipment_number = %s
@@ -104,6 +104,36 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
 
         # ✅ Assign the sales_invoice variable early to avoid reference issues
         sales_invoice = frappe.new_doc("Sales Invoice")
+        if sales_invoice.custom_shipper_country == definition.origin_country.upper():
+            imp_exp = "Export"
+            if sales_invoice.custom_shipper_number:
+                icris_number = sales_invoice.custom_shipper_number
+            else:
+                icris_number = definition.unassigned_icris_number
+
+        elif sales_invoice.custom_shipper_country != definition.origin_country.upper():
+            imp_exp = "Import"
+            if sales_invoice.custom_consignee_number:
+                icris_number = sales_invoice.custom_consignee_number
+            else:
+                icris_number = definition.unassigned_icris_number
+            
+        if sales_invoice.custom_package_type:
+            shipment_type = sales_invoice.custom_package_type
+        else:
+            shipment_type = sales_invoice.custom_shipment_type
+            
+        try:
+            icris_account = frappe.get_doc("ICRIS Account", icris_number)
+        
+        except frappe.DoesNotExistError:
+            logs.append(f"No icris Account Found {icris_number}")
+            print("No icris Account Found")
+            if definition.unassigned_icris_number:
+                icris_account = frappe.get_doc("ICRIS Account", definition.unassigned_icris_number)
+        # print(shipment_type)
+
+
 
         # Get default customer from company
         company = definition.default_company
@@ -119,6 +149,15 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
             docs = frappe.get_list(doctype_name, filters={'shipment_number': shipment_number}, fields=[field_name])
             if docs:
                 sales_invoice.set(sales_field_name, docs[0][field_name])
+
+        export_billing_term = []
+        import_billing_term = []
+        for term in definition.export_and_import_conditions:
+            if term.export_check == 1:
+                export_billing_term.append(term.billing_term)
+
+            elif term.export_check == 0:
+                import_billing_term.append(term.billing_term)
 
         # Set posting date
         sales_invoice.posting_date = getdate(end_date)
@@ -144,6 +183,73 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         sales_invoice.custom_shipment_weight = selected_weight
         # Set currency
         sales_invoice.currency = frappe.get_value("Customer", sales_invoice.customer, "default_currency")
+
+        if sales_invoice.custom_billing_term in export_billing_term and sales_invoice.custom_shipper_country == definition.origin_country.upper():
+            check1 = frappe.get_list("ICRIS List",
+                                    filters = {"shipper_no":icris_number})
+            if not check1:
+                logs.append(f"No Icris List Found {icris_number}")
+                print("No Icris List Found")
+                icris_number = definition.unassigned_icris_number
+            if icris_number:
+                icris_doc = frappe.get_list("ICRIS List",
+                                    filters = {"shipper_no":icris_number})
+                icris = frappe.get_doc("ICRIS List",icris_doc[0].name)
+                if icris.shipper_name:
+                    sales_invoice.customer = icris.shipper_name
+                else:
+                    logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}")
+                    print("No Customer Found")
+
+
+
+
+        elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
+            check = frappe.get_list("ICRIS List",
+                                    filters = {"shipper_no":icris_number})
+            if not check:
+                logs.append(f"No Icris List Found {icris_number}")
+                print("No Icris List Found Thats Why using Default Icris")
+                icris_number = definition.unassigned_icris_number
+            if icris_number:
+                icris_doc = frappe.get_list("ICRIS List",
+                                    filters = {"shipper_no":icris_number})
+                icris1 = frappe.get_doc("ICRIS List",icris_doc[0].name)
+                
+                if icris1.shipper_name:
+                    sales_invoice.customer = icris1.shipper_name
+                else:
+                    logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}") 
+                    print("No Customer Found")
+
+        if sales_invoice.customer != customer.custom_default_customer:
+            existing_invoice = frappe.db.sql(
+                            """SELECT name FROM `tabSales Invoice`
+                            WHERE custom_shipment_number = %s
+                            AND custom_freight_invoices = 1
+                            FOR UPDATE""",
+                            shipment_number,
+                            as_dict=True
+                        )
+            if existing_invoice:
+                logs.append(f"Already Present In Sales Invocie")
+                return frappe.log_error(message=logs, title="Sales Invoice Logs")
+            
+        if sales_invoice.customer == customer.custom_default_customer:
+            sales_invoice.custom_compensation_invoices = 1
+            sig = 0
+            existing_invoice = frappe.db.sql(
+                        """SELECT name FROM `tabSales Invoice`
+                        WHERE custom_shipment_number = %s
+                        AND custom_compensation_invoices = 1
+                        FOR UPDATE""",
+                        shipment_number,
+                        as_dict=True
+                    )
+
+            if existing_invoice:
+                logs.append(f"Already Present In Sales Invoice")
+                return frappe.log_error(message=logs, title="Sales Invoice Logs")
 
         # Append an item row
         rows = {'item_code': "ICG", 'qty': '1', 'rate': 0}

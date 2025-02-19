@@ -16,7 +16,7 @@ class R100000(Document):
 		# frappe.msgprint(str(result))
     pass
 	# def before_save(self):
-	# 	shipment_number = "853Y3XH4TLR"
+	# 	shipment_number = "853V4XVQ4BC"
 	# 	sales_invoice_definition = "Default"
 	# 	end_date = "2024-07-11"
 	# 	# print("yes R100000 is working", shipment_number,sales_invoice_definition,end_date) 
