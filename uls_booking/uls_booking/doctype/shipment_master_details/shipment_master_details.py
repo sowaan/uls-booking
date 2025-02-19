@@ -26,7 +26,6 @@ class ShipmentMasterDetails(Document):
 def send_notification(self):
 	if not frappe.db.exists('Shipment Master Details', self.name):
 		return
-
 	old_values = frappe.db.get_value(
 		'Shipment Master Details', 
 		self.name, 
@@ -36,20 +35,20 @@ def send_notification(self):
 
 
 	changed_fields = {
-		k: (old, new) for k in ["spot_rates_offered", "spot_rate_", "absolute_freight_rate"]
-		if (old := (old_values.get(k) or "").strip()) != (new := (getattr(self, k) or "").strip())
-	}
+        k: getattr(self, k, "").strip()
+        for k in ["spot_rates_offered", "spot_rate_", "absolute_freight_rate"]
+        if (old_values.get(k) or "").strip() != (getattr(self, k) or "").strip()
+    }
 
-	
-
+	url = frappe.utils.get_url() + self.get_url()
 
 	if not changed_fields:
 		return
 	
-	notify_billing_agents(changed_fields)
+	notify_billing_agents(self.name, changed_fields, url)
 
 
-def notify_billing_agents(changed_fields):
+def notify_billing_agents(shipment_name, changed_fields, doc_link):
 	billing_agent_emails = frappe.get_all(
         "User",
         filters={
@@ -59,25 +58,25 @@ def notify_billing_agents(changed_fields):
         pluck="name"
     )
 
-	# frappe.throw(str(billing_agent_emails) + " " + str(changed_fields))
 
 	if not billing_agent_emails:
 		return
 	
 
 	message = f"""
-		<p>Pricing Activity section has been updated:</p>
-		<ul>
-			{"".join(f"<li><b>{field.replace('_', ' ').title()}:</b> {old} ➝ {new}</li>" for field, (old, new) in changed_fields.items())}
-		</ul>
-	"""
+        <p>The Pricing Activity section for 
+        <b><a href="{doc_link}">{shipment_name}</a></b> has been updated.</p>
+        <ul>
+            {"".join(f"<li><b>{field.replace('_', ' ').title()}:</b> {value}</li>" for field, value in changed_fields.items())}
+        </ul>
+    """
 	# print(message)
-	# frappe.throw(str(billing_agent_emails) + " " + str(changed_fields) + " " + str(message))
+
 	frappe.sendmail(
-		recipients=billing_agent_emails,
-		subject="Pricing Activity Updated",
-		message=message,
-	)
+        recipients=billing_agent_emails,
+        subject=f"Pricing Activity Updated for {shipment_name}",
+        message=message,
+    )
 
 
 
@@ -145,7 +144,8 @@ def clear_form_fields(doc):
 	]
 	
 	for field in fields_to_clear:
-		setattr(doc, field, None)  
+		if hasattr(doc, field):
+			setattr(doc, field, None)  
 
 	doc.dispute_invoice_number = []
 	doc.dispute_invoice_number_billing = []
