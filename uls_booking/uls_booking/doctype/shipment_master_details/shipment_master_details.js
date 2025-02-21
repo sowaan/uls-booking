@@ -304,7 +304,7 @@ frappe.ui.form.on('Shipment Master Details', {
 
             // if (origin_country) {
             //     if (origin_country.toUpperCase() === 'PK' || origin_country.toUpperCase() === 'PAK' || origin_country.toUpperCase() === 'PAKISTAN') {
-            //         const icris_shipper = await frappe.db.get_value('ICRIS List', {'shipper_no': shipper_number}, 'shipper_name');
+            //         const icris_shipper = await frappe.db.get_value('ICRIS Account', {'shipper_no': shipper_number}, 'shipper_name');
             //         if (icris_shipper.message) {
             //             const email_id_shipper = await frappe.db.get_value('Customer', {'customer_name': icris_shipper.message.shipper_name}, 'email_id');
             //             if (email_id_shipper.message) {
@@ -320,10 +320,10 @@ frappe.ui.form.on('Shipment Master Details', {
             //                 };
             //             }
             //         }else{
-            //             frappe.msgprint(__('There is no shipper of this shipper number in Icris List.'));
+            //             frappe.msgprint(__('There is no shipper of this shipper number in ICRIS Account.'));
             //         }
             //     } else {
-            //         const icris_consignee = await frappe.db.get_value('ICRIS List', {'shipper_no': consignee_number}, 'shipper_name');
+            //         const icris_consignee = await frappe.db.get_value('ICRIS Account', {'shipper_no': consignee_number}, 'shipper_name');
             //         if (icris_consignee.message) {
             //             const email_id_consignee = await frappe.db.get_value('Customer', {'customer_name': icris_consignee.message.shipper_name}, 'email_id');
             //             if (email_id_consignee.message) {
@@ -339,7 +339,7 @@ frappe.ui.form.on('Shipment Master Details', {
             //                 };
             //             }
             //         }else{
-            //             frappe.msgprint(__('There is no consignee of this consignee number in Icris List.'));
+            //             frappe.msgprint(__('There is no consignee of this consignee number in ICRIS Account.'));
             //         }
             //     }
             // } else {

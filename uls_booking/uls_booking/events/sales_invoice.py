@@ -23,7 +23,7 @@ def generate_invoice( self, method):
         selling_rate_country = 0
         arrayy=[]
         sales_name= []
-
+        full_tariff = None
         definition = frappe.get_doc("Sales Invoice Definition", sales_invoice.custom_sales_invoice_definition)
         setting = frappe.get_doc("Manifest Setting Definition")
         # for row in sales_invoice.items:
@@ -133,16 +133,16 @@ def generate_invoice( self, method):
 
 
         if sales_invoice.custom_billing_term in export_billing_term and sales_invoice.custom_shipper_country == definition.origin_country.upper():
-            check1 = frappe.get_list("ICRIS List",
-                                    filters = {"shipper_no":icris_number})
+            check1 = frappe.get_list("ICRIS Account",
+                                    filters = {"name":icris_number})
             if not check1:
-                logs.append(f"No Icris List Found {icris_number}")
-                print("No Icris List Found")
+                logs.append(f"No ICRIS Account Found {icris_number}")
+                print("No ICRIS Account Found")
                 icris_number = definition.unassigned_icris_number
             if icris_number:
-                icris_doc = frappe.get_list("ICRIS List",
-                                    filters = {"shipper_no":icris_number})
-                icris = frappe.get_doc("ICRIS List",icris_doc[0].name)
+                icris_doc = frappe.get_list("ICRIS Account",
+                                    filters = {"name":icris_number})
+                icris = frappe.get_doc("ICRIS Account",icris_doc[0].name)
                 if icris.shipper_name:
                     sales_invoice.customer = icris.shipper_name
                 else:
@@ -218,7 +218,7 @@ def generate_invoice( self, method):
                         print("No selling group Found thats why using Default Selling group")
                         selling_group = definition.default_selling_group 
                 full_tariff_flag = 0
-                full_tariff = None
+                
                 print(selling_group , " = ", definition.default_selling_group)
 
 
@@ -410,16 +410,16 @@ def generate_invoice( self, method):
 
             
         elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
-            check = frappe.get_list("ICRIS List",
-                                    filters = {"shipper_no":icris_number})
+            check = frappe.get_list("ICRIS Account",
+                                    filters = {"name":icris_number})
             if not check:
-                logs.append(f"No Icris List Found {icris_number}")
-                print("No Icris List Found Thats Why using Default Icris")
+                logs.append(f"No ICRIS Account Found {icris_number}")
+                print("No ICRIS Account Found Thats Why using Default Icris")
                 icris_number = definition.unassigned_icris_number
             if icris_number:
-                icris_doc = frappe.get_list("ICRIS List",
-                                    filters = {"shipper_no":icris_number})
-                icris1 = frappe.get_doc("ICRIS List",icris_doc[0].name)
+                icris_doc = frappe.get_list("ICRIS Account",
+                                    filters = {"name":icris_number})
+                icris1 = frappe.get_doc("ICRIS Account",icris_doc[0].name)
                 
                 if icris1.shipper_name:
                     sales_invoice.customer = icris1.shipper_name
@@ -492,6 +492,7 @@ def generate_invoice( self, method):
                     print("No Selling Group Found Thats why using Default Selling Group")
                     selling_group = definition.default_selling_group
                 full_tariff_flag = 0
+                
                 print(selling_group , " = ", definition.default_selling_group)
 
 
@@ -853,20 +854,7 @@ def generate_invoice( self, method):
         # print(sales_invoice.customer, " = " , customer.custom_default_customer)
         if sales_invoice.customer != customer.custom_default_customer:
             sales_invoice.custom_freight_invoices = 1
-            if declared_value > 0:
-                existing_invoice = frappe.db.sql(
-                        """SELECT name FROM `tabSales Invoice`
-                        WHERE custom_shipment_number = %s
-                        AND custom_freight_invoices = 1
-                        FOR UPDATE""",
-                        shipment_number,
-                        as_dict=True
-                    )
-
-                if existing_invoice:
-                    logs.append(f"Already Present In Sales Invocie")
-                    return frappe.log_error(message=logs, title="Sales Invoice Logs")
-            
+            if declared_value > 0:            
                 percent = frappe.db.get_single_value('Additional Charges Page', 'percentage_on_declare_value')
                 minimum_amount = frappe.db.get_single_value('Additional Charges Page', 'minimum_amount_for_declare_value')
                 result = declared_value * (percent / 100)

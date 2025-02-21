@@ -7,7 +7,7 @@
  "field_order": [
   "shipper_no",
   "shipper_name",
-  "centre",
+  "center",
   "price_list",
   "column_break_evgf",
   "active_account",
@@ -32,14 +32,6 @@
    "label": "Shipper Name",
    "options": "Customer",
    "reqd": 1
-  },
-  {
-   "fieldname": "centre",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Centre",
-   "options": "\n0741 PK - KARACHI\n0531 PK - LAHORE\n0611 PK - SIALKOT"
   },
   {
    "fieldname": "price_list",
@@ -81,11 +73,19 @@
    "label": "Station",
    "options": "\nFaisalabad\nGujranwala\nIslamabad\nKarachi\nLahore\nLahore\nPeshawar\nSialkot\nWazirabad",
    "reqd": 1
+  },
+  {
+   "fieldname": "center",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Center",
+   "options": "\n0741 PK - KARACHI\n0531 PK - LAHORE\n0611 PK - SIALKOT"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-06 18:39:38.395889",
+ "modified": "2025-02-21 12:59:34.045190",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "ICRIS List",
