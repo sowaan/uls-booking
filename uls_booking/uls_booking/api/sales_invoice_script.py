@@ -185,16 +185,16 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         sales_invoice.currency = frappe.get_value("Customer", sales_invoice.customer, "default_currency")
 
         if sales_invoice.custom_billing_term in export_billing_term and sales_invoice.custom_shipper_country == definition.origin_country.upper():
-            check1 = frappe.get_list("ICRIS List",
-                                    filters = {"shipper_no":icris_number})
+            check1 = frappe.get_list("ICRIS Account",
+                                    filters = {"name":icris_number})
             if not check1:
-                logs.append(f"No Icris List Found {icris_number}")
-                print("No Icris List Found")
+                logs.append(f"No ICRIS Account Found {icris_number}")
+                print("No ICRIS Account Found")
                 icris_number = definition.unassigned_icris_number
             if icris_number:
-                icris_doc = frappe.get_list("ICRIS List",
-                                    filters = {"shipper_no":icris_number})
-                icris = frappe.get_doc("ICRIS List",icris_doc[0].name)
+                icris_doc = frappe.get_list("ICRIS Account",
+                                    filters = {"name":icris_number})
+                icris = frappe.get_doc("ICRIS Account",icris_doc[0].name)
                 if icris.shipper_name:
                     sales_invoice.customer = icris.shipper_name
                 else:
@@ -205,16 +205,16 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
 
 
         elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
-            check = frappe.get_list("ICRIS List",
-                                    filters = {"shipper_no":icris_number})
+            check = frappe.get_list("ICRIS Account",
+                                    filters = {"name":icris_number})
             if not check:
-                logs.append(f"No Icris List Found {icris_number}")
-                print("No Icris List Found Thats Why using Default Icris")
+                logs.append(f"No ICRIS Account Found {icris_number}")
+                print("No ICRIS Account Found Thats Why using Default Icris")
                 icris_number = definition.unassigned_icris_number
             if icris_number:
-                icris_doc = frappe.get_list("ICRIS List",
-                                    filters = {"shipper_no":icris_number})
-                icris1 = frappe.get_doc("ICRIS List",icris_doc[0].name)
+                icris_doc = frappe.get_list("ICRIS Account",
+                                    filters = {"name":icris_number})
+                icris1 = frappe.get_doc("ICRIS Account",icris_doc[0].name)
                 
                 if icris1.shipper_name:
                     sales_invoice.customer = icris1.shipper_name

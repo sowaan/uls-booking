@@ -7,6 +7,14 @@
  "engine": "InnoDB",
  "field_order": [
   "icris_account",
+  "contact",
+  "center",
+  "price_list",
+  "column_break_ghit",
+  "active_account",
+  "shipper_name",
+  "business_initiative",
+  "station",
   "section_break_uygx",
   "rate_group",
   "buying_rate_group_section",
@@ -42,11 +50,67 @@
    "fieldtype": "Table",
    "label": "Buying Rate Group",
    "options": "Buying Rate Group Table"
+  },
+  {
+   "fieldname": "contact",
+   "fieldtype": "Link",
+   "label": "Contact",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "center",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Center",
+   "options": "\n0741 PK - KARACHI\n0531 PK - LAHORE\n0611 PK - SIALKOT"
+  },
+  {
+   "fieldname": "column_break_ghit",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "active_account",
+   "fieldtype": "Check",
+   "label": "Active Account"
+  },
+  {
+   "fieldname": "shipper_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Shipper Name",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "business_initiative",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Business Initiative",
+   "options": "\nAA Enterprises\nADB Tender\nB2B Direct Sales\nB2C Direct Sales\nBanking Initiative\nBritish Council Material to WW\nEducational - British Council\nHeavy Weight Campaign\nLOC Tender\nNADRA Project\nPakistan Post Office - MRP\nPakistan Post Office Tender\nPK Ramadan Campaign\nProduct Boxes 10 and 25 Kg\nProject and Tender\nReseller - AA International\nReseller - AJ Worldwide\nReseller - Amanat Express\nReseller - Aviators\nReseller - Bex Logistics\nReseller - Call Courier\nReseller - Dart\nReseller - DHL Linker\nReseller - Easyways Express\nReseller - Express Movers\nReseller - Global Packers\nReseller - Noorani Impex\nReseller - North Pole\nReseller - Orbit\nReseller - Speedaf\nReseller and Retailor\nReseller North\nReseller South\nRetailor - Leopards\nRetailor - M&P\nRetailor - TCS Pvt. Ltd.\nWorld Food Programme WFP"
+  },
+  {
+   "fieldname": "station",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Station",
+   "options": "\nFaisalabad\nGujranwala\nIslamabad\nKarachi\nLahore\nLahore\nPeshawar\nSialkot\nWazirabad",
+   "reqd": 1
+  },
+  {
+   "fieldname": "price_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Price List",
+   "options": "Price List"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-24 13:22:01.363846",
+ "modified": "2025-02-21 13:00:20.921092",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "ICRIS Account",

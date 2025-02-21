@@ -221,7 +221,7 @@ def populate_r300000_data(shipment_number, doc):
 		shipper_number = shipper.get('shipper_number')
 		cus_shipper_name = None
 		if shipper_number:
-			icris_shipper_name = frappe.get_value('ICRIS List', {'shipper_no': shipper_number}, 'shipper_name')
+			icris_shipper_name = frappe.get_value('ICRIS Account', {'shipper_no': shipper_number}, 'shipper_name')
 			
 			if icris_shipper_name:
 				cus_shipper_name = icris_shipper_name
@@ -258,7 +258,7 @@ def populate_r400000_data(shipment_number, doc):
 		consignee_number = consignee.get('consignee_number')
 		cus_consignee_name = None
 		if consignee_number:
-			icris_consignee_name = frappe.get_value('ICRIS List', {'shipper_no': consignee_number}, 'shipper_name')
+			icris_consignee_name = frappe.get_value('ICRIS Account', {'shipper_no': consignee_number}, 'shipper_name')
 			if icris_consignee_name:
 				cus_consignee_name = icris_consignee_name
 			else:
@@ -315,21 +315,21 @@ def populate_icris_data(doc):
 	# consignee_number = doc.consignee_number
 
 	# if origin_country.upper() in ['PK', 'PAK', 'PAKISTAN']:
-	# 	icris_shipper = frappe.get_value('ICRIS List', {'shipper_no': shipper_number}, 'shipper_name')
+	# 	icris_shipper = frappe.get_value('ICRIS Account', {'shipper_no': shipper_number}, 'shipper_name')
 	# 	if icris_shipper:
 	# 		email_id_shipper = frappe.get_value('Customer', {'customer_name': icris_shipper}, 'email_id')
 	# 		if email_id_shipper:
 	# 			doc.shipper_email_address = email_id_shipper
 	# 	else:
-	# 		frappe.msgprint(f"There is no shipper of this shipper number in Icris List.")
+	# 		frappe.msgprint(f"There is no shipper of this shipper number in ICRIS Account.")
 	# else:
-	# 	icris_consignee = frappe.get_value('ICRIS List', {'shipper_no': consignee_number}, 'shipper_name')
+	# 	icris_consignee = frappe.get_value('ICRIS Account', {'shipper_no': consignee_number}, 'shipper_name')
 	# 	if icris_consignee:
 	# 		email_id_consignee = frappe.get_value('Customer', {'customer_name': icris_consignee}, 'email_id')
 	# 		if email_id_consignee:
 	# 			doc.consignee_email_address = email_id_consignee
 	# 	else:
-	# 		frappe.msgprint(f"There is no consignee of this consignee number in Icris List.")
+	# 		frappe.msgprint(f"There is no consignee of this consignee number in ICRIS Account.")
 
 
 

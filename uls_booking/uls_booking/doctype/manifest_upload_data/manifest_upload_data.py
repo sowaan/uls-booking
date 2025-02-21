@@ -182,16 +182,16 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
             
             
             if sales_invoice.custom_billing_term in export_billing_term and sales_invoice.custom_shipper_country == definition.origin_country.upper():
-                check1 = frappe.get_list("ICRIS List",
-                                        filters = {"shipper_no":icris_number})
+                check1 = frappe.get_list("ICRIS Account",
+                                        filters = {"name":icris_number})
                 if not check1:
-                    log_text = "No ICRIS List Found thats why Assigning Default Icris" +f"""{definition.unassigned_icris_number}"""+ ""+ f"""Shipment Number:,{shipment},Icris Number: {icris_number}"""
+                    log_text = "No ICRIS Account Found thats why Assigning Default Icris" +f"""{definition.unassigned_icris_number}"""+ ""+ f"""Shipment Number:,{shipment},Icris Number: {icris_number}"""
                     log.append(log_text)
                     icris_number = definition.unassigned_icris_number
                 if icris_number:
-                    icris_doc = frappe.get_list("ICRIS List",
-                                        filters = {"shipper_no":icris_number})
-                    icris = frappe.get_doc("ICRIS List",icris_doc[0].name)
+                    icris_doc = frappe.get_list("ICRIS Account",
+                                        filters = {"name":icris_number})
+                    icris = frappe.get_doc("ICRIS Account",icris_doc[0].name)
                     if icris.shipper_name:
                         sales_invoice.customer = icris.shipper_name
                     else:
@@ -353,16 +353,16 @@ def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,e
             elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
                
                 
-                check = frappe.get_list("ICRIS List",
-                                        filters = {"shipper_no":icris_number})
+                check = frappe.get_list("ICRIS Account",
+                                        filters = {"name":icris_number})
                 if not check:
-                    log_text = "No ICRIS List Found thats why Assigning Default Icris" +f"""{definition.unassigned_icris_number}"""+ ""+ f"""Shipment Number:,{shipment},Icris Number: {icris_number}"""
+                    log_text = "No ICRIS Account Found thats why Assigning Default Icris" +f"""{definition.unassigned_icris_number}"""+ ""+ f"""Shipment Number:,{shipment},Icris Number: {icris_number}"""
                     log.append(log_text)
                     icris_number = definition.unassigned_icris_number
                 if icris_number:
-                    icris_doc = frappe.get_list("ICRIS List",
-                                        filters = {"shipper_no":icris_number})
-                    icris1 = frappe.get_doc("ICRIS List",icris_doc[0].name)
+                    icris_doc = frappe.get_list("ICRIS Account",
+                                        filters = {"name":icris_number})
+                    icris1 = frappe.get_doc("ICRIS Account",icris_doc[0].name)
                     
                     if icris1.shipper_name:
                         sales_invoice.customer = icris1.shipper_name
@@ -890,7 +890,7 @@ def storing_shipment_number(arrays, frm, to, doc):
                 station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
                 shipper_number = export_array_temp[0].shipper_number
                 import_export = "Export"
-                icris = frappe.get_list("ICRIS List",
+                icris = frappe.get_list("ICRIS Account",
                     filters=[
                         ["shipper_no", "=", shipper_number]
                     ],
@@ -914,7 +914,7 @@ def storing_shipment_number(arrays, frm, to, doc):
                 station = frappe.get_value("R400000", {"shipment_number": shipment}, "consignee_city")
                 consignee_number = import_array_temp[0].consignee_number
                 import_export = "Import"
-                icris = frappe.get_list("ICRIS List",
+                icris = frappe.get_list("ICRIS Account",
                     filters=[
                         ["shipper_no", "=", consignee_number]
                     ],
@@ -968,7 +968,7 @@ def storing_shipment_number(arrays, frm, to, doc):
                 station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
                 shipper_number = export_array_temp[0].shipper_number
                 import_export = "Export"
-                icris = frappe.get_list("ICRIS List",
+                icris = frappe.get_list("ICRIS Account",
                     filters=[
                         ["shipper_no", "=", shipper_number]
                     ],
@@ -992,7 +992,7 @@ def storing_shipment_number(arrays, frm, to, doc):
                 station = frappe.get_value("R400000", {"shipment_number": shipment}, "consignee_city")
                 consignee_number = import_array_temp[0].consignee_number
                 import_export = "Import"
-                icris = frappe.get_list("ICRIS List",
+                icris = frappe.get_list("ICRIS Account",
                     filters=[
                         ["shipper_no", "=", consignee_number]
                     ],
