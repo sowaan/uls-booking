@@ -12,7 +12,7 @@ import logging
 
 
 @frappe.whitelist()
-def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, billing_type=None, icris_number=None, customer=None, import__export=None):
+def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, billing_type=None, icris_number=None, customer=None, import__export=None,date_type=None,manifest_file_type=None):
 
 
     # Prepare the values dictionary to pass into the SQL query
@@ -23,18 +23,34 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
         "billing_type": billing_type,
         "icris_number": icris_number,
         "customer": customer,
-        "import__export": import__export
+        "import__export": import__export,
+        "manifest_file_type":manifest_file_type,
+        "date_type":date_type
     }
 
     # Begin the SQL query
-    query = """
-        SELECT 
-            shipment_number
-        FROM 
-            `tabShipment Number` as sn
-        WHERE
-            sn.date_shipped BETWEEN %(start_date)s AND %(end_date)s
-    """
+
+
+    if date_type == 'Shipped Date' :
+        query = """
+            SELECT 
+                shipment_number
+            FROM 
+                `tabShipment Number` as sn
+            WHERE
+                sn.date_shipped BETWEEN %(start_date)s AND %(end_date)s
+        """
+
+    else :
+        query = """
+            SELECT 
+                shipment_number
+            FROM 
+                `tabShipment Number` as sn
+            WHERE
+                sn.import_date BETWEEN %(start_date)s AND %(end_date)s
+        """
+
 
     # Initialize a list for conditions
     conditions = []
@@ -50,6 +66,8 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
         conditions.append("sn.import__export = %(import__export)s")
     if customer:
         conditions.append("sn.customer = %(customer)s")
+    if manifest_file_type :
+        conditions.append("sn.manifest_file_type = %(manifest_file_type)s")
 
     # If there are additional conditions, join them to the query
     if conditions:
@@ -68,7 +86,7 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
 
     # Extract shipment numbers from results
     shipment_numbers = [row[0] for row in results]
-    print(shipment_numbers)
+    # print(shipment_numbers)
     # Return the shipment numbers
     return shipment_numbers
 
