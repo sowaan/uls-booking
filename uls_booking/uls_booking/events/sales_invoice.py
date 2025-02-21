@@ -82,11 +82,26 @@ def generate_invoice( self, method):
         sales_invoice.posting_date = date2
         posting_date = getdate(sales_invoice.posting_date)
         sales_invoice.set_posting_time = 1
+
+
+
         icris_number = None
         selling_group = None
         selling_rate = None
         shipped_date = getdate(sales_invoice.custom_date_shipped)
         print(shipped_date)
+        
+        exchange_rate = frappe.get_list(
+            "Currency Exchange",
+            filters={"from_currency": "USD", "to_currency": "PKR", "date": [">=", shipped_date]},
+            fields=["name", "exchange_rate", "date"],
+            order_by="date desc",
+            limit_page_length=1  # Fetch only the earliest matching record
+        )
+        if exchange_rate:
+            print(exchange_rate[0].exchange_rate)
+            sales_invoice.conversion_rate = exchange_rate[0].exchange_rate
+
         if sales_invoice.custom_shipper_country == definition.origin_country.upper():
             imp_exp = "Export"
             if sales_invoice.custom_shipper_number:
@@ -863,7 +878,14 @@ def generate_invoice( self, method):
                     sales_invoice.append('items', rows)
             sales_invoice.discount_amount = tarif - final_rate
             sales_invoice.custom_amount_after_discount = tarif - sales_invoice.discount_amount
-            sales_invoice.custom_selling_percentage = final_discount_percentage
+            
+            if sales_invoice.custom_selling_percentage:
+                final_discount_percentage = sales_invoice.custom_selling_percentage
+            if not sales_invoice.custom_selling_percentage:
+                sales_invoice.custom_selling_percentage = final_discount_percentage
+
+
+
             print(total_charges_other_charges,FSCcharges,tarif , shipmentbillingamount , total_charges_incl_fuel)
             if total_charges_other_charges:
                 rows = {'item_code': setting.other_charges, 'qty': 1 , 'rate' :total_charges_other_charges} 
