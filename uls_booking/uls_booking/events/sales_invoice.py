@@ -91,13 +91,44 @@ def generate_invoice( self, method):
         shipped_date = getdate(sales_invoice.custom_date_shipped)
         print(shipped_date)
         
+        # exchange_rate = frappe.get_list(
+        #     "Currency Exchange",
+        #     filters={"from_currency": "USD", "to_currency": "PKR", "date": [">=", shipped_date]},
+        #     fields=["name", "exchange_rate", "date"],
+        #     order_by="date desc",
+        #     limit_page_length=1  # Fetch only the earliest matching record
+        # )
+
+
+        # 1️⃣ Check for exchange rate on the exact shipped_date
         exchange_rate = frappe.get_list(
             "Currency Exchange",
-            filters={"from_currency": "USD", "to_currency": "PKR", "date": [">=", shipped_date]},
+            filters={"from_currency": "USD", "to_currency": "PKR", "date": shipped_date},
             fields=["name", "exchange_rate", "date"],
             order_by="date desc",
-            limit_page_length=1  # Fetch only the earliest matching record
+            limit_page_length=1
         )
+
+        # 2️⃣ If not found, fetch the latest exchange rate after shipped_date
+        if not exchange_rate:
+            exchange_rate = frappe.get_list(
+                "Currency Exchange",
+                filters={"from_currency": "USD", "to_currency": "PKR", "date": [">", shipped_date]},
+                fields=["name", "exchange_rate", "date"],
+                order_by="date asc",  # Get the earliest available future exchange rate
+                limit_page_length=1
+            )
+
+        # 3️⃣ If still not found, fetch the most recent exchange rate before shipped_date
+        if not exchange_rate:
+            exchange_rate = frappe.get_list(
+                "Currency Exchange",
+                filters={"from_currency": "USD", "to_currency": "PKR", "date": ["<", shipped_date]},
+                fields=["name", "exchange_rate", "date"],
+                order_by="date desc",  # Get the closest previous exchange rate
+                limit_page_length=1
+            )
+
         if exchange_rate:
             print(exchange_rate[0].exchange_rate)
             sales_invoice.conversion_rate = exchange_rate[0].exchange_rate
