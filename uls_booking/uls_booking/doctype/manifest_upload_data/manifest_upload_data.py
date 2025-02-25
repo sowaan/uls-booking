@@ -1018,8 +1018,8 @@ def storing_shipment_number(arrays, frm, to, doc):
             shipment_doc.set("import_date",import_date)
             shipment_doc.set("manifest_file_type",file_type)
 
-            shipment_doc.insert()
-            shipment_doc.save()
+            shipment_doc.insert(ignore_permissions=True)
+            shipment_doc.save(ignore_permissions=True)
             # frappe.db.commit()
     frappe.db.set_value("Manifest Upload Data",doc.name,"total_shipment_numbers" , len(unique_shipment_numbers))
 
