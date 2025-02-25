@@ -106,17 +106,6 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
             logs.append("Sales Invoice Definition does not exist")
             return {"message": logs}
 
-        # Check if invoice already exists
-        # existing_invoice = frappe.db.sql(
-        #     """SELECT name FROM `tabSales Invoice`
-        #        WHERE custom_shipment_number = %s
-        #        FOR UPDATE""",
-        #     shipment_number,
-        #     as_dict=True
-        # )
-        # if existing_invoice:
-        #     frappe.throw("Present In Sales Invoice")
-
         # Get settings
         setting = frappe.get_doc("Manifest Setting Definition")
 
