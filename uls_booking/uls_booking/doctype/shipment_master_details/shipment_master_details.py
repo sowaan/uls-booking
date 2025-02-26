@@ -221,7 +221,7 @@ def populate_r300000_data(shipment_number, doc):
 		shipper_number = shipper.get('shipper_number')
 		cus_shipper_name = None
 		if shipper_number:
-			icris_shipper_name = frappe.get_value('ICRIS Account', {'shipper_no': shipper_number}, 'shipper_name')
+			icris_shipper_name = frappe.get_value('ICRIS Account', {'name': shipper_number}, 'shipper_name')
 			
 			if icris_shipper_name:
 				cus_shipper_name = icris_shipper_name
@@ -258,7 +258,7 @@ def populate_r400000_data(shipment_number, doc):
 		consignee_number = consignee.get('consignee_number')
 		cus_consignee_name = None
 		if consignee_number:
-			icris_consignee_name = frappe.get_value('ICRIS Account', {'shipper_no': consignee_number}, 'shipper_name')
+			icris_consignee_name = frappe.get_value('ICRIS Account', {'name': consignee_number}, 'shipper_name')
 			if icris_consignee_name:
 				cus_consignee_name = icris_consignee_name
 			else:
