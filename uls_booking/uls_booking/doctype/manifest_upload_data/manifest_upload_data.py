@@ -994,7 +994,7 @@ def storing_shipment_number(arrays, frm, to, doc):
                 import_export = "Import"
                 icris = frappe.get_list("ICRIS Account",
                     filters=[
-                        ["shipper_no", "=", consignee_number]
+                        ["name", "=", consignee_number]
                     ],
                     fields=["shipper_name", "shipper_no"]
                 )
