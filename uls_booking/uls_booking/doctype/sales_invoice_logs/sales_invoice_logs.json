@@ -1,0 +1,82 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-02-26 12:35:52.345797",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_ziyi",
+  "amended_from",
+  "shipment_number",
+  "icris_number",
+  "invoice_logs_section",
+  "logs"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_ziyi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sales Invoice Logs",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "shipment_number",
+   "fieldtype": "Link",
+   "label": "Shipment Number",
+   "options": "Shipment Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "icris_number",
+   "fieldtype": "Link",
+   "label": "Icris Number",
+   "options": "ICRIS Account",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "invoice_logs_section",
+   "fieldtype": "Section Break",
+   "label": "Invoice Logs"
+  },
+  {
+   "fieldname": "logs",
+   "fieldtype": "Long Text",
+   "label": "Logs"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-02-26 13:02:34.817370",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Sales Invoice Logs",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

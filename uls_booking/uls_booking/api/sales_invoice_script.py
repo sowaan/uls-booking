@@ -83,11 +83,7 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
     except Exception as e:
         print("Error executing query:", e)
         return []
-
-    # Extract shipment numbers from results
     shipment_numbers = [row[0] for row in results]
-    # print(shipment_numbers)
-    # Return the shipment numbers
     return shipment_numbers
 
 
@@ -97,7 +93,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
     print("Main Function")
     try:
         logs = []
-        sales_invoice = None  # Ensure it's defined at the start
+        sales_invoice = None
 
         # Check if Sales Invoice Definition exists
         try:
@@ -105,11 +101,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         except frappe.DoesNotExistError:
             logs.append("Sales Invoice Definition does not exist")
             return {"message": logs}
-
-        # Get settings
         setting = frappe.get_doc("Manifest Setting Definition")
-
-        # ✅ Assign the sales_invoice variable early to avoid reference issues
         sales_invoice = frappe.new_doc("Sales Invoice")
         if sales_invoice.custom_shipper_country == definition.origin_country.upper():
             imp_exp = "Export"
@@ -138,14 +130,15 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
             print("No icris Account Found")
             if definition.unassigned_icris_number:
                 icris_account = frappe.get_doc("ICRIS Account", definition.unassigned_icris_number)
-        # print(shipment_type)
+
 
 
 
         # Get default customer from company
         company = definition.default_company
         customer = frappe.get_doc("Company", company, fields=["custom_default_customer"])
-        sales_invoice.customer = customer.custom_default_customer
+        # sales_invoice.customer = customer.custom_default_customer
+        sales_invoice.set("customer", customer.custom_default_customer)
         sales_invoice.custom_sales_invoice_definition = sales_invoice_definition
         # Populate sales invoice fields
         for child_record in definition.sales_invoice_definition:
@@ -188,8 +181,10 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         
         selected_weight = max(weight_frm_R200000, weight_frm_R201000)
         sales_invoice.custom_shipment_weight = selected_weight
-        # Set currency
         sales_invoice.currency = frappe.get_value("Customer", sales_invoice.customer, "default_currency")
+
+
+
 
         if sales_invoice.custom_billing_term in export_billing_term and sales_invoice.custom_shipper_country == definition.origin_country.upper():
             check1 = frappe.get_list("ICRIS Account",
@@ -229,7 +224,11 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                     logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}") 
                     print("No Customer Found")
 
+
+
+        log_doc = frappe.new_doc("Sales Invoice Logs")
         if sales_invoice.customer != customer.custom_default_customer:
+            sales_invoice.custom_freight_invoices = 1
             existing_invoice = frappe.db.sql(
                             """SELECT name FROM `tabSales Invoice`
                             WHERE custom_shipment_number = %s
@@ -240,7 +239,13 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                         )
             if existing_invoice:
                 logs.append(f"Already Present In Sales Invocie")
-                return frappe.log_error(message=logs, title="Sales Invoice Logs")
+                log_text = "\n".join(logs)
+                log_doc.shipment_number = shipment_number
+                log_doc.logs = log_text
+                log_doc.icris_number = icris_number
+                log_doc.save()
+                return
+                
             
         if sales_invoice.customer == customer.custom_default_customer:
             sales_invoice.custom_compensation_invoices = 1
@@ -256,18 +261,19 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
 
             if existing_invoice:
                 logs.append(f"Already Present In Sales Invoice")
-                return frappe.log_error(message=logs, title="Sales Invoice Logs")
+                log_text = "\n".join(logs)
 
+                log_doc.shipment_number = shipment_number
+                log_doc.logs = log_text
+                log_doc.icris_number = icris_number
+                log_doc.save()
+                return
+               
         # Append an item row
         rows = {'item_code': "ICG", 'qty': '1', 'rate': 0}
         sales_invoice.append('items', rows)
 
-        # Insert and save
-        # print(sales_invoice.customer)
         sales_invoice.insert()
-        # sales_invoice.save()
-        # print("saved")
-        # frappe.db.commit()
 
     except json.JSONDecodeError:
         message = "Invalid JSON data"
@@ -275,7 +281,6 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         logging.error(message)
 
     except Exception as e:
-        # ✅ Check if sales_invoice is assigned before using it
         if sales_invoice and sales_invoice.name:
             print(f"Error while processing Sales Invoice {sales_invoice.name}: {str(e)}")
         else:
