@@ -13,7 +13,7 @@ import logging
 def generate_invoice( self, method):
     sales_invoice = self
     if sales_invoice.custom_duty_and_taxes_invoice != 1:
-    
+        log_doc = frappe.new_doc("Sales Invoice Logs")
         shipment_number = sales_invoice.custom_shipment_number
         logs = []
         final_rate = 0
@@ -26,10 +26,7 @@ def generate_invoice( self, method):
         full_tariff = None
         definition = frappe.get_doc("Sales Invoice Definition", sales_invoice.custom_sales_invoice_definition)
         setting = frappe.get_doc("Manifest Setting Definition")
-        # for row in sales_invoice.items:
-        #     if row.item_code == "ICG":
-        #         sales_invoice.items.remove(row)
-        #         break
+        
         sales_invoice.items = []
         sales_invoice.taxes = []
         sales_invoice.taxes_and_charges= None
@@ -69,7 +66,9 @@ def generate_invoice( self, method):
         company = definition.default_company
         customer = frappe.get_doc("Company",company,
         fields = ["custom_default_customer"])
-        sales_invoice.customer = customer.custom_default_customer
+        # sales_invoice.customer = None
+        # sales_invoice.customer = customer.custom_default_customer
+        # sales_invoice.set("customer", customer.custom_default_customer)
         end_date = sales_invoice.posting_date
         doctype_name =0
         total_charges_incl_fuel = 0
@@ -90,17 +89,7 @@ def generate_invoice( self, method):
         selling_rate = None
         shipped_date = getdate(sales_invoice.custom_date_shipped)
         print(shipped_date)
-        
-        # exchange_rate = frappe.get_list(
-        #     "Currency Exchange",
-        #     filters={"from_currency": "USD", "to_currency": "PKR", "date": [">=", shipped_date]},
-        #     fields=["name", "exchange_rate", "date"],
-        #     order_by="date desc",
-        #     limit_page_length=1  # Fetch only the earliest matching record
-        # )
-
-
-        # 1️⃣ Check for exchange rate on the exact shipped_date
+       
         exchange_rate = frappe.get_list(
             "Currency Exchange",
             filters={"from_currency": "USD", "to_currency": "PKR", "date": shipped_date},
@@ -108,8 +97,6 @@ def generate_invoice( self, method):
             order_by="date desc",
             limit_page_length=1
         )
-
-        # 2️⃣ If not found, fetch the latest exchange rate after shipped_date
         if not exchange_rate:
             exchange_rate = frappe.get_list(
                 "Currency Exchange",
@@ -119,7 +106,7 @@ def generate_invoice( self, method):
                 limit_page_length=1
             )
 
-        # 3️⃣ If still not found, fetch the most recent exchange rate before shipped_date
+        
         if not exchange_rate:
             exchange_rate = frappe.get_list(
                 "Currency Exchange",
@@ -128,7 +115,6 @@ def generate_invoice( self, method):
                 order_by="date desc",  # Get the closest previous exchange rate
                 limit_page_length=1
             )
-
         if exchange_rate:
             print(exchange_rate[0].exchange_rate)
             sales_invoice.conversion_rate = exchange_rate[0].exchange_rate
@@ -176,6 +162,8 @@ def generate_invoice( self, method):
                 icris = frappe.get_doc("ICRIS Account",icris_doc[0].name)
                 if icris.shipper_name:
                     sales_invoice.customer = icris.shipper_name
+                    customer_name = frappe.db.get_value("Customer", sales_invoice.customer, 'customer_name')
+                    sales_invoice.customer_name = customer_name
                 else:
                     logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}")
                     print("No Customer Found")
@@ -255,7 +243,6 @@ def generate_invoice( self, method):
 
 
                 if selling_group == definition.default_selling_group:
-                    # print("Default Selling Group")
                     # Look for Full Tariff
                     zones = frappe.get_list("Zone",
                                             filters = {"country" : origin_country , "is_single_country":1})
@@ -394,10 +381,8 @@ def generate_invoice( self, method):
                                     )
                                 
                                     if selling_rate_name:        
-                                        # selling_rate_zone = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
                                         selling_rate = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
                                         print(selling_rate)
-                                        # selling_rate = selling_rate_zone
                                         
                                     else :
                                         logs.append(f"No Selling Rate Found Thats why using Default Selling Rate")
@@ -454,6 +439,8 @@ def generate_invoice( self, method):
                 
                 if icris1.shipper_name:
                     sales_invoice.customer = icris1.shipper_name
+                    customer_name = frappe.db.get_value("Customer", sales_invoice.customer, 'customer_name')
+                    sales_invoice.customer_name = customer_name
                 else:
                     logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}") 
                     print("No Customer Found")
@@ -529,7 +516,6 @@ def generate_invoice( self, method):
 
 
                 if selling_group == definition.default_selling_group:
-                    # print("Default Selling Group")
                     # Look for Full Tariff
                     zones = frappe.get_list("Zone", filters={"country": origin_country, "is_single_country": 1})
                     flag = 0
@@ -613,7 +599,6 @@ def generate_invoice( self, method):
                         print(f"Final Rate from Full Tariff: {tarif}")
 
                     else:
-                        # **If Full Tariff is NOT found, switch to Selling Rate Logic**
                         print("Full Tariff Not Found, Switching to Selling Rate Logic")
 
 
@@ -667,9 +652,7 @@ def generate_invoice( self, method):
                                         }
                                     )
                                     if selling_rate_name:        
-                                        # selling_rate_zone = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
                                         selling_rate = frappe.get_doc("Selling Rate" , selling_rate_name[0].name)
-                                        # selling_rate = selling_rate_zone
                                         
                                     else :
                                         logs.append(f"No Selling Rate Found Thats why using Default Selling Rate")
@@ -703,9 +686,6 @@ def generate_invoice( self, method):
                             final_discount_percentage = last_row.discount_percentage
                         tarif = final_rate / (1- (final_discount_percentage/100))
             
-
-        # currency = frappe.get_value("Customer" , sales_invoice.customer , "default_currency") 
-        # sales_invoice.currency = currency
         codes_incl_fuel = []
         amounts_incl_fuel = []
         surcharge_codes_incl_fuel = []
@@ -742,16 +722,8 @@ def generate_invoice( self, method):
                 for row in definition.surcharges:
                     code_name = row.sur_cod_1
                     amount_name = row.sur_amt_1
-
-                    # Fetch surcharge code and amount from the document
                     code = getattr(docn, code_name, None)
                     amount = getattr(docn, amount_name, None)
-
-                    # # Only process surcharges if present in customer table, else skip
-                    # if code not in surcharge_dict:
-                    #     continue  # Skip if no match in customer surcharges
-                    # DOCUMENTS
-                    
                     surcharge_amount = surcharge_dict.get(code)
 
                     
@@ -759,10 +731,9 @@ def generate_invoice( self, method):
                         if surcharge_amount > 0:
                             amount = surcharge_amount
                     else:
-                        # If the code is not found or the amount is 0 or negative, use the amount from the document
                         if amount is not None:
                             try:
-                                amount = float(amount)  # Ensure the amount is a valid float
+                                amount = float(amount)
                             except (ValueError, TypeError):
                                 amount = 0
 
@@ -770,16 +741,6 @@ def generate_invoice( self, method):
                         print(code in included_codes and code not in excluded_codes)
                         continue
 
-                    # # Use customer surcharge amount if available
-                    # if surcharge_dict[code] and surcharge_dict[code] > 0:
-                    #     amount = surcharge_dict[code]
-
-                    # try:
-                    #     amount = float(amount)
-                    # except (ValueError, TypeError):
-                    #     amount = 0
-
-                    # Categorize surcharges
                     if code in included_codes and code not in excluded_codes:
                         codes_incl_fuel.append(code)
                         amounts_incl_fuel.append(amount)
@@ -817,12 +778,11 @@ def generate_invoice( self, method):
         additional_page = frappe.get_doc("Additional Charges Page")
         for row in additional_page.fuel_surcharge_percentages_on_freight_amount:
             if row.expiry_date < shipped_date:  
-                latest_valid_percentage = row.fuel_surcharge_percentage_on_freight_amount  # Keep track of the last valid percentage
+                latest_valid_percentage = row.fuel_surcharge_percentage_on_freight_amount
             
             if row.from_date <= shipped_date <= row.expiry_date:
                 FSCpercentage = row.fuel_surcharge_percentage_on_freight_amount
                 break
-        print("Hello")
         print(FSCpercentage ,latest_valid_percentage )
         if FSCpercentage == 0 and latest_valid_percentage != 0:
             FSCpercentage = latest_valid_percentage
@@ -838,10 +798,8 @@ def generate_invoice( self, method):
         if sales_invoice.customer:
             customer_doc = frappe.get_doc("Customer",sales_invoice.customer)
             shipmentbillingcheck = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipping_bill_charges_applicable')
-            # shipmentbillingchargesfromcustomer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipment_billing_charges')
             if shipmentbillingcheck and shipment_type in sbc_included and shipment_type not in sbc_excluded:
                 if shipmentbillingcheck and customer_doc.custom_shipping_billing_charges:
-                        # shipmentbillingamount = shipmentbillingchargesfromcustomer
                         for row in customer_doc.custom_shipping_billing_charges:
                             if float(row.from_weight) <= float(sales_invoice.custom_shipment_weight) <= float(row.to_weight):
                                 shipmentbillingamount = row.amount
@@ -852,14 +810,6 @@ def generate_invoice( self, method):
                     
                 elif imp_exp == "Import" and sbc_flag == 0:
                     shipmentbillingamount = frappe.db.get_single_value('Additional Charges Page', 'import_amount_per_shipment')
-                    
-            # elif shipmentbillingcheck and customer_doc.custom_shipping_billing_charges:
-            #     # shipmentbillingamount = shipmentbillingchargesfromcustomer
-            #     for row in customer_doc.custom_shipping_billing_charges:
-            #        if float(row.from_weight) <= float(sales_invoice.custom_shipment_weight) <= float(row.to_weight):
-            #            shipmentbillingamount = row.amount
-            #            break
-                        
 
 
 
@@ -882,9 +832,7 @@ def generate_invoice( self, method):
             print("")
             
         max_insured = 0
-        # print(sales_invoice.customer, " = " , customer.custom_default_customer)
         if sales_invoice.customer != customer.custom_default_customer:
-            sales_invoice.custom_freight_invoices = 1
             if declared_value > 0:            
                 percent = frappe.db.get_single_value('Additional Charges Page', 'percentage_on_declare_value')
                 minimum_amount = frappe.db.get_single_value('Additional Charges Page', 'minimum_amount_for_declare_value')
@@ -947,7 +895,6 @@ def generate_invoice( self, method):
         export_compensation_amount = 0
         
         if sales_invoice.customer == customer.custom_default_customer:
-            sales_invoice.custom_compensation_invoices = 1
             sig = 0
             for comp in definition.compensation_table:
                 if sales_invoice.custom_billing_term == comp.shipment_billing_term and shipment_type == comp.shipping_billing_type and imp_exp == comp.case:
@@ -961,16 +908,25 @@ def generate_invoice( self, method):
         if not sales_invoice.items:
             print(sales_invoice.customer)
             logs.append(f"No Items shipment number {shipment_number}, icris number {icris_number}")
+            log_text = "\n".join(logs)
+            log_doc.set("shipment_number" , shipment_number)
+            log_doc.set("logs", log_text)
+            log_doc.set("icris_number" , icris_number)
+            log_doc.save()
             print("No Items")
-            return frappe.log_error(message=logs, title="Sales Invoice Logs")
+            return
         
         log_text = "\n".join(logs)
-        sales_invoice.set("custom_invoice_logs" , log_text)
         discounted_amount = discounted_amount -1
-        sales_invoice.run_method("set_missing_values")
-        sales_invoice.run_method("calculate_taxes_and_totals")
-        # sales_invoice.insert()
+        sales_invoice.set_missing_values()
+        sales_invoice.calculate_taxes_and_totals()
+        sales_invoice.validate()
+        print(sales_invoice.customer_name)
+        # sales_invoice.save()
         frappe.db.commit()
         if logs:
-            # If there is log content, log it
-            return frappe.log_error(message=logs, title="Sales Invoice Logs")
+            log_doc.set("shipment_number" , shipment_number)
+            log_doc.set("logs", log_text)
+            log_doc.set("icris_number" , icris_number)
+            log_doc.save()
+            
