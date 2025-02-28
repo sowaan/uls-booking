@@ -9,6 +9,7 @@
   "amended_from",
   "shipment_number",
   "icris_number",
+  "sales_invoice",
   "invoice_logs_section",
   "logs"
  ],
@@ -51,12 +52,18 @@
    "fieldname": "logs",
    "fieldtype": "Long Text",
    "label": "Logs"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Data",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-02-26 13:02:34.817370",
+ "modified": "2025-02-27 16:26:54.525575",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice Logs",

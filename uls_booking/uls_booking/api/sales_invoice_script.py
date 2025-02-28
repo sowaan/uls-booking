@@ -225,10 +225,14 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                     print("No Customer Found")
 
 
-
-        log_doc = frappe.new_doc("Sales Invoice Logs")
+        already_present = 0
+        log_list = frappe.get_list("Sales Invoice Logs",filters ={"shipment_number":shipment_number})
+        if log_list:
+            already_present = 1
+            log_doc = frappe.get_doc("Sales Invoice Logs",log_list[0].name)
+        else:
+            log_doc = frappe.new_doc("Sales Invoice Logs")
         if sales_invoice.customer != customer.custom_default_customer:
-            sales_invoice.custom_freight_invoices = 1
             existing_invoice = frappe.db.sql(
                             """SELECT name FROM `tabSales Invoice`
                             WHERE custom_shipment_number = %s
@@ -240,16 +244,13 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
             if existing_invoice:
                 logs.append(f"Already Present In Sales Invocie")
                 log_text = "\n".join(logs)
-                log_doc.shipment_number = shipment_number
-                log_doc.logs = log_text
-                log_doc.icris_number = icris_number
+                
+                log_doc.logs = (log_doc.logs or "") + "\n" + log_text
                 log_doc.save()
                 return
                 
             
         if sales_invoice.customer == customer.custom_default_customer:
-            sales_invoice.custom_compensation_invoices = 1
-            sig = 0
             existing_invoice = frappe.db.sql(
                         """SELECT name FROM `tabSales Invoice`
                         WHERE custom_shipment_number = %s
@@ -262,10 +263,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
             if existing_invoice:
                 logs.append(f"Already Present In Sales Invoice")
                 log_text = "\n".join(logs)
-
-                log_doc.shipment_number = shipment_number
-                log_doc.logs = log_text
-                log_doc.icris_number = icris_number
+                log_doc.logs = (log_doc.logs or "") + "\n" + log_text
                 log_doc.save()
                 return
                
@@ -287,3 +285,13 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
             print(f"An error occurred before Sales Invoice was created: {str(e)}")
         
         logging.error(f"An error occurred: {str(e)}")
+
+
+@frappe.whitelist()
+def get_sales_invoice_logs(shipment_number):
+    log_lsit = frappe.get_list("Sales Invoice Logs",filters ={"shipment_number":shipment_number})
+    if log_lsit:
+        log_record = frappe.get_doc("Sales Invoice Logs",log_lsit[0].name)
+        return {"sales_invoice_name": log_record.sales_invoice , "logs" : log_record.logs}
+    else:
+        return "No Logs Found"

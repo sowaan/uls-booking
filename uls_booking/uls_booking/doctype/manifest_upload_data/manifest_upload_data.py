@@ -1168,7 +1168,7 @@ def insert_data(arrays, frm, to,date_format,file_proper_name,shipped_date,import
                             field_data = float(field_data) if field_data else 0.0
                         except ValueError:
                             # Handle the case where field_data is not a number
-                            frappe.log_error(f"Cannot convert field_data '{field_data}' to float", "Conversion Error")
+                            # frappe.log_error(f"Cannot convert field_data '{field_data}' to float", "Conversion Error")
                             field_data = 0.0
                         if field.number_divide_with:
                             field_data = field_data / field.number_divide_with
@@ -1236,7 +1236,7 @@ def insert_data(arrays, frm, to,date_format,file_proper_name,shipped_date,import
                             field_data = float(field_data) if field_data else 0.0
                         except ValueError:
                             # Handle the case where field_data is not a number
-                            frappe.log_error(f"Cannot convert field_data '{field_data}' to float", "Conversion Error")
+                            # frappe.log_error(f"Cannot convert field_data '{field_data}' to float", "Conversion Error")
                             field_data = 0.0
                         if field.number_divide_with:
                             field_data = field_data / field.number_divide_with
@@ -1371,7 +1371,8 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3,shipped_date
                             field_data = date_object.strftime(output_date_format)
 
                         except:
-                            pass
+                            field_data = None
+                            # pass
         
                 for field in setting.fields_to_divide:
                     
@@ -1380,7 +1381,7 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3,shipped_date
                             field_data = float(field_data) if field_data else 0.0
                         except ValueError:
                             # Handle the case where field_data is not a number
-                            frappe.log_error(f"Cannot convert field_data '{field_data}' to float", f"Conversion Error , Shipment Number '{shipment_num}' , Package Tracking '{pkg_trck}'")
+                            # frappe.log_error(f"Cannot convert field_data '{field_data}' to float", f"Conversion Error , Shipment Number '{shipment_num}' , Package Tracking '{pkg_trck}'")
                             print(shipment_num,"  ",pkg_trck)
                             field_data = 0.0
                         if field.number_divide_with:
@@ -1432,7 +1433,8 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3,shipped_date
                             output_date_format = "%Y-%m-%d"
                             field_data = date_object.strftime(output_date_format)
                         except:
-                            pass
+                            field_data = None
+                            # pass
                 # doc.set(field_name, field_data)
                 for field in setting.fields_to_divide:
                     if doctype_name == field.doctype_name and field_name == field.field_name:
@@ -1440,7 +1442,7 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3,shipped_date
                             field_data = float(field_data) if field_data else 0.0
                         except ValueError:
                             # Handle the case where field_data is not a number
-                            frappe.log_error(f"Cannot convert field_data '{field_data}' to float", f"Conversion Error , Shipment Number '{shipment_num}' , Package Tracking '{pkg_trck}'")
+                            # frappe.log_error(f"Cannot convert field_data '{field_data}' to float", f"Conversion Error , Shipment Number '{shipment_num}' , Package Tracking '{pkg_trck}'")
                             field_data = 0.0
                         if field.number_divide_with:
                             field_data = field_data / field.number_divide_with
@@ -1570,7 +1572,7 @@ class ManifestUploadData(Document):
             while current_index3 < len(arrays3):
                 chunk = arrays3[current_index3:current_index3 + chunk_size3]             
                 current_index3 += chunk_size3
-                # opsys_insert_data( file_proper_name3 = file_proper_name3 , arrays=chunk,frm=frm, to=to, date_format = self.date_format)
+                # opsys_insert_data( shipped_date = shipped_date, import_date = import_date, file_proper_name3 = file_proper_name3 , arrays=chunk,frm=frm, to=to, date_format = self.date_format)
                 enqueue(opsys_insert_data,shipped_date = shipped_date, import_date = import_date, file_proper_name3 = file_proper_name3 , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
             enqueue(storing_shipment_number,arrays=arrays3, frm=shipfrom, to=shipto, doc=self ,queue="default")
                 
