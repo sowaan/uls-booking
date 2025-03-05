@@ -940,6 +940,9 @@ def generate_invoice( self, method):
         export_compensation_amount = 0
         
         if sales_invoice.customer == customer.custom_default_customer:
+            exempt_customer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst')
+            if not exempt_customer:
+                sales_invoice.taxes_and_charges = None
             sales_invoice.custom_compensation_invoices = 1
             sig = 0
             for comp in definition.compensation_table:

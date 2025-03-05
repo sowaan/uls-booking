@@ -864,7 +864,8 @@ def storing_shipment_number(arrays, frm, to, doc):
     origin_country = setting.origin_country
     for shipment in unique_shipment_numbers:
         # Check if the shipment number already exists
-        existing_doc = frappe.get_value("Shipment Number", {"shipment_number": shipment})
+        # existing_doc = frappe.get_value("Shipment Number", {"shipment_number": shipment})
+        existing_doc = frappe.get_list("Shipment Number",filters={"shipment_number":shipment})
         if existing_doc:
             billing_term = frappe.get_value("R200000", {"shipment_number": shipment}, "billing_term_field")
             date_shipped = frappe.get_value("R200000", {"shipment_number": shipment}, "shipped_date")

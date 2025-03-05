@@ -246,6 +246,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                 log_text = "\n".join(logs)
                 
                 log_doc.logs = (log_doc.logs or "") + "\n" + log_text
+                log_doc.set("shipment_number" , shipment_number)
                 log_doc.save()
                 return
                 
@@ -264,6 +265,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                 logs.append(f"Already Present In Sales Invoice")
                 log_text = "\n".join(logs)
                 log_doc.logs = (log_doc.logs or "") + "\n" + log_text
+                log_doc.set("shipment_number" , shipment_number)
                 log_doc.save()
                 return
                
