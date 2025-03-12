@@ -12,7 +12,7 @@ import logging
 
 def generate_invoice( self, method):
     sales_invoice = self
-    if sales_invoice.custom_duty_and_taxes_invoice != 1:
+    if sales_invoice.custom_duty_and_taxes_invoice != 1 :
         shipment_number = sales_invoice.custom_shipment_number
         already_present = 0
         log_list = frappe.get_list("Sales Invoice Logs",filters ={"shipment_number":shipment_number})
@@ -70,8 +70,9 @@ def generate_invoice( self, method):
         
         
         company = definition.default_company
-        customer = frappe.get_doc("Company",company,
-        fields = ["custom_default_customer"])
+        customer = frappe.get_doc("Company",company)
+
+        # frappe.msgprint(str(customer.custom_default_customer))
         # sales_invoice.customer = None
         # sales_invoice.customer = customer.custom_default_customer
         # sales_invoice.set("customer", customer.custom_default_customer)
@@ -939,6 +940,7 @@ def generate_invoice( self, method):
 
 
         export_compensation_amount = 0
+
         
         if sales_invoice.customer == customer.custom_default_customer:
             exempt_customer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst')
@@ -955,7 +957,7 @@ def generate_invoice( self, method):
                     sales_invoice.append('items', rows)
                     sig = 1
                     break
-
+        
         if not sales_invoice.items:
             print(sales_invoice.customer)
             logs.append(f"No Items shipment number {shipment_number}, icris number {icris_number}")
@@ -970,6 +972,13 @@ def generate_invoice( self, method):
         log_text = "\n".join(logs)
         discounted_amount = discounted_amount -1
         sales_invoice.set_missing_values()
+
+        #################### Sufyan Edit in Fariz Code As Per KashiBhai Instruction #######################
+        if frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst') :
+            self.taxes_and_charges = None
+            self.taxes = []
+        #################### Sufyan Edit in Fariz Code As Per KashiBhai Instruction #######################
+
         sales_invoice.calculate_taxes_and_totals()
         # sales_invoice.validate()
         print(sales_invoice.customer_name)
@@ -982,6 +991,7 @@ def generate_invoice( self, method):
             if not log_doc.sales_invoice:
                 log_doc.set("sales_invoice",sales_invoice.name)
             log_doc.save()
+        
         frappe.db.commit()
             
 # def after_save_sales_invoice(self,method):
