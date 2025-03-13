@@ -1053,6 +1053,7 @@ def make_R600000(self):
 
 
 def insert_data(arrays, frm, to,date_format,file_proper_name,shipped_date,import_date):
+    
     shipment_num = None
     pkg_trck = None
     
@@ -1533,7 +1534,6 @@ class ManifestUploadData(Document):
             while current_index < len(arrays):
                 chunk = arrays[current_index:current_index + chunk_size]             
                 current_index += chunk_size
-                # insert_data(main_doc = self , arrays=chunk,frm=frm, to=to, date_format = self.date_format)
                 enqueue(insert_data,shipped_date = shipped_date , import_date = import_date , file_proper_name = file_proper_name , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
             enqueue(storing_shipment_number,arrays=arrays, frm=shipfrom, to=shipto, doc=self ,queue="default")
 
@@ -1573,7 +1573,6 @@ class ManifestUploadData(Document):
             while current_index3 < len(arrays3):
                 chunk = arrays3[current_index3:current_index3 + chunk_size3]             
                 current_index3 += chunk_size3
-                # opsys_insert_data( shipped_date = shipped_date, import_date = import_date, file_proper_name3 = file_proper_name3 , arrays=chunk,frm=frm, to=to, date_format = self.date_format)
                 enqueue(opsys_insert_data,shipped_date = shipped_date, import_date = import_date, file_proper_name3 = file_proper_name3 , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
             enqueue(storing_shipment_number,arrays=arrays3, frm=shipfrom, to=shipto, doc=self ,queue="default")
                 

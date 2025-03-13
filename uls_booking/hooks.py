@@ -285,6 +285,7 @@ doc_events = {
 	},
   "Sales Invoice": {
     "before_save": "uls_booking.uls_booking.events.sales_invoice.generate_invoice",
+    "before_submit": "uls_booking.uls_booking.events.sales_invoice.duty_and_tax_validation_on_submit",
   },
 }
 
