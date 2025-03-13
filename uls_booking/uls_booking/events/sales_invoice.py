@@ -105,16 +105,7 @@ def generate_invoice( self, method):
             order_by="date desc",
             limit_page_length=1
         )
-        if not exchange_rate:
-            exchange_rate = frappe.get_list(
-                "Currency Exchange",
-                filters={"from_currency": "USD", "to_currency": "PKR", "date": [">", shipped_date]},
-                fields=["name", "exchange_rate", "date"],
-                order_by="date asc",  # Get the earliest available future exchange rate
-                limit_page_length=1
-            )
 
-        
         if not exchange_rate:
             exchange_rate = frappe.get_list(
                 "Currency Exchange",
@@ -123,9 +114,21 @@ def generate_invoice( self, method):
                 order_by="date desc",  # Get the closest previous exchange rate
                 limit_page_length=1
             )
+
+        # if not exchange_rate:
+        #     exchange_rate = frappe.get_list(
+        #         "Currency Exchange",
+        #         filters={"from_currency": "USD", "to_currency": "PKR", "date": [">", shipped_date]},
+        #         fields=["name", "exchange_rate", "date"],
+        #         order_by="date asc",  # Get the earliest available future exchange rate
+        #         limit_page_length=1
+        #     )
+
         if exchange_rate:
             print(exchange_rate[0].exchange_rate)
             sales_invoice.conversion_rate = exchange_rate[0].exchange_rate
+        else :
+            sales_invoice.conversion_rate = 0
 
         if sales_invoice.custom_shipper_country == definition.origin_country.upper():
             imp_exp = "Export"
@@ -993,7 +996,21 @@ def generate_invoice( self, method):
             log_doc.save()
         
         frappe.db.commit()
+
+
+    elif sales_invoice.custom_duty_and_taxes_invoice == 1 :
+        if self.taxes_and_charges :
+            self.taxes_and_charges = None
+            self.taxes = []
             
+
+def duty_and_tax_validation_on_submit(self, method) :
+    if self.custom_duty_and_taxes_invoice == 1 :
+        if self.taxes_and_charges :
+            self.taxes_and_charges = None
+            self.taxes = []
+
+
 # def after_save_sales_invoice(self,method):
 #     print("After save is working")
 #     sales_invoice = self
