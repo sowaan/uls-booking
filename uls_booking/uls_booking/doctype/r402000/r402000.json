@@ -19,6 +19,8 @@
   "payment_collection_service_amount",
   "payment_collection_service_currency_code",
   "payment_collection_service_currency_mode",
+  "manifest_upload_data",
+  "gateway",
   "file_name",
   "file_type"
  ],
@@ -100,11 +102,25 @@
    "label": "File Type",
    "options": "\nOPSYS\nISPS",
    "read_only": 1
+  },
+  {
+   "fieldname": "manifest_upload_data",
+   "fieldtype": "Link",
+   "label": "Manifest Upload Data",
+   "options": "Manifest Upload Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gateway",
+   "fieldtype": "Link",
+   "label": "Gateway",
+   "options": "Gateway",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-06 14:40:19.504228",
+ "modified": "2025-03-14 11:11:23.083710",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R402000",

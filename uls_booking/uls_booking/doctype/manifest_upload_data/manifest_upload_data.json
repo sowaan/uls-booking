@@ -15,6 +15,7 @@
   "package_tracking_from_index",
   "package_tracking_to_index",
   "manifest_file_type",
+  "gateway",
   "export_import",
   "shipped_date",
   "import_date",
@@ -175,12 +176,19 @@
   {
    "fieldname": "section_break_wqxl",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "gateway",
+   "fieldtype": "Link",
+   "label": "Gateway",
+   "options": "Gateway",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-02-06 12:55:59.555626",
+ "modified": "2025-03-14 11:22:35.478198",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Upload Data",

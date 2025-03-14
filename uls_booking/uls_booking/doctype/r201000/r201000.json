@@ -15,6 +15,8 @@
   "import_date",
   "mawb_number",
   "shipment_number",
+  "manifest_upload_data",
+  "gateway",
   "file_name",
   "file_type"
  ],
@@ -71,11 +73,25 @@
    "label": "File Type",
    "options": "\nOPSYS\nISPS",
    "read_only": 1
+  },
+  {
+   "fieldname": "manifest_upload_data",
+   "fieldtype": "Link",
+   "label": "Manifest Upload Data",
+   "options": "Manifest Upload Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gateway",
+   "fieldtype": "Link",
+   "label": "Gateway",
+   "options": "Gateway",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-06 14:37:07.786746",
+ "modified": "2025-03-14 11:14:25.049377",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R201000",

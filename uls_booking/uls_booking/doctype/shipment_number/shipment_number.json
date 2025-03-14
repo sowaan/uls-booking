@@ -10,6 +10,8 @@
   "icris_number",
   "billing_type",
   "billing_term",
+  "manifest_upload_data",
+  "gateway",
   "file_name",
   "column_break_zarc",
   "station",
@@ -80,11 +82,25 @@
    "fieldname": "manifest_file_type",
    "fieldtype": "Data",
    "label": "Manifest File Type"
+  },
+  {
+   "fieldname": "manifest_upload_data",
+   "fieldtype": "Link",
+   "label": "Manifest Upload Data",
+   "options": "Manifest Upload Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gateway",
+   "fieldtype": "Link",
+   "label": "Gateway",
+   "options": "Gateway",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-07 18:23:16.213108",
+ "modified": "2025-03-14 11:19:54.115173",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Shipment Number",

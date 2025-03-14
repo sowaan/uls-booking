@@ -1052,7 +1052,7 @@ def make_R600000(self):
 
 
 
-def insert_data(arrays, frm, to,date_format,file_proper_name,shipped_date,import_date):
+def insert_data(arrays, frm, to,date_format, manifest_upload_data_name, gateway,file_proper_name,shipped_date,import_date):
     
     shipment_num = None
     pkg_trck = None
@@ -1124,12 +1124,18 @@ def insert_data(arrays, frm, to,date_format,file_proper_name,shipped_date,import
             docs = frappe.get_list(doctype_name, filters={'shipment_number': shipment_num})
 
         
+        frappe.msgprint(str(doctype_name))
+        frappe.msgprint("Hello")
+
         if docs:
             
             print("Doc found:", docs[0])
             docss = frappe.get_doc(doctype_name, docs[0])
             # docss.set("check", 0)
             docss.set("file_name",file_proper_name)
+            docss.set("manifest_upload_data",manifest_upload_data_name)
+            docss.set("gateway",gateway)
+
             for child_record in definition.definitions:
                 field_name = child_record.field_name
                 from_index = child_record.from_index - 1
@@ -1199,6 +1205,9 @@ def insert_data(arrays, frm, to,date_format,file_proper_name,shipped_date,import
             
             doc = frappe.new_doc(doctype_name)
             doc.set("file_name",file_proper_name)
+            doc.set("manifest_upload_data",manifest_upload_data_name)
+            doc.set("gateway",gateway)
+
             for child_record in definition.definitions:
                 field_name = child_record.field_name
                 from_index = child_record.from_index - 1
@@ -1262,7 +1271,7 @@ def insert_data(arrays, frm, to,date_format,file_proper_name,shipped_date,import
             doc.save()
        
         
-def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3,shipped_date,import_date):
+def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3, manifest_upload_data_name, gateway,shipped_date,import_date):
     shipment_num = None
     pkg_trck = None
     
@@ -1341,6 +1350,9 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3,shipped_date
             docss = frappe.get_doc(doctype_name, docs[0])
             # docss.set("check", 0)
             docss.set("file_name",file_proper_name3)
+            docss.set("manifest_upload_data",manifest_upload_data_name)
+            docss.set("gateway",gateway)
+
             for child_record in definition.opsys_definitions:
                 field_name = child_record.field_name
                 from_index = child_record.from_index - 1
@@ -1412,6 +1424,9 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3,shipped_date
             
             doc = frappe.new_doc(doctype_name)
             doc.set("file_name",file_proper_name3)
+            doc.set("manifest_upload_data",manifest_upload_data_name)
+            doc.set("gateway",gateway)
+
             for child_record in definition.opsys_definitions:
                 field_name = child_record.field_name
                 from_index = child_record.from_index - 1
@@ -1498,11 +1513,11 @@ def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
             doc.save()
         else:
             frappe.get_doc({
-                                            "doctype": "Error Log",
-                                            "method": "Package tracking Number not found",
-                                            "error": f"""Package tracking Number:,{pkg_trck}"""
-    
-                                        }).insert()
+                "doctype": "Error Log",
+                "method": "Package tracking Number not found",
+                "error": f"""Package tracking Number:,{pkg_trck}"""
+
+            }).insert()
 
 
 
@@ -1534,7 +1549,7 @@ class ManifestUploadData(Document):
             while current_index < len(arrays):
                 chunk = arrays[current_index:current_index + chunk_size]             
                 current_index += chunk_size
-                enqueue(insert_data,shipped_date = shipped_date , import_date = import_date , file_proper_name = file_proper_name , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
+                enqueue(insert_data, manifest_upload_data_name = self.name, gateway = self.gateway, shipped_date = shipped_date , import_date = import_date , file_proper_name = file_proper_name , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
             enqueue(storing_shipment_number,arrays=arrays, frm=shipfrom, to=shipto, doc=self ,queue="default")
 
 
@@ -1573,7 +1588,7 @@ class ManifestUploadData(Document):
             while current_index3 < len(arrays3):
                 chunk = arrays3[current_index3:current_index3 + chunk_size3]             
                 current_index3 += chunk_size3
-                enqueue(opsys_insert_data,shipped_date = shipped_date, import_date = import_date, file_proper_name3 = file_proper_name3 , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
+                enqueue(opsys_insert_data, manifest_upload_data_name = self.name, gateway = self.gateway ,shipped_date = shipped_date, import_date = import_date, file_proper_name3 = file_proper_name3 , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
             enqueue(storing_shipment_number,arrays=arrays3, frm=shipfrom, to=shipto, doc=self ,queue="default")
                 
             

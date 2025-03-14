@@ -66,6 +66,8 @@
   "over_70_lbs_flag",
   "currency_code_for_register_charge_amount",
   "other_charges_amount",
+  "manifest_upload_data",
+  "gateway",
   "file_name",
   "manifest_input_date",
   "column_break_ivkpa",
@@ -573,11 +575,25 @@
    "fieldname": "manifest_input_date",
    "fieldtype": "Date",
    "label": "Manifest Input Date"
+  },
+  {
+   "fieldname": "manifest_upload_data",
+   "fieldtype": "Link",
+   "label": "Manifest Upload Data",
+   "options": "Manifest Upload Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gateway",
+   "fieldtype": "Link",
+   "label": "Gateway",
+   "options": "Gateway",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-07 12:18:51.311430",
+ "modified": "2025-03-14 11:01:01.182205",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R200000",

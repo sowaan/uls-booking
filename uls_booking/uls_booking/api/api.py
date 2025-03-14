@@ -1188,11 +1188,17 @@ def insert_add_discount_rate_grp_from_erp(rec, full_tariff_group, doctype, rate_
                         discount = package.get("percentage")
                         rate = package.get("rate")
 
-                        buy_sell_doc.append('package_rate', {
-                            'weight': float(weight),
-                            'discount_percentage': float(discount),
-                            'rate': float(rate),
-                        })
+                        for r in existing_rec_doc.package_rate :
+                            if float(r.weight) == float(weight) :
+                                rate = float(r.rate) * ( 1 - float(discount) / 100 )
+
+                                buy_sell_doc.append('package_rate', {
+                                    'weight': float(weight),
+                                    'discount_percentage': float(discount),
+                                    'rate': float(rate),
+                                })
+                                break
+
                     buy_sell_doc.save()
                     frappe.db.commit()
 

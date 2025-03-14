@@ -16,6 +16,8 @@
   "hazmat_item_quantity",
   "quantum_shipment_fee",
   "quantum_bundle_fee",
+  "manifest_upload_data",
+  "gateway",
   "file_name",
   "file_type"
  ],
@@ -81,11 +83,25 @@
    "label": "File Type",
    "options": "\nOPSYS\nISPS",
    "read_only": 1
+  },
+  {
+   "fieldname": "manifest_upload_data",
+   "fieldtype": "Link",
+   "label": "Manifest Upload Data",
+   "options": "Manifest Upload Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gateway",
+   "fieldtype": "Link",
+   "label": "Gateway",
+   "options": "Gateway",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-06 14:37:54.011701",
+ "modified": "2025-03-14 10:59:15.772754",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R202000",
