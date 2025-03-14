@@ -42,6 +42,8 @@
   "dws_hours",
   "dws_minutes",
   "dws_seconds",
+  "manifest_upload_data",
+  "gateway",
   "file_name",
   "dws_actual_weight",
   "dws_dim",
@@ -258,11 +260,25 @@
    "label": "File Type",
    "options": "\nOPSYS\nISPS",
    "read_only": 1
+  },
+  {
+   "fieldname": "manifest_upload_data",
+   "fieldtype": "Link",
+   "label": "Manifest Upload Data",
+   "options": "Manifest Upload Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gateway",
+   "fieldtype": "Link",
+   "label": "Gateway",
+   "options": "Gateway",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-06 14:41:05.413695",
+ "modified": "2025-03-14 11:07:37.779878",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R600000",

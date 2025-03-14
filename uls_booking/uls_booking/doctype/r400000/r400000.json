@@ -37,6 +37,8 @@
   "consignee_tax_id__number",
   "consignee_po_number_suffix",
   "broker_code",
+  "manifest_upload_data",
+  "gateway",
   "file_name",
   "file_type"
  ],
@@ -208,11 +210,24 @@
    "label": "File Type",
    "options": "\nOPSYS\nISPS",
    "read_only": 1
+  },
+  {
+   "fieldname": "manifest_upload_data",
+   "fieldtype": "Link",
+   "label": "Manifest Upload Data",
+   "options": "Manifest Upload Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gateway",
+   "fieldtype": "Data",
+   "label": "Gateway",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-06 14:38:41.640946",
+ "modified": "2025-03-14 11:02:30.208990",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R400000",
