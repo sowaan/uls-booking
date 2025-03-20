@@ -580,20 +580,18 @@
    "fieldname": "manifest_upload_data",
    "fieldtype": "Link",
    "label": "Manifest Upload Data",
-   "options": "Manifest Upload Data",
-   "read_only": 1
+   "options": "Manifest Upload Data"
   },
   {
    "fieldname": "gateway",
    "fieldtype": "Link",
    "label": "Gateway",
-   "options": "Gateway",
-   "read_only": 1
+   "options": "Gateway"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-14 11:01:01.182205",
+ "modified": "2025-03-19 16:34:52.453890",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R200000",
