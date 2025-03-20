@@ -12,7 +12,7 @@ import logging
 
 
 @frappe.whitelist()
-def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, billing_type=None, icris_number=None, customer=None, import__export=None,date_type=None,manifest_file_type=None):
+def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, billing_type=None, icris_number=None, customer=None, import__export=None,date_type=None,manifest_file_type=None,gateway=None):
 
 
     # Prepare the values dictionary to pass into the SQL query
@@ -25,7 +25,8 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
         "customer": customer,
         "import__export": import__export,
         "manifest_file_type":manifest_file_type,
-        "date_type":date_type
+        "date_type":date_type,
+        "gateway":gateway
     }
 
     # Begin the SQL query
@@ -68,6 +69,8 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
         conditions.append("sn.customer = %(customer)s")
     if manifest_file_type :
         conditions.append("sn.manifest_file_type = %(manifest_file_type)s")
+    if gateway:
+        conditions.append("sn.gateway = %(gateway)s")
 
     # If there are additional conditions, join them to the query
     if conditions:

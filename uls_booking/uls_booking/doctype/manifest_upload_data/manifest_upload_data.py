@@ -940,6 +940,8 @@ def storing_shipment_number(arrays, frm, to, doc):
             shipment_doc.set("import__export",import_export)
             shipment_doc.set("import_date",import_date)
             shipment_doc.set("manifest_file_type",file_type)
+            shipment_doc.set("manifest_upload_data",doc.name)
+            shipment_doc.set("gateway",doc.gateway)
 
             # shipment_doc.insert()
             shipment_doc.save()
@@ -1018,6 +1020,8 @@ def storing_shipment_number(arrays, frm, to, doc):
             shipment_doc.set("import__export",import_export)
             shipment_doc.set("import_date",import_date)
             shipment_doc.set("manifest_file_type",file_type)
+            shipment_doc.set("manifest_upload_data",doc.name)
+            shipment_doc.set("gateway",doc.gateway)
 
             shipment_doc.insert(ignore_permissions=True)
             shipment_doc.save(ignore_permissions=True)
@@ -1052,7 +1056,7 @@ def make_R600000(self):
 
 
 
-def insert_data(arrays, frm, to,date_format, manifest_upload_data_name, gateway,file_proper_name,shipped_date,import_date):
+def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway, file_proper_name, shipped_date, import_date):
     
     shipment_num = None
     pkg_trck = None
@@ -1271,7 +1275,7 @@ def insert_data(arrays, frm, to,date_format, manifest_upload_data_name, gateway,
             doc.save()
        
         
-def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3, manifest_upload_data_name, gateway,shipped_date,import_date):
+def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_date, import_date, manifest_upload_data_name, gateway):
     shipment_num = None
     pkg_trck = None
     
@@ -1337,21 +1341,19 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3, manifest_up
                     print(filter_str,"",pkg_trck,"3","\n\n")
 
 
-
-        
         else:
             print(doctype_name,"2","\n\n")
             docs = frappe.get_list(doctype_name, filters={'shipment_number': shipment_num})
 
-        
+
         if docs:
             
             print("Doc found:", docs[0])
             docss = frappe.get_doc(doctype_name, docs[0])
             # docss.set("check", 0)
             docss.set("file_name",file_proper_name3)
-            docss.set("manifest_upload_data",manifest_upload_data_name)
-            docss.set("gateway",gateway)
+            docss.set("manifest_upload_data" , manifest_upload_data_name)
+            docss.set("gateway", gateway)
 
             for child_record in definition.opsys_definitions:
                 field_name = child_record.field_name
@@ -1420,12 +1422,14 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3, manifest_up
             docss.save()
             # frappe.db.commit()
             # print(doctype_name, shipment_num, "Updating")
+        
         else:
             
             doc = frappe.new_doc(doctype_name)
             doc.set("file_name",file_proper_name3)
-            doc.set("manifest_upload_data",manifest_upload_data_name)
-            doc.set("gateway",gateway)
+            doc.set("manifest_upload_data" , manifest_upload_data_name)
+            doc.set("gateway", gateway)
+            
 
             for child_record in definition.opsys_definitions:
                 field_name = child_record.field_name
@@ -1479,6 +1483,7 @@ def opsys_insert_data(arrays, frm, to,date_format,file_proper_name3, manifest_up
                     make_R400000(doc)
             if not doc.file_type:
                 doc.file_type = "OPSYS"
+
             doc.insert()
             doc.save()
 
@@ -1588,7 +1593,7 @@ class ManifestUploadData(Document):
             while current_index3 < len(arrays3):
                 chunk = arrays3[current_index3:current_index3 + chunk_size3]             
                 current_index3 += chunk_size3
-                enqueue(opsys_insert_data, manifest_upload_data_name = self.name, gateway = self.gateway ,shipped_date = shipped_date, import_date = import_date, file_proper_name3 = file_proper_name3 , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
+                enqueue(opsys_insert_data, shipped_date = shipped_date, import_date = import_date, file_proper_name3 = file_proper_name3 , arrays=chunk, frm=frm, to=to, date_format = self.date_format, manifest_upload_data_name=self.name, gateway=self.gateway, queue="default")
             enqueue(storing_shipment_number,arrays=arrays3, frm=shipfrom, to=shipto, doc=self ,queue="default")
                 
             
