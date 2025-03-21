@@ -112,7 +112,11 @@ fixtures = [
                                 "custom_exempt_gst",
                                 "custom_sales_invoice_definition",
                                 "custom_invoice_logs",
-                                "custom_sales_invoice_log"
+                                "custom_sales_invoice_log",
+
+
+
+                                "custom_freight_charges"
 
                                 )
 	  	  
@@ -284,7 +288,8 @@ doc_events = {
 		"before_save": "uls_booking.uls_booking.api.api.check_user_permission",
 	},
   "Sales Invoice": {
-    "before_save": "uls_booking.uls_booking.events.sales_invoice.generate_invoice",
+    "before_insert": "uls_booking.uls_booking.events.sales_invoice.generate_invoice",
+    "before_save": "uls_booking.uls_booking.events.sales_invoice.restore_values",
     "before_submit": "uls_booking.uls_booking.events.sales_invoice.duty_and_tax_validation_on_submit",
   },
 }
