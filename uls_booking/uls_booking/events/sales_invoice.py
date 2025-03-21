@@ -915,7 +915,12 @@ def generate_invoice(self, method) :
             #     final_discount_percentage = sales_invoice.custom_selling_percentage
             # if not sales_invoice.custom_selling_percentage:
             #     sales_invoice.custom_selling_percentage = final_discount_percentage
-            sales_invoice.custom_selling_percentage = final_discount_percentage
+
+
+            if sales_invoice.custom_inserted != 1 :
+                sales_invoice.custom_selling_percentage = final_discount_percentage
+                sales_invoice.custom_inserted = 1
+
 
 
             print(total_charges_other_charges,FSCcharges,tarif , shipmentbillingamount , total_charges_incl_fuel)
