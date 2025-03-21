@@ -116,7 +116,8 @@ fixtures = [
 
 
 
-                                "custom_freight_charges"
+                                "custom_freight_charges",
+                                "custom_inserted"
 
                                 )
 	  	  

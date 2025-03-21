@@ -1,6 +1,7 @@
 frappe.ui.form.on('Sales Invoice', {
     custom_selling_percentage(frm) {
         // Get the custom selling percentage value
+        frm.set_value("custom_inserted", 1) ;
         const customPercentage = frm.doc.custom_selling_percentage;
 
         // Find the row with the item code "FCHG"
