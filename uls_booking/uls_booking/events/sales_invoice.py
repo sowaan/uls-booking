@@ -10,7 +10,20 @@ from frappe import _
 import logging
 
 
-def generate_invoice( self, method):
+
+
+
+def restore_values(self, method) :
+
+    generate_invoice(self, method)
+    if self.custom_freight_invoices == 1 :
+        self.discount_amount = (self.custom_freight_charges * self.custom_selling_percentage / 100)
+        self.custom_amount_after_discount = self.custom_freight_charges - self.discount_amount
+
+
+
+
+def generate_invoice(self, method) :
     sales_invoice = self
     if sales_invoice.custom_duty_and_taxes_invoice != 1 :
         shipment_number = sales_invoice.custom_shipment_number
@@ -894,14 +907,15 @@ def generate_invoice( self, method):
                     print("Max Insured")
                     rows = {'item_code': setting.insurance_charges, 'qty': '1', 'rate': max_insured}
                     sales_invoice.append('items', rows)
+            sales_invoice.custom_freight_charges = tarif
             sales_invoice.discount_amount = tarif - final_rate
             sales_invoice.custom_amount_after_discount = tarif - sales_invoice.discount_amount
             
-            if sales_invoice.custom_selling_percentage:
-                final_discount_percentage = sales_invoice.custom_selling_percentage
-            if not sales_invoice.custom_selling_percentage:
-                sales_invoice.custom_selling_percentage = final_discount_percentage
-
+            # if sales_invoice.custom_selling_percentage:
+            #     final_discount_percentage = sales_invoice.custom_selling_percentage
+            # if not sales_invoice.custom_selling_percentage:
+            #     sales_invoice.custom_selling_percentage = final_discount_percentage
+            sales_invoice.custom_selling_percentage = final_discount_percentage
 
 
             print(total_charges_other_charges,FSCcharges,tarif , shipmentbillingamount , total_charges_incl_fuel)
