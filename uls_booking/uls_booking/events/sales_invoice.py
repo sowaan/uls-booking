@@ -13,12 +13,11 @@ import logging
 
 
 
-def restore_values(self, method) :
-
-    generate_invoice(self, method)
-    if self.custom_freight_invoices == 1 :
-        self.discount_amount = (self.custom_freight_charges * self.custom_selling_percentage / 100)
-        self.custom_amount_after_discount = self.custom_freight_charges - self.discount_amount
+# def restore_values(self, method) :
+#     generate_invoice(self, method)
+#     if self.custom_freight_invoices == 1 :
+#         self.discount_amount = (self.custom_freight_charges * self.custom_selling_percentage / 100)
+#         self.custom_amount_after_discount = self.custom_freight_charges - self.discount_amount
 
 
 
@@ -917,7 +916,11 @@ def generate_invoice(self, method) :
             #     sales_invoice.custom_selling_percentage = final_discount_percentage
 
 
-            if sales_invoice.custom_inserted != 1 :
+            if sales_invoice.custom_inserted == 1 :
+                final_discount_percentage = sales_invoice.custom_selling_percentage
+                sales_invoice.discount_amount = (sales_invoice.custom_freight_charges * sales_invoice.custom_selling_percentage / 100)
+                sales_invoice.custom_amount_after_discount = sales_invoice.custom_freight_charges - sales_invoice.discount_amount
+            else :
                 sales_invoice.custom_selling_percentage = final_discount_percentage
                 sales_invoice.custom_inserted = 1
 
