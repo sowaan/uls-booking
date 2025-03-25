@@ -273,7 +273,14 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                 return
                
         # Append an item row
-        rows = {'item_code': "ICG", 'qty': '1', 'rate': 0}
+
+
+        itm_list = frappe.db.get_list("Item",
+                        filters={
+                            'disabled' : ['!=',1] 
+                        }
+                    )
+        rows = {'item_code': itm_list[0].name, 'qty': '1', 'rate': 0}
         sales_invoice.append('items', rows)
 
         sales_invoice.insert()
