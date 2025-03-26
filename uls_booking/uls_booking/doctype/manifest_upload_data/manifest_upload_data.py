@@ -843,6 +843,8 @@ def generate_remaining_sales_invoice():
 
 def storing_shipment_number(arrays, frm, to, doc):
 
+    # doc = frappe.get_doc('Manifest Upload Data', doc_name)
+
     
     shipment_numbers = set()  # Use a set to ensure uniqueness
 
@@ -1032,6 +1034,8 @@ def storing_shipment_number(arrays, frm, to, doc):
 
 
 
+
+
 def make_R300000(self):
     self.shipper_city = self.shipper_city.capitalize()
 
@@ -1128,8 +1132,8 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
             docs = frappe.get_list(doctype_name, filters={'shipment_number': shipment_num})
 
         
-        frappe.msgprint(str(doctype_name))
-        frappe.msgprint("Hello")
+        # frappe.msgprint(str(doctype_name))
+        # frappe.msgprint("Hello")
 
         if docs:
             
@@ -1203,6 +1207,7 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
 
 
             docss.save()
+
             # frappe.db.commit()    
             # print(doctype_name, shipment_num, "Updating")
         else:
@@ -1273,6 +1278,8 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
             # print(doctype_name, shipment_num, "Inserting")
             doc.insert()
             doc.save()
+
+
        
         
 def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_date, import_date, manifest_upload_data_name, gateway):
@@ -1549,13 +1556,14 @@ class ManifestUploadData(Document):
             shipfrom = int(self.shipment_number_from_index)-1
             shipto = int(self.shipment_number_to_index)
             chunk_size = 10  
-            current_index = 0 
+            current_index = 0
             
             while current_index < len(arrays):
                 chunk = arrays[current_index:current_index + chunk_size]             
                 current_index += chunk_size
-                enqueue(insert_data, manifest_upload_data_name = self.name, gateway = self.gateway, shipped_date = shipped_date , import_date = import_date , file_proper_name = file_proper_name , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="default")
-            enqueue(storing_shipment_number,arrays=arrays, frm=shipfrom, to=shipto, doc=self ,queue="default")
+                enqueue(insert_data, manifest_upload_data_name = self.name, gateway = self.gateway, shipped_date = shipped_date , import_date = import_date , file_proper_name = file_proper_name , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="long")
+                
+            enqueue(storing_shipment_number,arrays=arrays, frm=shipfrom, to=shipto, doc=self ,queue="long")
 
 
 
@@ -1588,12 +1596,13 @@ class ManifestUploadData(Document):
             shipfrom = int(self.shipment_number_from_index)-1
             shipto = int(self.shipment_number_to_index)
             chunk_size3 = 10  
-            current_index3 = 0 
+            current_index3 = 0
             
             while current_index3 < len(arrays3):
                 chunk = arrays3[current_index3:current_index3 + chunk_size3]             
                 current_index3 += chunk_size3
-                enqueue(opsys_insert_data, shipped_date = shipped_date, import_date = import_date, file_proper_name3 = file_proper_name3 , arrays=chunk, frm=frm, to=to, date_format = self.date_format, manifest_upload_data_name=self.name, gateway=self.gateway, queue="default")
-            enqueue(storing_shipment_number,arrays=arrays3, frm=shipfrom, to=shipto, doc=self ,queue="default")
+                enqueue(opsys_insert_data, shipped_date = shipped_date, import_date = import_date, file_proper_name3 = file_proper_name3 , arrays=chunk, frm=frm, to=to, date_format = self.date_format, manifest_upload_data_name=self.name, gateway=self.gateway, queue="long")
+            
+            enqueue(storing_shipment_number,arrays=arrays3, frm=shipfrom, to=shipto, doc=self ,queue="long")
                 
             
