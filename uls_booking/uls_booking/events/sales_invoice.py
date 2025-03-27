@@ -956,7 +956,9 @@ def generate_invoice(self, method) :
                             break
                         elif sales_invoice.custom_shipment_weight > 0.5:
                             peak_amount = sales_invoice.custom_shipment_weight * (row.amount)
-            if peak_amount:
+            
+            exempt_peak_surcharge = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_peak_surcharge')
+            if peak_amount and exempt_peak_surcharge != 1 :
                 rows = {'item_code' : setting.peak_charges , 'qty' : '1' , 'rate' : peak_amount}
                 sales_invoice.append('items' , rows)
 
