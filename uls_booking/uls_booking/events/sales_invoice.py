@@ -576,12 +576,10 @@ def generate_invoice(self, method) :
                 print(selling_group , " = ", definition.default_selling_group)
 
 
-
                 if selling_group == definition.default_selling_group:
                     # Look for Full Tariff
                     zones = frappe.get_list("Zone", filters={"country": origin_country, "is_single_country": 1})
                     flag = 0
-                    
                     if zones:
                         sales_invoice.custom_zone = zones[0].name
                         print("Zone with Country:", zones[0].name)
@@ -667,7 +665,6 @@ def generate_invoice(self, method) :
 
 
                 if selling_group and full_tariff_flag == 0:
-                    
                     zones = frappe.get_list("Zone",
                                             filters = {"country" : origin_country , "is_single_country":1})
                     
@@ -916,7 +913,8 @@ def generate_invoice(self, method) :
             #     sales_invoice.custom_selling_percentage = final_discount_percentage
 
 
-            if sales_invoice.custom_inserted == 1 :
+            # if sales_invoice.custom_inserted == 1 :
+            if sales_invoice.custom_edit_selling_percentage == 1 :
                 final_discount_percentage = sales_invoice.custom_selling_percentage
                 sales_invoice.discount_amount = (sales_invoice.custom_freight_charges * sales_invoice.custom_selling_percentage / 100)
                 sales_invoice.custom_amount_after_discount = sales_invoice.custom_freight_charges - sales_invoice.discount_amount
