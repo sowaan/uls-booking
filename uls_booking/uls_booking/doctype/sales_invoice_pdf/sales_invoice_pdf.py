@@ -3,7 +3,6 @@ from frappe.model.document import Document
 
 class SalesInvoicePDF(Document):
     def before_save(self):
-       
         self.customer_with_sales_invoice = []
         values = {
             "start_date": self.start_date,
@@ -48,16 +47,21 @@ class SalesInvoicePDF(Document):
             conditions.append("sn.icris_number = %(icris_number)s")
         if self.billing_type:
             conditions.append("c.custom_billing_type = %(billing_type)s")
+        if self.import__export:
+            values["import__export"] = self.import__export
+            conditions.append("sn.import__export = %(import__export)s")
 
         if conditions:
             query += " AND " + " AND ".join(conditions)
+            
         results = frappe.db.sql(query, values, as_dict=True)
         customer_sales_invoices = {}
 
         for row in results:
             customer = row["customer"]
             sales_invoice_name = row["name"]
-            convertion_rate = row["plc_conversion_rate"]
+            conversion_rate = row["plc_conversion_rate"]
+            
             if customer not in customer_sales_invoices:
                 customer_sales_invoices[customer] = {
                     "sales_invoices": [],
@@ -66,7 +70,7 @@ class SalesInvoicePDF(Document):
                     "total_taxes_and_charges": 0,
                     "total_base_taxes_and_charges": 0,
                     "email": None,
-                    "plc_conversion_rate":0
+                    "plc_conversion_rate": 0
                 }
 
             customer_sales_invoices[customer]["sales_invoices"].append(sales_invoice_name)
@@ -74,8 +78,7 @@ class SalesInvoicePDF(Document):
             customer_sales_invoices[customer]["total_base_grand_total"] += row["base_grand_total"]
             customer_sales_invoices[customer]["total_taxes_and_charges"] += row["total_taxes_and_charges"]
             customer_sales_invoices[customer]["total_base_taxes_and_charges"] += row["base_total_taxes_and_charges"]
-            customer_sales_invoices[customer]["plc_conversion_rate"] = convertion_rate
-            
+            customer_sales_invoices[customer]["plc_conversion_rate"] = conversion_rate
 
         for customer, data in customer_sales_invoices.items():
             email = None
@@ -86,10 +89,9 @@ class SalesInvoicePDF(Document):
                 if hasattr(address_doc, "email_id"):
                     email = address_doc.email_id
 
-            
             sales_invoices = ', '.join(data["sales_invoices"]) 
             email = email if email else "" 
-			
+            
             row = {
                 "customer": customer,
                 "sales_invoices": sales_invoices,
@@ -103,23 +105,21 @@ class SalesInvoicePDF(Document):
             }
             self.append("customer_with_sales_invoice", row)
 
-        
         self.total_invoices = len(results)
+
     def before_submit(self):
         for customer in self.customer_with_sales_invoice:
             new_doc = frappe.new_doc("Customer Shipment Invoice")
-            new_doc.sales_invoice_pdf  = self.name
+            new_doc.sales_invoice_pdf = self.name
             new_doc.customer = customer.customer
             new_doc.sales_invoices = customer.sales_invoices
             new_doc.start_date = self.start_date
             new_doc.end_date = self.end_date
             new_doc.billing_type = self.billing_type
-            new_doc.icirs_number = self.icris_number
+            new_doc.icris_number = self.icris_number
             new_doc.station = self.station
             new_doc.email = customer.email
             new_doc.insert()
             new_doc.save()
 
             customer.invoice = new_doc.name
-
-        # self.save()

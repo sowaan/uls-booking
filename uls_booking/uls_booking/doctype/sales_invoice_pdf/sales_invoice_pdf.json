@@ -9,6 +9,7 @@
   "start_date",
   "customer",
   "billing_type",
+  "import__export",
   "amended_from",
   "column_break_waxl",
   "end_date",
@@ -87,6 +88,12 @@
    "fieldtype": "Select",
    "label": "Billing Type",
    "options": "\nWeekly\nMonthly\nDaily"
+  },
+  {
+   "fieldname": "import__export",
+   "fieldtype": "Select",
+   "label": "Import / Export",
+   "options": "\nImport\nExport"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -97,7 +104,7 @@
    "link_fieldname": "sales_invoice_pdf"
   }
  ],
- "modified": "2025-01-07 11:17:31.180428",
+ "modified": "2025-02-19 19:28:45.294129",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice PDF",
