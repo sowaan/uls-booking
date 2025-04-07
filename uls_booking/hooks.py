@@ -123,7 +123,11 @@ fixtures = [
 
                                 "custom_applicable_surcharges_for_sales_invoice",
                                 "custom_column_break_jteoz",
-                                "custom_exempt_peak_surcharge"
+                                "custom_exempt_peak_surcharge",
+
+
+                                "custom_import_account_no",
+                                "custom_account_no"
 
                                 )
 	  	  
