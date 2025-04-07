@@ -185,6 +185,26 @@ def generate_invoice(self, method) :
                 icris = frappe.get_doc("ICRIS Account",icris_doc[0].name)
                 if icris.shipper_name:
                     sales_invoice.customer = icris.shipper_name
+
+                    r300000_list = frappe.get_list('R300000',
+                                        filters={
+                                            'shipment_number' : shipment_number
+                                        }
+                                    )
+                    
+                    if r300000_list :
+                        r300000_doc = frappe.get_doc('R300000', r300000_list[0].name)
+                        if r300000_doc.alternate_tracking_number_1 and r300000_doc.alternate_tracking_number_1 != '' :
+                            cust_list = frappe.get_list('Customer',
+                                        filters={
+                                            'disabled' : ['!=',1] ,
+                                            'custom_import_account_no' : r300000_doc.alternate_tracking_number_1
+                                        }
+                                    )
+                            if cust_list :
+                                sales_invoice.customer = cust_list[0].name
+                                sales_invoice.custom_account_no = r300000_doc.alternate_tracking_number_1
+
                     customer_name = frappe.db.get_value("Customer", sales_invoice.customer, 'customer_name')
                     sales_invoice.customer_name = customer_name
                 else:
@@ -487,8 +507,29 @@ def generate_invoice(self, method) :
                 
                 if icris1.shipper_name:
                     sales_invoice.customer = icris1.shipper_name
+                    
+                    r300000_list1 = frappe.get_list('R300000',
+                                        filters={
+                                            'shipment_number' : shipment_number
+                                        }
+                                    )
+                    
+                    if r300000_list1 :
+                        r300000_doc = frappe.get_doc('R300000', r300000_list1[0].name)
+                        if r300000_doc.alternate_tracking_number_1 and r300000_doc.alternate_tracking_number_1 != '' :
+                            cust_list = frappe.get_list('Customer',
+                                        filters={
+                                            'disabled' : ['!=',1] ,
+                                            'custom_import_account_no' : r300000_doc.alternate_tracking_number_1
+                                        }
+                                    )
+                            if cust_list :
+                                sales_invoice.customer = cust_list[0].name
+                                sales_invoice.custom_account_no = r300000_doc.alternate_tracking_number_1
+                                
                     customer_name = frappe.db.get_value("Customer", sales_invoice.customer, 'customer_name')
                     sales_invoice.customer_name = customer_name
+                    
                 else:
                     logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}") 
                     print("No Customer Found")
