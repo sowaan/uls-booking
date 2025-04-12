@@ -8,29 +8,37 @@
  "field_order": [
   "field_name",
   "doctype_name",
+  "column_break_prgm",
   "date_format"
  ],
  "fields": [
   {
    "fieldname": "field_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Field Name"
   },
   {
    "fieldname": "doctype_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Doctype Name"
   },
   {
    "fieldname": "date_format",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Date Format"
+  },
+  {
+   "fieldname": "column_break_prgm",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-02-07 12:45:07.623701",
+ "modified": "2025-04-12 12:17:07.549291",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Date Conversion Fields",

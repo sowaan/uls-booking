@@ -8,29 +8,37 @@
  "field_order": [
   "surcharge",
   "code",
+  "column_break_ovhd",
   "amount"
  ],
  "fields": [
   {
    "fieldname": "surcharge",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Surcharge"
   },
   {
    "fieldname": "code",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Code"
   },
   {
    "fieldname": "amount",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Amount"
+  },
+  {
+   "fieldname": "column_break_ovhd",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-09-10 17:50:51.753327",
+ "modified": "2025-04-11 18:18:04.480870",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Charges And Amount",
