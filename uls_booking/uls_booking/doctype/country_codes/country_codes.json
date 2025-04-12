@@ -7,24 +7,31 @@
  "engine": "InnoDB",
  "field_order": [
   "code",
+  "column_break_mdmd",
   "country"
  ],
  "fields": [
   {
    "fieldname": "code",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Code"
   },
   {
    "fieldname": "country",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Replacement"
+  },
+  {
+   "fieldname": "column_break_mdmd",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-12-23 11:53:01.087516",
+ "modified": "2025-04-12 12:23:17.850643",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Country Codes",

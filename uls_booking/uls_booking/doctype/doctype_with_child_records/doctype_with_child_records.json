@@ -7,24 +7,31 @@
  "engine": "InnoDB",
  "field_order": [
   "record",
+  "column_break_yyvj",
   "filter"
  ],
  "fields": [
   {
    "fieldname": "record",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Record"
   },
   {
    "fieldname": "filter",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Filter"
+  },
+  {
+   "fieldname": "column_break_yyvj",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-09-24 15:26:07.918059",
+ "modified": "2025-04-12 12:14:08.960856",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Doctype with child records",
