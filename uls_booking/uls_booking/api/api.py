@@ -785,6 +785,8 @@ def create_shipment(token , booking_name) :
         booking_doc.shipping_error_log = error_message
         booking_doc.save()
         frappe.db.commit()
+        # booking_doc.reload()
+        # frappe.db.commit()
         frappe.throw(f"Shipment creation failed: {error_message}")
 
     else :    

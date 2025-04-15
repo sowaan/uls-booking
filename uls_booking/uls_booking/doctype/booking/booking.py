@@ -131,7 +131,14 @@ class Booking(WebsiteGenerator):
 			frappe.db.set_value( "Booking" , self.name , "current_status" , data['trackResponse']['shipment'][0]['package'][0]['currentStatus']['description'])
 			frappe.db.set_value( "Booking" , self.name , "current_status_code" , data['trackResponse']['shipment'][0]['package'][0]['currentStatus']['code'])
 
+			# self.current_status = data['trackResponse']['shipment'][0]['package'][0]['currentStatus']['description']
+			# self.current_status_code = data['trackResponse']['shipment'][0]['package'][0]['currentStatus']['code']
+
+			# self.set("current_status", data['trackResponse']['shipment'][0]['package'][0]['currentStatus']['description'])
+			# self.set("current_status_code", data['trackResponse']['shipment'][0]['package'][0]['currentStatus']['code'])
+
 		except KeyError as e:
+
 			frappe.throw(f"Failed to retrieve shipment status information: {str(e)}")
 
 
