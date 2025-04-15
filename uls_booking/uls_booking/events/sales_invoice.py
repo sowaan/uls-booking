@@ -15,8 +15,9 @@ def get_exchange_rate(from_currency, to_currency, date):
 
     return rate[0].exchange_rate if rate else 0
 
-def generate_invoice(self, method) :
+def generate_invoice(self, method):
     sales_invoice = self
+    # frappe.throw("Generating Invoice")
     if sales_invoice.custom_duty_and_taxes_invoice == 1:
         if self.taxes_and_charges :
             self.taxes_and_charges = None

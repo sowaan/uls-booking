@@ -142,6 +142,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         customer = frappe.get_doc("Company", company, fields=["custom_default_customer"])
         # sales_invoice.customer = customer.custom_default_customer
         sales_invoice.set("customer", customer.custom_default_customer)
+        # frappe.throw(_("Customer: {0}").format(customer.custom_default_customer))
         sales_invoice.custom_sales_invoice_definition = sales_invoice_definition
         # Populate sales invoice fields
         for child_record in definition.sales_invoice_definition:
@@ -201,7 +202,8 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                                     filters = {"name":icris_number})
                 icris = frappe.get_doc("ICRIS Account",icris_doc[0].name)
                 if icris.shipper_name:
-                    sales_invoice.customer = icris.shipper_name
+                    sales_invoice.set("customer", icris.shipper_name)
+                    # sales_invoice.customer = icris.shipper_name
                 else:
                     logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}")
                     print("No Customer Found")
@@ -222,7 +224,8 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                 icris1 = frappe.get_doc("ICRIS Account",icris_doc[0].name)
                 
                 if icris1.shipper_name:
-                    sales_invoice.customer = icris1.shipper_name
+                    sales_invoice.set("customer", icris1.shipper_name)
+                    # sales_invoice.customer = icris1.shipper_name
                 else:
                     logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}") 
                     print("No Customer Found")
