@@ -114,11 +114,13 @@ def generate_invoice(self, method):
             logs.append(f"No ICRIS Account Found {icris_number}")
             print("No ICRIS Account Found")
             icris_number = definition.unassigned_icris_number
+        print('\n\n\n\n\n\n\n\n icris_number \n\n\n\n\n', icris_number, '\n\n\n')
         if icris_number:
             icris_doc = frappe.get_list("ICRIS Account", filters={"name": icris_number})
             icris = frappe.get_doc("ICRIS Account",icris_doc[0].name)
             if icris.shipper_name:
                 sales_invoice.customer = icris.shipper_name
+                print('\n\n\n\n\n\n\nn\n icris.shipper_name \n\n\n\nn\n')
 
                 r300000_list = frappe.get_list('R300000', filters={'shipment_number' : shipment_number})
                 
@@ -133,10 +135,13 @@ def generate_invoice(self, method):
                                 )
                         if cust_list :
                             sales_invoice.customer = cust_list[0].name
+                            print('\n\n\n\n\n\n\nn\n cust_list[0].name \n\n\n\nn\n')
                             sales_invoice.custom_account_no = r300000_doc.alternate_tracking_number_1
 
-                customer_name = frappe.db.get_value("Customer", sales_invoice.customer, 'customer_name')
-                sales_invoice.customer_name = customer_name
+                # customer_name = frappe.db.get_value("Customer", sales_invoice.customer, ['customer_name', 'custom_import_account_no', 'custom_billing_type'], as_dict=True)
+                # sales_invoice.customer_name = customer_name.customer_name
+                # sales_invoice.custom_billing_type = customer_name.custom_billing_type
+                # sales_invoice.custom_account_no = customer_name.custom_import_account_no
             else:
                 logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}")
                 print("No Customer Found")
@@ -431,6 +436,7 @@ def generate_invoice(self, method):
             
             if icris1.shipper_name:
                 sales_invoice.customer = icris1.shipper_name
+                print('\n\n\n\n\n\n\nn\n icris1.shipper_name \n\n\n\nn\n')
                 
                 r300000_list1 = frappe.get_list('R300000',
                                     filters={
@@ -449,10 +455,13 @@ def generate_invoice(self, method):
                                 )
                         if cust_list :
                             sales_invoice.customer = cust_list[0].name
+                            print('\n\n\n\n\n\n\nn\n cust_list[0].name \n\n\n\nn\n')
                             sales_invoice.custom_account_no = r300000_doc.alternate_tracking_number_1
                             
-                customer_name = frappe.db.get_value("Customer", sales_invoice.customer, 'customer_name')
-                sales_invoice.customer_name = customer_name
+                # customer_name = frappe.db.get_value("Customer", sales_invoice.customer, ['customer_name', 'custom_import_account_no', 'custom_billing_type'], as_dict=True)
+                # sales_invoice.customer_name = customer_name.customer_name
+                # sales_invoice.custom_billing_type = customer_name.custom_billing_type
+                # sales_invoice.custom_account_no = customer_name.custom_import_account_no
                 
             else:
                 logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}") 
@@ -926,7 +935,14 @@ def generate_invoice(self, method):
         log_doc.save()
         print("No Items")
         return
-    
+
+    customer = frappe.db.get_value("Customer", sales_invoice.customer, ['customer_name', 'custom_import_account_no', 'custom_billing_type', 'payment_terms'], as_dict=True)
+    sales_invoice.customer_name = customer.customer_name
+    # sales_invoice.custom_billing_type = customer.custom_billing_type
+    # sales_invoice.custom_account_no = customer.custom_import_account_no
+    # sales_invoice.set('payment_terms_template', customer.payment_terms)
+
+
     log_text = "\n".join(logs)
     discounted_amount = discounted_amount -1
     sales_invoice.set_missing_values()
