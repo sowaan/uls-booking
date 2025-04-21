@@ -58,6 +58,7 @@ def send_email_with_attachment(doc_name):
 
 @frappe.whitelist()
 def send_multi_email_with_attachment(doc_name, selected_customers):
+    print('helo\n\n\n\n\n\n\n\n\n\n\n\n\nn\n', selected_customers)
     try:
         selected_customers = json.loads(selected_customers)
     except Exception as e:
@@ -70,30 +71,41 @@ def send_multi_email_with_attachment(doc_name, selected_customers):
     success_count = 0
 
     for customer in selected_customers:
-        invoice = frappe.get_list(
-            "Customer Shipment Invoice",
-            filters={"sales_invoice_pdf": doc_name, "customer": customer},
-            pluck="name",
-            limit=1  
-        )
+        # invoice = frappe.get_list(
+        #     "Customer Shipment Invoice",
+        #     filters={"sales_invoice_pdf": doc_name, "customer": customer},
+        #     pluck="name",
+        #     limit=1  
+        # )
+        if not frappe.db.exists("Customer", customer):
+            failed_customers.append(customer)
+            continue
+        
+        customer_add = frappe.db.get_value("Customer", customer, "customer_primary_address")
+        if customer_add:
+            email = frappe.db.get_value("Address", customer_add, 'email_id')
 
-        if not invoice:
+        if not customer_add or not email:
             failed_customers.append(customer)
             continue
 
-        invoice_name = invoice[0] 
-        email = frappe.get_value("Customer Shipment Invoice", invoice_name, "email")
+        # if not invoice:
+        #     failed_customers.append(customer)
+        #     continue
 
-        if not email:
-            failed_customers.append(customer)
-            continue
+        # invoice_name = invoice[0] 
+        # email = frappe.get_value("Customer Shipment Invoice", invoice_name, "email")
+
+        # if not email:
+        #     failed_customers.append(customer)
+        #     continue
 
         try:
             pdf_attachment = frappe.attach_print(
-                doctype="Customer Shipment Invoice",
-                name=invoice_name,
+                doctype="Sales Invoice PDF",
+                name=doc_name,
                 print_format="Sales Tax Invoice",
-                letterhead="My Custom Letterhead",
+                # letterhead="My Custom Letterhead",
                 lang="en"
             )
 
