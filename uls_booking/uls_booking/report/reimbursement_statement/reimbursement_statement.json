@@ -7,11 +7,10 @@
  "doctype": "Report",
  "filters": [
   {
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "label": "Customer",
+   "fieldname": "tracking_number",
+   "fieldtype": "Data",
+   "label": "Tracking number",
    "mandatory": 0,
-   "options": "Customer",
    "wildcard_filter": 0
   },
   {
@@ -29,28 +28,56 @@
    "wildcard_filter": 0
   },
   {
-   "fieldname": "custom_freight_invoices",
-   "fieldtype": "Check",
-   "label": "Freight Invoices",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "mandatory": 0,
+   "options": "Customer",
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "consignee_number",
+   "fieldtype": "Data",
+   "label": "Consignee Number",
    "mandatory": 0,
    "options": "",
    "wildcard_filter": 0
   },
   {
-   "default": "1",
-   "fieldname": "custom_duty_and_taxes_invoice",
-   "fieldtype": "Check",
-   "label": "Duty and Taxes Invoice",
+   "fieldname": "consignee_name",
+   "fieldtype": "Data",
+   "label": "Consignee Name",
    "mandatory": 0,
    "options": "",
    "wildcard_filter": 0
   },
   {
-   "fieldname": "custom_compensation_invoices",
-   "fieldtype": "Check",
-   "label": "Compensation Invoices",
+   "fieldname": "invoice_number",
+   "fieldtype": "Link",
+   "label": "Invoice Number",
    "mandatory": 0,
-   "options": "",
+   "options": "Sales Invoice",
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "arrival_date",
+   "fieldtype": "Date",
+   "label": "Arrival Date",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "label": "Location",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "mawb_number",
+   "fieldtype": "Data",
+   "label": "MAWB Number",
+   "mandatory": 0,
    "wildcard_filter": 0
   }
  ],
@@ -59,7 +86,7 @@
  "javascript": "frappe.query_report.on('render', function() {\n    let style = document.createElement('style');\n    style.innerHTML = `\n        @media print {\n            @page { size: landscape; }\n            body { transform: rotate(90deg); }\n        }\n    `;\n    document.head.appendChild(style);\n});\n",
  "letter_head": "Reimbursement Statement Letter Head",
  "letterhead": null,
- "modified": "2025-04-18 16:56:35.882278",
+ "modified": "2025-04-21 11:22:54.246815",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Reimbursement Statement",

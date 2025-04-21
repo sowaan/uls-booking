@@ -16,12 +16,16 @@ def execute(filters=None):
     ]
 
     filter_values = {
-        "customer": filters.get("customer"),
+        "tracking_number": filters.get("tracking_number"),
         "from_date": filters.get("from_date"),
         "to_date": filters.get("to_date"),
-        "custom_freight_invoices": 1 if filters.get("custom_freight_invoices") else 0,
-        "custom_duty_and_taxes_invoice": 1 if filters.get("custom_duty_and_taxes_invoice") else 0,
-        "custom_compensation_invoices": 1 if filters.get("custom_compensation_invoices") else 0
+        "customer": filters.get("customer"),
+        "consignee_number": filters.get("consignee_number"),
+        "consignee_name": filters.get("consignee_name"),
+        "invoice_number": filters.get("invoice_number"),
+        "arrival_date": filters.get("arrival_date"),
+        "location": filters.get("location"),
+        "mawb_number": filters.get("mawb_number")
     }
 
     item_list = frappe.db.sql("""
@@ -30,12 +34,17 @@ def execute(filters=None):
         JOIN `tabSales Invoice` si ON sii.parent = si.name
         JOIN `tabItem` i ON sii.item_code = i.item_code
         WHERE si.status IN ('Overdue', 'Unpaid') AND si.docstatus = 1
-            AND (si.customer_name = %(customer)s OR %(customer)s IS NULL)
+            AND si.custom_duty_and_taxes_invoice = 1
+            AND (si.custom_tracking_number = %(tracking_number)s OR %(tracking_number)s IS NULL)
             AND (si.posting_date >= %(from_date)s OR %(from_date)s IS NULL)
             AND (si.posting_date <= %(to_date)s OR %(to_date)s IS NULL)
-            AND si.custom_freight_invoices = %(custom_freight_invoices)s
-            AND si.custom_duty_and_taxes_invoice = %(custom_duty_and_taxes_invoice)s
-            AND si.custom_compensation_invoices = %(custom_compensation_invoices)s
+            AND (si.customer_name = %(customer)s OR %(customer)s IS NULL)
+            AND (si.custom_consignee_number = %(consignee_number)s OR %(consignee_number)s IS NULL)
+            AND (si.custom_consignee_name = %(consignee_name)s OR %(consignee_name)s IS NULL)
+            AND (si.name = %(invoice_number)s OR %(invoice_number)s IS NULL)
+            AND (si.custom_arrival_date = %(arrival_date)s OR %(arrival_date)s IS NULL)
+            AND (si.custom_location = %(location)s OR %(location)s IS NULL)
+            AND (si.custom_mawb_number = %(mawb_number)s OR %(mawb_number)s IS NULL)
     """, values=filter_values, as_dict=True)
 
     item_columns = [item.item_code for item in item_list]
@@ -75,12 +84,18 @@ def execute(filters=None):
         JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
         JOIN `tabItem` i ON sii.item_code = i.item_code
         WHERE si.status IN ('Overdue', 'Unpaid') AND si.docstatus = 1
-            AND (si.customer_name = %(customer)s OR %(customer)s IS NULL)
+            AND si.custom_duty_and_taxes_invoice = 1
+            AND (si.custom_tracking_number = %(tracking_number)s OR %(tracking_number)s IS NULL)
             AND (si.posting_date >= %(from_date)s OR %(from_date)s IS NULL)
             AND (si.posting_date <= %(to_date)s OR %(to_date)s IS NULL)
-            AND si.custom_freight_invoices = %(custom_freight_invoices)s
-            AND si.custom_duty_and_taxes_invoice = %(custom_duty_and_taxes_invoice)s
-            AND si.custom_compensation_invoices = %(custom_compensation_invoices)s
+            AND (si.customer_name = %(customer)s OR %(customer)s IS NULL)
+            AND (si.custom_consignee_number = %(consignee_number)s OR %(consignee_number)s IS NULL)
+            AND (si.custom_consignee_name = %(consignee_name)s OR %(consignee_name)s IS NULL)
+            AND (si.name = %(invoice_number)s OR %(invoice_number)s IS NULL)
+            AND (si.custom_arrival_date = %(arrival_date)s OR %(arrival_date)s IS NULL)
+            AND (si.custom_location = %(location)s OR %(location)s IS NULL)
+            AND (si.custom_mawb_number = %(mawb_number)s OR %(mawb_number)s IS NULL)
+            
     """, values=filter_values, as_dict=True)
 
     # Process into crosstab
