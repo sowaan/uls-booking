@@ -11,8 +11,13 @@ def execute(filters=None):
 
     columns = [
         {"label": "Date", "fieldname": "posting_date", "fieldtype": "Date", "width": 120, "nowrap": 1},
+        {"label": "Invoice Number", "fieldname": "invoice", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
         {"label": "Tracking No", "fieldname": "custom_tracking_number", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
         {"label": "Shipper", "fieldname": "custom_shipper_name", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
+        {"label": "Consignee", "fieldname": "custom_consignee_name", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
+        {"label": "Arrival Date", "fieldname": "custom_arrival_date", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
+		{"label": "Location", "fieldname": "custom_location", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
+        {"label": "MAWB Number", "fieldname": "custom_mawb_number", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
     ]
 
     filter_values = {
@@ -20,8 +25,6 @@ def execute(filters=None):
         "from_date": filters.get("from_date"),
         "to_date": filters.get("to_date"),
         "customer": filters.get("customer"),
-        "consignee_number": filters.get("consignee_number"),
-        "consignee_name": filters.get("consignee_name"),
         "invoice_number": filters.get("invoice_number"),
         "arrival_date": filters.get("arrival_date"),
         "location": filters.get("location"),
@@ -39,8 +42,6 @@ def execute(filters=None):
             AND (si.posting_date >= %(from_date)s OR %(from_date)s IS NULL)
             AND (si.posting_date <= %(to_date)s OR %(to_date)s IS NULL)
             AND (si.customer_name = %(customer)s OR %(customer)s IS NULL)
-            AND (si.custom_consignee_number = %(consignee_number)s OR %(consignee_number)s IS NULL)
-            AND (si.custom_consignee_name = %(consignee_name)s OR %(consignee_name)s IS NULL)
             AND (si.name = %(invoice_number)s OR %(invoice_number)s IS NULL)
             AND (si.custom_arrival_date = %(arrival_date)s OR %(arrival_date)s IS NULL)
             AND (si.custom_location = %(location)s OR %(location)s IS NULL)
@@ -78,6 +79,10 @@ def execute(filters=None):
             si.custom_shipper_name,
             si.custom_tracking_number,
             si.total,
+            si.custom_consignee_name,
+			si.custom_arrival_date,
+            si.custom_location,
+			si.custom_mawb_number,
             i.item_code,
             sii.amount
         FROM `tabSales Invoice` si
@@ -89,8 +94,6 @@ def execute(filters=None):
             AND (si.posting_date >= %(from_date)s OR %(from_date)s IS NULL)
             AND (si.posting_date <= %(to_date)s OR %(to_date)s IS NULL)
             AND (si.customer_name = %(customer)s OR %(customer)s IS NULL)
-            AND (si.custom_consignee_number = %(consignee_number)s OR %(consignee_number)s IS NULL)
-            AND (si.custom_consignee_name = %(consignee_name)s OR %(consignee_name)s IS NULL)
             AND (si.name = %(invoice_number)s OR %(invoice_number)s IS NULL)
             AND (si.custom_arrival_date = %(arrival_date)s OR %(arrival_date)s IS NULL)
             AND (si.custom_location = %(location)s OR %(location)s IS NULL)
@@ -107,8 +110,13 @@ def execute(filters=None):
         if invoice not in invoice_map:
             invoice_map[invoice] = {
                 "posting_date": row.posting_date,
+                "invoice": invoice,
                 "custom_shipper_name": row.custom_shipper_name,
+                "custom_consignee_name": row.custom_consignee_name,
                 "custom_tracking_number": row.custom_tracking_number,
+                "custom_arrival_date": row.custom_arrival_date,
+                "custom_location": row.custom_location,
+                "custom_mawb_number": row.custom_mawb_number,
                 "total": row.total
             }
         invoice_map[invoice][custom_scrub(row.item_code)] = round(row.amount)

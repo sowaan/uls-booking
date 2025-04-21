@@ -36,22 +36,6 @@
    "wildcard_filter": 0
   },
   {
-   "fieldname": "consignee_number",
-   "fieldtype": "Data",
-   "label": "Consignee Number",
-   "mandatory": 0,
-   "options": "",
-   "wildcard_filter": 0
-  },
-  {
-   "fieldname": "consignee_name",
-   "fieldtype": "Data",
-   "label": "Consignee Name",
-   "mandatory": 0,
-   "options": "",
-   "wildcard_filter": 0
-  },
-  {
    "fieldname": "invoice_number",
    "fieldtype": "Link",
    "label": "Invoice Number",
@@ -86,12 +70,12 @@
  "javascript": "frappe.query_report.on('render', function() {\n    let style = document.createElement('style');\n    style.innerHTML = `\n        @media print {\n            @page { size: landscape; }\n            body { transform: rotate(90deg); }\n        }\n    `;\n    document.head.appendChild(style);\n});\n",
  "letter_head": "Reimbursement Statement Letter Head",
  "letterhead": null,
- "modified": "2025-04-21 12:13:49.059713",
+ "modified": "2025-04-21 12:55:47.023540",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Duty and Taxes Report",
  "owner": "Administrator",
- "prepared_report": 1,
+ "prepared_report": 0,
  "ref_doctype": "Sales Invoice",
  "reference_report": "",
  "report_name": "Duty and Taxes Report",
