@@ -319,9 +319,9 @@ def get_conditions(filters):
     if filters.get("import_date"):
         conditions += " AND si.custom_import_date = %(import_date)s"
     if filters.get("shipment_number"):
-        conditions += " AND si.custom_shipment_number >= %(shipment_number)s"
+        conditions += " AND si.custom_shipment_number = %(shipment_number)s"
     if filters.get("tracking_number"):
-        conditions += " AND si.custom_tracking_number <= %(tracking_number)s"
+        conditions += " AND si.custom_tracking_number = %(tracking_number)s"
     if filters.get("billing_type"):
         conditions += " AND si.custom_billing_type = %(billing_type)s"
     if filters.get("shipper_number"):

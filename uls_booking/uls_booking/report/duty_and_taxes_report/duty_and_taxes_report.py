@@ -123,4 +123,3 @@ def execute(filters=None):
     ]
 
     return columns, list(invoice_map.values()), None, report_summary
-
