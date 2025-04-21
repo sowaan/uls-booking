@@ -13,12 +13,13 @@
  ],
  "fields": [
   {
-   "default": "0",
+   "default": "270",
    "fieldname": "max_length",
    "fieldtype": "Float",
    "label": "Max Length"
   },
   {
+   "default": "270",
    "fieldname": "max_weight",
    "fieldtype": "Float",
    "label": "Max Weight"
@@ -28,16 +29,17 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
+   "default": "420",
    "fieldname": "max_girth",
    "fieldtype": "Float",
    "label": "Max Girth [ (2 x width) + (2 x height) ]"
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-07-18 19:04:13.633660",
+ "modified": "2025-04-21 14:30:24.517133",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Package Dimensions Limitation",

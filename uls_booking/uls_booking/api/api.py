@@ -547,7 +547,7 @@ def create_rate(full_tariff , weight_slab, rate_type, rate_grp, rate_creation_to
 
 
 @frappe.whitelist()
-def generate_token() :
+def generate_token(icris_account) :
 
     # base_url = "https://onlinetools.ups.com"
     # REMOVED
@@ -556,12 +556,28 @@ def generate_token() :
     booking_api_settings_doc = frappe.get_doc("Booking API Settings")
 
     base_url = booking_api_settings_doc.base_url
-    client_id = booking_api_settings_doc.client_id
-    client_secret = booking_api_settings_doc.client_secret
     version = booking_api_settings_doc.version
+
+    auth_sig = 0
+
+    if booking_api_settings_doc.icris_autherization :
+        for icr in booking_api_settings_doc.icris_autherization :
+            if icr.icris_account == icris_account :
+                client_id = icr.client_id
+                client_secret = icr.client_secret
+                auth_sig = 1
+                break
+
+    if auth_sig == 0 :
+        frappe.throw("Please define Client ID and Secret for respective ICRIS Account.")           
+
+
 
 
     credentials = f"{client_id}:{client_secret}"
+    # print("Credentials : \n\n\n\n")
+    # print(credentials)
+    # print("\n\n\n\nCredentials : ")
     encoded_credentials = base64.b64encode(credentials.encode()).decode()
 
     url = f"{base_url}/security/{version}/oauth/token"

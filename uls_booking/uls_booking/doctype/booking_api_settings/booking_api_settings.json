@@ -6,29 +6,15 @@
  "engine": "InnoDB",
  "field_order": [
   "base_url",
-  "version",
   "column_break_lset",
-  "client_id",
-  "client_secret"
+  "version",
+  "section_break_aanl",
+  "icris_autherization"
  ],
  "fields": [
   {
-   "fieldname": "client_id",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Client ID",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_lset",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "client_secret",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Client Secret",
-   "reqd": 1
   },
   {
    "fieldname": "base_url",
@@ -42,12 +28,24 @@
    "fieldtype": "Data",
    "label": "Version",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_aanl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "icris_autherization",
+   "fieldtype": "Table",
+   "label": "ICRIS Autherization",
+   "options": "ICRIS Autherization",
+   "reqd": 1
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-10-21 18:55:25.381049",
+ "modified": "2025-04-21 13:09:14.472247",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Booking API Settings",
