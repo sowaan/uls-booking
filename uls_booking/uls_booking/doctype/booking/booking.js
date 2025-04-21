@@ -1038,7 +1038,7 @@ frappe.ui.form.on("Parcel Information", {
             const element = frm.doc.parcel_information[i];
             if (element.length > pdl.max_length ) {
                 element.length = 1;
-                frappe.throw("Maximum length per package is 270 cm.");
+                frappe.throw(`Maximum length per package is ${pdl.max_length} cm.`);
             }
 
                 if (element.length < element.height || element.length < element.width ) {
@@ -1053,7 +1053,7 @@ frappe.ui.form.on("Parcel Information", {
                     frappe.model.set_value(element.doctype,element.name,'length',1);
                     frappe.model.set_value(element.doctype,element.name,'width',1);
                     frappe.model.set_value(element.doctype,element.name,'height',1);
-                    frappe.throw("Maximum size per package should not be Greater than 400cm in Length and Girth[(2 x width) + (2 x height)] combined.");    
+                    frappe.throw(`Maximum size per package should not be Greater than ${pdl.max_girth}cm in Length and Girth[(2 x width) + (2 x height)] combined.`);  
                 }
                 element.dim_weight = element.length * element.width * element.height / 5000;
                 if(element.total_identical_parcels){
@@ -1080,7 +1080,7 @@ frappe.ui.form.on("Parcel Information", {
             const element = frm.doc.parcel_information[i];
             if (element.height > pdl.max_length ) {
                 element.height = 1;
-                frappe.throw("No side should be Greater than 270 cm.");
+                frappe.throw(`No side should be Greater than ${pdl.max_length} cm.`);
             }
             // if(element.length && element.width && element.height){
                 if (element.length < element.height || element.length < element.width ) {
@@ -1101,7 +1101,7 @@ frappe.ui.form.on("Parcel Information", {
                     // element.length = 1;
                     // element.width = 1;
                     // element.height = 1;
-                    frappe.throw("Maximum size per package should not be Greater than 400cm in Length and Girth[(2 x width) + (2 x height)] combined.");    
+                    frappe.throw(`Maximum size per package should not be Greater than ${pdl.max_girth}cm in Length and Girth[(2 x width) + (2 x height)] combined.`);    
                 }
                 element.dim_weight = element.length * element.width * element.height / 5000;
                 if(element.total_identical_parcels){
@@ -1129,7 +1129,7 @@ frappe.ui.form.on("Parcel Information", {
             const element = frm.doc.parcel_information[i];
             if (element.width > pdl.max_length ) {
                 element.width = 1;
-                frappe.throw("No side should be Greater than 270 cm.");
+                frappe.throw(`No side should be Greater than ${pdl.max_length} cm.`);
             }
 
                 if (element.length < element.height || element.length < element.width ) {
@@ -1144,7 +1144,7 @@ frappe.ui.form.on("Parcel Information", {
                     frappe.model.set_value(element.doctype,element.name,'length',1);
                     frappe.model.set_value(element.doctype,element.name,'width',1);
                     frappe.model.set_value(element.doctype,element.name,'height',1);
-                    frappe.throw("Maximum size per package should not be Greater than 400cm in Length and Girth[(2 x width) + (2 x height)] combined.");    
+                    frappe.throw(`Maximum size per package should not be Greater than ${pdl.max_girth}cm in Length and Girth[(2 x width) + (2 x height)] combined.`);    
                 }
                 element.dim_weight = element.length * element.width * element.height / 5000;
                 if(element.total_identical_parcels){
