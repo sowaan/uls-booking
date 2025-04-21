@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import getdate
+from frappe.utils import getdate, cint
 import re
 import logging
 
@@ -874,9 +874,9 @@ def generate_invoice(self, method):
         sales_invoice.discount_amount = tarif - final_rate
         sales_invoice.custom_amount_after_discount = tarif - sales_invoice.discount_amount
         
-        if sales_invoice.custom_edit_selling_percentage == 1 :
-            final_discount_percentage = sales_invoice.custom_selling_percentage
-            sales_invoice.discount_amount = (sales_invoice.custom_freight_charges * sales_invoice.custom_selling_percentage / 100)
+        if sales_invoice.custom_edit_selling_percentage == 1:
+            final_discount_percentage = sales_invoice.custom_selling_percentage or 0
+            sales_invoice.discount_amount = (sales_invoice.custom_freight_charges * final_discount_percentage / 100)
             sales_invoice.custom_amount_after_discount = sales_invoice.custom_freight_charges - sales_invoice.discount_amount
         else :
             sales_invoice.custom_selling_percentage = final_discount_percentage

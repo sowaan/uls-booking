@@ -1,0 +1,103 @@
+{
+ "add_total_row": 1,
+ "columns": [],
+ "creation": "2025-03-19 15:58:59.772286",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "mandatory": 0,
+   "options": "Customer",
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "custom_freight_invoices",
+   "fieldtype": "Check",
+   "label": "Freight Invoices",
+   "mandatory": 0,
+   "options": "",
+   "wildcard_filter": 0
+  },
+  {
+   "default": "1",
+   "fieldname": "custom_duty_and_taxes_invoice",
+   "fieldtype": "Check",
+   "label": "Duty and Taxes Invoice",
+   "mandatory": 0,
+   "options": "",
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "custom_compensation_invoices",
+   "fieldtype": "Check",
+   "label": "Compensation Invoices",
+   "mandatory": 0,
+   "options": "",
+   "wildcard_filter": 0
+  }
+ ],
+ "idx": 0,
+ "is_standard": "Yes",
+ "javascript": "frappe.query_report.on('render', function() {\n    let style = document.createElement('style');\n    style.innerHTML = `\n        @media print {\n            @page { size: landscape; }\n            body { transform: rotate(90deg); }\n        }\n    `;\n    document.head.appendChild(style);\n});\n",
+ "letter_head": "Reimbursement Statement Letter Head",
+ "letterhead": null,
+ "modified": "2025-04-18 16:56:35.882278",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Reimbursement Statement",
+ "owner": "amir.baloch@sowaan.com",
+ "prepared_report": 0,
+ "ref_doctype": "Sales Invoice",
+ "reference_report": "",
+ "report_name": "Reimbursement Statement",
+ "report_script": "columns = [\n    # {\"label\": \"Invoice\", \"fieldname\": \"invoice\", \"fieldtype\": \"Link\", \"options\": \"Sales Invoice\", \"width\": 150},\n    # {\"label\": \"Customer\", \"fieldname\": \"customer\", \"fieldtype\": \"Link\", \"options\": \"Customer\", \"width\": 180},\n    {\"label\": \"Date\", \"fieldname\": \"posting_date\", \"fieldtype\": \"Date\", \"width\": 120, \"nowrap\":1},\n    {\"label\": \"Tracking No\", \"fieldname\": \"custom_tracking_number\", \"fieldtype\": \"Data\", \"width\": 150, \"nowrap\":1, \"word-break\": \"break-word\"},\n    {\"label\": \"Shipper\", \"fieldname\": \"custom_shipper_name\", \"fieldtype\": \"Data\", \"width\": 150, \"nowrap\":1, \"word-break\": \"break-word\"},\n]\n\nfilter_values = {\n    \"customer\" : filters.get(\"customer\") ,\n    \"from_date\" : filters.get(\"from_date\") ,\n    \"to_date\" : filters.get(\"to_date\"),\n    \"custom_freight_invoices\": 1 if filters.get(\"custom_freight_invoices\") else 0,\n    \"custom_duty_and_taxes_invoice\": 1 if filters.get(\"custom_duty_and_taxes_invoice\") else 0,\n    \"custom_compensation_invoices\": 1 if filters.get(\"custom_compensation_invoices\") else 0  \n}\n\n\ndef custom_scrub(txt):\n    return txt.lower().replace(' ', '_').replace('-', '_').replace('/', '_').replace('&','_')\n\nitem_list = frappe.db.sql(\"\"\"\n    SELECT DISTINCT i.item_code\n    FROM `tabSales Invoice Item` sii\n    JOIN `tabSales Invoice` si ON sii.parent = si.name\n    JOIN `tabItem` i ON sii.item_code = i.item_code\n    WHERE si.status IN ('Overdue', 'Unpaid') AND si.docstatus = 1\n        AND (si.customer_name = %(customer)s OR %(customer)s IS NULL)\n        AND (si.posting_date >= %(from_date)s OR %(from_date)s IS NULL)\n        AND (si.posting_date <= %(to_date)s OR %(to_date)s IS NULL)  \n        AND si.custom_freight_invoices = %(custom_freight_invoices)s      \n        AND si.custom_duty_and_taxes_invoice = %(custom_duty_and_taxes_invoice)s      \n        AND si.custom_compensation_invoices = %(custom_compensation_invoices)s\n\n\"\"\", values=filter_values, as_dict=True)\n\nitem_columns = [item.item_code for item in item_list]\n\nfor item in item_columns:\n    columns.append({\"label\": item, \"fieldname\": custom_scrub(item), \"fieldtype\": \"Currency\", \"width\": 120, \"align\": \"center\",\"precision\": 0})\n\n# Add total field as the last column\ncolumns.append({\"label\": \"Total\", \"fieldname\": \"total\", \"fieldtype\": \"Currency\", \"width\": 120, \"align\": \"center\",\"precision\":0})\n\n\n# Get invoice-item-amount mapping along with additional fields\nresults = frappe.db.sql(\"\"\"\nSELECT\n    si.name AS invoice,\n    si.posting_date,\n    si.customer,\n    si.custom_shipper_name,\n    si.custom_tracking_number,\n    si.total,\n    i.item_code,\n    sii.amount\nFROM `tabSales Invoice` si\nJOIN `tabSales Invoice Item` sii ON sii.parent = si.name\nJOIN `tabItem` i ON sii.item_code = i.item_code\nWHERE si.status IN ('Overdue', 'Unpaid') AND si.docstatus = 1\n    AND (si.customer_name = %(customer)s OR %(customer)s IS NULL)\n    AND (si.posting_date >= %(from_date)s OR %(from_date)s IS NULL)\n    AND (si.posting_date <= %(to_date)s OR %(to_date)s IS NULL)     \n    AND si.custom_freight_invoices = %(custom_freight_invoices)s      \n    AND si.custom_duty_and_taxes_invoice = %(custom_duty_and_taxes_invoice)s      \n    AND si.custom_compensation_invoices = %(custom_compensation_invoices)s\n\n                                                    \n \"\"\", values=filter_values, as_dict=True)\n\nfrappe.msgprint(str(filter_values[\"custom_freight_invoices\"]))\n\n# Process into crosstab\ninvoice_map = {}\ntotal_amount = 0.00\n\nfor row in results:\n    invoice = row.invoice\n    if invoice not in invoice_map:\n        total_amount = row.total\n        invoice_map[invoice] = {\n            # \"invoice\": invoice,\n            \"posting_date\": row.posting_date,\n            # \"customer\": row.customer,\n            \"custom_shipper_name\": row.custom_shipper_name,\n            \"custom_tracking_number\": row.custom_tracking_number,\n            \"total\": row.total\n        }\n    invoice_map[invoice][custom_scrub(row.item_code)] = round(row.amount)\n\nreport_summary = [\n    {\n        \"label\": \"Total Amount\",\n        \"value\": frappe.utils.fmt_money(total_amount),\n        \"indicator\": \"Blue\",\n    }\n]\n\n# Final data preparation\ndata = columns, list(invoice_map.values()), report_summary, total_amount\n\n",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Customer"
+  },
+  {
+   "role": "Employee Self Service"
+  },
+  {
+   "role": "Ground Agent"
+  },
+  {
+   "role": "Import Agent"
+  },
+  {
+   "role": "Billing Agent"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "timeout": 0
+}
