@@ -22,30 +22,71 @@ frappe.ui.form.on('Sales Invoice', {
             const rate = originalAmount - discountAmount;
 
             // Fetch the percentage from the Additional Charges doctype
-            frappe.db.get_single_value("Additional Charges Page", "feul_surcharge_percentage_on_freight_amount").then((percentage) => {
-                console.log(percentage);  // Log the percentage value
-                // Assuming total_fuel is defined somewhere in your form
-                const total_fuel = frm.doc.custom_total_surcharges_incl_fuel; // Make sure this field exists
+            // frappe.db.get_single_value("Additional Charges Page", "fuel_surcharge_percentages_on_freight_amount").then((percentage) => {
+            //     console.log(percentage);  // Log the percentage value
+            //     // Assuming total_fuel is defined somewhere in your form
+            //     const total_fuel = frm.doc.custom_total_surcharges_incl_fuel; // Make sure this field exists
 
-                // Calculate fsc_vv
-                const fsc_vv = (rate + total_fuel) * percentage / 100;
+            //     // Calculate fsc_vv
+            //     const fsc_vv = (rate + total_fuel) * percentage / 100;
+            //     console.log('fsc', fsc_vv);
 
-                // Find the row with the item code "FSC"
-                const fscItem = frm.doc.items.find(item => item.item_code === "FSC");
+            //     // Find the row with the item code "FSC"
+            //     const fscItem = frm.doc.items.find(item => item.item_code === "FSC");
 
-                if (fscItem) {
-                    // Set the rate for the FSC item
-                    frappe.model.set_value("Sales Invoice Item", fscItem.name, "rate", fsc_vv);
-                    // Refresh the item table to reflect changes
-                    frm.refresh_field('items');
-                } else {
-                    console.log("FSC item not found in the invoice items.");
+            //     if (fscItem) {
+            //         // Set the rate for the FSC item
+            //         frappe.model.set_value("Sales Invoice Item", fscItem.name, "rate", fsc_vv);
+            //         // Refresh the item table to reflect changes
+            //         frm.refresh_field('items');
+            //     } else {
+            //         console.log("FSC item not found in the invoice items.");
+            //     }
+            // });
+
+            // ############################ UMAIR WORK ############################
+            frappe.call({
+                method: "uls_booking.uls_booking.events.sales_invoice.get_fuel_percentage_for_date",
+                args: {
+                    date_shipped: frm.doc.custom_date_shipped
+                },
+                callback: function(r) {
+                    const percentage = r.message;
+                    console.log("Matched FSC percentage:", percentage);
+            
+                    const total_fuel = frm.doc.custom_total_surcharges_incl_fuel || 0;
+                    // const rate = frm.doc.custom_base_freight_rate || 0;
+            
+                    const fsc_vv = (rate + total_fuel) * percentage / 100;
+                    console.log("fsc_vv:", fsc_vv);
+            
+                    const fscItem = frm.doc.items.find(item => item.item_code === "FSC");
+                    if (fscItem) {
+                        frappe.model.set_value("Sales Invoice Item", fscItem.name, "rate", fsc_vv);
+                        frm.refresh_field('items');
+                    } else {
+                        console.log("FSC item not found in the invoice items.");
+                    }
                 }
             });
+            
+
+
+
         } else {
             console.log("Export Saver item not found in the invoice items.");
         }
     }
+    // ,
+    // after_save: function(frm) {
+    //     const cust_values = frappe.db.get_value("Customer", frm.doc.customer, ["custom_import_account_no", "custom_billing_type"], as_dict = true);
+    //     if (cust_values.custom_import_account_no === frm.doc.custom_account_no && cust_values.custom_billing_type === frm.doc.custom_billing_type) {
+    //         return;
+    //     }else{
+    //         frm.set_value("Customer", frm.doc.customer);
+    //     }
+    //         // frm.set_value("custom_import_account_no", cust_values.custom_import_account_no);
+    // }
     // ,
 
     // async custom_insurance_amount(frm) {

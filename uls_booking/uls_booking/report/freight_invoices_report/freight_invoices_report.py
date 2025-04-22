@@ -21,6 +21,12 @@ def get_columns(filters):
             "width": 150
         },
         {
+            "label": _("Date"),
+            "fieldname": "posting_date",
+            "fieldtype": "Date",
+            "width": 120
+        },
+        {
             "label": _("Document Status"),
             "fieldname": "stat",
             "fieldtype": "Data",
@@ -142,6 +148,12 @@ def get_columns(filters):
             "width": 120
         },
         {
+            "label": _("Import / Export"),
+            "fieldname": "import_export",
+            "fieldtype": "Data",
+            "width": 120
+        },
+        {
             "label": _("Shipment Weight"),
             "fieldname": "shipment_weight",
             "fieldtype": "Float",
@@ -156,6 +168,12 @@ def get_columns(filters):
         {
             "label": _("Currency"),
             "fieldname": "currency",
+            "fieldtype": "Data",
+            "width": 80
+        },
+        {
+            "label": _("Exchange Rate"),
+            "fieldname": "exchange_rate",
             "fieldtype": "Data",
             "width": 80
         }
@@ -221,7 +239,12 @@ def get_data(filters):
     data = frappe.db.sql("""
         SELECT 
             si.name as invoice_id,
+            si.posting_date as posting_date,
             CASE si.docstatus WHEN 0 THEN 'Draft' WHEN 1 THEN 'Submitted' ELSE 'Cancelled' END as stat,
+            CASE 
+                WHEN UPPER(si.custom_consignee_country) IN ('PAKISTAN', 'PAK', 'PK') THEN 'Import'
+                ELSE 'Export'
+            END AS import_export,
             si.custom_booking_date as booking_date,
             si.custom_date_shipped as date_shipped,
             si.custom_tracking_number as tracking_number,
@@ -235,7 +258,7 @@ def get_data(filters):
             si.custom_shipper_number as shipper_number,
             si.custom_consignee_name as consignee_name,
             si.custom_consignee_number as consignee_number,
-            si.company_tax_id as tax_id,
+            cust.tax_id as tax_id,
             si.custom_service_type as service_type,
             si.custom_shipment_type as shipment_type,
             si.custom_package_type as package_type,
@@ -244,6 +267,7 @@ def get_data(filters):
             si.custom_shipment_weight as shipment_weight,
             si.custom_billing_term as billing_term,
             si.currency,
+            si.conversion_rate as exchange_rate,
             si.custom_freight_charges as freight_charges,
             si.custom_total_surcharges_incl_fuel as total_surcharges_incl_fuel,
             si.custom_total_surcharges_excl_fuel as total_surcharges_excl_fuel,
@@ -256,6 +280,8 @@ def get_data(filters):
             si.base_grand_total
         FROM 
             `tabSales Invoice` si
+        JOIN
+            `tabCustomer` cust ON si.customer = cust.name
         WHERE 
             si.custom_freight_invoices = 1 {conditions}
         ORDER BY 
@@ -332,8 +358,14 @@ def get_conditions(filters):
     check_docstatus = filters.get("docstatus")
     if check_docstatus:
         conditions += f" AND si.docstatus = {doc_status[check_docstatus]}"
-    if filters.get("custom_freight_invoices"):
-        conditions += " AND si.custom_freight_invoices = %(custom_freight_invoices)s"
+    if filters.get("import_export"):
+        if filters["import_export"] == "Import":
+            conditions += " AND UPPER(si.custom_consignee_country) IN ('PAKISTAN', 'PAK', 'PK')"
+        elif filters["import_export"] == "Export":
+            conditions += " AND UPPER(si.custom_consignee_country) NOT IN ('PAKISTAN', 'PAK', 'PK')"
+    if filters.get("billing_term"):
+        filters["billing_term"] = filters["billing_term"].upper()
+        conditions += " AND UPPER(si.custom_billing_term) = %(billing_term)s"
     
     
     return conditions

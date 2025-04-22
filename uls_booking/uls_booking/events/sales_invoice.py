@@ -119,7 +119,8 @@ def generate_invoice(self, method):
             icris_doc = frappe.get_list("ICRIS Account", filters={"name": icris_number})
             icris = frappe.get_doc("ICRIS Account",icris_doc[0].name)
             if icris.shipper_name:
-                sales_invoice.customer = icris.shipper_name
+                # sales_invoice.customer = icris.shipper_name
+                sales_invoice.set("customer", icris.shipper_name)
                 print('\n\n\n\n\n\n\nn\n icris.shipper_name \n\n\n\nn\n')
 
                 r300000_list = frappe.get_list('R300000', filters={'shipment_number' : shipment_number})
@@ -128,13 +129,14 @@ def generate_invoice(self, method):
                     r300000_doc = frappe.get_doc('R300000', r300000_list[0].name)
                     if r300000_doc.alternate_tracking_number_1 and r300000_doc.alternate_tracking_number_1 != '':
                         cust_list = frappe.get_list('Customer',
-                                    filters={
+                                                    filters={
                                         'disabled' : ['!=',1] ,
                                         'custom_import_account_no' : r300000_doc.alternate_tracking_number_1
                                     }
                                 )
-                        if cust_list :
-                            sales_invoice.customer = cust_list[0].name
+                        if cust_list:
+                            # sales_invoice.customer = cust_list[0].name
+                            sales_invoice.set("customer", cust_list[0].name)
                             print('\n\n\n\n\n\n\nn\n cust_list[0].name \n\n\n\nn\n')
                             sales_invoice.custom_account_no = r300000_doc.alternate_tracking_number_1
 
@@ -435,7 +437,8 @@ def generate_invoice(self, method):
             icris1 = frappe.get_doc("ICRIS Account",icris_doc[0].name)
             
             if icris1.shipper_name:
-                sales_invoice.customer = icris1.shipper_name
+                # sales_invoice.customer = icris1.shipper_name
+                sales_invoice.set("customer", icris1.shipper_name)
                 print('\n\n\n\n\n\n\nn\n icris1.shipper_name \n\n\n\nn\n')
                 
                 r300000_list1 = frappe.get_list('R300000',
@@ -454,8 +457,9 @@ def generate_invoice(self, method):
                                     }
                                 )
                         if cust_list :
-                            sales_invoice.customer = cust_list[0].name
-                            print('\n\n\n\n\n\n\nn\n cust_list[0].name \n\n\n\nn\n')
+                            # sales_invoice.customer = cust_list[0].name
+                            sales_invoice.set("customer", cust_list[0].name)
+                            # print('\n\n\n\n\n\n\nn\n cust_list[0].name \n\n\n\nn\n')
                             sales_invoice.custom_account_no = r300000_doc.alternate_tracking_number_1
                             
                 # customer_name = frappe.db.get_value("Customer", sales_invoice.customer, ['customer_name', 'custom_import_account_no', 'custom_billing_type'], as_dict=True)
@@ -895,6 +899,7 @@ def generate_invoice(self, method):
             sales_invoice.append('items' , {'item_code' : setting.shipment_billing_charges , 'qty' : '1' , 'rate' : shipmentbillingamount})
         if total_charges_incl_fuel:
             sales_invoice.append('items' , {'item_code' : setting.include_fuel_charges , 'qty' : '1' , 'rate' : total_charges_incl_fuel})
+        
         additional_surcharges_page = frappe.get_doc("Additional Charges Page")
         peak_amount = 0
         if additional_surcharges_page.peak_charges_duration_and_amount:    
@@ -935,12 +940,21 @@ def generate_invoice(self, method):
         log_doc.save()
         print("No Items")
         return
+    
+    if sales_invoice.custom_edit_selling_percentage:
+        for row in sales_invoice.items:
+            if row.item_code == setting.fuel_charges:
+                per = get_fuel_percentage_for_date(sales_invoice.custom_date_shipped)
+                row.rate = ((sales_invoice.custom_amount_after_discount + sales_invoice.custom_total_surcharges_incl_fuel) * per) / 100
+
 
     customer = frappe.db.get_value("Customer", sales_invoice.customer, ['customer_name', 'custom_import_account_no', 'custom_billing_type', 'payment_terms'], as_dict=True)
     sales_invoice.customer_name = customer.customer_name
     # sales_invoice.custom_billing_type = customer.custom_billing_type
     # sales_invoice.custom_account_no = customer.custom_import_account_no
     # sales_invoice.set('payment_terms_template', customer.payment_terms)
+    # if sales_invoice.payment_schedule:
+    #     sales_invoice.payment_schedule[0].set("payment_term", customer.payment_terms)
 
 
     log_text = "\n".join(logs)
@@ -976,3 +990,21 @@ def duty_and_tax_validation_on_submit(self, method) :
         if self.taxes_and_charges :
             self.taxes_and_charges = None
             self.taxes = []
+
+
+
+############################ UMAIR WORK ############################
+@frappe.whitelist()
+def get_fuel_percentage_for_date(date_shipped):
+    date = frappe.utils.getdate(date_shipped)
+    records = frappe.get_all("Fuel Surcharge Percentage on Freight Amount",
+        filters={
+            "parent": "Additional Charges Page",
+            "from_date": ["<=", date],
+            "expiry_date": [">=", date]
+        },
+        fields=["fuel_surcharge_percentage_on_freight_amount"],
+        order_by="from_date desc"
+    )
+    perenctage = records[0]["fuel_surcharge_percentage_on_freight_amount"] if records else 0
+    return perenctage 

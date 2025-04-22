@@ -95,6 +95,21 @@
    "mandatory": 0,
    "options": "\nDraft\nSubmitted\nCancelled",
    "wildcard_filter": 0
+  },
+  {
+   "fieldname": "import_export",
+   "fieldtype": "Select",
+   "label": "Import / Export",
+   "mandatory": 0,
+   "options": "\nImport\nExport",
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "billing_term",
+   "fieldtype": "Data",
+   "label": "Billing Term",
+   "mandatory": 0,
+   "wildcard_filter": 0
   }
  ],
  "idx": 0,
@@ -102,12 +117,12 @@
  "javascript": "frappe.query_report.on('render', function() {\n    let style = document.createElement('style');\n    style.innerHTML = `\n        @media print {\n            @page { size: landscape; }\n            body { transform: rotate(90deg); }\n        }\n    `;\n    document.head.appendChild(style);\n});\n",
  "letter_head": "Reimbursement Statement Letter Head",
  "letterhead": null,
- "modified": "2025-04-21 12:11:37.259874",
+ "modified": "2025-04-22 16:41:13.158892",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Freight Invoices Report",
  "owner": "Administrator",
- "prepared_report": 1,
+ "prepared_report": 0,
  "ref_doctype": "Sales Invoice",
  "reference_report": "",
  "report_name": "Freight Invoices Report",
