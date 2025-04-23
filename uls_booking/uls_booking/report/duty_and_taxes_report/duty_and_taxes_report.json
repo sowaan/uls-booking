@@ -75,7 +75,7 @@
  "module": "ULS Booking",
  "name": "Duty and Taxes Report",
  "owner": "Administrator",
- "prepared_report": 0,
+ "prepared_report": 1,
  "ref_doctype": "Sales Invoice",
  "reference_report": "",
  "report_name": "Duty and Taxes Report",
