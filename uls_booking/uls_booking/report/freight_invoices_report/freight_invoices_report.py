@@ -21,7 +21,7 @@ def get_columns(filters):
             "width": 150
         },
         {
-            "label": _("Date"),
+            "label": _("Posting Date"),
             "fieldname": "posting_date",
             "fieldtype": "Date",
             "width": 120

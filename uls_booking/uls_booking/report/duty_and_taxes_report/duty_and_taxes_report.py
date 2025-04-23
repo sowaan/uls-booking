@@ -10,9 +10,10 @@ def execute(filters=None):
         return txt.lower().replace(' ', '_').replace('-', '_').replace('/', '_').replace('&', '_')
 
     columns = [
-        {"label": "Date", "fieldname": "posting_date", "fieldtype": "Date", "width": 120, "nowrap": 1},
-        {"label": "Invoice Number", "fieldname": "invoice", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
+        {"label": "Posting Date", "fieldname": "posting_date", "fieldtype": "Date", "width": 120, "nowrap": 1},
+        {"label": "Invoice Number", "fieldname": "invoice", "fieldtype": "Link", "options": "Sales Invoice", "width": 150, "nowrap": 1, "word-break": "break-word"},
         {"label": "Tracking No", "fieldname": "custom_tracking_number", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
+        {"label": "Customer", "fieldname": "customer", "fieldtype": "Link", "options": "Customer", "width": 150, "nowrap": 1, "word-break": "break-word"},
         {"label": "Shipper", "fieldname": "custom_shipper_name", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
         {"label": "Consignee", "fieldname": "custom_consignee_name", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
         {"label": "Arrival Date", "fieldname": "custom_arrival_date", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
@@ -111,6 +112,7 @@ def execute(filters=None):
             invoice_map[invoice] = {
                 "posting_date": row.posting_date,
                 "invoice": invoice,
+                "customer": row.customer,
                 "custom_shipper_name": row.custom_shipper_name,
                 "custom_consignee_name": row.custom_consignee_name,
                 "custom_tracking_number": row.custom_tracking_number,
