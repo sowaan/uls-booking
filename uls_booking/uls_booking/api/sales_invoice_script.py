@@ -109,6 +109,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         setting = frappe.get_doc("Manifest Setting Definition")
         sales_invoice = frappe.new_doc("Sales Invoice")
         
+        
 
 
 
@@ -121,6 +122,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         customer = frappe.get_doc("Company", company, fields=["custom_default_customer"])
         # sales_invoice.customer = customer.custom_default_customer
         sales_invoice.set("customer", customer.custom_default_customer)
+        
         # frappe.throw(_("Customer: {0}").format(customer.custom_default_customer))
         sales_invoice.custom_sales_invoice_definition = sales_invoice_definition
         # Populate sales invoice fields
@@ -137,7 +139,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         # print('\n\n\n\custom_shipper_number0', sales_invoice.custom_shipper_number, '\n\n\n\n')
         # print('\n\n\n\custom_consignee_number0', sales_invoice.custom_consignee_number, '\n\n\n\n')
 
-
+        
         if sales_invoice.custom_shipper_country == definition.origin_country.upper():
             imp_exp = "Export"
             if sales_invoice.custom_shipper_number:
@@ -167,7 +169,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
             if definition.unassigned_icris_number:
                 icris_account = frappe.get_doc("ICRIS Account", definition.unassigned_icris_number)
 
-
+        
         export_billing_term = []
         import_billing_term = []
         for term in definition.export_and_import_conditions:
@@ -191,7 +193,9 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
             filters={'shipment_number': shipment_number},
             fieldname="custom_minimum_bill_weight"
         )
-
+        # print('\n\n\n\weight_frm_R200000', weight_frm_R200000, 'weight_frm_R200000\n\n\n\n')
+        # print('\n\n\n\weight_frm_R201000', weight_frm_R201000, 'weight_frm_R201000\n\n\n\n')
+        
         
         weight_frm_R200000 = float(weight_frm_R200000) if weight_frm_R200000 else 0.0
         weight_frm_R201000 = float(weight_frm_R201000) if weight_frm_R201000 else 0.0
@@ -203,7 +207,8 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
 
         # print('\n\n\n\custom_shipper_number1', sales_invoice.custom_shipper_number, '\n\n\n\n')
         # print('\n\n\n\custom_consignee_number1', sales_invoice.custom_consignee_number, '\n\n\n\n')
-
+        # print('\n\n\n\custom_shipment_type', sales_invoice.custom_shipment_type, 'custom_shipment_type\n\n\n\n')
+        # print('\n\n\n\custom_package_type', sales_invoice.custom_package_type, 'custom_package_type\n\n\n\n')
 
         if sales_invoice.custom_billing_term in export_billing_term and sales_invoice.custom_shipper_country == definition.origin_country.upper():
             check1 = frappe.get_list("ICRIS Account",
@@ -244,9 +249,8 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                 else:
                     logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}") 
                     print("No Customer Found")
-
-        # print('\n\n\n\custom_shipper_number2', sales_invoice.custom_shipper_number, '\n\n\n\n')
-        # print('\n\n\n\custom_consignee_number2', sales_invoice.custom_consignee_number, '\n\n\n\n')
+        
+        # print('\n\n\n\customer', sales_invoice.customer, 'customer\n\n\n\n')
         already_present = 0
         log_list = frappe.get_list("Sales Invoice Logs",filters ={"shipment_number":shipment_number})
         if log_list:
@@ -295,7 +299,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         # Append an item row
         # print('\n\n\n\custom_shipper_number4', sales_invoice.custom_shipper_number, '\n\n\n\n')
         # print('\n\n\n\custom_consignee_number4', sales_invoice.custom_consignee_number, '\n\n\n\n')
-
+    
         itm_list = frappe.db.get_list("Item",
                         filters={
                             'disabled' : ['!=',1] 
@@ -303,13 +307,17 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                     )
         rows = {'item_code': itm_list[0].name, 'qty': '1', 'rate': 0}
         sales_invoice.append('items', rows)
-        # print('\n\n\n\custom_shipper_number5', sales_invoice.custom_shipper_number, '\n\n\n\n')
+
+        # print('\n\n\n\itm_list', itm_list[0].name, 'itm_list\n\n\n\n')
         # print('\n\n\n\custom_consignee_number5', sales_invoice.custom_consignee_number, '\n\n\n\n')
         # print('\n\n\n\ndoc shipment', sales_invoice.custom_shipment_number, '\n\n\n\n')
-        # print('\n\n\n\nshipment', shipment_number, '\n\n\n\n')
         
-
+        
+        # print("pt",sales_invoice.custom_package_type)
+        # print("st",sales_invoice.custom_shipment_type)
+        # print('hello')
         sales_invoice.insert()
+        # print('hello')
 
     except json.JSONDecodeError:
         message = "Invalid JSON data"
@@ -318,7 +326,9 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
 
     except Exception as e:
         if sales_invoice and sales_invoice.name:
+
             print(f"Error while processing Sales Invoice {sales_invoice.name}: {str(e)}")
+
         else:
             print(f"An error occurred before Sales Invoice was created: {str(e)}")
         
