@@ -313,8 +313,6 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         # print('\n\n\n\ndoc shipment', sales_invoice.custom_shipment_number, '\n\n\n\n')
         
         
-        # print("pt",sales_invoice.custom_package_type)
-        # print("st",sales_invoice.custom_shipment_type)
         # print('hello')
         sales_invoice.insert()
         # print('hello')

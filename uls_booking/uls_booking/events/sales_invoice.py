@@ -17,6 +17,8 @@ def get_exchange_rate(from_currency, to_currency, date):
 
 def generate_invoice(self, method):
     sales_invoice = self
+    # if not self.customer == "UPS Compensation":
+    #     return
     # frappe.throw("Generating Invoice")
     if sales_invoice.custom_duty_and_taxes_invoice == 1:
         if self.taxes_and_charges :
@@ -106,7 +108,6 @@ def generate_invoice(self, method):
         if definition.unassigned_icris_number:
             icris_account = frappe.get_doc("ICRIS Account", definition.unassigned_icris_number)
     #print(shipment_type, "shipment_type \n\n\n")
-
 
     if sales_invoice.custom_billing_term in export_billing_term and is_export:
         check1 = frappe.get_list("ICRIS Account", filters = {"name":icris_number})
@@ -336,7 +337,6 @@ def generate_invoice(self, method):
 
 
 
-
             if selling_group and full_tariff_flag == 0:
 
                 zones = frappe.get_list("Zone",
@@ -424,7 +424,6 @@ def generate_invoice(self, method):
                     tarif = final_rate / (1- (final_discount_percentage/100))
                     #print(final_rate)
 
-        
     elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
         # print(icris_number, "icris number \n\n\n")
         check = frappe.get_list("ICRIS Account",
@@ -532,7 +531,6 @@ def generate_invoice(self, method):
                     sales_invoice.append('taxes', rows)
                     logs.append(f"No Territory Found {sales_invoice.custom_consignee_city} so Using default Tax")
                     #print("No Territory Found Thats Why using Default Sales Tax and Template")
-                
             if sales_invoice.custom_shipper_country:
                 origin_country = sales_invoice.custom_shipper_country
                 origin_country = origin_country.capitalize()
@@ -741,7 +739,7 @@ def generate_invoice(self, method):
         # Fetch customer applicable surcharges using sales_invoice.customer
         customer_surcharges = frappe.get_all(
             "Customer Surcharges Table",
-            filters={'parent': sales_invoice.customer}, 
+            filters={'parent': sales_invoice.customer},
             fields=['surcharge', 'amount']
         )
         
@@ -786,7 +784,6 @@ def generate_invoice(self, method):
                 surcharge_codes_other_charges.append(code_name)
 
 
-        
     sales_invoice.custom_surcharge_excl_fuel = []
     total_charges_incl_fuel = sum(amounts_incl_fuel)
     total_charges_other_charges = sum(amounts_other_charges)
@@ -810,7 +807,6 @@ def generate_invoice(self, method):
                 "code": code,                
                 "amount": amount            
             })
-    
     sales_invoice.custom_total_surcharges_excl_fuel = total_charges_other_charges
     sales_invoice.custom_total_surcharges_incl_fuel = total_charges_incl_fuel
     FSCpercentage = frappe.db.get_single_value('Additional Charges Page','feul_surcharge_percentage_on_freight_amount')
@@ -864,7 +860,6 @@ def generate_invoice(self, method):
     else:
         pass
         #print("")
-        
     max_insured = 0
     if sales_invoice.customer != customer.custom_default_customer:
         sales_invoice.custom_freight_invoices = 1
@@ -889,7 +884,6 @@ def generate_invoice(self, method):
         else:
             sales_invoice.custom_selling_percentage = final_discount_percentage
             sales_invoice.custom_inserted = 1
-
 
 
         #print(total_charges_other_charges,FSCcharges,tarif , shipmentbillingamount , total_charges_incl_fuel)
@@ -925,7 +919,7 @@ def generate_invoice(self, method):
     if sales_invoice.customer == customer.custom_default_customer:
         exempt_customer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst')
         if not exempt_customer:
-            sales_invoice.taxes_and_charges= None
+            sales_invoice.taxes_and_charges = None
             sales_invoice.taxes = []
         sales_invoice.custom_compensation_invoices = 1
         for comp in definition.compensation_table:
@@ -937,7 +931,6 @@ def generate_invoice(self, method):
                 export_compensation_amount = comp.document_amount
                 sales_invoice.append('items', {'item_code': setting.compensation_charges , 'qty': '1', 'rate': export_compensation_amount})
                 break
-    
     if not sales_invoice.items:
         # print('\n\n\n\n\n\n\nn\n No Items \n\n\n\nn\n')
         logs.append(f"No Items shipment number {shipment_number}, icris number {icris_number}")
@@ -965,7 +958,6 @@ def generate_invoice(self, method):
         # print("\n\nNO ITEMS\n\n")
         #print("No Items")
         return
-    
     if sales_invoice.custom_edit_selling_percentage:
         for row in sales_invoice.items:
             if row.item_code == setting.fuel_charges:
@@ -985,7 +977,6 @@ def generate_invoice(self, method):
     log_text = "\n".join(logs)
     discounted_amount = discounted_amount -1
     sales_invoice.set_missing_values()
-
     #################### Sufyan Edit in Fariz Code As Per KashiBhai Instruction #######################
     if frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst') :
         self.taxes_and_charges = None
@@ -998,13 +989,14 @@ def generate_invoice(self, method):
     # sales_invoice.save()
     #print(sales_invoice.name)
     if logs:
-        log_doc.set("shipment_number" , shipment_number)
+        if frappe.db.exists("Shipment Number", shipment_number):
+            log_doc.set("shipment_number" , shipment_number)
+        if frappe.db.exists("ICRIS Account", icris_number):
+            log_doc.set("icris_number" , icris_number)
         log_doc.set("logs", log_text)
-        log_doc.set("icris_number" , icris_number)
         if not log_doc.sales_invoice:
             log_doc.set("sales_invoice",sales_invoice.name)
         log_doc.save()
-    
     frappe.db.commit()
 
 
@@ -1031,5 +1023,5 @@ def get_fuel_percentage_for_date(date_shipped):
         fields=["fuel_surcharge_percentage_on_freight_amount"],
         order_by="from_date desc"
     )
-    perenctage = records[0]["fuel_surcharge_percentage_on_freight_amount"] if records else 0
-    return perenctage 
+    percentage = records[0]["fuel_surcharge_percentage_on_freight_amount"] if records else 0
+    return percentage 
