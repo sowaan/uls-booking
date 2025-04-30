@@ -869,7 +869,8 @@ def generate_invoice(self, method):
             result = declared_value * (percent / 100)
             max_insured = max(result , minimum_amount)
             
-            if max_insured > 0 and shipment_type == setting.insurance_shipment_type:
+            # if max_insured > 0 and shipment_type == setting.insurance_shipment_type:
+            if max_insured > 0 and sales_invoice.custom_shipment_type == setting.insurance_shipment_type:
                 #print("Max Insured")
                 rows = {'item_code': setting.insurance_charges, 'qty': '1', 'rate': max_insured}
                 sales_invoice.append('items', rows)
