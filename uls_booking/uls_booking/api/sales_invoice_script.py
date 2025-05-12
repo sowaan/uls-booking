@@ -112,7 +112,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         
 
 
-
+        # print('hello')
         
 
 
@@ -165,7 +165,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         
         except frappe.DoesNotExistError:
             logs.append(f"No icris Account Found {icris_number}")
-            print("No icris Account Found")
+            # print("No icris Account Found")
             if definition.unassigned_icris_number:
                 icris_account = frappe.get_doc("ICRIS Account", definition.unassigned_icris_number)
 
@@ -230,8 +230,9 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
 
 
 
-
+            # print('hello1')
         elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
+            # print('hello2')
             check = frappe.get_list("ICRIS Account",
                                     filters = {"name":icris_number})
             if not check:
