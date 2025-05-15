@@ -43,6 +43,7 @@
   "currency_code_of_insured_amount",
   "shipper_details_section",
   "customer_shipper",
+  "shipper_customer_account_no",
   "shipper_number",
   "shipper_contact_name",
   "shipper_street",
@@ -56,6 +57,7 @@
   "shipper_email_address",
   "consignee_details_section",
   "customer_consignee",
+  "consignee_customer_account_no",
   "consignee_number",
   "consignee_contact_name",
   "consignee_street",
@@ -136,7 +138,7 @@
   },
   {
    "fieldname": "date_shipped",
-   "fieldtype": "Data",
+   "fieldtype": "Date",
    "label": "Date Shipped"
   },
   {
@@ -183,7 +185,7 @@
   },
   {
    "fieldname": "import_date",
-   "fieldtype": "Data",
+   "fieldtype": "Date",
    "label": "Import Date"
   },
   {
@@ -336,9 +338,9 @@
   },
   {
    "fieldname": "spot_rates_offered",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Spot Rates Offered",
-   "options": "\nYES\nNO"
+   "options": "Spot Rates Offered List"
   },
   {
    "fieldname": "column_break_yzwc",
@@ -356,9 +358,9 @@
   },
   {
    "fieldname": "third_party_delivery",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Third Party Delivery",
-   "options": "\nTCS\nLeopards\nBlue-Ex\nM&P"
+   "options": "Third Party Delivery List"
   },
   {
    "fieldname": "shipment_abandoned_date",
@@ -367,9 +369,9 @@
   },
   {
    "fieldname": "hold_cage_location",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Hold Cage Location",
-   "options": "\nKarachi\nLahore"
+   "options": "Hold Cage Location List"
   },
   {
    "fieldname": "column_break_oprq",
@@ -382,9 +384,9 @@
   },
   {
    "fieldname": "abandon_reason",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Abandon Reason",
-   "options": "\nConsignee Refused to Pay Duty & Taxed\nConsignee Refused to Receive\nIncomplete Address\nConsignee Moved"
+   "options": "Abandon Reason List"
   },
   {
    "fieldname": "package_abandon_id",
@@ -398,27 +400,27 @@
   },
   {
    "fieldname": "cs_ern_status",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "CS ERN Status",
-   "options": "\nOpen\nClose\nTransferred"
+   "options": "CS ERN Status List"
   },
   {
    "fieldname": "cs_investigation",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "CS Investigation",
-   "options": "\nOpen\nClaim Declined\nCredit Note\nCheque"
+   "options": "CS Investigation List"
   },
   {
    "fieldname": "cs_shipment_exception",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "CS Shipment Exception",
-   "options": "\nAir Capacity\nCustom Hold\nWeather\nFlight Cancellation\nExport Hold\nMisconnection\nDPS"
+   "options": "CS Shipment Exception List"
   },
   {
    "fieldname": "cs_shipment_status",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "CS Shipment Status",
-   "options": "\nDelivered\nIn Transit\nException\nReturn\nClaim\nAbandon"
+   "options": "CS Shipment Status List"
   },
   {
    "fieldname": "column_break_gggz",
@@ -431,9 +433,9 @@
   },
   {
    "fieldname": "cs_investigation_outcome",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "CS Investigation Outcome",
-   "options": "\nDamaged\nLost\nMissing Item\nDenied Signature"
+   "options": "CS Investigation Outcome List"
   },
   {
    "fieldname": "cs_exception_details",
@@ -447,15 +449,15 @@
   },
   {
    "fieldname": "shipment_status",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Shipment Status",
-   "options": "\nICG Cleared\nDetained\nConfiscated\nConsignee Refusal\nDO Delivered\nShipment Delivered\nAbandoned"
+   "options": "Shipment Status List"
   },
   {
    "fieldname": "detained_status",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Detained Status",
-   "options": "\n1st Contact to Consignee\nERN Open\nSelf Clearance\nDO Delivered\nDocuments Awaited\nDocuments Received\nDocuments Submitted to Agency\nDiscrepancy Found\nUnder Clearance\n1st Duty Paid\nUnder Examination\nUnder Assessment\nDuty Enhanced\nEnhance Duty Paid\nReleased from Customs"
+   "options": "Detained Status List"
   },
   {
    "fieldname": "column_break_lwap",
@@ -463,9 +465,9 @@
   },
   {
    "fieldname": "reason_for_shipment_status",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Reason For Shipment Status",
-   "options": "\nHigh Value\nGovt. Approval Required\nContraband Item\nDocumentation Issue\nMissing Invoice\nRegularity Reason\nHigher Duty & Taxes\nDuty & Taxes Payer Party Dispute\nH.S Code Difference\nSplit Shipment"
+   "options": "Reason For Shipment Status List"
   },
   {
    "fieldname": "recovery_activity_section",
@@ -484,9 +486,9 @@
   },
   {
    "fieldname": "final_outcome",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Final Outcome",
-   "options": "\nFully Recovered\nPartially Recovered\nNot Recovered"
+   "options": "Final Outcome List"
   },
   {
    "fieldname": "column_break_pxjt",
@@ -494,15 +496,15 @@
   },
   {
    "fieldname": "nature_of_dispute",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Nature of Dispute",
-   "options": "\nWrong Payer Party\nWeight Difference\nItems Missing\nShipment Lost\nOther Charges\nShipment Damage\nWrong Discount Applied"
+   "options": "Nature of Dispute List"
   },
   {
    "fieldname": "recovery_chances",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Recovery Chances",
-   "options": "\nFully Recoverable\nPartially Recoverable\nNot Recoverable\nLawsuit Filed"
+   "options": "Recovery Chances List"
   },
   {
    "fieldname": "billing_activities_section",
@@ -525,9 +527,9 @@
   },
   {
    "fieldname": "settlement",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Settlement",
-   "options": "\nRevised Invoice\nCredit note"
+   "options": "Settlement List"
   },
   {
    "fieldname": "credit_note_amount",
@@ -679,11 +681,23 @@
    "fieldtype": "Data",
    "label": "Absolute Freight Rate",
    "translatable": 1
+  },
+  {
+   "fieldname": "shipper_customer_account_no",
+   "fieldtype": "Data",
+   "label": "Customer Account No.",
+   "read_only": 1
+  },
+  {
+   "fieldname": "consignee_customer_account_no",
+   "fieldtype": "Data",
+   "label": "Customer Account No. ",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-18 14:36:36.598603",
+ "modified": "2025-05-15 16:52:33.087083",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Shipment Master Details",

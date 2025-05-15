@@ -167,7 +167,7 @@ def populate_r202000_data(shipment_number, doc):
 def populate_r200000_data(shipment_number, doc):
 	r2 = frappe.get_list('R200000', filters={'shipment_number': shipment_number}, fields=[
 		'origin_country', 'shipment_type', 'shipped_date', 'bill_term_surcharge_indicator','currency_code_for_invoice_total',
-		'split_duty_and_vat_flag', 'shipment_weight', 'destination_country', 'import_date',
+		'split_duty_and_vat_flag', 'shipment_weight', 'destination_country', 'manifest_import_date',
 		'destination_port', 'billing_term_field', 'shipment_weight_unit','expanded_invoice_total',
 		'number_of_packages_in_shipment', 'biling_type_shipment', 'origin_port','declared_value','currency_code_of_insured_amount'
 	])
@@ -182,7 +182,7 @@ def populate_r200000_data(shipment_number, doc):
 		doc.split_duty_and_vat_flag = record.get('split_duty_and_vat_flag', '')
 		doc.shipment_weight_ = record.get('shipment_weight', '')
 		doc.destination_country = record.get('destination_country', '')
-		doc.import_date = record.get('import_date', '')
+		doc.import_date = record.get('manifest_import_date', '')
 		doc.billing_term = record.get('billing_term_field', '')
 		doc.shipment_weight_unit = record.get('shipment_weight_unit', '')
 		doc.number_of_packages_in_shipment = record.get('number_of_packages_in_shipment', '')
@@ -234,6 +234,7 @@ def populate_r300000_data(shipment_number, doc):
 		if cus_shipper_name:
 			if doc.origin_country and doc.origin_country.upper() in ['PK', 'PAK', 'PAKISTAN']:
 					doc.customer_shipper = cus_shipper_name
+					doc.shipper_customer_account_no = shipper_number
 
 
 def populate_r400000_data(shipment_number, doc):
@@ -269,8 +270,9 @@ def populate_r400000_data(shipment_number, doc):
 		if cus_consignee_name:
 			if doc.origin_country and doc.origin_country.upper() not in ['PK', 'PAK', 'PAKISTAN']:
 				doc.customer_consignee = cus_consignee_name
+				doc.consignee_customer_account_no = consignee_number
 
-			
+
 def populate_r500000_data(shipment_number, doc):
     result = frappe.db.get_value(
         'R500000', 

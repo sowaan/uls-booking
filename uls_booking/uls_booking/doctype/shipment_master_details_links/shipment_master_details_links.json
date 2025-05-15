@@ -1,0 +1,152 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-05-15 14:46:10.953616",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "link_tables_section",
+  "table_dnkg",
+  "recovery_chances_list",
+  "final_outcome_list",
+  "nature_of_dispute_list",
+  "detained_status_list",
+  "reason_for_shipment_status_list",
+  "shipment_status_list",
+  "cs_shipment_exception_list",
+  "cs_investigation_outcome_list",
+  "cs_shipment_status_list",
+  "third_party_delivery_list",
+  "spot_rates_offered_list",
+  "settlement_list",
+  "cs_investigation_list",
+  "cs_ern_status_list",
+  "hold_cage_location_list"
+ ],
+ "fields": [
+  {
+   "fieldname": "table_dnkg",
+   "fieldtype": "Table",
+   "label": "Abandon Reason List",
+   "options": "Abandon Reason List"
+  },
+  {
+   "fieldname": "link_tables_section",
+   "fieldtype": "Section Break",
+   "label": "Link Tables"
+  },
+  {
+   "fieldname": "recovery_chances_list",
+   "fieldtype": "Table",
+   "label": "Recovery Chances List",
+   "options": "Recovery Chances List"
+  },
+  {
+   "fieldname": "final_outcome_list",
+   "fieldtype": "Table",
+   "label": "Final Outcome List",
+   "options": "Final Outcome List"
+  },
+  {
+   "fieldname": "nature_of_dispute_list",
+   "fieldtype": "Table",
+   "label": "Nature of Dispute List",
+   "options": "Nature of Dispute List"
+  },
+  {
+   "fieldname": "detained_status_list",
+   "fieldtype": "Table",
+   "label": "Detained Status List",
+   "options": "Detained Status List"
+  },
+  {
+   "fieldname": "reason_for_shipment_status_list",
+   "fieldtype": "Table",
+   "label": "Reason For Shipment Status List",
+   "options": "Reason For Shipment Status List"
+  },
+  {
+   "fieldname": "shipment_status_list",
+   "fieldtype": "Table",
+   "label": "Shipment Status List",
+   "options": "Shipment Status List"
+  },
+  {
+   "fieldname": "cs_shipment_exception_list",
+   "fieldtype": "Table",
+   "label": "CS Shipment Exception List",
+   "options": "CS Shipment Exception List"
+  },
+  {
+   "fieldname": "cs_investigation_outcome_list",
+   "fieldtype": "Table",
+   "label": "CS Investigation Outcome List",
+   "options": "CS Investigation Outcome List"
+  },
+  {
+   "fieldname": "cs_shipment_status_list",
+   "fieldtype": "Table",
+   "label": "CS Shipment Status List",
+   "options": "CS Shipment Status List"
+  },
+  {
+   "fieldname": "third_party_delivery_list",
+   "fieldtype": "Table",
+   "label": "Third Party Delivery List",
+   "options": "Third Party Delivery List"
+  },
+  {
+   "fieldname": "spot_rates_offered_list",
+   "fieldtype": "Table",
+   "label": "Spot Rates Offered List",
+   "options": "Spot Rates Offered List"
+  },
+  {
+   "fieldname": "settlement_list",
+   "fieldtype": "Table",
+   "label": "Settlement List",
+   "options": "Settlement List"
+  },
+  {
+   "fieldname": "cs_investigation_list",
+   "fieldtype": "Table",
+   "label": "CS Investigation List",
+   "options": "CS Investigation List"
+  },
+  {
+   "fieldname": "cs_ern_status_list",
+   "fieldtype": "Table",
+   "label": "CS ERN Status List",
+   "options": "CS ERN Status List"
+  },
+  {
+   "fieldname": "hold_cage_location_list",
+   "fieldtype": "Table",
+   "label": "Hold Cage Location List",
+   "options": "Hold Cage Location List"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-05-15 15:40:40.696698",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Shipment Master Details Links",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
