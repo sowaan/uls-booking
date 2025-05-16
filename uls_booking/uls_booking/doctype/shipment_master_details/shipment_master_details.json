@@ -338,9 +338,8 @@
   },
   {
    "fieldname": "spot_rates_offered",
-   "fieldtype": "Link",
-   "label": "Spot Rates Offered",
-   "options": "Spot Rates Offered List"
+   "fieldtype": "Select",
+   "label": "Spot Rates Offered"
   },
   {
    "fieldname": "column_break_yzwc",
@@ -358,9 +357,8 @@
   },
   {
    "fieldname": "third_party_delivery",
-   "fieldtype": "Link",
-   "label": "Third Party Delivery",
-   "options": "Third Party Delivery List"
+   "fieldtype": "Select",
+   "label": "Third Party Delivery"
   },
   {
    "fieldname": "shipment_abandoned_date",
@@ -369,9 +367,8 @@
   },
   {
    "fieldname": "hold_cage_location",
-   "fieldtype": "Link",
-   "label": "Hold Cage Location",
-   "options": "Hold Cage Location List"
+   "fieldtype": "Select",
+   "label": "Hold Cage Location"
   },
   {
    "fieldname": "column_break_oprq",
@@ -384,9 +381,8 @@
   },
   {
    "fieldname": "abandon_reason",
-   "fieldtype": "Link",
-   "label": "Abandon Reason",
-   "options": "Abandon Reason List"
+   "fieldtype": "Select",
+   "label": "Abandon Reason"
   },
   {
    "fieldname": "package_abandon_id",
@@ -400,27 +396,23 @@
   },
   {
    "fieldname": "cs_ern_status",
-   "fieldtype": "Link",
-   "label": "CS ERN Status",
-   "options": "CS ERN Status List"
+   "fieldtype": "Select",
+   "label": "CS ERN Status"
   },
   {
    "fieldname": "cs_investigation",
-   "fieldtype": "Link",
-   "label": "CS Investigation",
-   "options": "CS Investigation List"
+   "fieldtype": "Select",
+   "label": "CS Investigation"
   },
   {
    "fieldname": "cs_shipment_exception",
-   "fieldtype": "Link",
-   "label": "CS Shipment Exception",
-   "options": "CS Shipment Exception List"
+   "fieldtype": "Select",
+   "label": "CS Shipment Exception"
   },
   {
    "fieldname": "cs_shipment_status",
-   "fieldtype": "Link",
-   "label": "CS Shipment Status",
-   "options": "CS Shipment Status List"
+   "fieldtype": "Select",
+   "label": "CS Shipment Status"
   },
   {
    "fieldname": "column_break_gggz",
@@ -433,9 +425,8 @@
   },
   {
    "fieldname": "cs_investigation_outcome",
-   "fieldtype": "Link",
-   "label": "CS Investigation Outcome",
-   "options": "CS Investigation Outcome List"
+   "fieldtype": "Select",
+   "label": "CS Investigation Outcome"
   },
   {
    "fieldname": "cs_exception_details",
@@ -449,15 +440,13 @@
   },
   {
    "fieldname": "shipment_status",
-   "fieldtype": "Link",
-   "label": "Shipment Status",
-   "options": "Shipment Status List"
+   "fieldtype": "Select",
+   "label": "Shipment Status"
   },
   {
    "fieldname": "detained_status",
-   "fieldtype": "Link",
-   "label": "Detained Status",
-   "options": "Detained Status List"
+   "fieldtype": "Select",
+   "label": "Detained Status"
   },
   {
    "fieldname": "column_break_lwap",
@@ -465,9 +454,8 @@
   },
   {
    "fieldname": "reason_for_shipment_status",
-   "fieldtype": "Link",
-   "label": "Reason For Shipment Status",
-   "options": "Reason For Shipment Status List"
+   "fieldtype": "Select",
+   "label": "Reason For Shipment Status"
   },
   {
    "fieldname": "recovery_activity_section",
@@ -486,9 +474,8 @@
   },
   {
    "fieldname": "final_outcome",
-   "fieldtype": "Link",
-   "label": "Final Outcome",
-   "options": "Final Outcome List"
+   "fieldtype": "Select",
+   "label": "Final Outcome"
   },
   {
    "fieldname": "column_break_pxjt",
@@ -496,15 +483,13 @@
   },
   {
    "fieldname": "nature_of_dispute",
-   "fieldtype": "Link",
-   "label": "Nature of Dispute",
-   "options": "Nature of Dispute List"
+   "fieldtype": "Select",
+   "label": "Nature of Dispute"
   },
   {
    "fieldname": "recovery_chances",
-   "fieldtype": "Link",
-   "label": "Recovery Chances",
-   "options": "Recovery Chances List"
+   "fieldtype": "Select",
+   "label": "Recovery Chances"
   },
   {
    "fieldname": "billing_activities_section",
@@ -527,9 +512,8 @@
   },
   {
    "fieldname": "settlement",
-   "fieldtype": "Link",
-   "label": "Settlement",
-   "options": "Settlement List"
+   "fieldtype": "Select",
+   "label": "Settlement"
   },
   {
    "fieldname": "credit_note_amount",
@@ -697,7 +681,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-15 16:52:33.087083",
+ "modified": "2025-05-16 11:11:07.972675",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Shipment Master Details",

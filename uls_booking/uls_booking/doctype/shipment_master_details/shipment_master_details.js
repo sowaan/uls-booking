@@ -1,5 +1,31 @@
 frappe.ui.form.on('Shipment Master Details', {
     refresh: function (frm) {
+
+        frappe.call({
+            method: 'get_options_from_links',
+            doc: frm.doc,
+            callback: function(r) {
+                if (r.message) {
+                    const options_map = r.message;
+                    Object.keys(options_map).forEach(fieldname => {
+                        const options = options_map[fieldname];
+                        frm.set_df_property(fieldname, 'options', options);
+                        frm.refresh_field(fieldname);
+                    });
+                }
+            }
+        });
+
+        // frm.set_df_property('shipment_type', 'options', [
+        //     '',  // This creates a blank/empty default option
+        //     'Air Freight',
+        //     'Sea Freight',
+        //     'Land Transport'
+        // ]);
+
+        // // Optional: explicitly clear the field value
+        // frm.set_value('shipment_type', '');
+
         frm.add_custom_button('Get Records', function () {
             
             frappe.call({
@@ -34,13 +60,10 @@ frappe.ui.form.on('Shipment Master Details', {
                                 }
                             };
                         };
-
-                    
                     }
-                    frm.refresh();
                 }
             });
-        
+        // frm.refresh();
         });
 
         frm.add_custom_button('Tracking', function () {

@@ -6,10 +6,11 @@ from frappe.model.document import Document
 
 
 
-
+LINKS = frappe.get_doc('Shipment Master Details Links', 'Shipment Master Details Links', ignore_permissions=True)
 
 class ShipmentMasterDetails(Document):
-    
+
+
 	def before_save(self):
 		send_notification(self)
 		get_records(self)
@@ -18,7 +19,39 @@ class ShipmentMasterDetails(Document):
 	def get_records_api(self):
 		get_records(self)
 
+	@frappe.whitelist()
+	def get_options_from_links(self):
+		# frappe.throw('helo')
 
+		field_table_map = {
+			'spot_rates_offered': ('spot_rates_offered_list', 'spot_rates_offered'),
+			'third_party_delivery': ('third_party_delivery_list', 'third_party_delivery'),
+			'abandon_reason': ('table_dnkg', 'abandon_reason'),
+			'hold_cage_location': ('hold_cage_location_list', 'hold_cage_location'),
+			'cs_ern_status': ('cs_ern_status_list', 'cs_ern_status'),
+			'cs_investigation': ('cs_investigation_list', 'cs_investigation'),
+			'cs_shipment_status': ('cs_shipment_status_list', 'cs_shipment_status'),
+			'cs_investigation_outcome': ('cs_investigation_outcome_list', 'cs_investigation_outcome'),
+			'cs_shipment_exception': ('cs_shipment_exception_list', 'cs_shipment_exception'),
+			'shipment_status': ('shipment_status_list', 'shipment_status'),
+			'reason_for_shipment_status': ('reason_for_shipment_status_list', 'reason_for_shipment_status'),
+			'detained_status': ('detained_status_list', 'detained_status'),
+			'nature_of_dispute': ('nature_of_dispute_list', 'nature_of_dispute'),
+			'final_outcome': ('final_outcome_list', 'final_outcome'),
+			'recovery_chances': ('recovery_chances_list', 'recovery_chances'),
+			'settlement': ('settlement_list', 'settlement')
+		}
+		options_dict = {}
+
+		for fieldname, (child_table_field, value_field) in field_table_map.items():
+			child_table = getattr(LINKS, child_table_field, [])
+			values = sorted({getattr(row, value_field) for row in child_table if getattr(row, value_field)})
+			options_dict[fieldname] = [""] + values
+
+		return options_dict
+
+
+			
 
 
 

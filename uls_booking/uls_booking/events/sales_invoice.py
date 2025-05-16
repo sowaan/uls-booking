@@ -33,8 +33,6 @@ def generate_invoice(self, method):
     log_doc = frappe.get_doc("Sales Invoice Logs", log_list[0].name) if log_list else frappe.new_doc("Sales Invoice Logs")
     
     logs = []
-    final_rate = 0
-    tarif = 0
     discounted_amount = 0
     selling_rate_country = 0
     full_tariff = None
@@ -321,6 +319,7 @@ def generate_invoice(self, method):
                     for row in full_tariff.package_rate:
                         if my_weight <= row.weight:
                             final_rate = row.rate
+                            # print('row_02', final_rate, 'row_02')
                             flg = 1
                             break
                         else:
@@ -328,6 +327,7 @@ def generate_invoice(self, method):
 
                     if flg == 0:
                         final_rate = (last_row.rate / last_row.weight) * my_weight
+                        # print('last_row_02', final_rate, 'last_row_02')
                         final_discount_percentage = 0.00
                     tarif = final_rate / (1- (final_discount_percentage/100))
                     #print(final_rate)
@@ -419,6 +419,7 @@ def generate_invoice(self, method):
 
                         if my_weight <= row.weight :
                             final_rate = row.rate
+                            # print('row_01', final_rate, 'row_01')
                             final_discount_percentage = row.discount_percentage
                             flg = 1
                             break
@@ -426,6 +427,7 @@ def generate_invoice(self, method):
                             last_row = row
                     if flg == 0 :
                         final_rate = ( last_row.rate / last_row.weight ) * my_weight
+                        # print('last_row_01', final_rate, 'last_row_01')
                         final_discount_percentage = last_row.discount_percentage
                     tarif = final_rate / (1- (final_discount_percentage/100))
                     #print(final_rate)
@@ -634,6 +636,7 @@ def generate_invoice(self, method):
                     for row in full_tariff.package_rate:
                         if my_weight <= row.weight:
                             final_rate = row.rate
+                            # print('row_0', final_rate, 'row_0')
                             flg = 1
                             break
                         else:
@@ -641,6 +644,7 @@ def generate_invoice(self, method):
 
                     if flg == 0:
                         final_rate = (last_row.rate / last_row.weight) * my_weight
+                        # print('last_row_0', final_rate, 'last_row_0')
                         final_discount_percentage = 0.00
                     tarif = final_rate / (1- (final_discount_percentage/100))
                     
@@ -724,6 +728,7 @@ def generate_invoice(self, method):
                     for row in selling_rate.package_rate :
                         if my_weight <= row.weight :
                             final_rate = row.rate
+                            # print('row', final_rate, 'row')
                             final_discount_percentage = row.discount_percentage
                             flg = 1
                             break
@@ -731,6 +736,7 @@ def generate_invoice(self, method):
                             last_row = row
                     if flg == 0 :
                         final_rate = ( last_row.rate / last_row.weight ) * my_weight
+                        # print('last_row', final_rate, 'last_row')
                         final_discount_percentage = last_row.discount_percentage
                     tarif = final_rate / (1- (final_discount_percentage/100))
     # print('hello4')
@@ -886,8 +892,15 @@ def generate_invoice(self, method):
                 rows = {'item_code': setting.insurance_charges, 'qty': '1', 'rate': max_insured}
                 sales_invoice.append('items', rows)
         sales_invoice.custom_freight_charges = tarif
-        sales_invoice.discount_amount = tarif - final_rate
-        sales_invoice.custom_amount_after_discount = tarif - sales_invoice.discount_amount
+        # frappe.throw(str(final_rate))
+        amt = tarif - final_rate
+        sales_invoice.discount_amount = round(amt, 2) or 0
+        sales_invoice.base_discount_amount = (sales_invoice.discount_amount or 0)  * (sales_invoice.conversion_rate or 0)
+        # frappe.msgprint(str(sales_invoice.conversion_rate))
+        # frappe.msgprint(str(sales_invoice.discount_amount))
+        # frappe.msgprint(str(sales_invoice.base_discount_amount))
+
+        sales_invoice.custom_amount_after_discount = tarif - (sales_invoice.discount_amount or 0)
         
         # if sales_invoice.custom_edit_selling_percentage == 1:
         #     final_discount_percentage = sales_invoice.custom_selling_percentage or 0
