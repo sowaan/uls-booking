@@ -27,7 +27,9 @@
   "include_fuel_charges",
   "peak_charges",
   "modified_definition_tab",
-  "definition"
+  "definition",
+  "sales_invoice_settings_tab",
+  "default_sales_taxes_and_charges_template"
  ],
  "fields": [
   {
@@ -167,12 +169,26 @@
    "fieldtype": "Link",
    "label": "Peak Charges",
    "options": "Item"
+  },
+  {
+   "fieldname": "sales_invoice_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Sales Invoice Settings"
+  },
+  {
+   "fieldname": "default_sales_taxes_and_charges_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Sales Taxes and Charges Template",
+   "options": "Sales Taxes and Charges Template",
+   "reqd": 1
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-02-11 18:41:05.417922",
+ "modified": "2025-05-21 18:18:42.750596",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Setting Definition",
@@ -186,6 +202,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
