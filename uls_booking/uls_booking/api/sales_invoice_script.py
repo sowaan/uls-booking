@@ -17,17 +17,18 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
 
     # Prepare the values dictionary to pass into the SQL query
     values = {
+        "import__export": import__export,
         "start_date": start_date,
         "end_date": end_date,
         "station": station,
         "billing_type": billing_type,
         "icris_number": icris_number,
         "customer": customer,
-        "import__export": import__export,
         "manifest_file_type":manifest_file_type,
         "date_type":date_type,
         "gateway":gateway
     }
+    # print("Values for SQL query:", values)
 
     # Begin the SQL query
 
@@ -270,10 +271,17 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                         )
             if existing_invoice:
                 logs.append(f"Already Present In Sales Invocie")
-                log_text = "\n".join(logs)
+                if logs:
+                    log_text = logs[0] + "\n" + "\n".join(logs[1:])
+                else:
+                    log_text = ""
                 
-                log_doc.logs = (log_doc.logs or "") + "\n" + log_text
+                log_doc.logs = (log_doc.logs + "\n" if log_doc.logs else "") + log_text
+
+
                 log_doc.set("shipment_number" , shipment_number)
+                if existing_invoice[0]["name"]:
+                    log_doc.set("sales_invoice" , existing_invoice[0]["name"])
                 log_doc.save()
                 return
                 
@@ -291,9 +299,15 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
 
             if existing_invoice:
                 logs.append(f"Already Present In Sales Invoice")
-                log_text = "\n".join(logs)
-                log_doc.logs = (log_doc.logs or "") + "\n" + log_text
+                if logs:
+                    log_text = logs[0] + "\n" + "\n".join(logs[1:])
+                else:
+                    log_text = ""
+                
+                log_doc.logs = (log_doc.logs + "\n" if log_doc.logs else "") + log_text
                 log_doc.set("shipment_number" , shipment_number)
+                if existing_invoice[0]["name"]:
+                    log_doc.set("sales_invoice" , existing_invoice[0]["name"])
                 log_doc.save()
                 return
                
@@ -316,7 +330,24 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         
         # print('hello')
         sales_invoice.insert()
-        # print('hello')
+        if frappe.db.exists("Sales Invoice", sales_invoice.name) and not frappe.db.exists("Sales Invoice Logs", {'shipment_number': sales_invoice.custom_shipment_number}):
+            log_doc_last = frappe.new_doc('Sales Invoice Logs')
+            log_doc_last.shipment_number = sales_invoice.custom_shipment_number
+            log_doc_last.sales_invoice = sales_invoice.name
+            im_ex = frappe.db.get_value('Shipment Number', sales_invoice.custom_shipment_number, 'import__export')
+            if im_ex == 'Export' and frappe.db.exists("ICRIS Account", sales_invoice.custom_shipper_number):
+                log_doc_last.icris_number = sales_invoice.custom_shipper_number
+            elif im_ex == 'Import' and frappe.db.exists("ICRIS Account", sales_invoice.custom_consignee_number):
+                log_doc_last.icris_number = sales_invoice.custom_consignee_number
+            log_doc_last.logs = "Sales Invoice Created Successfully."
+            
+            log_doc_last.insert()
+            
+        #     print("New Sales Invoice Document")
+        #     print(sales_invoice.name)
+        # else:
+        #     print("Existing Sales Invoice Document")
+        #     print('hello')
 
     except json.JSONDecodeError:
         message = "Invalid JSON data"

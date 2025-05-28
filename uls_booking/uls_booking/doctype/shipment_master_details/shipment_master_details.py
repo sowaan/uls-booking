@@ -6,7 +6,7 @@ from frappe.model.document import Document
 
 
 
-LINKS = frappe.get_doc('Shipment Master Details Links', 'Shipment Master Details Links', ignore_permissions=True)
+
 
 class ShipmentMasterDetails(Document):
 
@@ -21,7 +21,7 @@ class ShipmentMasterDetails(Document):
 
 	@frappe.whitelist()
 	def get_options_from_links(self):
-		# frappe.throw('helo')
+		LINKS = frappe.get_doc('Shipment Master Details Links', 'Shipment Master Details Links', ignore_permissions=True)
 
 		field_table_map = {
 			'spot_rates_offered': ('spot_rates_offered_list', 'spot_rates_offered'),

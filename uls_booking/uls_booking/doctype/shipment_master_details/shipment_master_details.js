@@ -42,7 +42,7 @@ frappe.ui.form.on('Shipment Master Details', {
                     else if (frm.doc.customer_consignee) {
                         customer_field = frm.doc.customer_consignee;
                     }
-
+                    console.log(customer_field);
                     if (customer_field) {
                         frm.fields_dict.dispute_invoice_number.grid.get_field("customers_sales_invoice").get_query = function () {
                             return {
@@ -60,6 +60,8 @@ frappe.ui.form.on('Shipment Master Details', {
                                 }
                             };
                         };
+                        frm.refresh_field('dispute_invoice_number');
+                        frm.refresh_field('dispute_invoice_number_billing');
                     }
                 }
             });

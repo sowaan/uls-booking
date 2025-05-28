@@ -55,15 +55,14 @@
   },
   {
    "fieldname": "sales_invoice",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Sales Invoice",
    "options": "Sales Invoice"
   }
  ],
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2025-02-27 16:26:54.525575",
+ "modified": "2025-05-28 18:48:55.717856",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice Logs",
@@ -79,7 +78,6 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],
