@@ -270,13 +270,13 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                             as_dict=True
                         )
             if existing_invoice:
-                logs.append(f"Already Present In Sales Invocie")
+                logs.append(f"Already Present In Sales Invoice")
                 if logs:
                     log_text = logs[0] + "\n" + "\n".join(logs[1:])
                 else:
                     log_text = ""
                 
-                log_doc.logs = (log_doc.logs + "\n" if log_doc.logs else "") + log_text
+                log_doc.logs =  log_text
 
 
                 log_doc.set("shipment_number" , shipment_number)
@@ -304,7 +304,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                 else:
                     log_text = ""
                 
-                log_doc.logs = (log_doc.logs + "\n" if log_doc.logs else "") + log_text
+                log_doc.logs = log_text
                 log_doc.set("shipment_number" , shipment_number)
                 if existing_invoice[0]["name"]:
                     log_doc.set("sales_invoice" , existing_invoice[0]["name"])
@@ -367,9 +367,8 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
 
 @frappe.whitelist()
 def get_sales_invoice_logs(shipment_number):
-    log_lsit = frappe.get_list("Sales Invoice Logs",filters ={"shipment_number":shipment_number})
+    log_lsit = frappe.db.get_value("Sales Invoice Logs", {"shipment_number":shipment_number}, ['sales_invoice', 'logs'], as_dict=True)
     if log_lsit:
-        log_record = frappe.get_doc("Sales Invoice Logs",log_lsit[0].name)
-        return {"sales_invoice_name": log_record.sales_invoice , "logs" : log_record.logs}
+        return {"sales_invoice_name": log_lsit.sales_invoice , "logs" : log_lsit.logs}
     else:
         return "No Logs Found"

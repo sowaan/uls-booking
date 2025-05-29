@@ -16,7 +16,6 @@ def get_exchange_rate(from_currency, to_currency, date):
     return rate[0].exchange_rate if rate else 0
 
 def generate_invoice(self, method):
-    
     # print("Generating Invoice")
     # return
     # print("Generating Invoice")
@@ -31,7 +30,7 @@ def generate_invoice(self, method):
             self.taxes_and_charges = None
             self.taxes = []
         return
-    
+
     # third_party_ind = frappe.db.get_value("R200000", {'shipment_number': sales_invoice.custom_shipment_number}, 'third_party_indicator_code') if sales_invoice.custom_shipment_number else None
 
     if sales_invoice.custom_shipment_number:
@@ -40,19 +39,23 @@ def generate_invoice(self, method):
             FROM `tabR200000` 
             WHERE shipment_number = %s
         """, sales_invoice.custom_shipment_number, as_dict=False)
-        third_party_ind = third_party_ind_list[0][0] if third_party_ind_list else None
+        if third_party_ind_list :
+            third_party_ind = third_party_ind_list[0][0]
+            sales_invoice.set('custom_third_party_indicator_code', third_party_ind)
+        else:
+            third_party_ind = None
     else:
         third_party_ind = None
 
-    if third_party_ind and (third_party_ind == 1 or third_party_ind == "1"):
+    if third_party_ind and (third_party_ind != 0 or third_party_ind != "0"):
         sales_invoice.set('custom_compensation_invoices', True)
         sales_invoice.set('custom_freight_invoices', False)
     elif third_party_ind and (third_party_ind == 0 or third_party_ind == '0'):
         sales_invoice.set('custom_compensation_invoices', False)
-        sales_invoice.set('custom_freight_invoices', True)
+        sales_invoice.set('custom_freight_invoices', True)        
 
 
-    
+
     shipment_number = sales_invoice.custom_shipment_number
     log_list = frappe.get_list("Sales Invoice Logs", filters={"shipment_number": shipment_number})
     log_doc = frappe.get_doc("Sales Invoice Logs", log_list[0].name) if log_list else frappe.new_doc("Sales Invoice Logs")

@@ -128,7 +128,8 @@ fixtures = [
 
                                 "custom_import_account_no",
                                 "custom_account_no",
-                                "custom_edit_items"
+                                "custom_edit_items",
+                                "custom_third_party_indicator_code"
 
                                 )
 	  	  
