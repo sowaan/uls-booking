@@ -16,7 +16,7 @@ def get_exchange_rate(from_currency, to_currency, date):
     return rate[0].exchange_rate if rate else 0
 
 def generate_invoice(self, method):
-    # print("Generating Invoice")
+    
     # return
     # print("Generating Invoice")
     sales_invoice = self
@@ -32,27 +32,31 @@ def generate_invoice(self, method):
         return
 
     # third_party_ind = frappe.db.get_value("R200000", {'shipment_number': sales_invoice.custom_shipment_number}, 'third_party_indicator_code') if sales_invoice.custom_shipment_number else None
-
-    if sales_invoice.custom_shipment_number:
-        third_party_ind_list = frappe.db.sql("""
-            SELECT IFNULL(third_party_indicator_code, 0) 
-            FROM `tabR200000` 
-            WHERE shipment_number = %s
-        """, sales_invoice.custom_shipment_number, as_dict=False)
-        if third_party_ind_list :
-            third_party_ind = third_party_ind_list[0][0]
-            sales_invoice.set('custom_third_party_indicator_code', third_party_ind)
+    # print(sales_invoice.custom_shipment_number, "custom_shipment_number \n\n\n")
+    if not sales_invoice.custom_compensation_invoices and not sales_invoice.custom_freight_invoices:
+        if sales_invoice.custom_shipment_number:
+            third_party_ind_list = frappe.db.sql("""
+                SELECT IFNULL(third_party_indicator_code, 0) 
+                FROM `tabR200000` 
+                WHERE shipment_number = %s
+            """, sales_invoice.custom_shipment_number, as_dict=False)
+            if third_party_ind_list :
+                third_party_ind = third_party_ind_list[0][0]
+                sales_invoice.set('custom_third_party_indicator_code', third_party_ind)
+            else:
+                third_party_ind = None
         else:
             third_party_ind = None
-    else:
-        third_party_ind = None
 
-    if third_party_ind and (third_party_ind != 0 or third_party_ind != "0"):
-        sales_invoice.set('custom_compensation_invoices', True)
-        sales_invoice.set('custom_freight_invoices', False)
-    elif third_party_ind and (third_party_ind == 0 or third_party_ind == '0'):
-        sales_invoice.set('custom_compensation_invoices', False)
-        sales_invoice.set('custom_freight_invoices', True)        
+        if third_party_ind and (third_party_ind != 0 or third_party_ind != "0"):
+            # print("compensation")
+            sales_invoice.set('custom_compensation_invoices', True)
+            sales_invoice.set('custom_freight_invoices', False)
+        elif third_party_ind and (third_party_ind == 0 or third_party_ind == '0'):
+            # print("freight")
+            sales_invoice.set('custom_compensation_invoices', False)
+            sales_invoice.set('custom_freight_invoices', True)
+         
 
 
 
@@ -977,7 +981,8 @@ def generate_invoice(self, method):
             sales_invoice.custom_freight_charges = freight_in_items
 
 
-    elif sales_invoice.custom_compensation_invoices :
+    elif sales_invoice.custom_compensation_invoices:
+        
 
         export_compensation_amount = 0
         
@@ -988,15 +993,20 @@ def generate_invoice(self, method):
                 sales_invoice.taxes = []
             sales_invoice.custom_compensation_invoices = 1
             for comp in definition.compensation_table:
+                
                 # if sales_invoice.custom_billing_term == comp.shipment_billing_term and shipment_type == comp.shipping_billing_type and imp_exp == comp.case:
                 #     export_compensation_amount = comp.document_amount
                 #     sales_invoice.append('items', {'item_code': setting.compensation_charges , 'qty': '1', 'rate': export_compensation_amount})
                 #     break
                 if sales_invoice.custom_billing_term == comp.shipment_billing_term and self.custom_shipment_type == comp.shipping_billing_type and imp_exp == comp.case:
+                    print('condition true')
                     export_compensation_amount = comp.document_amount
                     sales_invoice.append('items', {'item_code': setting.compensation_charges , 'qty': '1', 'rate': export_compensation_amount})
                     break
-    
+
+    # print(sales_invoice.items)
+    # print(export_compensation_amount, "export_compensation_amount")
+    # print("setting.compensation_charges", setting.compensation_charges)
     if sales_invoice.custom_edit_selling_percentage == 1:
         final_discount_percentage = sales_invoice.custom_selling_percentage or 0
         sales_invoice.discount_amount = (sales_invoice.custom_freight_charges * final_discount_percentage / 100)
@@ -1017,24 +1027,6 @@ def generate_invoice(self, method):
         if frappe.db.exists("ICRIS Account", icris_number):
             log_doc.set("icris_number" , icris_number)
         log_doc.save()
-        # print("\n\nNO ITEMS\n\n")
-    # else:
-    #     print('\n\n\n\n\n\n\nn\n Items \n\n\n\nn\n')
-
-        # print('billing_term',sales_invoice.custom_billing_term)
-        # print('shipment_type',shipment_type)
-        # print('form_shipment_type',sales_invoice.custom_shipment_type)
-        # print('form_package_type',sales_invoice.custom_package_type)
-        # print('imp_exp',imp_exp)
-        # print('cust',sales_invoice.customer)
-        # print('log',log_text)
-        # print('shipper',sales_invoice.custom_shipper_number)
-        # print('consignee',sales_invoice.custom_consignee_number)
-        # print('shipper_name',sales_invoice.custom_shipper_name)
-        # print('consignee_name',sales_invoice.custom_consignee_name)
-
-        # print("\n\nNO ITEMS\n\n")
-        #print("No Items")
         return
     if sales_invoice.custom_edit_selling_percentage:
         for row in sales_invoice.items:
@@ -1078,7 +1070,16 @@ def generate_invoice(self, method):
         log_doc.set("logs", log_text)
         if not log_doc.sales_invoice:
             log_doc.set("sales_invoice",sales_invoice.name)
-        log_doc.save()
+    else:
+        if frappe.db.exists("Sales Invoice Logs", {"shipment_number": sales_invoice.custom_shipment_number}):
+            log_doc.set("shipment_number", sales_invoice.custom_shipment_number)
+        if frappe.db.exists("ICRIS Account", icris_number):
+            log_doc.set("icris_number", icris_number)
+        log_doc.set("logs", "Sales Invoice Created Successfully")
+        if not log_doc.sales_invoice:
+            log_doc.set("sales_invoice", sales_invoice.name)
+
+    log_doc.save()
     
     frappe.db.commit()
     

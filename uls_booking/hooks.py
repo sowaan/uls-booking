@@ -120,7 +120,6 @@ fixtures = [
                                 "custom_inserted",
                                 "custom_edit_selling_percentage",
 
-
                                 "custom_applicable_surcharges_for_sales_invoice",
                                 "custom_column_break_jteoz",
                                 "custom_exempt_peak_surcharge",
