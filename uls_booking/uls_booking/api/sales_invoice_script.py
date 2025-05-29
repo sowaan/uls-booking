@@ -353,24 +353,67 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         # print('\n\n\n\itm_list', itm_list[0].name, 'itm_list\n\n\n\n')
         # print('\n\n\n\custom_consignee_number5', sales_invoice.custom_consignee_number, '\n\n\n\n')
         # print('\n\n\n\ndoc shipment', sales_invoice.custom_shipment_number, '\n\n\n\n')
-        # print('\n\n\n\ndoc customer', sales_invoice.customer, '\n\n\n\n')
+        print('\n\n\n\ndoc customer', sales_invoice.customer, '\n\n\n\n')
         
         
         # print('hello')
 
         sales_invoice.insert()
-        if frappe.db.exists("Sales Invoice", sales_invoice.name) and not frappe.db.exists("Sales Invoice Logs", {'shipment_number': sales_invoice.custom_shipment_number}):
-            log_doc_last = frappe.new_doc('Sales Invoice Logs')
-            log_doc_last.shipment_number = sales_invoice.custom_shipment_number
-            log_doc_last.sales_invoice = sales_invoice.name
-            im_ex = frappe.db.get_value('Shipment Number', sales_invoice.custom_shipment_number, 'import__export')
-            if im_ex == 'Export' and frappe.db.exists("ICRIS Account", sales_invoice.custom_shipper_number):
-                log_doc_last.icris_number = sales_invoice.custom_shipper_number
-            elif im_ex == 'Import' and frappe.db.exists("ICRIS Account", sales_invoice.custom_consignee_number):
-                log_doc_last.icris_number = sales_invoice.custom_consignee_number
-            log_doc_last.logs = "Sales Invoice Created Successfully"
+        # if frappe.db.exists("Sales Invoice", sales_invoice.name) and not frappe.db.exists("Sales Invoice Logs", {'shipment_number': sales_invoice.custom_shipment_number}):
+        #     log_doc_last = frappe.new_doc('Sales Invoice Logs')
+        #     log_doc_last.shipment_number = sales_invoice.custom_shipment_number
+        #     log_doc_last.sales_invoice = sales_invoice.name
+        #     im_ex = frappe.db.get_value('Shipment Number', sales_invoice.custom_shipment_number, 'import__export')
+        #     if im_ex == 'Export' and frappe.db.exists("ICRIS Account", sales_invoice.custom_shipper_number):
+        #         log_doc_last.icris_number = sales_invoice.custom_shipper_number
+        #     elif im_ex == 'Import' and frappe.db.exists("ICRIS Account", sales_invoice.custom_consignee_number):
+        #         log_doc_last.icris_number = sales_invoice.custom_consignee_number
+        #     log_doc_last.logs = "Sales Invoice Created Successfully"
+        # elif frappe.db.exists("Sales Invoice Logs", {"shipment_number": sales_invoice.custom_shipment_number}):
+        #     log_doc.set("shipment_number", sales_invoice.custom_shipment_number)
+        # if frappe.db.exists("ICRIS Account", icris_number):
+        #     log_doc.set("icris_number", icris_number)
+        #     log_doc.set("logs", "Sales Invoice Created Successfully")
             
-            log_doc_last.insert()
+        # log_doc_last.insert()
+
+        # Check if Sales Invoice exists and create/update log
+        if frappe.db.exists("Sales Invoice", sales_invoice.name):
+            log_filters = {'shipment_number': sales_invoice.custom_shipment_number}
+            log_exists = frappe.db.exists("Sales Invoice Logs", log_filters)
+            
+            if not log_exists:
+                # Create new log
+                log_doc = frappe.new_doc('Sales Invoice Logs')
+                log_doc.update({
+                    'shipment_number': sales_invoice.custom_shipment_number,
+                    'sales_invoice': sales_invoice.name,
+                    'logs': "Sales Invoice Created Successfully"
+                })
+                
+                # Set ICRIS number based on import/export status
+                im_ex = frappe.db.get_value('Shipment Number', 
+                                        sales_invoice.custom_shipment_number, 
+                                        'import__export')
+                icris_field = 'custom_shipper_number' if im_ex == 'Export' else 'custom_consignee_number'
+                icris_number = sales_invoice.get(icris_field)
+                
+                if icris_number and frappe.db.exists("ICRIS Account", icris_number):
+                    log_doc.icris_number = icris_number
+                    
+                log_doc.insert()
+            else:
+                # Update existing log
+                log_doc = frappe.get_doc("Sales Invoice Logs", log_filters)
+                log_doc.update({
+                    'shipment_number': sales_invoice.custom_shipment_number,
+                    'logs': "Sales Invoice Created Successfully"
+                })
+                
+                if icris_number and frappe.db.exists("ICRIS Account", icris_number):
+                    log_doc.icris_number = icris_number
+                    
+                log_doc.save()
             
         #     print("New Sales Invoice Document")
         #     print(sales_invoice.name)

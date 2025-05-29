@@ -1068,18 +1068,15 @@ def generate_invoice(self, method):
         if frappe.db.exists("ICRIS Account", icris_number):
             log_doc.set("icris_number" , icris_number)
         log_doc.set("logs", log_text)
-        if not log_doc.sales_invoice:
-            log_doc.set("sales_invoice",sales_invoice.name)
-    else:
-        if frappe.db.exists("Sales Invoice Logs", {"shipment_number": sales_invoice.custom_shipment_number}):
-            log_doc.set("shipment_number", sales_invoice.custom_shipment_number)
-        if frappe.db.exists("ICRIS Account", icris_number):
-            log_doc.set("icris_number", icris_number)
-        log_doc.set("logs", "Sales Invoice Created Successfully")
-        if not log_doc.sales_invoice:
-            log_doc.set("sales_invoice", sales_invoice.name)
+        log_doc.save()
+        # if not log_doc.sales_invoice:
+        #     log_doc.set("sales_invoice",sales_invoice.name)
+    # else:
+        
+        # if not log_doc.sales_invoice:
+        #     log_doc.set("sales_invoice", sales_invoice.name)
 
-    log_doc.save()
+    
     
     frappe.db.commit()
     
