@@ -1232,6 +1232,15 @@ def duty_and_tax_validation_on_submit(self, method):
             self.taxes = []
 
 
+def before_delete(self, method):
+    logs = frappe.get_all("Sales Invoice Logs", filters={"sales_invoice": self.name}, pluck="name")
+    
+    for log_name in logs:
+        frappe.delete_doc("Sales Invoice Logs", log_name, force=1)
+    
+
+
+
 
 ############################ UMAIR WORK ############################
 @frappe.whitelist()
