@@ -420,7 +420,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                 # Update existing log
                 log_doc = frappe.get_doc("Sales Invoice Logs", log_filters)
                 log_doc.update({
-                    'shipment_number': sales_invoice.custom_shipment_number,
+                    'sales_invoice': sales_invoice.name,
                     'logs': "Sales Invoice Created Successfully"
                 })
                 
