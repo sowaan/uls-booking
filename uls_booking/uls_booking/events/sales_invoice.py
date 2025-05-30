@@ -48,11 +48,11 @@ def generate_invoice(self, method):
         else:
             third_party_ind = None
 
-        if third_party_ind and (third_party_ind != 0 or third_party_ind != "0"):
+        if third_party_ind and third_party_ind != "0":
             # print("compensation")
             sales_invoice.set('custom_compensation_invoices', True)
             sales_invoice.set('custom_freight_invoices', False)
-        elif third_party_ind and (third_party_ind == 0 or third_party_ind == '0'):
+        elif third_party_ind and third_party_ind == '0':
             # print("freight")
             sales_invoice.set('custom_compensation_invoices', False)
             sales_invoice.set('custom_freight_invoices', True)
@@ -120,8 +120,10 @@ def generate_invoice(self, method):
     shipped_date = getdate(sales_invoice.custom_date_shipped)
     #print(shipped_date, "shipped Date \n\n")
     sales_invoice.conversion_rate = get_exchange_rate("USD", "PKR", shipped_date)
-
-    is_export = sales_invoice.custom_shipper_country == definition.origin_country.upper()
+    if sales_invoice.custom_shipper_country:
+        is_export = sales_invoice.custom_shipper_country.upper() == definition.origin_country.upper()
+    else:
+        is_export = sales_invoice.custom_shipper_country == definition.origin_country.upper()
     imp_exp = "Export" if is_export else "Import"
     if is_export:
         icris_number = sales_invoice.custom_shipper_number or definition.unassigned_icris_number
@@ -141,8 +143,11 @@ def generate_invoice(self, method):
             icris_account = frappe.get_doc("ICRIS Account", definition.unassigned_icris_number)
     #print(shipment_type, "shipment_type \n\n\n")
     # print('hello')
+    # print("sales_invoice.custom_freight_invoices", sales_invoice.custom_freight_invoices)
+    # print("sales_invoice.custom_compensation_invoices", sales_invoice.custom_compensation_invoices)
     if sales_invoice.custom_freight_invoices:
-        if sales_invoice.custom_billing_term in export_billing_term and is_export:
+        # if sales_invoice.custom_billing_term in export_billing_term and is_export:
+        if is_export:
             check1 = frappe.get_list("ICRIS Account", filters = {"name":icris_number})
             if not check1:
                 logs.append(f"No ICRIS Account Found {icris_number}")
@@ -465,7 +470,8 @@ def generate_invoice(self, method):
                         tarif = final_rate / (1- (final_discount_percentage/100))
                         #print(final_rate)
             # print('hello2')
-        elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
+        # elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
+        else:
             # print('hello3')
             # print(icris_number, "icris number \n\n\n")
             check = frappe.get_list("ICRIS Account",
@@ -489,10 +495,9 @@ def generate_invoice(self, method):
                                             'shipment_number' : shipment_number
                                         }
                                     )
-                    
                     if r300000_list1 :
                         r300000_doc = frappe.get_doc('R300000', r300000_list1[0].name)
-                        if r300000_doc.alternate_tracking_number_1 and r300000_doc.alternate_tracking_number_1 != '' :
+                        if r300000_doc.alternate_tracking_number_1 and r300000_doc.alternate_tracking_number_1 != '':
                             cust_list = frappe.get_list('Customer',
                                         filters={
                                             'disabled' : ['!=',1] ,
@@ -1004,7 +1009,8 @@ def generate_invoice(self, method):
                     sales_invoice.append('items', {'item_code': setting.compensation_charges , 'qty': '1', 'rate': export_compensation_amount})
                     break
 
-    # print(sales_invoice.items)
+    print(sales_invoice.items)
+    print(sales_invoice.customer)
     # print(export_compensation_amount, "export_compensation_amount")
     # print("setting.compensation_charges", setting.compensation_charges)
     if sales_invoice.custom_edit_selling_percentage == 1:

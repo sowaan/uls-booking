@@ -227,17 +227,26 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         else:
             third_party_ind = None
 
-        if third_party_ind and (third_party_ind != 0 or third_party_ind != "0"):
+        if third_party_ind and third_party_ind != "0":
             # print("compensation")
             sales_invoice.set('custom_compensation_invoices', True)
             sales_invoice.set('custom_freight_invoices', False)
-        elif third_party_ind and (third_party_ind == 0 or third_party_ind == '0'):
+        elif third_party_ind and third_party_ind == '0':
             # print("freight")
             sales_invoice.set('custom_compensation_invoices', False)
             sales_invoice.set('custom_freight_invoices', True)
+        
+        if sales_invoice.custom_shipper_country:
+            is_export = sales_invoice.custom_shipper_country.upper() == definition.origin_country.upper()
+        else:
+            is_export = sales_invoice.custom_shipper_country == definition.origin_country.upper()
 
         if sales_invoice.custom_freight_invoices:
-            if sales_invoice.custom_billing_term in export_billing_term and sales_invoice.custom_shipper_country == definition.origin_country.upper():
+
+            
+            # if sales_invoice.custom_billing_term in export_billing_term and sales_invoice.custom_shipper_country == definition.origin_country.upper():
+            if is_export:
+                # print('hello1')
                 check1 = frappe.get_list("ICRIS Account",
                                         filters = {"name":icris_number})
                 if not check1:
@@ -258,8 +267,9 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
 
 
                 # print('hello1')
-            elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
-                # print('hello2')
+            # elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
+            else:
+                print('hello2')
                 check = frappe.get_list("ICRIS Account",
                                         filters = {"name":icris_number})
                 if not check:
@@ -275,10 +285,11 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                         sales_invoice.set("customer", icris1.shipper_name)
                         # sales_invoice.customer = icris1.shipper_name
                     else:
-                        logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}") 
+                        logs.append(f"No Customer Found icris number: {icris_number} , shipment number: {shipment_number}")
                         print("No Customer Found")
+            # else:
+            #     print('hello3')
         
-        # print('\n\n\n\customer', sales_invoice.customer, 'customer\n\n\n\n')
         already_present = 0
         log_list = frappe.get_list("Sales Invoice Logs",filters ={"shipment_number":shipment_number})
         if log_list:
@@ -286,6 +297,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
             log_doc = frappe.get_doc("Sales Invoice Logs",log_list[0].name)
         else:
             log_doc = frappe.new_doc("Sales Invoice Logs")
+        # print('\n\n\n\customer', sales_invoice.customer, 'customer\n\n\n\n')
         if sales_invoice.customer != customer.custom_default_customer:
             existing_invoice = frappe.db.sql(
                             """SELECT name FROM `tabSales Invoice`
@@ -296,6 +308,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                             as_dict=True
                         )
             if existing_invoice:
+                # print("Already Present In Sales Invoice fright")
                 logs.append(f"Already Present In Sales Invoice")
                 if logs:
                     # log_text = logs[0] + "\n" + "\n".join(logs[1:])
@@ -325,6 +338,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                     )
 
             if existing_invoice:
+                # print("Already Present In Sales Invoice comapnsation")
                 logs.append(f"Already Present In Sales Invoice")
                 if logs:
                     log_text = logs[0] if len(logs) == 1 else logs[0] + "\n" + "\n".join(logs[1:])
@@ -353,7 +367,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         # print('\n\n\n\itm_list', itm_list[0].name, 'itm_list\n\n\n\n')
         # print('\n\n\n\custom_consignee_number5', sales_invoice.custom_consignee_number, '\n\n\n\n')
         # print('\n\n\n\ndoc shipment', sales_invoice.custom_shipment_number, '\n\n\n\n')
-        print('\n\n\n\ndoc customer', sales_invoice.customer, '\n\n\n\n')
+        # print('\n\n\n\ndoc customer', sales_invoice.customer, '\n\n\n\n')
         
         
         # print('hello')

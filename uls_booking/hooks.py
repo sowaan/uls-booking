@@ -128,7 +128,10 @@ fixtures = [
                                 "custom_import_account_no",
                                 "custom_account_no",
                                 "custom_edit_items",
-                                "custom_third_party_indicator_code"
+                                "custom_third_party_indicator_code",
+                                "custom_created_byfrom_billing_tool",
+                                "custom_parent_idfrom_billing_tool",
+                                "custom_import__export"
 
                                 )
 	  	  
