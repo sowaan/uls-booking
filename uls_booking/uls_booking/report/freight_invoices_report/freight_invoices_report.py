@@ -82,6 +82,13 @@ def get_columns(filters):
             "width": 120
         },
         {
+            "label": _("Customer Group"),
+            "fieldname": "customer_grp",
+            "fieldtype": "Link",
+            "options": "Customer Group",
+            "width": 120
+        },
+        {
             "label": _("Billing type"),
             "fieldname": "billing_type",
             "fieldtype": "Data",
@@ -253,6 +260,7 @@ def get_data(filters):
             si.territory as territory,
             si.custom_shipment_number as shipment_number,
             si.custom_account_no as account_no,
+            cust.customer_group as customer_grp,
             si.customer,
             si.custom_billing_type as billing_type,
             si.custom_shipper_number as shipper_number,
@@ -331,19 +339,32 @@ def get_data(filters):
 def get_conditions(filters):
     conditions = ""
     doc_status = {"Draft": 0, "Submitted": 1, "Cancelled": 2}
-    
-    if filters.get("from_date"):
-        conditions += " AND si.posting_date >= %(from_date)s"
-    if filters.get("to_date"):
-        conditions += " AND si.posting_date <= %(to_date)s"
+    date_type = filters.get("date_type")
+
+    date_field_map = {
+        "Posting Date": "si.posting_date",
+        "Shipped Date": "si.custom_date_shipped",
+        "Import Date": "si.custom_import_date"
+    }
+
+    date_field = date_field_map.get(date_type)
+
+    if date_field:
+        conditions += f" AND {date_field} IS NOT NULL"
+        if filters.get("from_date"):
+            conditions += f" AND {date_field} >= %(from_date)s"
+        if filters.get("to_date"):
+            conditions += f" AND {date_field} <= %(to_date)s"
+
+
     if filters.get("name"):
         conditions += " AND si.name = %(name)s"
     if filters.get("customer"):
         conditions += " AND si.customer = %(customer)s"
-    if filters.get("date_shipped"):
-        conditions += " AND si.custom_date_shipped = %(date_shipped)s"
-    if filters.get("import_date"):
-        conditions += " AND si.custom_import_date = %(import_date)s"
+    # if filters.get("date_shipped"):
+    #     conditions += " AND si.custom_date_shipped = %(date_shipped)s"
+    # if filters.get("import_date"):
+    #     conditions += " AND si.custom_import_date = %(import_date)s"
     if filters.get("shipment_number"):
         conditions += " AND si.custom_shipment_number = %(shipment_number)s"
     if filters.get("tracking_number"):
@@ -352,9 +373,19 @@ def get_conditions(filters):
         conditions += " AND si.custom_billing_type = %(billing_type)s"
     if filters.get("shipper_number"):
         conditions += " AND si.custom_shipper_number = %(shipper_number)s"
+    if filters.get("customer_group"):
+        cus_grp = filters.get("customer_group")
+        customers_from_grps = frappe.db.get_all(
+            "Customer",
+            filters={"customer_group": cus_grp},
+            pluck="name"
+        )
+        if not customers_from_grps:
+            frappe.throw(_("No customers found for the selected customer group: {0}").format(cus_grp))
+        conditions += " AND si.customer IN %(customer_group)s"
+        filters["customer_group"] = customers_from_grps
     if filters.get("consignee_number"):
         conditions += " AND si.custom_consignee_number = %(consignee_number)s"
-    doc_status = {"Draft": 0, "Submitted": 1, "Cancelled": 2}
     check_docstatus = filters.get("docstatus")
     if check_docstatus:
         conditions += f" AND si.docstatus = {doc_status[check_docstatus]}"

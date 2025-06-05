@@ -93,7 +93,7 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
 
 
 @frappe.whitelist()
-def generate_single_invoice(shipment_number, sales_invoice_definition, end_date):
+def generate_single_invoice(parent_id=None, login_username=None, shipment_number=None, sales_invoice_definition=None, end_date=None):
     print("Main Function")
     try:
         logs = []
@@ -189,7 +189,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
             filters={'shipment_number': shipment_number},
             fieldname="custom_expanded_shipment_weight"
         )
-
+        
         weight_frm_R201000 = frappe.get_value(
             "R201000",
             filters={'shipment_number': shipment_number},
@@ -241,6 +241,11 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         else:
             is_export = sales_invoice.custom_shipper_country == definition.origin_country.upper()
 
+        if login_username and frappe.db.exists('User', login_username):
+            sales_invoice.set("custom_created_byfrom_billing_tool", login_username)
+        if parent_id:
+            sales_invoice.set("custom_parent_idfrom_billing_tool", parent_id)
+
         if sales_invoice.custom_freight_invoices:
 
             
@@ -269,7 +274,7 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                 # print('hello1')
             # elif sales_invoice.custom_billing_term in import_billing_term and sales_invoice.custom_shipper_country != definition.origin_country.upper():
             else:
-                print('hello2')
+                # print('hello2')
                 check = frappe.get_list("ICRIS Account",
                                         filters = {"name":icris_number})
                 if not check:
@@ -298,7 +303,8 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
         else:
             log_doc = frappe.new_doc("Sales Invoice Logs")
         # print('\n\n\n\customer', sales_invoice.customer, 'customer\n\n\n\n')
-        if sales_invoice.customer != customer.custom_default_customer:
+        # if sales_invoice.customer != customer.custom_default_customer:
+        if sales_invoice.custom_freight_invoices:
             existing_invoice = frappe.db.sql(
                             """SELECT name FROM `tabSales Invoice`
                             WHERE custom_shipment_number = %s
@@ -320,14 +326,19 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
 
 
                 log_doc.set("shipment_number" , shipment_number)
+                log_doc.set("sales_invoice_status" , 'Already Created')
+                log_doc.set("created_byfrom_utility" , login_username)
+                log_doc.set("parent_idfrom_utility" , parent_id)
                 if existing_invoice[0]["name"]:
                     log_doc.set("sales_invoice" , existing_invoice[0]["name"])
+                
                 log_doc.save()
                 return
                 
         # print('\n\n\n\custom_shipper_number3', sales_invoice.custom_shipper_number, '\n\n\n\n')
         # print('\n\n\n\custom_consignee_number3', sales_invoice.custom_consignee_number, '\n\n\n\n')
-        if sales_invoice.customer == customer.custom_default_customer:
+        # if sales_invoice.customer == customer.custom_default_customer:
+        if sales_invoice.custom_compensation_invoices:
             existing_invoice = frappe.db.sql(
                         """SELECT name FROM `tabSales Invoice`
                         WHERE custom_shipment_number = %s
@@ -347,6 +358,9 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                 
                 log_doc.logs = log_text
                 log_doc.set("shipment_number" , shipment_number)
+                log_doc.set("sales_invoice_status" , 'Already Created')
+                log_doc.set("created_byfrom_utility" , login_username)
+                log_doc.set("parent_idfrom_utility" , parent_id)
                 if existing_invoice[0]["name"]:
                     log_doc.set("sales_invoice" , existing_invoice[0]["name"])
                 log_doc.save()
@@ -414,8 +428,11 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                 
                 if icris_number and frappe.db.exists("ICRIS Account", icris_number):
                     log_doc.icris_number = icris_number
+                log_doc.set("created_byfrom_utility", login_username)
+                log_doc.set("parent_idfrom_utility", parent_id)
+                log_doc.set("sales_invoice_status", 'Created')
                     
-                log_doc.insert()
+                # log_doc.insert()
             else:
                 # Update existing log
                 log_doc = frappe.get_doc("Sales Invoice Logs", log_filters)
@@ -426,8 +443,30 @@ def generate_single_invoice(shipment_number, sales_invoice_definition, end_date)
                 
                 if icris_number and frappe.db.exists("ICRIS Account", icris_number):
                     log_doc.icris_number = icris_number
+                log_doc.set("created_byfrom_utility", login_username)
+                log_doc.set("parent_idfrom_utility", parent_id)
+                log_doc.set("sales_invoice_status", 'Created')
+
                     
-                log_doc.save()
+                # log_doc.save()
+        else:
+            if frappe.db.exists("Sales Invoice Logs", {'shipment_number': shipment_number}):
+                log_doc = frappe.get_doc("Sales Invoice Logs", {'shipment_number': shipment_number})
+            else:
+                log_doc = frappe.new_doc('Sales Invoice Logs')
+            log_doc.update({
+                'shipment_number': shipment_number,
+                'created_byfrom_utility': login_username,
+                'parent_idfrom_utility': parent_id,
+                'sales_invoice_status': 'Failed'
+            })
+            if not log_doc.logs:
+                log_doc.logs = "Sales Invoice not created"
+        if not log_doc.name:  # New doc, insert
+            log_doc.insert(ignore_permissions=True)
+        else:  # Existing doc, update
+            log_doc.save()
+            # log_doc.insert()
             
         #     print("New Sales Invoice Document")
         #     print(sales_invoice.name)

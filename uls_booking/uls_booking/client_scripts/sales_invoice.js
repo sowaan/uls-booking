@@ -70,13 +70,53 @@ frappe.ui.form.on('Sales Invoice', {
                 }
             });
             
-
-
-
         } else {
             console.log("Export Saver item not found in the invoice items.");
         }
-    }
+    },
+    // customer: function(frm) {
+    //     check_gst_exemption_and_clear_taxes(frm);
+    // },
+    // customer: function(frm) {
+    //     if (!frm.doc.customer || !frm.doc.custom_duty_and_taxes_invoice) return;
+
+    //     frappe.db.get_value("Customer", frm.doc.customer, "custom_exempt_gst")
+    //         .then(r => {
+    //             console.log(r.message.custom_exempt_gst);
+    //             if (r.message.custom_exempt_gst) {
+    //                 frm.set_value("taxes_and_charges", null);
+    //                 frm.set_value("taxes", null);
+    //             }
+    //         });
+    
+
+    // },
+    // refresh(frm) {
+    //     if (
+    //         frm.doc.custom_duty_and_taxes_invoice &&
+    //         frm.doc.customer &&
+    //         (
+    //             frm.doc.taxes_and_charges ||
+    //             (!frm.doc.taxes_and_charges && frm.doc.total_taxes_and_charges > 0)
+    //         )
+    //     )
+    //     {
+    //         frappe.db.get_value('Customer', frm.doc.customer, 'custom_exempt_gst')
+    //             .then(r => {
+    //                 if (r && r.message && r.message.custom_exempt_gst) {
+    //                     frm.set_value("taxes_and_charges", null);
+    //                     frm.set_value("taxes", null);
+    //                 }
+    //         });
+    //     }
+            
+        
+    // }
+    // ,
+    // reload(frm) {
+    //     if (frm.doc.custom_duty_and_taxes_invoice)
+    //         frm.set_value("taxes_and_charges", None);
+    // }
     // ,
     // after_save: function(frm) {
     //     const cust_values = frappe.db.get_value("Customer", frm.doc.customer, ["custom_import_account_no", "custom_billing_type"], as_dict = true);
@@ -271,3 +311,38 @@ frappe.ui.form.on('Sales Invoice', {
         // }
     
 });
+
+
+
+// function check_gst_exemption_and_clear_taxes(frm) {
+//     if (frm.doc.custom_duty_and_taxes_invoice && frm.doc.customer) {
+//         frappe.db.get_value("Customer", frm.doc.customer, "custom_exempt_gst")
+//             .then(r => {
+//                 if (r.message.custom_exempt_gst) {
+//                     // Clear tax fields
+//                     frm.set_value("taxes_and_charges", null);
+//                     frm.clear_table("taxes");
+
+//                     frm.set_value("total_taxes_and_charges", 0);
+//                     frm.set_value("base_total_taxes_and_charges", 0);
+
+//                     frm.set_value("grand_total", frm.doc.net_total);
+//                     frm.set_value("base_grand_total", frm.doc.base_net_total);
+
+//                     // Optional: Update in_words manually if needed
+//                     frappe.call({
+//                         method: "uls_booking.uls_booking.events.sales_invoice.get_money_in_words",
+//                         args: {
+//                             amount: frm.doc.grand_total,
+//                             currency: frm.doc.currency
+//                         },
+//                         callback: function(response) {
+//                             frm.set_value("in_words", response.message);
+//                         }
+//                     });
+
+//                     frm.refresh_fields();
+//                 }
+//             });
+//     }
+// }

@@ -131,7 +131,8 @@ fixtures = [
                                 "custom_third_party_indicator_code",
                                 "custom_created_byfrom_billing_tool",
                                 "custom_parent_idfrom_billing_tool",
-                                "custom_import__export"
+                                "custom_import__export",
+                                "custom_import__export_si"
 
                                 )
 	  	  

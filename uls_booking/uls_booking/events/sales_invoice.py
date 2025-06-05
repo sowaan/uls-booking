@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import getdate, cint
+from frappe.utils import getdate, cint, money_in_words
 import re
 import logging
 
@@ -22,14 +22,38 @@ def generate_invoice(self, method):
     sales_invoice = self
     if sales_invoice.custom_edit_items:
         edit_items = sales_invoice.get("items")
+    
+    
     # if not self.customer == "UPS Compensation":
     #     return
     # frappe.throw("Generating Invoice")
-    if sales_invoice.custom_duty_and_taxes_invoice == 1:
-        if self.taxes_and_charges :
-            self.taxes_and_charges = None
-            self.taxes = []
+    if sales_invoice.custom_duty_and_taxes_invoice:
+        reset_tax_fields(self)
         return
+        # exempt = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst')
+        # if exempt:
+        #     # Clear taxes completely
+        #     sales_invoice.taxes = []
+        #     sales_invoice.taxes_and_charges = None
+
+        #     # Set all tax-related totals to zero
+        #     sales_invoice.total_taxes_and_charges = 0
+        #     sales_invoice.base_total_taxes_and_charges = 0
+
+        #     # Adjust grand totals to exclude taxes
+        #     sales_invoice.grand_total = sales_invoice.total
+        #     sales_invoice.base_grand_total = sales_invoice.base_total
+
+        #     # Update amount in words
+        #     sales_invoice.in_words = money_in_words(sales_invoice.grand_total, sales_invoice.currency)
+        #     sales_invoice.base_in_words = money_in_words(sales_invoice.base_grand_total, sales_invoice.company_currency)
+        # else:
+        #     # sales_invoice.set_missing_values()
+        #     # sales_invoice.calculate_taxes_and_totals()
+        #     get_sales_tax(sales_invoice)
+            # sales_invoice.in_words = money_in_words(sales_invoice.grand_total, sales_invoice.currency)
+            # sales_invoice.base_in_words = money_in_words(sales_invoice.base_grand_total, sales_invoice.company_currency)
+
 
     # third_party_ind = frappe.db.get_value("R200000", {'shipment_number': sales_invoice.custom_shipment_number}, 'third_party_indicator_code') if sales_invoice.custom_shipment_number else None
     # print(sales_invoice.custom_shipment_number, "custom_shipment_number \n\n\n")
@@ -1004,15 +1028,25 @@ def generate_invoice(self, method):
                 #     sales_invoice.append('items', {'item_code': setting.compensation_charges , 'qty': '1', 'rate': export_compensation_amount})
                 #     break
                 if sales_invoice.custom_billing_term == comp.shipment_billing_term and self.custom_shipment_type == comp.shipping_billing_type and imp_exp == comp.case:
-                    print('condition true')
+                    # print('condition true')
                     export_compensation_amount = comp.document_amount
                     sales_invoice.append('items', {'item_code': setting.compensation_charges , 'qty': '1', 'rate': export_compensation_amount})
                     break
-
-    print(sales_invoice.items)
-    print(sales_invoice.customer)
+                        
+    # print(sales_invoice.items)
+    # print(sales_invoice.customer)
     # print(export_compensation_amount, "export_compensation_amount")
     # print("setting.compensation_charges", setting.compensation_charges)
+    imp_or_exp = frappe.db.get_value("Shipment Number", sales_invoice.custom_shipment_number, "import__export")
+    if imp_or_exp:
+        imp_or_exp = imp_or_exp.strip().lower()
+        if imp_or_exp == "export":
+            sales_invoice.custom_import__export_si = "Export"
+        elif imp_or_exp == "import":
+            sales_invoice.custom_import__export_si = "Import"
+
+    
+
     if sales_invoice.custom_edit_selling_percentage == 1:
         final_discount_percentage = sales_invoice.custom_selling_percentage or 0
         sales_invoice.discount_amount = (sales_invoice.custom_freight_charges * final_discount_percentage / 100)
@@ -1089,7 +1123,7 @@ def generate_invoice(self, method):
 
 
 
-def get_sales_tax(self, logs) :
+def get_sales_tax(self, logs=None):
 
 
     if self.custom_freight_invoices == 1 :
@@ -1101,7 +1135,8 @@ def get_sales_tax(self, logs) :
             ret1 = check_for_consignee_city(self)
             if not ret1 :
                 set_default_tax(self)
-                logs.append("No Territory Found.So Using default Tax.")
+                if logs:
+                    logs.append("No Territory Found.So Using default Tax.")
 
 
 
@@ -1257,3 +1292,39 @@ def get_fuel_percentage_for_date(date_shipped):
     )
     percentage = records[0]["fuel_surcharge_percentage_on_freight_amount"] if records else 0
     return percentage 
+
+
+
+@frappe.whitelist()
+def get_money_in_words(amount, currency=None):
+    return money_in_words(amount, currency)
+
+
+
+def reset_tax_fields(self):
+    exempt = frappe.db.get_value("Customer", self.customer, "custom_exempt_gst")
+    if exempt:
+        self.taxes = []
+        self.taxes_and_charges = None
+
+        self.total_taxes_and_charges = 0
+        self.base_total_taxes_and_charges = 0
+
+        if hasattr(self, "other_charges_calculation") and self.other_charges_calculation:
+            self.other_charges_calculation = ''
+
+        # self.total = self.net_total
+        # self.base_total = self.base_net_total
+        self.grand_total = self.total
+        self.base_grand_total = self.base_total
+
+        self.rounded_total = self.grand_total
+        self.base_rounded_total = self.base_grand_total
+        self.outstanding_amount = self.grand_total
+        self.base_outstanding_amount = self.base_grand_total
+
+        self.in_words = money_in_words(self.rounded_total, self.currency)
+        self.base_in_words = money_in_words(self.base_rounded_total, self.company_currency)
+    else:
+        if not self.taxes_and_charges and not self.taxes:
+            get_sales_tax(self)

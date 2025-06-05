@@ -14,16 +14,32 @@
    "wildcard_filter": 0
   },
   {
+   "default": "Posting Date",
+   "fieldname": "date_type",
+   "fieldtype": "Select",
+   "label": "Date Type",
+   "mandatory": 1,
+   "options": "Posting Date\nArrival Date",
+   "wildcard_filter": 0
+  },
+  {
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
-   "mandatory": 0,
+   "mandatory": 1,
    "wildcard_filter": 0
   },
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
    "label": "To Date",
+   "mandatory": 1,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "billing_term",
+   "fieldtype": "Data",
+   "label": "Billing Term",
    "mandatory": 0,
    "wildcard_filter": 0
   },
@@ -36,18 +52,19 @@
    "wildcard_filter": 0
   },
   {
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "label": "Customer Group",
+   "mandatory": 0,
+   "options": "Customer Group",
+   "wildcard_filter": 0
+  },
+  {
    "fieldname": "invoice_number",
    "fieldtype": "Link",
    "label": "Invoice Number",
    "mandatory": 0,
    "options": "Sales Invoice",
-   "wildcard_filter": 0
-  },
-  {
-   "fieldname": "arrival_date",
-   "fieldtype": "Date",
-   "label": "Arrival Date",
-   "mandatory": 0,
    "wildcard_filter": 0
   },
   {
@@ -70,12 +87,12 @@
  "javascript": "frappe.query_report.on('render', function() {\n    let style = document.createElement('style');\n    style.innerHTML = `\n        @media print {\n            @page { size: landscape; }\n            body { transform: rotate(90deg); }\n        }\n    `;\n    document.head.appendChild(style);\n});\n",
  "letter_head": "Reimbursement Statement Letter Head",
  "letterhead": null,
- "modified": "2025-04-21 12:55:47.023540",
+ "modified": "2025-06-04 17:44:14.763314",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Duty and Taxes Report",
  "owner": "Administrator",
- "prepared_report": 1,
+ "prepared_report": 0,
  "ref_doctype": "Sales Invoice",
  "reference_report": "",
  "report_name": "Duty and Taxes Report",

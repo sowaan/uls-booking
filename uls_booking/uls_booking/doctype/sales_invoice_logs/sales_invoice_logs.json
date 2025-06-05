@@ -7,9 +7,13 @@
  "field_order": [
   "section_break_ziyi",
   "amended_from",
+  "sales_invoice_status",
   "shipment_number",
   "icris_number",
   "sales_invoice",
+  "column_break_nhom",
+  "created_byfrom_utility",
+  "parent_idfrom_utility",
   "invoice_logs_section",
   "logs"
  ],
@@ -43,7 +47,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "invoice_logs_section",
    "fieldtype": "Section Break",
    "label": "Invoice Logs"
@@ -58,11 +61,34 @@
    "fieldtype": "Link",
    "label": "Sales Invoice",
    "options": "Sales Invoice"
+  },
+  {
+   "fieldname": "sales_invoice_status",
+   "fieldtype": "Select",
+   "label": "Sales Invoice Status",
+   "options": "\nAlready Created\nCreated\nFailed"
+  },
+  {
+   "fieldname": "column_break_nhom",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "created_byfrom_utility",
+   "fieldtype": "Link",
+   "label": "Created By(From Utility)",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "parent_idfrom_utility",
+   "fieldtype": "Data",
+   "label": "Parent ID(From Utility)",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-28 18:48:55.717856",
+ "modified": "2025-06-05 15:50:56.351475",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice Logs",
