@@ -212,7 +212,9 @@ def get_columns(filters):
     ]
 
     item_columns = []
-    conditions = get_conditions(filters)
+    conditions, message = get_conditions(filters)
+    if message:
+        frappe.msgprint(_(message))
     
     items = frappe.db.sql("""
         SELECT DISTINCT sii.item_code, sii.item_name
@@ -241,7 +243,7 @@ def get_columns(filters):
 
 
 def get_data(filters):
-    conditions = get_conditions(filters)
+    conditions, message = get_conditions(filters)
     
     data = frappe.db.sql("""
         SELECT 
@@ -336,7 +338,9 @@ def get_data(filters):
     return data
 
 
+
 def get_conditions(filters):
+    msg = None
     conditions = ""
     doc_status = {"Draft": 0, "Submitted": 1, "Cancelled": 2}
     date_type = filters.get("date_type")
@@ -356,15 +360,11 @@ def get_conditions(filters):
         if filters.get("to_date"):
             conditions += f" AND {date_field} <= %(to_date)s"
 
-
     if filters.get("name"):
         conditions += " AND si.name = %(name)s"
     if filters.get("customer"):
         conditions += " AND si.customer = %(customer)s"
-    # if filters.get("date_shipped"):
-    #     conditions += " AND si.custom_date_shipped = %(date_shipped)s"
-    # if filters.get("import_date"):
-    #     conditions += " AND si.custom_import_date = %(import_date)s"
+
     if filters.get("shipment_number"):
         conditions += " AND si.custom_shipment_number = %(shipment_number)s"
     if filters.get("tracking_number"):
@@ -373,33 +373,38 @@ def get_conditions(filters):
         conditions += " AND si.custom_billing_type = %(billing_type)s"
     if filters.get("shipper_number"):
         conditions += " AND si.custom_shipper_number = %(shipper_number)s"
+    if filters.get("consignee_number"):
+        conditions += " AND si.custom_consignee_number = %(consignee_number)s"
+
     if filters.get("customer_group"):
-        cus_grp = filters.get("customer_group")
+        cus_grp = filters["customer_group"]
         customers_from_grps = frappe.db.get_all(
             "Customer",
             filters={"customer_group": cus_grp},
             pluck="name"
         )
-        if not customers_from_grps:
-            frappe.throw(_("No customers found for the selected customer group: {0}").format(cus_grp))
-        conditions += " AND si.customer IN %(customer_group)s"
-        filters["customer_group"] = customers_from_grps
-    if filters.get("consignee_number"):
-        conditions += " AND si.custom_consignee_number = %(consignee_number)s"
+        if customers_from_grps:
+            conditions += " AND si.customer IN %(customer_group_customers)s"
+            filters["customer_group_customers"] = tuple(customers_from_grps)
+        else:
+            conditions += " AND 1=0"
+            msg = (f"No customers found for the selected customer group: {cus_grp}")
+
     check_docstatus = filters.get("docstatus")
     if check_docstatus:
         conditions += f" AND si.docstatus = {doc_status[check_docstatus]}"
+        
     if filters.get("import_export"):
         if filters["import_export"] == "Import":
             conditions += " AND UPPER(si.custom_consignee_country) IN ('PAKISTAN', 'PAK', 'PK')"
         elif filters["import_export"] == "Export":
             conditions += " AND UPPER(si.custom_consignee_country) NOT IN ('PAKISTAN', 'PAK', 'PK')"
+
     if filters.get("billing_term"):
         filters["billing_term"] = filters["billing_term"].upper()
         conditions += " AND UPPER(si.custom_billing_term) = %(billing_term)s"
-    
-    
-    return conditions
+
+    return conditions, msg
 
 
 def remaining_columns():

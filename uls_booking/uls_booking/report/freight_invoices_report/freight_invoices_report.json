@@ -120,7 +120,7 @@
  "javascript": "frappe.query_report.on('render', function() {\n    let style = document.createElement('style');\n    style.innerHTML = `\n        @media print {\n            @page { size: landscape; }\n            body { transform: rotate(90deg); }\n        }\n    `;\n    document.head.appendChild(style);\n});\n",
  "letter_head": "Reimbursement Statement Letter Head",
  "letterhead": null,
- "modified": "2025-06-04 16:33:52.757580",
+ "modified": "2025-06-11 13:59:30.086785",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Freight Invoices Report",
