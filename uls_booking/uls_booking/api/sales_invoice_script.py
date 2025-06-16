@@ -213,28 +213,81 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
         # print('\n\n\n\custom_package_type', sales_invoice.custom_package_type, 'custom_package_type\n\n\n\n')
 
 
+        # if sales_invoice.custom_shipment_number:
+        #     third_party_ind_list = frappe.db.sql("""
+        #         SELECT IFNULL(third_party_indicator_code, 0) 
+        #         FROM `tabR200000` 
+        #         WHERE shipment_number = %s
+        #     """, sales_invoice.custom_shipment_number, as_dict=False)
+        #     if third_party_ind_list :
+        #         third_party_ind = third_party_ind_list[0][0]
+        #         sales_invoice.set('custom_third_party_indicator_code', third_party_ind)
+        #     else:
+        #         third_party_ind = None
+        # else:
+        #     third_party_ind = None
+
+        # if third_party_ind and third_party_ind != "0":
+        #     # print("compensation")
+        #     sales_invoice.set('custom_compensation_invoices', True)
+        #     sales_invoice.set('custom_freight_invoices', False)
+        # elif third_party_ind and third_party_ind == '0':
+        #     # print("freight")
+        #     sales_invoice.set('custom_compensation_invoices', False)
+        #     sales_invoice.set('custom_freight_invoices', True)
+
+
         if sales_invoice.custom_shipment_number:
+            # Get third party indicator from R200000
             third_party_ind_list = frappe.db.sql("""
-                SELECT IFNULL(third_party_indicator_code, 0) 
+                SELECT IFNULL(third_party_indicator_code, 0)
                 FROM `tabR200000` 
                 WHERE shipment_number = %s
             """, sales_invoice.custom_shipment_number, as_dict=False)
-            if third_party_ind_list :
+
+            if third_party_ind_list:
                 third_party_ind = third_party_ind_list[0][0]
                 sales_invoice.set('custom_third_party_indicator_code', third_party_ind)
             else:
                 third_party_ind = None
-        else:
-            third_party_ind = None
 
-        if third_party_ind and third_party_ind != "0":
-            # print("compensation")
-            sales_invoice.set('custom_compensation_invoices', True)
-            sales_invoice.set('custom_freight_invoices', False)
-        elif third_party_ind and third_party_ind == '0':
-            # print("freight")
+            shipment_info = frappe.db.get_value(
+                "Shipment Number",
+                sales_invoice.custom_shipment_number,
+                ["billing_term", "import__export"],
+                as_dict=True
+            )
+
+            billing_term = shipment_info.billing_term.strip().upper() if shipment_info and shipment_info.billing_term else ""
+            import_export_type = shipment_info.import__export.strip().upper() if shipment_info and shipment_info.import__export else ""
+
+            # sales_invoice.set("custom_billing_term", billing_term)
+            # sales_invoice.set("custom_import__export_si", import_export_type)
+
+            if import_export_type == "EXPORT":
+                if billing_term == "F/C":
+                    sales_invoice.set('custom_compensation_invoices', True)
+                    sales_invoice.set('custom_freight_invoices', False)
+                elif third_party_ind and third_party_ind != "0":
+                    sales_invoice.set('custom_compensation_invoices', True)
+                    sales_invoice.set('custom_freight_invoices', False)
+                else:
+                    sales_invoice.set('custom_compensation_invoices', False)
+                    sales_invoice.set('custom_freight_invoices', True)
+
+            elif import_export_type == "IMPORT":
+                if billing_term in ["P/P", "F/D"]:
+                    sales_invoice.set('custom_compensation_invoices', True)
+                    sales_invoice.set('custom_freight_invoices', False)
+                else:
+                    sales_invoice.set('custom_compensation_invoices', False)
+                    sales_invoice.set('custom_freight_invoices', True)
+        else:
             sales_invoice.set('custom_compensation_invoices', False)
             sales_invoice.set('custom_freight_invoices', True)
+
+
+
         
         if sales_invoice.custom_shipper_country:
             is_export = sales_invoice.custom_shipper_country.upper() == definition.origin_country.upper()

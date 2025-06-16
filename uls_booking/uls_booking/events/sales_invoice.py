@@ -59,25 +59,51 @@ def generate_invoice(self, method):
     # print(sales_invoice.custom_shipment_number, "custom_shipment_number \n\n\n")
     if not sales_invoice.custom_compensation_invoices and not sales_invoice.custom_freight_invoices:
         if sales_invoice.custom_shipment_number:
+            # Get third party indicator from R200000
             third_party_ind_list = frappe.db.sql("""
-                SELECT IFNULL(third_party_indicator_code, 0) 
-                FROM `tabR200000` 
+                SELECT IFNULL(third_party_indicator_code, 0)
+                FROM `tabR200000`
                 WHERE shipment_number = %s
             """, sales_invoice.custom_shipment_number, as_dict=False)
-            if third_party_ind_list :
+
+            if third_party_ind_list:
                 third_party_ind = third_party_ind_list[0][0]
                 sales_invoice.set('custom_third_party_indicator_code', third_party_ind)
             else:
                 third_party_ind = None
-        else:
-            third_party_ind = None
 
-        if third_party_ind and third_party_ind != "0":
-            # print("compensation")
-            sales_invoice.set('custom_compensation_invoices', True)
-            sales_invoice.set('custom_freight_invoices', False)
-        elif third_party_ind and third_party_ind == '0':
-            # print("freight")
+            shipment_info = frappe.db.get_value(
+                "Shipment Number",
+                sales_invoice.custom_shipment_number,
+                ["billing_term", "import__export"],
+                as_dict=True
+            )
+
+            billing_term = shipment_info.billing_term.strip().upper() if shipment_info and shipment_info.billing_term else ""
+            import_export_type = shipment_info.import__export.strip().upper() if shipment_info and shipment_info.import__export else ""
+
+            # sales_invoice.set("custom_billing_term", billing_term)
+            # sales_invoice.set("custom_import__export_si", import_export_type)
+
+            if import_export_type == "EXPORT":
+                if billing_term == "F/C":
+                    sales_invoice.set('custom_compensation_invoices', True)
+                    sales_invoice.set('custom_freight_invoices', False)
+                elif third_party_ind and third_party_ind != "0":
+                    sales_invoice.set('custom_compensation_invoices', True)
+                    sales_invoice.set('custom_freight_invoices', False)
+                else:
+                    sales_invoice.set('custom_compensation_invoices', False)
+                    sales_invoice.set('custom_freight_invoices', True)
+
+            elif import_export_type == "IMPORT":
+                if billing_term in ["P/P", "F/D"]:
+                    sales_invoice.set('custom_compensation_invoices', True)
+                    sales_invoice.set('custom_freight_invoices', False)
+                else:
+                    sales_invoice.set('custom_compensation_invoices', False)
+                    sales_invoice.set('custom_freight_invoices', True)
+        else:
             sales_invoice.set('custom_compensation_invoices', False)
             sales_invoice.set('custom_freight_invoices', True)
          
@@ -305,7 +331,8 @@ def generate_invoice(self, method):
                     if not selling_group:
                         logs.append(f"No selling group Found thats why using Default Selling group")
                         #print("No selling group Found thats why using Default Selling group")
-                        selling_group = definition.default_selling_group 
+                        selling_group = definition.default_selling_group
+                    sales_invoice.set("custom_selling_rate_group", selling_group)
                 full_tariff_flag = 0
                 
                 #print(selling_group , " = ", definition.default_selling_group, "Group \n\n\n")
@@ -324,12 +351,13 @@ def generate_invoice(self, method):
                             SELECT name
                             FROM `tabFull Tariff`
                             WHERE country = %s
+                            AND rate_type = %s
                             AND service_type = %s
                             AND package_type = %s
                             AND valid_from <= %s
                             AND expiry_date >= %s
                         """
-                        params = (origin_country, service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
+                        params = (origin_country, 'Selling', service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
                         full_tariff_name = frappe.db.sql(full_tariff_query, params, as_dict=True)
 
                         if full_tariff_name:
@@ -356,12 +384,13 @@ def generate_invoice(self, method):
                                         SELECT name
                                         FROM `tabFull Tariff`
                                         WHERE zone = %s
+                                        AND rate_type = %s
                                         AND service_type = %s
                                         AND package_type = %s
                                         AND valid_from <= %s
                                         AND expiry_date >= %s
                                     """
-                                    params = (zone_with_out_country, service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
+                                    params = (zone_with_out_country, 'Selling', service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
                                     full_tariff_name = frappe.db.sql(full_tariff_query, params, as_dict=True)
 
                                     if full_tariff_name:
@@ -625,6 +654,7 @@ def generate_invoice(self, method):
                     logs.append(f"No selling group Found thats why using Default Selling group")
                     #print("No Selling Group Found Thats why using Default Selling Group")
                     selling_group = definition.default_selling_group
+                sales_invoice.set("custom_selling_rate_group", selling_group)
                 full_tariff_flag = 0
                 
                 #print(selling_group , " = ", definition.default_selling_group)
@@ -641,12 +671,13 @@ def generate_invoice(self, method):
                             SELECT name
                             FROM `tabFull Tariff`
                             WHERE country = %s
+                            AND rate_type = %s
                             AND service_type = %s
                             AND package_type = %s
                             AND valid_from <= %s
                             AND expiry_date >= %s
                         """
-                        params = (origin_country, service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
+                        params = (origin_country, 'Selling', service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
                         full_tariff_name = frappe.db.sql(full_tariff_query, params, as_dict=True)
                         if full_tariff_name:
                             full_tariff = frappe.get_doc("Full Tariff", full_tariff_name[0]["name"])
@@ -672,12 +703,13 @@ def generate_invoice(self, method):
                                         SELECT name
                                         FROM `tabFull Tariff`
                                         WHERE zone = %s
+                                        AND rate_type = %s
                                         AND service_type = %s
                                         AND package_type = %s
                                         AND valid_from <= %s
                                         AND expiry_date >= %s
                                     """
-                                    params = (zone_with_out_country, service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
+                                    params = (zone_with_out_country, 'Selling', service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
                                     full_tariff_name = frappe.db.sql(full_tariff_query, params, as_dict=True)
 
                                     if full_tariff_name:

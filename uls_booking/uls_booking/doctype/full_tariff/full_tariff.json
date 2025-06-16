@@ -18,6 +18,7 @@
   "import__export",
   "valid_from",
   "expiry_date",
+  "rate_type",
   "section_break_oyzq",
   "package_rate"
  ],
@@ -122,11 +123,18 @@
    "fieldtype": "Data",
    "label": "Code",
    "read_only": 1
+  },
+  {
+   "fieldname": "rate_type",
+   "fieldtype": "Select",
+   "label": "Rate Type",
+   "options": "Buying\nSelling",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-13 12:04:36.804793",
+ "modified": "2025-06-16 19:47:50.812369",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Full Tariff",

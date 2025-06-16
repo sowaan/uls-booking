@@ -1,0 +1,128 @@
+{
+ "add_total_row": 1,
+ "columns": [],
+ "creation": "2024-06-07 11:16:00.367943",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [
+  {
+   "fieldname": "shipment_number",
+   "fieldtype": "Data",
+   "label": "Shipment Number",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "custom_package_tracking_number",
+   "fieldtype": "Data",
+   "label": "Package Tracking Number",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "date_type",
+   "fieldtype": "Select",
+   "label": "Date Type",
+   "mandatory": 0,
+   "options": "\nShipped Date\nImport Date",
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "shipper_number",
+   "fieldtype": "Data",
+   "label": "Shipper Number",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "consignee_number",
+   "fieldtype": "Data",
+   "label": "Consignee Number",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "shipper_country",
+   "fieldtype": "Data",
+   "label": "Shipper Country",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "consignee_country_code",
+   "fieldtype": "Data",
+   "label": "Consignee Country",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "origin_port",
+   "fieldtype": "Data",
+   "label": "Origin Port",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "destination_port",
+   "fieldtype": "Data",
+   "label": "Destination Port",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "origin_country",
+   "fieldtype": "Data",
+   "label": "Origin Country",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "destination_country",
+   "fieldtype": "Data",
+   "label": "Destination Country",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "billing_term",
+   "fieldtype": "Data",
+   "label": "Billing Term",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  }
+ ],
+ "idx": 1,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2025-06-16 20:13:40.232521",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "HD Report Manifest Data",
+ "owner": "fariz.khanzada@sowaan.com",
+ "prepared_report": 0,
+ "ref_doctype": "R200000",
+ "report_name": "HD Report Manifest Data",
+ "report_script": "values = { \r\n    'Shipment Number': filters.get('shipment_number'), \r\n    'Package Tracking Number': filters.get('custom_package_tracking_number'),\r\n    'Shipped Date': filters.get('shipped_date'),\r\n    'Import Date': filters.get('manifest_import_date'),\r\n    'Shipper Number': filters.get('shipper_number'),\r\n    'Consignee Number': filters.get('consignee_number'),\r\n    'Shipper Country': filters.get('shipper_country'),\r\n    'Consignee Country': filters.get('consignee_country_code'),\r\n    'Origin Slic': filters.get('origin_port'),\r\n    'Destination Slic': filters.get('destination_port') \r\n} \r\n\r\nresult = frappe.db.sql(\"\"\"\r\n    SELECT r22.custom_package_tracking_number AS 'Package Tracking Number',\r\n           r2.destination_country AS 'Destination Country',\r\n           r2.origin_country AS 'Origin Country',\r\n           r3.shipper_number AS 'Shipper Number',\r\n           r3.shipper_name AS 'Shipper Name',\r\n\t       r2.shipped_date AS 'Shipped Date',\r\n           r2.manifest_import_date AS 'Import Date',\r\n\t       r2.origin_port AS 'Origin Slic',\r\n           r2.destination_port AS 'Destination Slic',\r\n           r2.shipment_type AS 'Shipment Type',\r\n           r21.custom_minimum_bill_weight AS 'Minimum Bill Weight',\r\n           r2.shipment_weight AS 'Shipment Weight',\r\n           r2.shipment_weight_unit AS 'Shipment Weight Unit',\r\n           r5.custom_invdesc AS 'Invoice Description',\r\n           r3.shipper_building AS 'Shipper Building',\r\n           r3.shipper_street AS 'Shipper Street',\r\n           r3.shipper_city AS 'Shipper City',\r\n           r3.shipper_country AS 'Shipper Country',\r\n           r4.consignee_number AS 'Consignee Number',\r\n           r4.consignee_name AS 'Consignee Name',\r\n           r4.consignee_contact_name AS 'Consignee Contact Name',\r\n           r4.consignee_building AS 'Consignee Building',\r\n           r4.consignee_street AS 'Consignee Street',\r\n           r4.consignee_city AS 'Consignee City',\r\n           r4.consignee_country_code AS 'Consignee Country',\r\n           r2.billing_term_field AS 'Billing Term Field',\r\n           r2.bill_term_surcharge_indicator AS 'Bill Term Surcharge Indicator',\r\n           r2.terms_of_shipment AS 'Terms Of Shipment',\r\n           r5.custom_invdesc AS 'Invoice Description',\r\n           r2.number_of_packages_in_shipment AS 'Number Of Packages In shipment',\r\n           r2.split_duty_and_vat_flag AS 'Split Duty And VAT Flag'\r\n    FROM `tabR200000` AS r2 \r\n    LEFT JOIN `tabR201000` AS r21 ON r2.shipment_number = r21.shipment_number \r\n    LEFT JOIN `tabR202000` AS r22 ON r21.shipment_number = r22.shipment_number \r\n    LEFT JOIN `tabR300000` AS r3 ON r22.shipment_number = r3.shipment_number \r\n    LEFT JOIN `tabR400000` AS r4 ON r3.shipment_number = r4.shipment_number \r\n    LEFT JOIN `tabR500000` AS r5 ON r4.shipment_number = r5.shipment_number \r\n    WHERE r2.shipment_number = %(Shipment Number)s\r\n    or r2.custom_package_tracking_number = %(Package Tracking Number)s\r\n    or r2.shipped_date = %(Shipped Date)s\r\n    or r2.manifest_import_date = %(Import Date)s\r\n    or r2.origin_port = %(Origin Slic)s\r\n    or r2.destination_port = %(Destination Slic)s\r\n    or r3.shipper_number = %(Shipper Number)s\r\n    or r4.consignee_number = %(Consignee Number)s\r\n    or r3.shipper_country = %(Shipper Country)s\r\n    or r4.consignee_country_code = %(Consignee Country)s\r\n    GROUP BY r2.shipment_number\r\n\"\"\", values=values, as_dict=1) \r\n\r\ncolumns = [ \r\n    {'fieldname': 'Shipment Number', 'label': _('Shipment Number'), 'fieldtype': 'Data', 'width': 150 },\r\n    {'fieldname': 'Package Tracking Number', 'label': _('Package Tracking Number'), 'fieldtype': 'Data', 'width': 150 },\r\n    {'fieldname': 'Destination Country', 'label': _('Destination Country'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Origin Country', 'label': _('Origin Country'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Shipper Number', 'label': _('Shipper Number'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Shipper Name', 'label': _('Shipper Name'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Shipped Date', 'label': _('Shipped Date'), 'fieldtype': 'Date', 'width': 150 },\r\n    {'fieldname': 'Import Date', 'label': _('Import Date'), 'fieldtype': 'Date', 'width': 150 },\r\n    {'fieldname': 'Origin Slic', 'label': _('Origin Slic'), 'fieldtype': 'Data', 'width': 150 },\r\n    {'fieldname': 'Destination Slic', 'label': _('Destination Slic'), 'fieldtype': 'Data', 'width': 150 },\r\n    {'fieldname': 'Shipment Type', 'label': _('Shipment Type'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Minimum Bill Weight', 'label': _('Minimum Bill Weight'), 'fieldtype': 'Float', 'width': 120 },\r\n    {'fieldname': 'Shipment Weight', 'label': _('Shipment Weight'), 'fieldtype': 'Float', 'width': 120 },\r\n    {'fieldname': 'Shipment Weight Unit', 'label': _('Shipment Weight Unit'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Invoice Description', 'label': _('Invoice Description'), 'fieldtype': 'Text', 'width': 300 },\r\n    {'fieldname': 'Shipper Building', 'label': _('Shipper Building'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Shipper Street', 'label': _('Shipper Street'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Shipper City', 'label': _('Shipper City'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Shipper Country', 'label': _('Shipper Country'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Consignee Number', 'label': _('Consignee Number'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Consignee Name', 'label': _('Consignee Name'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Consignee Contact Name', 'label': _('Consignee Contact Name'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Consignee Building', 'label': _('Consignee Building'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Consignee Street', 'label': _('Consignee Street'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Consignee City', 'label': _('Consignee City'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Consignee Country', 'label': _('Consignee Country'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Billing Term Field', 'label': _('Billing Term Field'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Invoice Description', 'label': _('Invoice Description'), 'fieldtype': 'Text', 'width': 300 },\r\n    {'fieldname': 'Number Of Packages In Shipment', 'label': _('Number Of Packages In Shipment'), 'fieldtype': 'Int', 'width': 120 },\r\n    {'fieldname': 'Split Duty And VAT Flag', 'label': _('Split Duty And VAT Flag'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Bill Term Surcharge Indicator', 'label': _('Bill Term Surcharge Indicator'), 'fieldtype': 'Data', 'width': 120 },\r\n    {'fieldname': 'Terms Of Shipment', 'label': _('Terms Of Shipment'), 'fieldtype': 'Data', 'width': 120 },\r\n   ]\r\n\r\ndata = columns, result\r\n",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ],
+ "timeout": 0
+}
