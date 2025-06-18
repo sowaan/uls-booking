@@ -170,10 +170,10 @@ def generate_invoice(self, method):
     shipped_date = getdate(sales_invoice.custom_date_shipped)
     #print(shipped_date, "shipped Date \n\n")
     sales_invoice.conversion_rate = get_exchange_rate("USD", "PKR", shipped_date)
-    if sales_invoice.custom_shipper_country:
-        is_export = sales_invoice.custom_shipper_country.upper() == definition.origin_country.upper()
-    else:
-        is_export = sales_invoice.custom_shipper_country == definition.origin_country.upper()
+    # if sales_invoice.custom_shipper_country:
+    #     is_export = sales_invoice.custom_shipper_country.upper() == definition.origin_country.upper()
+    # else:
+    is_export = sales_invoice.custom_shipper_country.upper() == definition.origin_country.upper()
     imp_exp = "Export" if is_export else "Import"
     if is_export:
         icris_number = sales_invoice.custom_shipper_number or definition.unassigned_icris_number
@@ -318,8 +318,8 @@ def generate_invoice(self, method):
 
                 
                 if sales_invoice.custom_consignee_country:
-                    origin_country = sales_invoice.custom_consignee_country
-                    origin_country = origin_country.capitalize()
+                    origin_country = sales_invoice.custom_consignee_country.capitalize()
+                    # origin_country = origin_country.capitalize()
                     
                 zone_with_out_country = None
                 selling_rate_name = None
@@ -642,8 +642,8 @@ def generate_invoice(self, method):
                         # logs.append(f"No Territory Found '{sales_invoice.custom_consignee_city}'.So Using default Tax")
                         #print("No Territory Found Thats Why using Default Sales Tax and Template")
                 if sales_invoice.custom_shipper_country:
-                    origin_country = sales_invoice.custom_shipper_country
-                    origin_country = origin_country.capitalize()
+                    origin_country = sales_invoice.custom_shipper_country.capitalize()
+                    # origin_country = origin_country.capitalize()
                 zone_with_out_country = None
                 selling_rate_name = None
                 service_type = frappe.get_list("Service Type",
