@@ -1,16 +1,17 @@
 {
- "add_total_row": 1,
+ "add_total_row": 0,
  "columns": [],
  "creation": "2024-06-07 11:16:00.367943",
- "disabled": 0,
+ "disabled": 1,
  "docstatus": 0,
  "doctype": "Report",
  "filters": [
   {
    "fieldname": "shipment_number",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Shipment Number",
    "mandatory": 0,
+   "options": "Shipment Number",
    "wildcard_filter": 0
   },
   {
@@ -21,10 +22,11 @@
    "wildcard_filter": 0
   },
   {
+   "default": "Shipped Date",
    "fieldname": "date_type",
    "fieldtype": "Select",
    "label": "Date Type",
-   "mandatory": 0,
+   "mandatory": 1,
    "options": "\nShipped Date\nImport Date",
    "wildcard_filter": 0
   },
@@ -32,14 +34,14 @@
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
-   "mandatory": 0,
+   "mandatory": 1,
    "wildcard_filter": 0
   },
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
    "label": "To Date",
-   "mandatory": 0,
+   "mandatory": 1,
    "wildcard_filter": 0
   },
   {
@@ -109,7 +111,7 @@
  "idx": 1,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-06-16 20:13:40.232521",
+ "modified": "2025-06-18 13:37:08.804243",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "HD Report Manifest Data",

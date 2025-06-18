@@ -134,10 +134,15 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
             doctype_name = child_record.ref_doctype
             field_name = child_record.field_name
             sales_field_name = child_record.sales_invoice_field_name
+            is_linked = child_record.is_link
 
-            docs = frappe.get_list(doctype_name, filters={'shipment_number': shipment_number}, fields=[field_name])
-            if docs:
-                sales_invoice.set(sales_field_name, docs[0][field_name])
+            value = frappe.db.get_value(doctype_name, {'shipment_number': shipment_number}, field_name)
+            if value:
+                if is_linked:
+                    if frappe.db.exists(child_record.linked_doctype, field_name):
+                        sales_invoice.set(sales_field_name, value)
+                else:
+                    sales_invoice.set(sales_field_name, value)
         # print('\n\n\n\custom_shipper_number0', sales_invoice.custom_shipper_number, '\n\n\n\n')
         # print('\n\n\n\custom_consignee_number0', sales_invoice.custom_consignee_number, '\n\n\n\n')
 

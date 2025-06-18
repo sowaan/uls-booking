@@ -23,6 +23,7 @@
   "from_index",
   "to_index",
   "total_shipment_numbers",
+  "created_shipments",
   "attach_file",
   "manifest_modification_process",
   "record_to_modify",
@@ -183,12 +184,17 @@
    "label": "Gateway",
    "options": "Gateway",
    "reqd": 1
+  },
+  {
+   "fieldname": "created_shipments",
+   "fieldtype": "Int",
+   "label": "Created Shipments"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-03-14 11:22:35.478198",
+ "modified": "2025-06-18 13:04:40.285075",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Upload Data",

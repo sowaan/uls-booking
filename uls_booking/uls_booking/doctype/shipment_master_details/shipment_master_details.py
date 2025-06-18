@@ -14,6 +14,7 @@ class ShipmentMasterDetails(Document):
 	def before_save(self):
 		send_notification(self)
 		get_records(self)
+		update_sales_invoice_delivery_status(self)
 
 	@frappe.whitelist()
 	def get_records_api(self):
@@ -371,4 +372,25 @@ def populate_icris_data(doc):
 
 
 
+###############################DELIVERY STATUS#############################
+def update_sales_invoice_delivery_status(doc):
+	if not doc.shipment_number or not doc.delivery_status:
+		return
+
+	sales_invoices = frappe.get_all(
+		"Sales Invoice",
+		filters={"custom_shipment_number": doc.shipment_number},
+		fields=["name"]
+	)
+
+	if not sales_invoices:
+		return
+
+	for invoice in sales_invoices:
+		frappe.db.set_value(
+			"Sales Invoice",
+			invoice.name,
+			"custom_delivery_status",
+			doc.delivery_status
+		)
 

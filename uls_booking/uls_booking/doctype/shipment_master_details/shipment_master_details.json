@@ -80,6 +80,7 @@
   "shipment_abandoned_date",
   "hold_cage_location",
   "column_break_oprq",
+  "delivery_status",
   "third_party_tracking_no",
   "abandon_reason",
   "package_abandon_id",
@@ -677,11 +678,17 @@
    "fieldtype": "Data",
    "label": "Customer Account No. ",
    "read_only": 1
+  },
+  {
+   "fieldname": "delivery_status",
+   "fieldtype": "Select",
+   "label": "Delivery Status",
+   "options": "\nDelivered\nUndelivered\nAbandoned"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-16 11:11:07.972675",
+ "modified": "2025-06-17 18:35:54.714268",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Shipment Master Details",

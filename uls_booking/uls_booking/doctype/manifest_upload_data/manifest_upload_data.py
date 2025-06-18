@@ -864,6 +864,7 @@ def storing_shipment_number(arrays, frm, to, doc):
     # defintion = frappe.get_doc("Sales Invoice Definition", "4f1330rq6u")
     setting = frappe.get_doc("Manifest Setting Definition")
     origin_country = setting.origin_country
+    frappe.db.set_value("Manifest Upload Data",doc.name,"total_shipment_numbers" , len(unique_shipment_numbers))
     for shipment in unique_shipment_numbers:
         # Check if the shipment number already exists
         # existing_doc = frappe.get_value("Shipment Number", {"shipment_number": shipment})
@@ -897,12 +898,12 @@ def storing_shipment_number(arrays, frm, to, doc):
                     filters=[
                         ["name", "=", shipper_number]
                     ],
-                    fields=["shipper_name", "shipper_no"]
+                    fields=["shipper_name", "icris_account"]
                 )
                 if icris:
                     customer = icris[0].shipper_name
                     billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
-                    icris_number = icris[0].shipper_no
+                    icris_number = icris[0].icris_account
 
             # Fetch import shipments
             import_array_temp = frappe.get_list("R400000",
@@ -921,12 +922,12 @@ def storing_shipment_number(arrays, frm, to, doc):
                     filters=[
                         ["name", "=", consignee_number]
                     ],
-                    fields=["shipper_name", "shipper_no"]
+                    fields=["shipper_name", "icris_account"]
                 )
                 if icris:
                     customer = icris[0].shipper_name
                     billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
-                    icris_number = icris[0].shipper_no
+                    icris_number = icris[0].icris_account
 
 
             # Create a new shipment document
@@ -977,12 +978,12 @@ def storing_shipment_number(arrays, frm, to, doc):
                     filters=[
                         ["name", "=", shipper_number]
                     ],
-                    fields=["shipper_name", "shipper_no"]
+                    fields=["shipper_name", "icris_account"]
                 )
                 if icris:
                     customer = icris[0].shipper_name
                     billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
-                    icris_number = icris[0].shipper_no
+                    icris_number = icris[0].icris_account
 
             # Fetch import shipments
             import_array_temp = frappe.get_list("R400000",
@@ -1001,12 +1002,12 @@ def storing_shipment_number(arrays, frm, to, doc):
                     filters=[
                         ["name", "=", consignee_number]
                     ],
-                    fields=["shipper_name", "shipper_no"]
+                    fields=["shipper_name", "icris_account"]
                 )
                 if icris:
                     customer = icris[0].shipper_name
                     billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
-                    icris_number = icris[0].shipper_no
+                    icris_number = icris[0].icris_account
 
 
             # Create a new shipment document
@@ -1028,7 +1029,18 @@ def storing_shipment_number(arrays, frm, to, doc):
             shipment_doc.insert(ignore_permissions=True)
             shipment_doc.save(ignore_permissions=True)
             # frappe.db.commit()
-    frappe.db.set_value("Manifest Upload Data",doc.name,"total_shipment_numbers" , len(unique_shipment_numbers))
+
+    shipment_numbers = frappe.db.get_all(
+        "Shipment Number",
+        filters={"manifest_upload_data": doc.name},
+        pluck="name"
+    )
+
+
+    unique_shipment_numbers_created = set(shipment_numbers)
+
+    frappe.db.set_value("Manifest Upload Data", doc.name, "created_shipments", len(unique_shipment_numbers_created))
+
 
 
 

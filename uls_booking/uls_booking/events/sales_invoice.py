@@ -17,19 +17,19 @@ def get_exchange_rate(from_currency, to_currency, date):
 
 def generate_invoice(self, method):
     
-    # return
     # print("Generating Invoice")
     sales_invoice = self
-    if sales_invoice.custom_edit_items:
-        edit_items = sales_invoice.get("items")
+    if sales_invoice.custom_edit_customer:
+        return
     
-    
-    # if not self.customer == "UPS Compensation":
-    #     return
-    # frappe.throw("Generating Invoice")
     if sales_invoice.custom_duty_and_taxes_invoice:
         reset_tax_fields(self)
         return
+
+
+    if sales_invoice.custom_edit_items:
+        edit_items = sales_invoice.get("items")
+    
         # exempt = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst')
         # if exempt:
         #     # Clear taxes completely
@@ -195,9 +195,12 @@ def generate_invoice(self, method):
     # print('hello')
     # print("sales_invoice.custom_freight_invoices", sales_invoice.custom_freight_invoices)
     # print("sales_invoice.custom_compensation_invoices", sales_invoice.custom_compensation_invoices)
+    
     if sales_invoice.custom_freight_invoices:
+        
         # if sales_invoice.custom_billing_term in export_billing_term and is_export:
         if is_export:
+            
             check1 = frappe.get_list("ICRIS Account", filters = {"name":icris_number})
             if not check1:
                 logs.append(f"No ICRIS Account Found {icris_number}")
@@ -239,8 +242,9 @@ def generate_invoice(self, method):
                 exempt_customer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst')
                 tax_rule = None
                 tax_rule_name = None
+                # print(sales_invoice.custom_shipper_city)
                 if exempt_customer == 0:
-                    if frappe.db.exists("Territory", {"name": sales_invoice.custom_shipper_city}):
+                    if frappe.db.exists("Territory", sales_invoice.custom_shipper_city):
                         tt = frappe.get_doc("Territory", sales_invoice.custom_shipper_city)
                     else:
                         tt = None
@@ -332,7 +336,8 @@ def generate_invoice(self, method):
                         logs.append(f"No selling group Found thats why using Default Selling group")
                         #print("No selling group Found thats why using Default Selling group")
                         selling_group = definition.default_selling_group
-                    sales_invoice.set("custom_selling_rate_group", selling_group)
+                    if frappe.db.exists("Selling Rate Group", selling_group):
+                        sales_invoice.set("custom_selling_rate_group", selling_group)
                 full_tariff_flag = 0
                 
                 #print(selling_group , " = ", definition.default_selling_group, "Group \n\n\n")
@@ -575,12 +580,14 @@ def generate_invoice(self, method):
                 tax_rule = None
                 tax_rule_name = None
                 tax_flag = 0
+                # print(sales_invoice.territory)
                 if exempt_customer == 0:
-                    if frappe.db.exists("Territory", {"name": sales_invoice.custom_shipper_city}):
+                    if frappe.db.exists("Territory", sales_invoice.custom_consignee_city):
                         mm = frappe.get_doc("Territory", sales_invoice.custom_consignee_city)
                     else:
                         mm = None
                     if mm:
+                        # print('hello3')
                         vv = mm.parent_territory
                         if vv != "All Territories":
                             bb = frappe.get_doc("Sales Taxes and Charges Template", {"custom_province": vv})
@@ -654,7 +661,8 @@ def generate_invoice(self, method):
                     logs.append(f"No selling group Found thats why using Default Selling group")
                     #print("No Selling Group Found Thats why using Default Selling Group")
                     selling_group = definition.default_selling_group
-                sales_invoice.set("custom_selling_rate_group", selling_group)
+                if frappe.db.exists("Selling Rate Group", selling_group):
+                    sales_invoice.set("custom_selling_rate_group", selling_group)
                 full_tariff_flag = 0
                 
                 #print(selling_group , " = ", definition.default_selling_group)
@@ -1043,7 +1051,6 @@ def generate_invoice(self, method):
 
 
     elif sales_invoice.custom_compensation_invoices:
-        
 
         export_compensation_amount = 0
         
@@ -1066,7 +1073,7 @@ def generate_invoice(self, method):
                     break
                         
     # print(sales_invoice.items)
-    # print(sales_invoice.customer)
+    print(sales_invoice.customer)
     # print(export_compensation_amount, "export_compensation_amount")
     # print("setting.compensation_charges", setting.compensation_charges)
     imp_or_exp = frappe.db.get_value("Shipment Number", sales_invoice.custom_shipment_number, "import__export")

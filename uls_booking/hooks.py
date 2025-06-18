@@ -133,7 +133,10 @@ fixtures = [
                                 "custom_parent_idfrom_billing_tool",
                                 "custom_import__export",
                                 "custom_import__export_si",
-                                "custom_selling_rate_group"
+                                "custom_selling_rate_group",
+                                "custom_edit_customer",
+                                "custom_shipment_type_dt",
+                                "custom_delivery_status"
 
                                 )
 	  	  

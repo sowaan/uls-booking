@@ -234,7 +234,7 @@ def create_sales_invoices(rec_name) :
 
 
 		if r2_list :
-			si_doc.custom_shipment_type = r2_list[0].shipment_type
+			si_doc.custom_shipment_type_dt = r2_list[0].shipment_type
 			si_doc.custom_shipment_weight = r2_list[0].shipment_weight
 			si_doc.custom_shipment_weight_unit = r2_list[0].custom_shipment_weight_unit
 			si_doc.custom_currency_code_for_invoice_total = r2_list[0].currency_code_for_invoice_total
