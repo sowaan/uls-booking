@@ -217,7 +217,8 @@ def create_sales_invoices(rec_name) :
 
 
 		if r4_list :
-			si_doc.custom_consignee_number = r4_list[0].consignee_number
+			if frappe.db.exists("ICRIS Account", r4_list[0].consignee_number):
+				si_doc.custom_consignee_number = r4_list[0].consignee_number
 			si_doc.custom_consignee_postal_code = r4_list[0].consignee_postal_code
 			si_doc.custom_consignee_country = r4_list[0].consignee_county
 			si_doc.custom_consignee_name = r4_list[0].consignee_name
@@ -230,7 +231,8 @@ def create_sales_invoices(rec_name) :
 			si_doc.custom_shipper_city = r3_list[0].shipper_city
 			si_doc.custom_shipper_postal_code = r3_list[0].shipper_postal_code
 			si_doc.custom_shipper_phone_number = r3_list[0].shipper_phone_number
-			si_doc.custom_shipper_number = r3_list[0].shipper_number
+			if frappe.db.exists("ICRIS Account", r3_list[0].shipper_number):
+				si_doc.custom_shipper_number = r3_list[0].shipper_number
 
 
 		if r2_list :
