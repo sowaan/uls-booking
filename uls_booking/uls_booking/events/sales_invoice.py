@@ -1067,7 +1067,7 @@ def generate_invoice(self, method):
                 #     export_compensation_amount = comp.document_amount
                 #     sales_invoice.append('items', {'item_code': setting.compensation_charges , 'qty': '1', 'rate': export_compensation_amount})
                 #     break
-                if sales_invoice.custom_billing_term == comp.shipment_billing_term and self.custom_shipment_type == comp.shipping_billing_type and imp_exp == comp.case:
+                if sales_invoice.custom_billing_term.upper() == comp.shipment_billing_term.upper() and sales_invoice.custom_shipment_type.upper() == comp.shipping_billing_type.upper() and imp_exp.upper() == comp.case.upper():
                     # print('condition true')
                     export_compensation_amount = comp.document_amount
                     sales_invoice.append('items', {'item_code': setting.compensation_charges , 'qty': '1', 'rate': export_compensation_amount})
@@ -1098,14 +1098,24 @@ def generate_invoice(self, method):
         
 
     if not sales_invoice.items:
+        log_doc.set("sales_invoice_status", "Failed")
         # print('\n\n\n\n\n\n\nn\n No Items \n\n\n\nn\n')
         logs.append(f"No Items shipment number {shipment_number}, icris number {icris_number}")
-        if sales_invoice.custom_compensation_invoices:
-            logs.append(f"shipment billing term: {sales_invoice.custom_billing_term}, shipment type: {sales_invoice.custom_shipment_type}, imp_exp: {imp_exp}")
         log_text = "\n".join(logs)
+        if sales_invoice.custom_compensation_invoices:
+            log_doc.set(
+                'logs',
+                f"No Items shipment number {shipment_number}, icris number {icris_number}\n"
+                f"Shipment Billing Term: {sales_invoice.custom_billing_term}, "
+                f"Shipment Type: {sales_invoice.custom_shipment_type}, "
+                f"Imp/Exp: {imp_exp}"
+            )
+        else:
+            log_doc.set("logs", log_text)
+        
         if frappe.db.exists("Shipment Number", shipment_number):
             log_doc.set("shipment_number" , shipment_number)
-        log_doc.set("logs", log_text)
+        
         if frappe.db.exists("ICRIS Account", icris_number):
             log_doc.set("icris_number" , icris_number)
         log_doc.save()
