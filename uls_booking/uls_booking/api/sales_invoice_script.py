@@ -382,7 +382,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
                     log_doc.set("sales_invoice" , existing_invoice[0]["name"])
                 log_doc.save()
                 return
-               
+            
        
     
         itm_list = frappe.db.get_list("Item",

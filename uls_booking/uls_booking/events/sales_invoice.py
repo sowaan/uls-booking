@@ -1101,7 +1101,7 @@ def generate_invoice(self, method):
         # print('\n\n\n\n\n\n\nn\n No Items \n\n\n\nn\n')
         logs.append(f"No Items shipment number {shipment_number}, icris number {icris_number}")
         if sales_invoice.custom_compensation_invoices:
-            logs.append("shipment billing term", sales_invoice.custom_billing_term, "shipment type", sales_invoice.custom_shipment_type, "imp_exp", imp_exp)
+            logs.append(f"shipment billing term: {sales_invoice.custom_billing_term}, shipment type: {sales_invoice.custom_shipment_type}, imp_exp: {imp_exp}")
         log_text = "\n".join(logs)
         if frappe.db.exists("Shipment Number", shipment_number):
             log_doc.set("shipment_number" , shipment_number)
@@ -1168,7 +1168,7 @@ def generate_invoice(self, method):
 def get_sales_tax(self, logs=None):
 
 
-    if self.custom_freight_invoices == 1 :
+    if self.custom_freight_invoices == 1:
 
         self.set('taxes_and_charges', None)
         self.taxes = []
@@ -1234,8 +1234,8 @@ def check_for_shipper_city(self) :
     return False
         
         
-def check_for_consignee_city(self) :
-    if self.custom_consignee_city :
+def check_for_consignee_city(self):
+    if self.custom_consignee_city:
         sales_tax_list = frappe.get_all('Sales Taxes and Charges Template', 
                             filters = {
                                 'custom_province' : self.custom_consignee_city
