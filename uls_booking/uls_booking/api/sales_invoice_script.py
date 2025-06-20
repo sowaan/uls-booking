@@ -133,12 +133,12 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
             value = frappe.db.get_value(doctype_name, {'shipment_number': shipment_number}, field_name)
             if value:
                 if is_linked:
-                    print('link')
+                    # print('link')
                     if frappe.db.exists(child_record.linked_doctype, value):
                         sales_invoice.set(sales_field_name, value)
-                        print('linkset')
-                    else:
-                        print('link not set')
+                        # print('linkset')
+                    # else:
+                        # print('link not set')
                 else:
                     sales_invoice.set(sales_field_name, value)
         # print(sales_invoice.custom_shipper_country)
@@ -265,7 +265,8 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
 
 
 
-        
+        # print('freight invoices', sales_invoice.custom_freight_invoices)
+        # print('compensation invoices', sales_invoice.custom_compensation_invoices)
         
         is_export = sales_invoice.custom_shipper_country.upper() == definition.origin_country.upper()
 
@@ -398,10 +399,10 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
         # print('hello')
 
         sales_invoice.insert()
-        print(sales_invoice.custom_shipper_country)
-        print(sales_invoice.custom_shipper_country)
-        print(sales_invoice.custom_shipper_number)
-        print(sales_invoice.custom_consignee_number)
+        print('shipper country', sales_invoice.custom_shipper_country)
+        print('consignee country', sales_invoice.custom_consignee_country)
+        print('shipper no.', sales_invoice.custom_shipper_number)
+        print('consignee no.', sales_invoice.custom_consignee_number)
         
         if frappe.db.exists("Sales Invoice", sales_invoice.name):
             log_filters = {'shipment_number': sales_invoice.custom_shipment_number}

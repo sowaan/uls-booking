@@ -1060,6 +1060,7 @@ def generate_invoice(self, method):
                 sales_invoice.taxes_and_charges = None
                 sales_invoice.taxes = []
             sales_invoice.custom_compensation_invoices = 1
+            # print('ok hai')
             for comp in definition.compensation_table:
                 
                 # if sales_invoice.custom_billing_term == comp.shipment_billing_term and shipment_type == comp.shipping_billing_type and imp_exp == comp.case:
@@ -1073,7 +1074,7 @@ def generate_invoice(self, method):
                     break
                         
     # print(sales_invoice.items)
-    print(sales_invoice.customer)
+    # print(sales_invoice.customer)
     # print(export_compensation_amount, "export_compensation_amount")
     # print("setting.compensation_charges", setting.compensation_charges)
     imp_or_exp = frappe.db.get_value("Shipment Number", sales_invoice.custom_shipment_number, "import__export")
@@ -1099,6 +1100,8 @@ def generate_invoice(self, method):
     if not sales_invoice.items:
         # print('\n\n\n\n\n\n\nn\n No Items \n\n\n\nn\n')
         logs.append(f"No Items shipment number {shipment_number}, icris number {icris_number}")
+        if sales_invoice.custom_compensation_invoices:
+            logs.append("shipment billing term", sales_invoice.custom_billing_term, "shipment type", sales_invoice.custom_shipment_type, "imp_exp", imp_exp)
         log_text = "\n".join(logs)
         if frappe.db.exists("Shipment Number", shipment_number):
             log_doc.set("shipment_number" , shipment_number)
