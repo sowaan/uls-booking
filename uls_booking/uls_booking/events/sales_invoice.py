@@ -1059,7 +1059,7 @@ def generate_invoice(self, method):
             if not exempt_customer:
                 sales_invoice.taxes_and_charges = None
                 sales_invoice.taxes = []
-            sales_invoice.custom_compensation_invoices = 1
+            # sales_invoice.custom_compensation_invoices = 1
             # print('ok hai')
             for comp in definition.compensation_table:
                 
@@ -1077,6 +1077,12 @@ def generate_invoice(self, method):
     # print(sales_invoice.customer)
     # print(export_compensation_amount, "export_compensation_amount")
     # print("setting.compensation_charges", setting.compensation_charges)
+    # print(f"Shipment Billing Term: {sales_invoice.custom_billing_term}")
+    # print(f"comp.shipment_billing_term: {comp.shipment_billing_term}")
+    # print(f"Shipment Type: {sales_invoice.custom_shipment_type}")
+    # print(f"comp.shipping_billing_type: {comp.shipping_billing_type}")
+    # print(f"Imp/Exp: {imp_exp}")
+    # print(f"comp.case: {comp.case}")
     imp_or_exp = frappe.db.get_value("Shipment Number", sales_invoice.custom_shipment_number, "import__export")
     if imp_or_exp:
         imp_or_exp = imp_or_exp.strip().lower()
@@ -1139,12 +1145,12 @@ def generate_invoice(self, method):
     #     sales_invoice.payment_schedule[0].set("payment_term", customer.payment_terms)
 
 
-    discounted_amount = discounted_amount -1
+    discounted_amount = discounted_amount - 1
     get_sales_tax(self, logs)
     log_text = "\n".join(logs)
     sales_invoice.set_missing_values()
     #################### Sufyan Edit in Fariz Code As Per KashiBhai Instruction #######################
-    if frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst') :
+    if frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst'):
         self.taxes_and_charges = None
         self.taxes = []
     #################### Sufyan Edit in Fariz Code As Per KashiBhai Instruction #######################

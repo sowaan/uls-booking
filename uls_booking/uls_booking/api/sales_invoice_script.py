@@ -399,10 +399,10 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
         # print('hello')
 
         sales_invoice.insert()
-        print('shipper country', sales_invoice.custom_shipper_country)
-        print('consignee country', sales_invoice.custom_consignee_country)
-        print('shipper no.', sales_invoice.custom_shipper_number)
-        print('consignee no.', sales_invoice.custom_consignee_number)
+        # print('shipper country', sales_invoice.custom_shipper_country)
+        # print('consignee country', sales_invoice.custom_consignee_country)
+        # print('shipper no.', sales_invoice.custom_shipper_number)
+        # print('consignee no.', sales_invoice.custom_consignee_number)
         
         if frappe.db.exists("Sales Invoice", sales_invoice.name):
             log_filters = {'shipment_number': sales_invoice.custom_shipment_number}
