@@ -136,7 +136,8 @@ fixtures = [
                                 "custom_selling_rate_group",
                                 "custom_edit_customer",
                                 "custom_shipment_type_dt",
-                                "custom_delivery_status"
+                                "custom_delivery_status",
+                                "custom_sales_invoice_pdf_ref"
 
                                 )
 	  	  

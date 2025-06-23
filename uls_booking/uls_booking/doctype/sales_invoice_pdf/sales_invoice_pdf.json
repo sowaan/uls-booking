@@ -5,6 +5,10 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "details_section",
+  "date_type",
+  "column_break_hlcn",
+  "invoice_type",
   "section_break_wsps",
   "start_date",
   "customer",
@@ -15,6 +19,7 @@
   "end_date",
   "icris_number",
   "station",
+  "all_sales_invoices",
   "section_break_ecaf",
   "total_invoices",
   "customer_with_sales_invoice"
@@ -22,8 +27,7 @@
  "fields": [
   {
    "fieldname": "section_break_wsps",
-   "fieldtype": "Section Break",
-   "label": "Details"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "amended_from",
@@ -45,14 +49,17 @@
   {
    "fieldname": "start_date",
    "fieldtype": "Date",
-   "label": "Start Date"
+   "label": "Start Date",
+   "reqd": 1
   },
   {
    "fieldname": "end_date",
    "fieldtype": "Date",
-   "label": "End Date"
+   "label": "End Date",
+   "reqd": 1
   },
   {
+   "depends_on": "eval: doc.invoice_type === \"Freight Invoices\";",
    "fieldname": "icris_number",
    "fieldtype": "Data",
    "label": "Icris Number"
@@ -84,27 +91,53 @@
    "options": "Sales Invoice PDF table"
   },
   {
+   "depends_on": "eval: doc.invoice_type === \"Freight Invoices\";",
    "fieldname": "billing_type",
    "fieldtype": "Select",
    "label": "Billing Type",
    "options": "\nWeekly\nMonthly\nDaily"
   },
   {
+   "depends_on": "eval: doc.invoice_type === \"Freight Invoices\";",
    "fieldname": "import__export",
    "fieldtype": "Select",
    "label": "Import / Export",
    "options": "\nImport\nExport"
+  },
+  {
+   "fieldname": "date_type",
+   "fieldtype": "Select",
+   "label": "Date Type",
+   "options": "\nPosting Date\nShipped Date\nImport Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_hlcn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "invoice_type",
+   "fieldtype": "Select",
+   "label": "Invoice Type",
+   "options": "\nFreight Invoices\nDuty and Taxes Invoices\nCompensation Invoices",
+   "reqd": 1
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "all_sales_invoices",
+   "fieldtype": "Text",
+   "hidden": 1,
+   "label": "All Sales Invoices(Used in Code)"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [
-  {
-   "link_doctype": "Customer Shipment Invoice",
-   "link_fieldname": "sales_invoice_pdf"
-  }
- ],
- "modified": "2025-02-19 19:28:45.294129",
+ "links": [],
+ "modified": "2025-06-23 16:45:05.907444",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice PDF",

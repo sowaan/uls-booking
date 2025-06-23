@@ -74,6 +74,12 @@ frappe.ui.form.on('Sales Invoice', {
             console.log("Export Saver item not found in the invoice items.");
         }
     },
+    custom_shipper_number(frm) {        
+        get_icris_name(frm, "export", frm.doc.custom_shipper_number);
+    },
+    custom_consignee_number(frm) {
+        get_icris_name(frm, "import", frm.doc.custom_consignee_number);
+    }
     // customer: function(frm) {
     //     check_gst_exemption_and_clear_taxes(frm);
     // },
@@ -346,3 +352,35 @@ frappe.ui.form.on('Sales Invoice', {
 //             });
 //     }
 // }
+
+
+function get_icris_name(frm, imp_exp, cond) {
+    console.log("get_icris_name called with imp_exp:", imp_exp, "and cond:", cond, "for doc imp exp:", frm.doc.custom_import__export_si?.toLowerCase());
+    if (frm.doc.custom_freight_invoices && frm.doc.custom_import__export_si?.toLowerCase() === imp_exp) {
+        frappe.db.get_value("Sales Invoice Definition", frm.doc.custom_sales_invoice_definition, "unassigned_icris_number")
+            .then(def_res => {
+                if (!def_res.message) return;
+
+                const unassigned_icris_number = def_res.message.unassigned_icris_number;
+
+                frappe.db.get_value("ICRIS Account", unassigned_icris_number, "shipper_name")
+                    .then(unassigned_res => {
+                        const fallback_name = unassigned_res.message ? unassigned_res.message.shipper_name : "";
+
+                        if (cond) {
+                            frappe.db.get_value("ICRIS Account", cond, "shipper_name")
+                                .then(r => {
+                                    if (r.message) {
+                                        frm.set_value("customer", r.message.shipper_name);
+                                    } else {
+                                        frm.set_value("customer", fallback_name);
+                                    }
+                                });
+                        } else {
+                            frm.set_value("customer", fallback_name);
+                        }
+                    });
+            });
+    }
+}
+
