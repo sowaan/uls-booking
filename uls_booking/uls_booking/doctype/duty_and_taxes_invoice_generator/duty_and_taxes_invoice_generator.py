@@ -127,7 +127,7 @@ def create_sales_invoices(rec_name) :
 						filters={
 							'shipment_number' : row.shipment_number ,
 						},
-						fields = ["name","consignee_number","consignee_contact_name","consignee_building","consignee_street","consignee_city","consignee_phone_number","consignee_number","consignee_postal_code","consignee_county","consignee_name"],
+						fields = ["name","consignee_number","consignee_contact_name","consignee_building","consignee_street","consignee_city","consignee_phone_number","consignee_number","consignee_postal_code","consignee_country_code","consignee_name"],
 						)
 
 		r3_list = frappe.db.get_list("R300000",
@@ -220,7 +220,7 @@ def create_sales_invoices(rec_name) :
 			if frappe.db.exists("ICRIS Account", r4_list[0].consignee_number):
 				si_doc.custom_consignee_number = r4_list[0].consignee_number
 			si_doc.custom_consignee_postal_code = r4_list[0].consignee_postal_code
-			si_doc.custom_consignee_country = r4_list[0].consignee_county
+			si_doc.custom_consignee_country = r4_list[0].consignee_country_code
 			si_doc.custom_consignee_name = r4_list[0].consignee_name
 		
 
