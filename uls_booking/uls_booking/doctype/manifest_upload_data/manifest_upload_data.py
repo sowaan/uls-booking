@@ -11,8 +11,6 @@ from datetime import datetime
 
 def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,end_date,chunk_size):
     try:
-        
-        
         # doc = json.loads(doc_str)
         final_rate = 0
         tarif = 0
@@ -1544,7 +1542,14 @@ def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
             }).insert()
 
 
-
+def safe_decode(file_doc):
+    content = file_doc.get_content()
+    if isinstance(content, bytes):
+        try:
+            return content.decode("utf-8")
+        except UnicodeDecodeError:
+            return content.decode("ISO-8859-1", errors="ignore")
+    return content
 
 
 
@@ -1561,7 +1566,7 @@ class ManifestUploadData(Document):
             file_proper_name = frappe.get_value("File",file_name,"file_name")
             # print("File Name",file_proper_name,"\n\n\n\n\n")
             file_doc = frappe.get_doc("File", file_name)
-            content = file_doc.get_content()
+            content = safe_decode(file_doc)
             arrays = content.split('\n')
             frm = int(self.from_index)-1
             to = int(self.to_index)
@@ -1583,7 +1588,7 @@ class ManifestUploadData(Document):
 
             file_name2 = frappe.db.get_value("File", {"file_url": self.modified_file}, "name")
             file_doc2 = frappe.get_doc("File", file_name2)
-            content2 = file_doc2.get_content()
+            content2 = safe_decode(file_doc2)
             arrays2 = content2.split('\n')
             pkg_from = int(self.package_tracking_from_index)-1
             pkg_to = int(self.package_tracking_to_index)-1
@@ -1601,7 +1606,7 @@ class ManifestUploadData(Document):
             file_name3 = frappe.db.get_value("File", {"file_url": self.opsys_file}, "name")
             file_doc3 = frappe.get_doc("File", file_name3)
             file_proper_name3 = file_doc3.file_name
-            content3 = file_doc3.get_content()
+            content3 = safe_decode(file_doc3)
             arrays3 = content3.split('\n')
             frm = int(self.from_index)-1
             to = int(self.to_index)

@@ -354,8 +354,8 @@ frappe.ui.form.on('Sales Invoice', {
 // }
 
 
+
 function get_icris_name(frm, imp_exp, cond) {
-    console.log("get_icris_name called with imp_exp:", imp_exp, "and cond:", cond, "for doc imp exp:", frm.doc.custom_import__export_si?.toLowerCase());
     if (frm.doc.custom_freight_invoices && frm.doc.custom_import__export_si?.toLowerCase() === imp_exp) {
         frappe.db.get_value("Sales Invoice Definition", frm.doc.custom_sales_invoice_definition, "unassigned_icris_number")
             .then(def_res => {
@@ -366,15 +366,18 @@ function get_icris_name(frm, imp_exp, cond) {
                 frappe.db.get_value("ICRIS Account", unassigned_icris_number, "shipper_name")
                     .then(unassigned_res => {
                         const fallback_name = unassigned_res.message ? unassigned_res.message.shipper_name : "";
-
                         if (cond) {
-                            frappe.db.get_value("ICRIS Account", cond, "shipper_name")
-                                .then(r => {
-                                    if (r.message) {
-                                        frm.set_value("customer", r.message.shipper_name);
+                            frappe.db.get_doc("ICRIS Account", cond)
+                                .then(doc => {
+                                    if (doc && doc.shipper_name) {
+                                        frm.set_value("customer", doc.shipper_name);
                                     } else {
                                         frm.set_value("customer", fallback_name);
                                     }
+                                })
+                                .catch(err => {
+                                    console.log("Error fetching ICRIS Account:", err);
+                                    frm.set_value("customer", fallback_name);
                                 });
                         } else {
                             frm.set_value("customer", fallback_name);

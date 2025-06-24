@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-06-24 16:21:44.745936",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "items_for_dt_pf"
+ ],
+ "fields": [
+  {
+   "fieldname": "items_for_dt_pf",
+   "fieldtype": "Table",
+   "label": "Items for DT PF",
+   "options": "Items for DT PF"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-06-24 16:23:37.190128",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Sales Invoice PDF Print Format-Duty and Taxes",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

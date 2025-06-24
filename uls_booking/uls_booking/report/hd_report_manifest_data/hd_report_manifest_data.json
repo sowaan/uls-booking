@@ -1,5 +1,5 @@
 {
- "add_total_row": 0,
+ "add_total_row": 1,
  "columns": [],
  "creation": "2024-06-07 11:16:00.367943",
  "disabled": 1,
@@ -111,7 +111,7 @@
  "idx": 1,
  "is_standard": "Yes",
  "letterhead": null,
- "modified": "2025-06-18 13:37:08.804243",
+ "modified": "2025-06-24 16:14:22.399450",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "HD Report Manifest Data",

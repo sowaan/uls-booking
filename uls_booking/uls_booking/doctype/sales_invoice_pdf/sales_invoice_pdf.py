@@ -65,7 +65,6 @@ class SalesInvoicePDF(Document):
                 si.base_total_taxes_and_charges,
                 si.plc_conversion_rate,
                 sn.station
-
             FROM 
                 `tabSales Invoice` si
             LEFT JOIN
@@ -78,9 +77,11 @@ class SalesInvoicePDF(Document):
         date_field_map_with_dt = {
                 "Posting Date": "si.posting_date",
                 "Shipped Date": "si.custom_date_shipped",
-                "Import Date": "si.custom_import_date"
+                "Import Date": "si.custom_import_date",
+                "Arrival Date": "si.custom_arrival_date"
         }
         date_field_with_dt = date_field_map_with_dt.get(self.date_type) if self.date_type else None
+        frappe.msgprint(f"Date Field with DT: {date_field_with_dt}")
         conditions = []
         if self.date_type:
             if date_field_with_dt:
@@ -110,23 +111,28 @@ class SalesInvoicePDF(Document):
         if self.station:
             values["station"]= self.station
             conditions.append("sn.station = %(station)s")
-        if self.icris_number:
-            values["icris_number"] = self.icris_number
-            conditions.append("sn.icris_number = %(icris_number)s")
-        if self.billing_type:
-            values["billing_type"] = self.billing_type
-            conditions.append("c.custom_billing_type = %(billing_type)s")
-        if self.import__export:
-            values["import__export"] = self.import__export
-            conditions.append("sn.import__export = %(import__export)s")
+        if not self.invoice_type == "Duty and Taxes Invoices":
+            if self.icris_number:
+                values["icris_number"] = self.icris_number
+                conditions.append("sn.icris_number = %(icris_number)s")
+            if self.billing_type:
+                values["billing_type"] = self.billing_type
+                conditions.append("c.custom_billing_type = %(billing_type)s")
+            if self.import__export:
+                values["import__export"] = self.import__export
+                conditions.append("sn.import__export = %(import__export)s")
 
 
         if conditions:
             query += " AND " + " AND ".join(conditions)
+        
+        frappe.msgprint(f"Query: {query}")
+        frappe.msgprint(f"Values: {values}")
             
         results = frappe.db.sql(query, values, as_dict=True)
         if not results:
             frappe.msgprint("No matching Sales Invoices found.")
+            self.total_invoices = 0
             return
         customer_sales_invoices = {}
         invoice_list = []

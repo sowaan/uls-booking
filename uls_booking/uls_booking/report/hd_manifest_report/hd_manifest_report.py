@@ -66,7 +66,7 @@ def execute(filters=None):
 
             r21.custom_minimum_bill_weight AS minimum_bill_weight,
             r22.custom_package_tracking_number AS package_tracking_number,
-            r5.custom_invdesc AS invoice_description,
+            
 
             r3.shipper_number,
             r3.shipper_name,
@@ -85,14 +85,16 @@ def execute(filters=None):
             r4.consignee_city,
             r4.consignee_country_code AS consignee_country,
             r4.consignee_postal_code,
-            r4.consignee_phone_number AS consignee_contact_number
+            r4.consignee_phone_number AS consignee_contact_number,
+            
+            r5.custom_invdesc AS invoice_description
 
         FROM `tabR200000` r2
-        LEFT JOIN `tabR201000` r21 ON r21.shipment_number = r2.shipment_number
-        LEFT JOIN `tabR202000` r22 ON r22.shipment_number = r2.shipment_number
-        LEFT JOIN `tabR300000` r3 ON r3.shipment_number = r2.shipment_number
-        LEFT JOIN `tabR400000` r4 ON r4.shipment_number = r2.shipment_number
-        LEFT JOIN `tabR500000` r5 ON r5.shipment_number = r2.shipment_number
+        LEFT JOIN `tabR201000` r21 ON r2.shipment_number = r21.shipment_number
+        LEFT JOIN `tabR202000` r22 ON r2.shipment_number = r22.shipment_number
+        LEFT JOIN `tabR300000` r3 ON r2.shipment_number = r3.shipment_number
+        LEFT JOIN `tabR400000` r4 ON r2.shipment_number = r4.shipment_number
+        LEFT JOIN `tabR500000` r5 ON r2.shipment_number = r5.shipment_number
         {where_clause}
     """
 

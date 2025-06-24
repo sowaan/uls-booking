@@ -362,7 +362,12 @@ def generate_invoice(self, method):
                             AND valid_from <= %s
                             AND expiry_date >= %s
                         """
-                        params = (origin_country, 'Selling', service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
+                        if service_type and service_type[0].get("name"):
+                            service_name = service_type[0].get("name")
+                        else:
+                            service_name = None
+
+                        params = (origin_country, 'Selling', service_name, shipment_type, shipped_date, shipped_date)
                         full_tariff_name = frappe.db.sql(full_tariff_query, params, as_dict=True)
 
                         if full_tariff_name:
@@ -395,7 +400,11 @@ def generate_invoice(self, method):
                                         AND valid_from <= %s
                                         AND expiry_date >= %s
                                     """
-                                    params = (zone_with_out_country, 'Selling', service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
+                                    if service_type and service_type[0].get("name"):
+                                        service_name = service_type[0].get("name")
+                                    else:
+                                        service_name = None
+                                    params = (zone_with_out_country, 'Selling', service_name, shipment_type, shipped_date, shipped_date)
                                     full_tariff_name = frappe.db.sql(full_tariff_query, params, as_dict=True)
 
                                     if full_tariff_name:
@@ -404,7 +413,6 @@ def generate_invoice(self, method):
 
                         except:
                             logs.append("No Full Tariff Found. Using Default Tariff")
-                            #print("No Full Tariff Found. Using Default Tariff")
 
                     # **Calculate Rate if Full Tariff is Found**
                     if full_tariff:
@@ -446,10 +454,11 @@ def generate_invoice(self, method):
                     flag = 0
                     if zones:
                         sales_invoice.custom_zone = zones[0].name
+                        service_name = service_type[0].get("name") if service_type and service_type[0].get("name") else None
                         selling_rate_name = frappe.get_list("Selling Rate",
                             filters={
                                 "country": origin_country,
-                                "service_type": service_type[0].get("name"),
+                                "service_type": service_name,
                                 "package_type": shipment_type,
                                 "rate_group": selling_group 
                             }
@@ -475,10 +484,11 @@ def generate_invoice(self, method):
                                 zone_with_out_country = countries[0].parent
                                 if zone_with_out_country:
                                     sales_invoice.custom_zone = zone_with_out_country
+                                    service_name = service_type[0].get("name") if service_type and service_type[0].get("name") else None
                                     selling_rate_name = frappe.get_list("Selling Rate",
                                         filters={
                                             "zone": countries[0].parent,
-                                            "service_type": service_type[0].get("name"),
+                                            "service_type": service_name,
                                             "package_type": shipment_type,
                                             "rate_group": selling_group 
                                         }
@@ -685,7 +695,12 @@ def generate_invoice(self, method):
                             AND valid_from <= %s
                             AND expiry_date >= %s
                         """
-                        params = (origin_country, 'Selling', service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
+                        if service_type and service_type[0].get("name"):
+                            service_name = service_type[0].get("name")
+                        else:
+                            service_name = None
+
+                        params = (origin_country, 'Selling', service_name, shipment_type, shipped_date, shipped_date)
                         full_tariff_name = frappe.db.sql(full_tariff_query, params, as_dict=True)
                         if full_tariff_name:
                             full_tariff = frappe.get_doc("Full Tariff", full_tariff_name[0]["name"])
@@ -717,7 +732,11 @@ def generate_invoice(self, method):
                                         AND valid_from <= %s
                                         AND expiry_date >= %s
                                     """
-                                    params = (zone_with_out_country, 'Selling', service_type[0].get("name"), shipment_type, shipped_date, shipped_date)
+                                    if service_type and service_type[0].get("name"):
+                                        service_name = service_type[0].get("name")
+                                    else:
+                                        service_name = None
+                                    params = (zone_with_out_country, 'Selling', service_name, shipment_type, shipped_date, shipped_date)
                                     full_tariff_name = frappe.db.sql(full_tariff_query, params, as_dict=True)
 
                                     if full_tariff_name:
@@ -767,10 +786,11 @@ def generate_invoice(self, method):
                     if zones:
                         sales_invoice.custom_zone = zones[0].name
                         #print("Zone with Country :",zones[0].name)
+                        service_name = service_type[0].get("name") if service_type and service_type[0].get("name") else None
                         selling_rate_name = frappe.get_list("Selling Rate",
                             filters={
                                 "country": origin_country,
-                                "service_type": service_type[0].get("name"),
+                                "service_type": service_name,
                                 "package_type": shipment_type,
                                 "rate_group": selling_group 
                             }
@@ -796,11 +816,11 @@ def generate_invoice(self, method):
                                 #print("Zone with Country :",zone_with_out_country)
                                 if zone_with_out_country:
                                     sales_invoice.custom_zone = zone_with_out_country
-                                
+                                    service_name = service_type[0].get("name") if service_type and service_type[0].get("name") else None
                                     selling_rate_name = frappe.get_list("Selling Rate",
                                         filters={
                                             "zone": zone_with_out_country,
-                                            "service_type": service_type[0].get("name"),
+                                            "service_type": service_name,
                                             "package_type": shipment_type,
                                             "rate_group": selling_group 
                                         }
