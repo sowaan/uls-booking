@@ -49,6 +49,7 @@ class SalesInvoicePDF(Document):
 
     def before_save(self):
         self.customer_with_sales_invoice = []
+        self.total_invoices = 0
         values = {}
 
         query = """
@@ -81,7 +82,6 @@ class SalesInvoicePDF(Document):
                 "Arrival Date": "si.custom_arrival_date"
         }
         date_field_with_dt = date_field_map_with_dt.get(self.date_type) if self.date_type else None
-        frappe.msgprint(f"Date Field with DT: {date_field_with_dt}")
         conditions = []
         if self.date_type:
             if date_field_with_dt:
@@ -126,13 +126,12 @@ class SalesInvoicePDF(Document):
         if conditions:
             query += " AND " + " AND ".join(conditions)
         
-        frappe.msgprint(f"Query: {query}")
-        frappe.msgprint(f"Values: {values}")
+        # frappe.msgprint(f"Query: {query}")
+        # frappe.msgprint(f"Values: {values}")
             
         results = frappe.db.sql(query, values, as_dict=True)
         if not results:
             frappe.msgprint("No matching Sales Invoices found.")
-            self.total_invoices = 0
             return
         customer_sales_invoices = {}
         invoice_list = []
