@@ -8,12 +8,12 @@ class SalesInvoicePDF(Document):
         station = "0"
         serial = '00001'
 
-        if hasattr(self, 'import__export') and self.import__export:
-            if self.invoice_type == "Duty and Taxes Invoices":
-                prefix = "D&T"
-            elif self.invoice_type == "Compensation Invoices":
-                prefix = "COMP"
-            elif self.import__export == "Import":
+        if self.invoice_type == "Duty and Taxes Invoices":
+            prefix = "D&T"
+        elif self.invoice_type == "Compensation Invoices":
+            prefix = "COMP"
+        elif hasattr(self, 'import__export') and self.import__export:
+            if self.import__export == "Import":
                 prefix = "IFC"
             elif self.import__export == "Export":
                 prefix = "EPP"
