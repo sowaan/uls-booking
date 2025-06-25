@@ -503,8 +503,8 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
 
 @frappe.whitelist()
 def get_sales_invoice_logs(shipment_number):
-    log_lsit = frappe.db.get_value("Sales Invoice Logs", {"shipment_number":shipment_number}, ['sales_invoice', 'logs'], as_dict=True)
+    log_lsit = frappe.db.get_value("Sales Invoice Logs", {"shipment_number":shipment_number}, ['sales_invoice', 'logs', 'sales_invoice_status'], as_dict=True)
     if log_lsit:
-        return {"sales_invoice_name": log_lsit.sales_invoice , "logs" : log_lsit.logs}
+        return {"sales_invoice_name": log_lsit.sales_invoice , "logs" : log_lsit.logs, "sales_invoice_status": log_lsit.sales_invoice_status}
     else:
         return "No Logs Found"
