@@ -1345,12 +1345,14 @@ def duty_and_tax_validation_on_submit(self, method):
             self.taxes = []
 
 
+
 def before_delete(self, method):
+    frappe.db.delete("Dispute Invoice Number", {"customers_sales_invoice": self.name})
+
     logs = frappe.get_all("Sales Invoice Logs", filters={"sales_invoice": self.name}, pluck="name")
     
     for log_name in logs:
-        frappe.delete_doc("Sales Invoice Logs", log_name, force=1)
-    
+        frappe.delete_doc("Sales Invoice Logs", log_name, force=1)    
 
 
 
