@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-07-01 11:27:56.417384",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "delete_sales_invoice_links"
+ ],
+ "fields": [
+  {
+   "description": "<b>This will perform the following actions:</b><br>\n\u2022 <b>Doctype:</b> Shipment Master Details<br>Empty <b>Dispute Invoice Number</b> child tables from all records.<br>\n\u2022 <b>Doctype:</b> Sales Invoice Logs<br>Empty the <b>Sales Invoice</b> field from all records where it is set.\n",
+   "fieldname": "delete_sales_invoice_links",
+   "fieldtype": "Button",
+   "label": "Delete Sales Invoice Links"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-07-01 11:39:59.056721",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Deleting Records",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
