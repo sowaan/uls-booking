@@ -6,7 +6,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "name1",
   "customer",
+  "total_invoices",
   "sales_invoices",
   "email",
   "invoice_date",
@@ -14,7 +16,8 @@
   "sales_tax_amount_pkr",
   "station",
   "net_total_in_usd",
-  "net_total_in_pkr"
+  "net_total_in_pkr",
+  "include_in_print"
  ],
  "fields": [
   {
@@ -66,12 +69,30 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Net Total In PKR"
+  },
+  {
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "total_invoices",
+   "fieldtype": "Int",
+   "label": "Total Invoices"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "include_in_print",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Include In Print"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-23 16:45:51.564558",
+ "modified": "2025-07-02 12:51:23.020454",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice PDF table",

@@ -81,6 +81,7 @@ class SalesInvoicePDF(Document):
                 "Import Date": "si.custom_import_date",
                 "Arrival Date": "si.custom_arrival_date"
         }
+        
         date_field_with_dt = date_field_map_with_dt.get(self.date_type) if self.date_type else None
         conditions = []
         if self.date_type:
@@ -130,6 +131,7 @@ class SalesInvoicePDF(Document):
         # frappe.msgprint(f"Values: {values}")
             
         results = frappe.db.sql(query, values, as_dict=True)
+        # frappe.msgprint(f"Values: {results}")
         if not results:
             frappe.msgprint("No matching Sales Invoices found.")
             return
@@ -165,7 +167,7 @@ class SalesInvoicePDF(Document):
         self.all_sales_invoices = ", ".join(invoice_list)
 
 
-        for customer, data in customer_sales_invoices.items():
+        for idx, (customer, data) in enumerate(customer_sales_invoices.items(), start=1):
             email = None
             try:
                 customer_doc = frappe.get_doc("Customer", customer)
@@ -189,18 +191,20 @@ class SalesInvoicePDF(Document):
             except Exception:
                 email = ""
 
-            sales_invoices = ', '.join(data["sales_invoices"])
+            # sales_invoices = ', '.join(data["sales_invoices"])
             email = email if email else "" 
             row = {
+                "name1": f"{self.name}-{str(idx).zfill(3)}",
                 "customer": customer,
-                "sales_invoices": sales_invoices,
+                "sales_invoices": ', '.join(data["sales_invoices"]),
                 "email": email,
                 "net_total_in_usd": data["total_grand_total"],
                 "net_total_in_pkr": data["total_grand_total"] * data["plc_conversion_rate"],
                 "sales_tax_amount_usd": data["total_taxes_and_charges"],
                 "sales_tax_amount_pkr": data["total_taxes_and_charges"] * data["plc_conversion_rate"],
                 "invoice_date": self.end_date,
-                "station": data["station"]
+                "station": data["station"],
+                "total_invoices": len(data["sales_invoices"])
             }
             self.append("customer_with_sales_invoice", row)
 

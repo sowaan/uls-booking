@@ -102,9 +102,11 @@
    "fieldname": "import__export",
    "fieldtype": "Select",
    "label": "Import / Export",
-   "options": "\nImport\nExport"
+   "mandatory_depends_on": "eval: doc.invoice_type === \"Freight Invoices\";",
+   "options": "Import\nExport"
   },
   {
+   "default": "Posting Date",
    "fieldname": "date_type",
    "fieldtype": "Select",
    "label": "Date Type",
@@ -116,6 +118,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "Freight Invoices",
    "fieldname": "invoice_type",
    "fieldtype": "Select",
    "label": "Invoice Type",
@@ -137,7 +140,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-24 17:08:22.213987",
+ "modified": "2025-07-01 15:32:26.821170",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice PDF",

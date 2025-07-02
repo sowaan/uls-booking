@@ -9,6 +9,20 @@ import base64
 from frappe import _
 
 
+@frappe.whitelist()
+def update_include_in_print(docname, selected_customers):
+    child_rows = frappe.get_all("Sales Invoice PDF table",
+        filters={"parent": docname},
+        fields=["name"]
+    )
+
+    for row in child_rows:
+        value = 1 if row.name in selected_customers else 0
+        frappe.db.set_value("Sales Invoice PDF table", row.name, "include_in_print", value)
+
+
+
+
 
 @frappe.whitelist()
 def get_address(customer):

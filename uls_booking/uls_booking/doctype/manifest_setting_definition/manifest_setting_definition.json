@@ -29,7 +29,8 @@
   "modified_definition_tab",
   "definition",
   "sales_invoice_settings_tab",
-  "default_sales_taxes_and_charges_template"
+  "default_sales_taxes_and_charges_template",
+  "default_company"
  ],
  "fields": [
   {
@@ -182,13 +183,19 @@
    "label": "Default Sales Taxes and Charges Template",
    "options": "Sales Taxes and Charges Template",
    "reqd": 1
+  },
+  {
+   "fieldname": "default_company",
+   "fieldtype": "Link",
+   "label": "Default Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
- "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-05-21 18:18:42.750596",
+ "modified": "2025-07-01 17:07:05.066742",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Setting Definition",
@@ -202,7 +209,6 @@
    "write": 1
   }
  ],
- "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
