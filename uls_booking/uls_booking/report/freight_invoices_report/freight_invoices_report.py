@@ -243,9 +243,11 @@ def get_columns(filters):
 
 
 def get_data(filters):
+
+
     conditions, message = get_conditions(filters)
-    
     data = frappe.db.sql("""
+        
         SELECT 
             si.name as invoice_id,
             si.posting_date as posting_date,
@@ -311,17 +313,7 @@ def get_data(filters):
         """, (invoice_id,), as_dict=1)
         for item in items:
             row[custom_scrub(item.item_code)] = item.amount
-
-
-            # item_code = item.get("item_code")
-            # amount = item.get("amount", 0)
-            # if item_code == 'FSC':
-            #     row["fsc"] = amount
-            # elif item_code == 'SBC':
-            #     row["sbc"] = amount
-            # elif item_code == 'Peak':
-            #     row["peak"] = amount
-
+        
         tax_data = frappe.db.sql("""
             SELECT
                 base_tax_amount_after_discount_amount as tax_amount
