@@ -791,10 +791,11 @@ def generate_invoice(self, method):
         sales_invoice.custom_inserted = 1
 
         
+    log_name = frappe.db.get_value("Sales Invoice Logs", {"shipment_number": shipment_number}, "name")
+    log_doc = frappe.get_doc("Sales Invoice Logs", log_name) if log_name else frappe.new_doc("Sales Invoice Logs")
 
     if not sales_invoice.items:
-        log_list = frappe.get_list("Sales Invoice Logs", filters={"shipment_number": shipment_number})
-        log_doc = frappe.get_doc("Sales Invoice Logs", log_list[0].name) if log_list else frappe.new_doc("Sales Invoice Logs")
+        
         log_doc.set("sales_invoice_status", "Failed")
         logs.append(f"No Items shipment number {shipment_number}, icris number {icris_number}")
         log_text = "\n".join(logs)
@@ -842,7 +843,7 @@ def generate_invoice(self, method):
         log_doc.set("logs", log_text)
         log_doc.save()
     frappe.db.commit()
-    print("si end")
+    # print("si end")
     
 
 def get_sales_tax(self, logs=None):
