@@ -6,7 +6,7 @@ class SalesInvoicePDF(Document):
     def autoname(self):
         prefix = "AAA"
         station = "0"
-        serial = '00001'
+        serial = '001'
 
         if self.invoice_type == "Duty and Taxes Invoices":
             prefix = "D&T"
@@ -42,7 +42,7 @@ class SalesInvoicePDF(Document):
                     if pre_year == current_year:
                         serial = serial_with_dates[4:]
                         if serial.isdigit():
-                            serial = str(int(serial) + 1).zfill(5)
+                            serial = str(int(serial) + 1).zfill(3)
 
         self.name = f"{prefix}-{station}-{current_year}{current_month}{serial}"
 

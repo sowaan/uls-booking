@@ -59,12 +59,6 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
 
 @frappe.whitelist()
 def generate_single_invoice(parent_id=None, login_username=None, shipment_number=None, sales_invoice_definition=None, end_date=None):
-    log = frappe.db.get_value(
-        "Sales Invoice Logs",
-        {"shipment_number": shipment_number},
-        ['sales_invoice', 'logs', 'sales_invoice_status'],
-        as_dict=True
-    )
     try:
         if not shipment_number:
             return
@@ -252,20 +246,23 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
                 log_doc.created_byfrom_utility = user
         except frappe.DoesNotExistError:
             log_messages.append(f"User '{login_username}' not found")
-
         log_doc.update({
             'shipment_number': shipment_number,
             'sales_invoice_status': 'Failed',
             'logs': "\n".join(log_messages),
             'parent_idfrom_utility': parent_id
         })
-
-        
-
         if icris_number and frappe.db.exists("ICRIS Account", icris_number):
             log_doc.icris_number = icris_number
 
         log_doc.save(ignore_permissions=True)
+    
+    log = frappe.db.get_value(
+        "Sales Invoice Logs",
+        {"shipment_number": shipment_number},
+        ['sales_invoice', 'logs', 'sales_invoice_status'],
+        as_dict=True
+    )
     return {
         "sales_invoice_name": log.sales_invoice,
         "logs": log.logs,
