@@ -12,12 +12,12 @@ def execute(filters=None):
     values = {}
 
     field_map = {
-        "shipment_number": "r2.shipment_number",
-        "origin_port": "r2.origin_port",
-        "destination_port": "r2.destination_port",
-        "origin_country": "r2.origin_country",
-        "destination_country": "r2.destination_country",
-        "billing_term_field": "r2.billing_term_field",
+        "shipment_number": "shipment_number",
+        "origin_port": "origin_port",
+        "destination_port": "destination_port",
+        "origin_country": "origin_country",
+        "destination_country": "destination_country",
+        "billing_term_field": "billing_term_field",
     }
 
     for key, field in field_map.items():
@@ -26,7 +26,7 @@ def execute(filters=None):
             values[f"value_{key}"] = filters[key]
 
     if filters.get("date_type") in ["Shipped Date", "Import Date"]:
-        date_field = "r2.shipped_date" if filters["date_type"] == "Shipped Date" else "r2.manifest_import_date"
+        date_field = "shipped_date" if filters["date_type"] == "Shipped Date" else "manifest_import_date"
         if filters.get("from_date") and filters.get("to_date"):
             conditions.append(f"{date_field} BETWEEN %(from_date)s AND %(to_date)s")
             values["from_date"] = filters["from_date"]
@@ -89,13 +89,52 @@ def execute(filters=None):
             
             r5.custom_invdesc AS invoice_description
 
-        FROM `tabR200000` r2
-        LEFT JOIN `tabR201000` r21 ON r2.shipment_number = r21.shipment_number
-        LEFT JOIN `tabR202000` r22 ON r2.shipment_number = r22.shipment_number
-        LEFT JOIN `tabR300000` r3 ON r2.shipment_number = r3.shipment_number
-        LEFT JOIN `tabR400000` r4 ON r2.shipment_number = r4.shipment_number
-        LEFT JOIN `tabR500000` r5 ON r2.shipment_number = r5.shipment_number
-        {where_clause}
+        FROM (
+            SELECT * FROM `tabR200000`
+            {where_clause}
+        ) AS r2
+
+        LEFT JOIN (
+            SELECT * FROM `tabR201000`
+            WHERE shipment_number IN (
+                SELECT shipment_number FROM `tabR200000`
+                {where_clause}
+            )
+        ) AS r21 ON r2.shipment_number = r21.shipment_number
+
+        LEFT JOIN (
+            SELECT * FROM `tabR202000`
+            WHERE shipment_number IN (
+                SELECT shipment_number FROM `tabR200000`
+                {where_clause}
+            )
+        ) AS r22 ON r2.shipment_number = r22.shipment_number
+
+        LEFT JOIN (
+            SELECT * FROM `tabR300000`
+            WHERE shipment_number IN (
+                SELECT shipment_number FROM `tabR200000`
+                {where_clause}
+            )
+        ) AS r3 ON r2.shipment_number = r3.shipment_number
+
+        LEFT JOIN (
+            SELECT * FROM `tabR400000`
+            WHERE shipment_number IN (
+                SELECT shipment_number FROM `tabR200000`
+                {where_clause}
+            )
+        ) AS r4 ON r2.shipment_number = r4.shipment_number
+
+        
+        LEFT JOIN (
+            SELECT * FROM `tabR500000`
+            WHERE shipment_number IN (
+                SELECT shipment_number FROM `tabR200000`
+                {where_clause}
+            )
+        ) AS r5 ON r2.shipment_number = r5.shipment_number
+
     """
 
     data = frappe.db.sql(query, values, as_dict=True)

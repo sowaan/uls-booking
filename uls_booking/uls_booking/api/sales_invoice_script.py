@@ -59,56 +59,75 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
 
 @frappe.whitelist()
 def generate_single_invoice(parent_id=None, login_username=None, shipment_number=None, sales_invoice_definition=None, end_date=None):
-    try:
-        if not shipment_number:
+    if not shipment_number:
             return
-        print("Processing Invoice")
-        sales_invoice = frappe.new_doc("Sales Invoice")
-        logs = []
-        
-        if check_type(shipment_number, logs):
-            sales_invoice.custom_compensation_invoices = True
-            sales_invoice.custom_freight_invoices = False
-        else:
-            sales_invoice.custom_compensation_invoices = False
-            sales_invoice.custom_freight_invoices = True
+    print("Processing Invoice")
+    sales_invoice = frappe.new_doc("Sales Invoice")
+    logs = []
+    
+    if check_type(shipment_number, logs):
+        sales_invoice.custom_compensation_invoices = True
+        sales_invoice.custom_freight_invoices = False
+    else:
+        sales_invoice.custom_compensation_invoices = False
+        sales_invoice.custom_freight_invoices = True
 
-        invoice_type = "custom_compensation_invoices" if sales_invoice.custom_compensation_invoices else "custom_freight_invoices"
-        if log_existing_invoice(invoice_type, shipment_number, logs, login_username, parent_id):
-            return {
-                "sales_invoice_name": log.sales_invoice,
-                "logs": log.logs,
-                "sales_invoice_status": log.sales_invoice_status
-            } if log else "No Logs Found"
-
-        definition = frappe.db.get_value(
-            "Sales Invoice Definition",
-            sales_invoice_definition,
-            ["default_company", "origin_country", "unassigned_icris_number"],
+    invoice_type = "custom_compensation_invoices" if sales_invoice.custom_compensation_invoices else "custom_freight_invoices"
+    if log_existing_invoice(invoice_type, shipment_number, logs, login_username, parent_id):
+        log = frappe.db.get_value(
+            "Sales Invoice Logs",
+            {"shipment_number": shipment_number},
+            ['sales_invoice', 'logs', 'sales_invoice_status'],
             as_dict=True
         )
-        if not definition:
-            logs.append("Sales Invoice Definition does not exist")
-            print("Sales Invoice Definition does not exist")
-            return {
-                "sales_invoice_name": log.sales_invoice,
-                "logs": log.logs,
-                "sales_invoice_status": log.sales_invoice_status
-            } if log else "No Logs Found"
+        return {
+            "sales_invoice_name": log.sales_invoice,
+            "logs": log.logs,
+            "sales_invoice_status": log.sales_invoice_status
+        } if log else "No Logs Found"
 
-        definition_children = frappe.get_all(
-            "Sales Invoice def",
-            filters={"parent": sales_invoice_definition},
-            fields=["ref_doctype", "field_name", "sales_invoice_field_name", "linked_doctype", "is_link"]
+    definition = frappe.db.get_value(
+        "Sales Invoice Definition",
+        sales_invoice_definition,
+        ["default_company", "origin_country", "unassigned_icris_number"],
+        as_dict=True
+    )
+    if not definition:
+        logs.append("Sales Invoice Definition does not exist")
+        print("Sales Invoice Definition does not exist")
+        log = frappe.db.get_value(
+            "Sales Invoice Logs",
+            {"shipment_number": shipment_number},
+            ['sales_invoice', 'logs', 'sales_invoice_status'],
+            as_dict=True
         )
-        if not definition_children:
-            logs.append("No child definitions found for this Sales Invoice Definition")
-            print("No child definitions found for this Sales Invoice Definition")
-            return {
-                "sales_invoice_name": log.sales_invoice,
-                "logs": log.logs,
-                "sales_invoice_status": log.sales_invoice_status
-            } if log else "No Logs Found"
+        return {
+            "sales_invoice_name": log.sales_invoice,
+            "logs": log.logs,
+            "sales_invoice_status": log.sales_invoice_status
+        } if log else "No Logs Found"
+
+    definition_children = frappe.get_all(
+        "Sales Invoice def",
+        filters={"parent": sales_invoice_definition},
+        fields=["ref_doctype", "field_name", "sales_invoice_field_name", "linked_doctype", "is_link"]
+    )
+    if not definition_children:
+        logs.append("No child definitions found for this Sales Invoice Definition")
+        print("No child definitions found for this Sales Invoice Definition")
+        log = frappe.db.get_value(
+            "Sales Invoice Logs",
+            {"shipment_number": shipment_number},
+            ['sales_invoice', 'logs', 'sales_invoice_status'],
+            as_dict=True
+        )
+        return {
+            "sales_invoice_name": log.sales_invoice,
+            "logs": log.logs,
+            "sales_invoice_status": log.sales_invoice_status
+        } if log else "No Logs Found"
+    try:
+        
 
         
         company = definition.default_company
@@ -254,9 +273,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
         })
         if icris_number and frappe.db.exists("ICRIS Account", icris_number):
             log_doc.icris_number = icris_number
-
         log_doc.save(ignore_permissions=True)
-    
     log = frappe.db.get_value(
         "Sales Invoice Logs",
         {"shipment_number": shipment_number},
@@ -331,7 +348,8 @@ def log_existing_invoice(invoice_type_field, ship, logs, login_username, parent_
             "parent_idfrom_utility": parent_id,
             "sales_invoice": invoice_name
         })
-        log_doc.save()
+        log_doc.add_comment("Comment", f"Created by {login_username} via tool (Parent ID: {parent_id}).")
+        log_doc.save(ignore_permissions=True)
         return True
     return False
 

@@ -139,7 +139,7 @@ def generate_invoice(self, method):
     origin_country = None
     
     company = definition.default_company
-    customer = frappe.get_doc("Company",company)
+    # customer = frappe.get_doc("Company",company)
 
     end_date = sales_invoice.posting_date
     total_charges_incl_fuel = 0
@@ -652,8 +652,9 @@ def generate_invoice(self, method):
                 })
         sales_invoice.custom_total_surcharges_excl_fuel = total_charges_other_charges
         sales_invoice.custom_total_surcharges_incl_fuel = total_charges_incl_fuel
-        FSCpercentage = frappe.db.get_single_value('Additional Charges Page','feul_surcharge_percentage_on_freight_amount')
         additional_page = frappe.get_doc("Additional Charges Page")
+        # FSCpercentage = frappe.db.get_single_value('Additional Charges Page','feul_surcharge_percentage_on_freight_amount')
+        FSCpercentage = additional_page.feul_surcharge_percentage_on_freight_amount
         for row in additional_page.fuel_surcharge_percentages_on_freight_amount:
             if row.expiry_date < shipped_date:  
                 latest_valid_percentage = row.fuel_surcharge_percentage_on_freight_amount
@@ -671,7 +672,8 @@ def generate_invoice(self, method):
         sbc_flag = 0
         if sales_invoice.customer:
             customer_doc = frappe.get_doc("Customer",sales_invoice.customer)
-            shipmentbillingcheck = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipping_bill_charges_applicable')
+            # shipmentbillingcheck = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_shipping_bill_charges_applicable')
+            shipmentbillingcheck = customer_doc.custom_shipping_bill_charges_applicable 
             if shipmentbillingcheck and shipment_type in sbc_included and shipment_type not in sbc_excluded:
                 if shipmentbillingcheck and customer_doc.custom_shipping_billing_charges:
                         for row in customer_doc.custom_shipping_billing_charges:
@@ -680,10 +682,12 @@ def generate_invoice(self, method):
                                 sbc_flag = 1
                                 break
                 if imp_exp == "Export" and sbc_flag == 0:
-                    shipmentbillingamount = frappe.db.get_single_value('Additional Charges Page', 'export_amount_per_shipment')
+                    # shipmentbillingamount = frappe.db.get_single_value('Additional Charges Page', 'export_amount_per_shipment')
+                    shipmentbillingamount = additional_page.export_amount_per_shipment
                     
                 elif imp_exp == "Import" and sbc_flag == 0:
-                    shipmentbillingamount = frappe.db.get_single_value('Additional Charges Page', 'import_amount_per_shipment')
+                    # shipmentbillingamount = frappe.db.get_single_value('Additional Charges Page', 'import_amount_per_shipment')
+                    shipmentbillingamount = additional_page.import_amount_per_shipment
 
         declared_value = sales_invoice.custom_insurance_amount
         if declared_value is None:
@@ -698,52 +702,56 @@ def generate_invoice(self, method):
                 pass
         
         max_insured = 0
-        if sales_invoice.customer != customer.custom_default_customer:
-            sales_invoice.custom_freight_invoices = 1
-            if declared_value > 0:
-                percent = frappe.db.get_single_value('Additional Charges Page', 'percentage_on_declare_value')
-                minimum_amount = frappe.db.get_single_value('Additional Charges Page', 'minimum_amount_for_declare_value')
-                result = declared_value * (percent / 100)
-                max_insured = max(result , minimum_amount)
-                
-                if max_insured > 0 and sales_invoice.custom_shipment_type == setting.insurance_shipment_type:
-                    rows = {'item_code': setting.insurance_charges, 'qty': '1', 'rate': max_insured}
-                    sales_invoice.append('items', rows)
-            sales_invoice.custom_freight_charges = tarif
-            amt = tarif - final_rate
-            sales_invoice.discount_amount = round(amt, 2) or 0
-            sales_invoice.base_discount_amount = (sales_invoice.discount_amount or 0)  * (sales_invoice.conversion_rate or 0)
+        # if sales_invoice.customer != customer.custom_default_customer:
+        #     sales_invoice.custom_freight_invoices = 1
+        if declared_value > 0:
+            # percent = frappe.db.get_single_value('Additional Charges Page', 'percentage_on_declare_value')
+            # minimum_amount = frappe.db.get_single_value('Additional Charges Page', 'minimum_amount_for_declare_value')
+            percent = additional_page.percentage_on_declare_value
+            minimum_amount = additional_page.minimum_amount_for_declare_value
+            result = declared_value * (percent / 100)
+            max_insured = max(result , minimum_amount)
             
+            if max_insured > 0 and sales_invoice.custom_shipment_type == setting.insurance_shipment_type:
+                rows = {'item_code': setting.insurance_charges, 'qty': '1', 'rate': max_insured}
+                sales_invoice.append('items', rows)
+        sales_invoice.custom_freight_charges = tarif
+        amt = tarif - final_rate
+        sales_invoice.discount_amount = round(amt, 2) or 0
+        sales_invoice.base_discount_amount = (sales_invoice.discount_amount or 0)  * (sales_invoice.conversion_rate or 0)
+        
 
-            sales_invoice.custom_amount_after_discount = tarif - (sales_invoice.discount_amount or 0)
-            
-            
-            if total_charges_other_charges:
-                sales_invoice.append('items', {'item_code': setting.other_charges, 'qty': 1 , 'rate' :total_charges_other_charges})
-            if FSCcharges:
-                sales_invoice.append('items', {'item_code': setting.fuel_charges, 'qty': '1', 'rate': FSCcharges})
-            if tarif:
-                sales_invoice.append('items' , {'item_code' : setting.freight_charges , 'qty' : '1' , 'rate' : tarif})
-            if shipmentbillingamount:
-                sales_invoice.append('items' , {'item_code' : setting.shipment_billing_charges , 'qty' : '1' , 'rate' : shipmentbillingamount})
-            if total_charges_incl_fuel:
-                sales_invoice.append('items' , {'item_code' : setting.include_fuel_charges , 'qty' : '1' , 'rate' : total_charges_incl_fuel})
-            
-            additional_surcharges_page = frappe.get_doc("Additional Charges Page")
-            peak_amount = 0
-            if additional_surcharges_page.peak_charges_duration_and_amount:    
-                for row in additional_surcharges_page.peak_charges_duration_and_amount:
-                    if row.from_date <= shipped_date <= row.to_date:
-                        if sales_invoice.custom_shipment_weight <= 0.5:
-                            peak_amount = row.amount
-                            break
-                        elif sales_invoice.custom_shipment_weight > 0.5:
-                            peak_amount = sales_invoice.custom_shipment_weight * (row.amount)
-            
-            exempt_peak_surcharge = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_peak_surcharge')
-            if peak_amount and exempt_peak_surcharge != 1 :
-                rows = {'item_code' : setting.peak_charges , 'qty' : '1' , 'rate' : peak_amount}
-                sales_invoice.append('items' , rows)
+        sales_invoice.custom_amount_after_discount = tarif - (sales_invoice.discount_amount or 0)
+        
+        
+        if total_charges_other_charges:
+            sales_invoice.append('items', {'item_code': setting.other_charges, 'qty': 1 , 'rate' :total_charges_other_charges})
+        if FSCcharges:
+            sales_invoice.append('items', {'item_code': setting.fuel_charges, 'qty': '1', 'rate': FSCcharges})
+        if tarif:
+            sales_invoice.append('items' , {'item_code' : setting.freight_charges , 'qty' : '1' , 'rate' : tarif})
+        if shipmentbillingamount:
+            sales_invoice.append('items' , {'item_code' : setting.shipment_billing_charges , 'qty' : '1' , 'rate' : shipmentbillingamount})
+        if total_charges_incl_fuel:
+            sales_invoice.append('items' , {'item_code' : setting.include_fuel_charges , 'qty' : '1' , 'rate' : total_charges_incl_fuel})
+        
+        # additional_surcharges_page = frappe.get_doc("Additional Charges Page")
+        additional_surcharges_page = additional_page
+        peak_amount = 0
+        if additional_surcharges_page.peak_charges_duration_and_amount:    
+            for row in additional_surcharges_page.peak_charges_duration_and_amount:
+                if row.from_date <= shipped_date <= row.to_date:
+                    if sales_invoice.custom_shipment_weight <= 0.5:
+                        peak_amount = row.amount
+                        break
+                    elif sales_invoice.custom_shipment_weight > 0.5:
+                        peak_amount = sales_invoice.custom_shipment_weight * (row.amount)
+        
+        # exempt_peak_surcharge = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_peak_surcharge')
+        exempt_peak_surcharge = customer_doc.custom_exempt_peak_surcharge
+        if peak_amount and exempt_peak_surcharge != 1 :
+            rows = {'item_code' : setting.peak_charges , 'qty' : '1' , 'rate' : peak_amount}
+            sales_invoice.append('items' , rows)
 
         if sales_invoice.custom_edit_items:
             sales_invoice.items = edit_items
@@ -767,18 +775,15 @@ def generate_invoice(self, method):
 
     elif sales_invoice.custom_compensation_invoices:
         export_compensation_amount = 0
-        exempt_customer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst')
-        if not exempt_customer:
-            sales_invoice.taxes_and_charges = None
-            sales_invoice.taxes = []
+        # exempt_customer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst')
+        # if not exempt_customer:
+        #     sales_invoice.taxes_and_charges = None
+        #     sales_invoice.taxes = []
         for comp in definition.compensation_table:
             if sales_invoice.custom_billing_term.upper() == comp.shipment_billing_term.upper() and sales_invoice.custom_shipment_type.upper() == comp.shipping_billing_type.upper() and imp_exp.upper() == comp.case.upper():
                 export_compensation_amount = comp.document_amount
                 sales_invoice.append('items', {'item_code': setting.compensation_charges , 'qty': '1', 'rate': export_compensation_amount})
-                break
-    
-    # print("compensation")
-    
+                break    
 
     
 
@@ -825,14 +830,34 @@ def generate_invoice(self, method):
 
 
     discounted_amount = discounted_amount - 1
-    get_sales_tax(self, logs)
+    # get_sales_tax(self, logs)
+    get_sales_tax(sales_invoice, logs)
     log_text = "\n".join(logs)
     sales_invoice.set_missing_values()
-    #################### Sufyan Edit in Fariz Code As Per KashiBhai Instruction #######################
-    if frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst'):
-        self.taxes_and_charges = None
-        self.taxes = []
-    #################### Sufyan Edit in Fariz Code As Per KashiBhai Instruction #######################
+    ############################################################################################
+    exempt_case = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst')
+    if exempt_case:
+        # sales_invoice.taxes_and_charges = None
+        # sales_invoice.taxes = []
+        sales_invoice.taxes = []
+        sales_invoice.taxes_and_charges = None
+
+        sales_invoice.total_taxes_and_charges = 0
+        sales_invoice.base_total_taxes_and_charges = 0
+
+        if hasattr(sales_invoice, "other_charges_calculation") and sales_invoice.other_charges_calculation:
+            sales_invoice.other_charges_calculation = ''
+        sales_invoice.grand_total = sales_invoice.total
+        sales_invoice.base_grand_total = sales_invoice.base_total
+
+        sales_invoice.rounded_total = sales_invoice.grand_total
+        sales_invoice.base_rounded_total = sales_invoice.base_grand_total
+        sales_invoice.outstanding_amount = sales_invoice.grand_total
+        sales_invoice.base_outstanding_amount = sales_invoice.base_grand_total
+
+        sales_invoice.in_words = money_in_words(sales_invoice.rounded_total, self.currency)
+        sales_invoice.base_in_words = money_in_words(sales_invoice.base_rounded_total, self.company_currency)
+    ############################################################################################
 
     sales_invoice.calculate_taxes_and_totals()
     if logs:
