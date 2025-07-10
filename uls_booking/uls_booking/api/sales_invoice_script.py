@@ -141,17 +141,15 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
             if not field_names:
                 continue
 
-            ref_doc_data = frappe.get_all(
+            ref_doc_row = frappe.db.get_value(
                 ref_doctype,
-                filters={"shipment_number": shipment_number},
-                fields=field_names,
-                limit_page_length=1
+                {"shipment_number": shipment_number},
+                field_names,
+                as_dict=True
             )
-
-            if not ref_doc_data:
+            if not ref_doc_row:
                 continue
 
-            ref_doc_row = ref_doc_data[0]
 
             for child in child_list:
                 value = ref_doc_row.get(child["field_name"])
@@ -166,11 +164,29 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
         
         shipper_country = (sales_invoice.custom_shipper_country or "").upper()
         origin_country = (definition.origin_country or "").upper()
+        is_export = shipper_country == origin_country
+
+
+
+        ##############################  get icris from shipment number 1st 6 char  ##################################
+        if not is_export and not sales_invoice.custom_consignee_number:
+            ship_icris = str(shipment_number)[:6]
+            sales_invoice.custom_consignee_number = (
+                ship_icris if frappe.db.exists("ICRIS Account", ship_icris) else unassign
+            )
+        #############################################################################################################
+
+
+        if is_export and not sales_invoice.custom_shipper_number:
+            sales_invoice.custom_shipper_number = unassign
 
         icris_number = (
-            sales_invoice.custom_shipper_number if shipper_country == origin_country
+            sales_invoice.custom_shipper_number if is_export 
             else sales_invoice.custom_consignee_number
         ) or unassign
+
+        
+        
 
         sales_invoice.posting_date = getdate(end_date)
         sales_invoice.set_posting_time = 1

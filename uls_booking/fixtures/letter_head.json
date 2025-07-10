@@ -1,0 +1,25 @@
+[
+ {
+  "align": "Left",
+  "content": "<div style=\"width: 100%; position: relative;margin-top:10px;\">\n\n    <div style=\"position: absolute; top: 0; right: 0; text-align: center; font-size: 12px;\">\n        <img style=\"width: 60px; height: 65px;\" src=\"/files/ups_logo_2.png\">\n        <div style=\"margin-top: 3px;\">Authorised</div>\n        <div style=\"margin-top: -5px;\">Service Contractor</div>\n    </div>\n\n    <div style=\"text-align: center; font-size: 13px;\">\n        <h3 style=\"margin: 0;\">UNIVERSAL LOGISTICS SERVICES PVT LTD</h3>\n        Authorised Representative of UPS <br>\n        D - 79, Kehkashan Clifton, Block - 5, Karachi - Pakistan <br>\n        Phone # (021) 35148129 &amp; 35148131 UAN # 0213-111-669-877\n    </div>\n\n</div>\n\n<hr style=\"border: none; height: 2px; background-color: #ccc; margin-top: 25px; margin-bottom: 0;\">\n",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Letter Head",
+  "footer": "",
+  "footer_align": "Left",
+  "footer_image": null,
+  "footer_image_height": 0.0,
+  "footer_image_width": 0.0,
+  "footer_script": null,
+  "footer_source": "HTML",
+  "header_script": null,
+  "image": null,
+  "image_height": 0.0,
+  "image_width": 0.0,
+  "is_default": 1,
+  "letter_head_name": "Reimbursement Statement Letter Head",
+  "modified": "2025-07-10 15:54:43.959338",
+  "name": "Reimbursement Statement Letter Head",
+  "source": "HTML"
+ }
+]

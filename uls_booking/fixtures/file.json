@@ -1,0 +1,25 @@
+[
+ {
+  "attached_to_doctype": null,
+  "attached_to_field": null,
+  "attached_to_name": null,
+  "content_hash": "09efd2974c20b3e34a7c3993fdf4a174",
+  "docstatus": 0,
+  "doctype": "File",
+  "file_name": "ups_logo_2.png",
+  "file_size": 160911,
+  "file_type": "PNG",
+  "file_url": "/files/ups_logo_2.png",
+  "folder": "Home",
+  "is_attachments_folder": 0,
+  "is_folder": 0,
+  "is_home_folder": 0,
+  "is_private": 0,
+  "modified": "2025-07-09 13:46:11.946061",
+  "name": "65671b8254",
+  "old_parent": null,
+  "thumbnail_url": null,
+  "uploaded_to_dropbox": 0,
+  "uploaded_to_google_drive": 0
+ }
+]
