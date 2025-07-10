@@ -143,22 +143,19 @@ fixtures = [
 	  	  
         ]  
       ]
-	}
-#   ,
-#     {
-#         "doctype" : "Client Script",
-#       "filters" : [
-#         [  
-#           "name" , "=" , "Selling Percentage"
-# ]
-#       ]
-
-
-
-#     }
-
-
-
+	},
+  {
+      "doctype": "Letter Head",
+      "filters": [
+          ["name", "=", "Reimbursement Statement Letter Head"]
+      ]
+  },
+  {
+      "doctype": "File",
+      "filters": [
+          ["file_url", "=", "/files/ups_logo_2.png"]
+      ]
+  }
 ]
 
 # include js in doctype views
