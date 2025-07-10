@@ -7,18 +7,64 @@ from frappe.model.mapper import get_mapped_doc
 import requests
 import base64
 from frappe import _
+import zipfile
+import io
+from frappe.utils.pdf import get_pdf
+
+def scrub(txt=None):
+    if txt is None:
+        return ""
+    return txt.replace(' ', '_').lower()
 
 
 @frappe.whitelist()
-def update_include_in_print(docname, selected_customers):
-    child_rows = frappe.get_all("Sales Invoice PDF table",
-        filters={"parent": docname},
-        fields=["name"]
-    )
+def download_sales_invoices_zip(docname, selected_customers):
 
-    for row in child_rows:
-        value = 1 if row.name in selected_customers else 0
-        frappe.db.set_value("Sales Invoice PDF table", row.name, "include_in_print", value)
+    selected_customers = frappe.parse_json(selected_customers)
+    if not selected_customers:
+        frappe.throw("No customers selected")
+
+    original_doc = frappe.get_doc("Sales Invoice PDF", docname)
+    zip_buffer = io.BytesIO()
+
+    with zipfile.ZipFile(zip_buffer, 'w') as zipf:
+        for row in original_doc.customer_with_sales_invoice:
+            if row.name not in selected_customers:
+                continue
+
+            single_doc = frappe.copy_doc(original_doc)
+            single_doc.customer_with_sales_invoice = [row]
+
+            frappe.flags.ignore_print_permissions = True
+            html = frappe.get_print(
+                "Sales Invoice PDF",
+                single_doc.name,
+                print_format="Specific Customer Sales Invoice Tax",
+                doc=single_doc
+            )
+
+            pdf_data = get_pdf(html)
+            filename = f"{scrub(row.customer)}_{row.name1}.pdf"
+            zipf.writestr(filename, pdf_data)
+
+    zip_buffer.seek(0)
+    file_name = f"{docname}_customer_invoices.zip"
+    frappe.local.response.filename = file_name
+    frappe.local.response.filecontent = zip_buffer.getvalue()
+    frappe.local.response.type = "download"
+
+
+
+
+# @frappe.whitelist()
+# def update_include_in_print(docname, selected_customers):
+#     child_rows = frappe.get_all("Sales Invoice PDF table",
+#         filters={"parent": docname},
+#         fields=["name"]
+#     )
+#     for row in child_rows:
+#         value = 1 if row.name in selected_customers else 0
+#         frappe.db.set_value("Sales Invoice PDF table", row.name, "include_in_print", value)
 
 
 

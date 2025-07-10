@@ -50,9 +50,47 @@ class SalesInvoicePDF(Document):
     def before_save(self):
         self.customer_with_sales_invoice = []
         self.total_invoices = 0
+        self.all_sales_invoices = ""
+
+        conditions = ["docstatus = 1"]
         values = {}
 
-        query = """
+        date_field_map = {
+            "Posting Date": "posting_date",
+            "Shipped Date": "custom_date_shipped",
+            "Import Date": "custom_import_date",
+            "Arrival Date": "custom_arrival_date"
+        }
+        date_field = date_field_map.get(self.date_type)
+        if date_field:
+            if self.start_date and self.end_date:
+                conditions.append(f"{date_field} BETWEEN %(start_date)s AND %(end_date)s")
+                values["start_date"] = self.start_date
+                values["end_date"] = self.end_date
+            elif self.start_date:
+                conditions.append(f"{date_field} >= %(start_date)s")
+                values["start_date"] = self.start_date
+            elif self.end_date:
+                conditions.append(f"{date_field} <= %(end_date)s")
+                values["end_date"] = self.end_date
+
+        if self.invoice_type:
+            invoice_type_map = {
+                "Freight Invoices": "custom_freight_invoices = 1",
+                "Duty and Taxes Invoices": "custom_duty_and_taxes_invoice = 1",
+                "Compensation Invoices": "custom_compensation_invoices = 1"
+            }
+            condition = invoice_type_map.get(self.invoice_type)
+            if condition:
+                conditions.append(condition)
+
+        if self.customer:
+            conditions.append("customer = %(customer)s")
+            values["customer"] = self.customer
+
+        where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
+
+        query = f"""
             SELECT 
                 si.name,
                 si.posting_date,
@@ -66,71 +104,36 @@ class SalesInvoicePDF(Document):
                 si.base_total_taxes_and_charges,
                 si.plc_conversion_rate,
                 sn.station
-            FROM 
-                `tabSales Invoice` si
-            LEFT JOIN
-                `tabShipment Number` as sn ON si.custom_shipment_number = sn.name
-            LEFT JOIN
-                `tabCustomer` c ON si.customer = c.name
-            WHERE
-                si.docstatus = 1
+            FROM (
+                SELECT * FROM `tabSales Invoice`
+                {where_clause}
+            ) AS si
+            LEFT JOIN `tabShipment Number` sn ON si.custom_shipment_number = sn.name
+            LEFT JOIN `tabCustomer` c ON si.customer = c.name
         """
-        date_field_map_with_dt = {
-                "Posting Date": "si.posting_date",
-                "Shipped Date": "si.custom_date_shipped",
-                "Import Date": "si.custom_import_date",
-                "Arrival Date": "si.custom_arrival_date"
-        }
-        
-        date_field_with_dt = date_field_map_with_dt.get(self.date_type) if self.date_type else None
-        conditions = []
-        if self.date_type:
-            if date_field_with_dt:
-                if self.start_date and self.end_date:
-                    conditions.append(f"{date_field_with_dt} BETWEEN %(start_date)s AND %(end_date)s")
-                    values["start_date"] = self.start_date
-                    values["end_date"] = self.end_date
-                elif self.start_date:
-                    conditions.append(f"{date_field_with_dt} >= %(start_date)s")
-                    values["start_date"] = self.start_date
-                elif self.end_date:
-                    conditions.append(f"{date_field_with_dt} <= %(end_date)s")
-                    values["end_date"] = self.end_date
-        if self.invoice_type:
-            invoice_type_map = {
-                "Freight Invoices": "si.custom_freight_invoices = 1",
-                "Duty and Taxes Invoices": "si.custom_duty_and_taxes_invoice = 1",
-                "Compensation Invoices": "si.custom_compensation_invoices = 1"
-            }
-            invoice_condition = invoice_type_map.get(self.invoice_type)
-            if invoice_condition:
-                conditions.append(invoice_condition)
 
-        if self.customer:
-            values["customer"] = self.customer
-            query += " AND si.customer = %(customer)s"
+        outer_conditions = []
+
         if self.station:
-            values["station"]= self.station
-            conditions.append("sn.station = %(station)s")
-        if not self.invoice_type == "Duty and Taxes Invoices":
+            outer_conditions.append("sn.station = %(station)s")
+            values["station"] = self.station
+
+        if self.invoice_type != "Duty and Taxes Invoices":
             if self.icris_number:
+                outer_conditions.append("sn.icris_number = %(icris_number)s")
                 values["icris_number"] = self.icris_number
-                conditions.append("sn.icris_number = %(icris_number)s")
             if self.billing_type:
+                outer_conditions.append("c.custom_billing_type = %(billing_type)s")
                 values["billing_type"] = self.billing_type
-                conditions.append("c.custom_billing_type = %(billing_type)s")
             if self.import__export:
+                outer_conditions.append("sn.import__export = %(import__export)s")
                 values["import__export"] = self.import__export
-                conditions.append("sn.import__export = %(import__export)s")
 
+        if outer_conditions:
+            query += " WHERE " + " AND ".join(outer_conditions)
 
-        if conditions:
-            query += " AND " + " AND ".join(conditions)
-        
-        # frappe.msgprint(f"Query: {query}")
-        # frappe.msgprint(f"Values: {values}")
-            
         results = frappe.db.sql(query, values, as_dict=True)
+
         # frappe.msgprint(f"Values: {results}")
         if not results:
             frappe.msgprint("No matching Sales Invoices found.")

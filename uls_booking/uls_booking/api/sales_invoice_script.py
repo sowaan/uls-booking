@@ -61,19 +61,8 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
 def generate_single_invoice(parent_id=None, login_username=None, shipment_number=None, sales_invoice_definition=None, end_date=None):
     if not shipment_number:
             return
-    print("Processing Invoice")
-    sales_invoice = frappe.new_doc("Sales Invoice")
-    logs = []
-    
-    if check_type(shipment_number, logs):
-        sales_invoice.custom_compensation_invoices = True
-        sales_invoice.custom_freight_invoices = False
-    else:
-        sales_invoice.custom_compensation_invoices = False
-        sales_invoice.custom_freight_invoices = True
-
-    invoice_type = "custom_compensation_invoices" if sales_invoice.custom_compensation_invoices else "custom_freight_invoices"
-    if log_existing_invoice(invoice_type, shipment_number, logs, login_username, parent_id):
+    invoice_types = ["custom_compensation_invoices", "custom_freight_invoices"]
+    if log_existing_invoice(invoice_types, shipment_number, logs, login_username, parent_id):
         log = frappe.db.get_value(
             "Sales Invoice Logs",
             {"shipment_number": shipment_number},
@@ -85,6 +74,18 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
             "logs": log.logs,
             "sales_invoice_status": log.sales_invoice_status
         } if log else "No Logs Found"
+    print("Processing Invoice")
+    sales_invoice = frappe.new_doc("Sales Invoice")
+    logs = []
+    
+    if check_type(shipment_number, logs):
+        sales_invoice.custom_compensation_invoices = True
+        sales_invoice.custom_freight_invoices = False
+    else:
+        sales_invoice.custom_compensation_invoices = False
+        sales_invoice.custom_freight_invoices = True
+
+    
 
     definition = frappe.db.get_value(
         "Sales Invoice Definition",
@@ -127,12 +128,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
             "sales_invoice_status": log.sales_invoice_status
         } if log else "No Logs Found"
     try:
-        
-
-        
         company = definition.default_company
-
-        
         sales_invoice.custom_sales_invoice_definition = sales_invoice_definition
         unassign = definition.unassigned_icris_number
 
@@ -326,32 +322,36 @@ def check_type(shipment, logs):
     return False
 
 
-def log_existing_invoice(invoice_type_field, ship, logs, login_username, parent_id):
-    invoice_name = frappe.db.get_value(
-        "Sales Invoice",
-        {
-            "custom_shipment_number": ship,
-            invoice_type_field: 1
-        },
-        "name"
-    )
+def log_existing_invoice(invoice_type_fields, shipment_number, logs, login_username, parent_id):
+    for field in invoice_type_fields:
+        invoice_name = frappe.db.get_value(
+            "Sales Invoice",
+            {
+                "custom_shipment_number": shipment_number,
+                field: 1
+            },
+            "name"
+        )
+        if invoice_name:
+            log_name = frappe.db.get_value("Sales Invoice Logs", {"shipment_number": shipment_number}, "name")
+            log_doc = frappe.get_doc("Sales Invoice Logs", log_name) if log_name else frappe.new_doc("Sales Invoice Logs")
 
-    if invoice_name:
-        log_name = frappe.db.get_value("Sales Invoice Logs", {"shipment_number": ship}, "name")
-        log_doc = frappe.get_doc("Sales Invoice Logs", log_name) if log_name else frappe.new_doc("Sales Invoice Logs")
-        logs.append("Already Present In Sales Invoice")
-        log_doc.update({
-            "logs": "\n".join(logs),
-            "shipment_number": ship,
-            "sales_invoice_status": "Already Created",
-            "created_byfrom_utility": login_username,
-            "parent_idfrom_utility": parent_id,
-            "sales_invoice": invoice_name
-        })
-        log_doc.add_comment("Comment", f"Created by {login_username} via tool (Parent ID: {parent_id}).")
-        log_doc.save(ignore_permissions=True)
-        return True
+            logs.append("Already Present In Sales Invoice")
+
+            log_doc.update({
+                "logs": "\n".join(logs),
+                "shipment_number": shipment_number,
+                "sales_invoice_status": "Already Created",
+                "created_byfrom_utility": login_username,
+                "parent_idfrom_utility": parent_id,
+                "sales_invoice": invoice_name
+            })
+
+            log_doc.save(ignore_permissions=True)
+
+            return True
     return False
+
 
 
 

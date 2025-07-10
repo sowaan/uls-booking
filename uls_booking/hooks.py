@@ -306,14 +306,17 @@ doctype_js = {
 
 doc_events = {
 	"Customer": {
-		"before_save": "uls_booking.uls_booking.api.api.check_user_permission",
+		"before_save": "uls_booking.uls_booking.api.api.check_user_permission"
 	},
   "Sales Invoice": {
     "before_save": "uls_booking.uls_booking.events.sales_invoice.generate_invoice",
     # "before_save": "uls_booking.uls_booking.events.sales_invoice.restore_values",
     "before_submit": "uls_booking.uls_booking.events.sales_invoice.duty_and_tax_validation_on_submit",
-    "on_trash": "uls_booking.uls_booking.events.sales_invoice.before_delete",
+    "on_trash": "uls_booking.uls_booking.events.sales_invoice.before_delete"
   },
+  "Sales Invoice Logs": {
+    "before_save": "uls_booking.uls_booking.events.sales_invoice_logs.before_save"
+  }
 }
 
 # Scheduled Tasks
