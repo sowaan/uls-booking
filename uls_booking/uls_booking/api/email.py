@@ -26,6 +26,7 @@ def send_multi_email_with_attachment(doc_name, selected_customers):
         return {"status": "error", "message": f"Sales Invoice PDF with name {doc_name} does not exist."}
 
     original_doc = frappe.get_doc("Sales Invoice PDF", doc_name)
+    single_doc = frappe.copy_doc(original_doc)
     failed_customers = []
     success_count = 0
 
@@ -33,9 +34,7 @@ def send_multi_email_with_attachment(doc_name, selected_customers):
         if row.customer not in selected_customers:
             continue
 
-        # Get customer email
-        # customer_add = frappe.db.get_value("Customer", row.customer, "customer_primary_address")
-        # email = frappe.db.get_value("Address", customer_add, "email_id") if customer_add else None
+        
         email = row.email if row.email else None
         if not email:
             customer_add = frappe.db.get_value("Customer", row.customer, "customer_primary_address")
@@ -45,7 +44,7 @@ def send_multi_email_with_attachment(doc_name, selected_customers):
             continue
 
         try:
-            single_doc = frappe.copy_doc(original_doc)
+            
             single_doc.customer_with_sales_invoice = [row]
 
             frappe.flags.ignore_print_permissions = True

@@ -17,6 +17,7 @@ def scrub(txt=None):
     return txt.replace(' ', '_').lower()
 
 
+
 @frappe.whitelist()
 def download_sales_invoices_zip(docname, selected_customers):
 
@@ -25,14 +26,18 @@ def download_sales_invoices_zip(docname, selected_customers):
         frappe.throw("No customers selected")
 
     original_doc = frappe.get_doc("Sales Invoice PDF", docname)
+    single_doc = frappe.copy_doc(original_doc)
+
+    row_map = {row.name: row for row in original_doc.customer_with_sales_invoice}
+
     zip_buffer = io.BytesIO()
 
     with zipfile.ZipFile(zip_buffer, 'w') as zipf:
-        for row in original_doc.customer_with_sales_invoice:
-            if row.name not in selected_customers:
+        for idx, row_name in enumerate(selected_customers, 1):
+            row = row_map.get(row_name)
+            if not row:
                 continue
 
-            single_doc = frappe.copy_doc(original_doc)
             single_doc.customer_with_sales_invoice = [row]
 
             frappe.flags.ignore_print_permissions = True
@@ -44,7 +49,8 @@ def download_sales_invoices_zip(docname, selected_customers):
             )
 
             pdf_data = get_pdf(html)
-            filename = f"{scrub(row.customer)}_{row.name1}.pdf"
+
+            filename = f"{str(idx).zfill(2)}_{scrub(row.customer)}_{row.name1}.pdf"
             zipf.writestr(filename, pdf_data)
 
     zip_buffer.seek(0)
@@ -52,7 +58,6 @@ def download_sales_invoices_zip(docname, selected_customers):
     frappe.local.response.filename = file_name
     frappe.local.response.filecontent = zip_buffer.getvalue()
     frappe.local.response.type = "download"
-
 
 
 
@@ -88,7 +93,6 @@ def get_address(customer):
 @frappe.whitelist()
 def get_cities(country) :
     city = []
-    # frappe.msgprint(1)
     city_list = frappe.get_list('City',
                     filters = {
                         'country' : country,
@@ -105,7 +109,6 @@ def get_postal_codes(country) :
     postal_codes = []
     postal_codes_list = frappe.get_list('Postal Codes',
                     filters = {
-                        # 'city' : city,
                         'country' : country,
                     },fields = ['name'],
                     ignore_permissions = True)
@@ -138,53 +141,6 @@ def get_service_types(customer,imp_exp_field) :
         for row in cust.custom_service_types :
             if row.imp__exp == imp_exp_field :
                 service_types.append(row.service_type)
-
-    #     if cust.custom_express_plus == 1 :
-    #         ser_doc = frappe.get_doc("Service Type","Import Express Plus")
-    #         service_types.append(ser_doc.name)
-    #     if cust.custom_express_imp == 1 :
-    #         ser_doc = frappe.get_doc("Service Type","Import Express")
-    #         service_types.append(ser_doc.name)
-
-    #     if cust.custom_express_saver_imp == 1 :
-    #         ser_doc = frappe.get_doc("Service Type","Import Express Saver")
-    #         service_types.append(ser_doc.name)
-
-    #     if cust.custom_expedited_imp == 1 :
-    #         ser_doc = frappe.get_doc("Service Type","Import Express Saver")
-    #         service_types.append(ser_doc.name)
-
-    #     if cust.custom_express_freight_imp == 1 :
-    #         ser_doc = frappe.get_doc("Service Type","Import Express Freight")
-    #         service_types.append(ser_doc.name)        
-
-    # elif imp_exp_field == 'Export' :
-    #     if cust.custom_express_plus_exp == 1 :
-    #         ser_doc = frappe.get_doc("Service Type","Export Express Plus")
-    #         service_types.append(ser_doc.name)
-    #     if cust.custom_express == 1 :
-    #         ser_doc = frappe.get_doc("Service Type","Export Express")
-    #         service_types.append(ser_doc.name)
-
-    #     if cust.custom_express_saver == 1 :
-    #         ser_doc = frappe.get_doc("Service Type","Export Express Saver")
-    #         service_types.append(ser_doc.name)
-
-    #     if cust.custom_expedited == 1 :
-    #         ser_doc = frappe.get_doc("Service Type","Export Expedited")
-    #         service_types.append(ser_doc.name)
-
-    #     if cust.custom_express_freight == 1 :
-    #         ser_doc = frappe.get_doc("Service Type","Export Express Freight")
-    #         service_types.append(ser_doc.name)   
-
-    #     if cust.custom_express_freight_midday == 1 :
-    #         ser_doc = frappe.get_doc("Service Type","Export Express Freight Midday")
-    #         service_types.append(ser_doc.name)            
-
-    # for account in cust.service_types :
-    #     service_types.append(account.service_type)
-    
     return service_types   
 
 
@@ -241,7 +197,6 @@ def get_customer1(contact):
 @frappe.whitelist()
 def get_customer_doc(customer):
     cust = frappe.get_doc('Customer',customer)
-    # frappe.msgprint(str(cust.name))
     name = cust.name
     return name
 
@@ -303,12 +258,12 @@ def add_handling( add_charge_type ,name) :
     
     else :
         if single_pkg_no > 0 :
-            return max(single_pkg_no*add_charge_doc.amount , add_charge_doc.minimum_amount )
+            return max(single_pkg_no*add_charge_doc.amount , add_charge_doc.minimum_amount)
 
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False) :
+def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
     doclist = get_mapped_doc(
 		"Booking",
 		source_name,
@@ -318,7 +273,6 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False) :
 				"field_map": {
 					"customer": "customer",
 				},
-				# "validation": {"docstatus": ["=", 1]},
 			},
 		},
 		target_doc,

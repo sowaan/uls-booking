@@ -62,6 +62,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     if not shipment_number:
             return
     invoice_types = ["custom_compensation_invoices", "custom_freight_invoices"]
+    logs = []
     if log_existing_invoice(invoice_types, shipment_number, logs, login_username, parent_id):
         log = frappe.db.get_value(
             "Sales Invoice Logs",
@@ -76,7 +77,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
         } if log else "No Logs Found"
     print("Processing Invoice")
     sales_invoice = frappe.new_doc("Sales Invoice")
-    logs = []
+    
     
     if check_type(shipment_number, logs):
         sales_invoice.custom_compensation_invoices = True

@@ -173,12 +173,14 @@ class SalesInvoicePDF(Document):
         for idx, (customer, data) in enumerate(customer_sales_invoices.items(), start=1):
             email = None
             try:
-                customer_doc = frappe.get_doc("Customer", customer)
+                if not customer:
+                    continue
+                customer_doc = frappe.db.get_value("Customer", customer, ["name", "customer_primary_address"], as_dict=True)
                 if customer_doc:
                     if customer_doc.customer_primary_address:
                         pri_address_doc_mail = frappe.db.get_value("Address", customer_doc.customer_primary_address, "email_id")
-                        email = pri_address_doc_mail if pri_address_doc_mail else ""
-                    else:
+                        email = pri_address_doc_mail if pri_address_doc_mail else None
+                    if not email:
                         linked_address = frappe.db.get_value(
                             "Dynamic Link",
                             {
@@ -194,7 +196,6 @@ class SalesInvoicePDF(Document):
             except Exception:
                 email = ""
 
-            # sales_invoices = ', '.join(data["sales_invoices"])
             email = email if email else "" 
             row = {
                 "name1": f"{self.name}-{str(idx).zfill(3)}",
