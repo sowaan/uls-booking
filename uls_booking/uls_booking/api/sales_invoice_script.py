@@ -177,7 +177,6 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
             )
         #############################################################################################################
 
-
         if is_export and not sales_invoice.custom_shipper_number:
             sales_invoice.custom_shipper_number = unassign
 
@@ -227,7 +226,6 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
         # print("insert")
         sales_invoice.insert()
         # print("after insert")
-
         log_filters = {'shipment_number': shipment_number}
         log_doc = frappe.get_doc("Sales Invoice Logs", log_filters) if frappe.db.exists("Sales Invoice Logs", log_filters) else frappe.new_doc("Sales Invoice Logs")
         if frappe.db.exists("Sales Invoice", sales_invoice.name):

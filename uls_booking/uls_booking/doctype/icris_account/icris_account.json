@@ -110,7 +110,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-11 14:43:55.195084",
+ "modified": "2025-07-11 17:09:49.751479",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "ICRIS Account",
@@ -130,7 +130,6 @@
    "write": 1
   }
  ],
- "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

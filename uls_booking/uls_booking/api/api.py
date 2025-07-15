@@ -61,17 +61,109 @@ def download_sales_invoices_zip(docname, selected_customers):
 
 
 
+
+def make_str_to_array(str_value):
+    """
+    Converts a string of comma-separated values into a list.
+    """
+    if not str_value:
+        return []
+    return [item.strip() for item in str_value.split(',') if item.strip()]
+
+
+
+
+@frappe.whitelist()
+def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
+    """
+    Returns a list of outstanding invoice details for Payment Entry reference table.
+    Optimized using frappe.db.get_list instead of get_doc.
+    """
+    si_str = None
+    invoice_names = []
+    pdf_doc = frappe.get_doc("Sales Invoice PDF", sales_invoice_pdf)
+
+    if pdf_doc.customer and pdf_doc.customer == party:
+        si_str = pdf_doc.customer_with_sales_invoice[0].sales_invoices
+        invoice_names = make_str_to_array(si_str)
+    elif pdf_doc.customer:
+        pass
+    else:
+        for row in pdf_doc.customer_with_sales_invoice:
+            if row.customer == party:
+                si_str = row.sales_invoices
+                invoice_names = make_str_to_array(si_str)
+                break
+
+    if not invoice_names:
+        return []
+
+    invoices = frappe.db.get_list(
+        "Sales Invoice",
+        filters={"name": ["in", invoice_names], "outstanding_amount": [">", 0]},
+        fields=[
+            "name", "due_date", "grand_total", "rounded_total",
+            "outstanding_amount", "bill_no", "debit_to", "conversion_rate"
+        ]
+    )
+
+    detailed_invoices = []
+    for inv in invoices:
+        payment_term = None
+        payment_term_outstanding = inv.outstanding_amount
+
+        ps = frappe.db.get_list(
+            "Payment Schedule",
+            filters={"parent": inv.name},
+            fields=["payment_term", "outstanding"],
+            limit=1
+        )
+        if ps:
+            payment_term = ps[0].payment_term
+            payment_term_outstanding = ps[0].outstanding
+
+        detailed_invoices.append({
+            "voucher_type": "Sales Invoice",
+            "voucher_no": inv.name,
+            "due_date": inv.due_date,
+            "invoice_amount": inv.rounded_total or inv.grand_total,
+            "outstanding_amount": inv.outstanding_amount,
+            "allocated_amount": inv.outstanding_amount,
+            "bill_no": inv.bill_no,
+            "account": inv.debit_to,
+            "payment_term": payment_term,
+            "payment_term_outstanding": payment_term_outstanding,
+            "exchange_rate": inv.conversion_rate or 1
+        })
+
+    return detailed_invoices
+
+
+
+
+
+
 # @frappe.whitelist()
-# def update_include_in_print(docname, selected_customers):
-#     child_rows = frappe.get_all("Sales Invoice PDF table",
-#         filters={"parent": docname},
-#         fields=["name"]
-#     )
-#     for row in child_rows:
-#         value = 1 if row.name in selected_customers else 0
-#         frappe.db.set_value("Sales Invoice PDF table", row.name, "include_in_print", value)
-
-
+# def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
+#     """
+#     Returns a list of outstanding invoices for the selected customers.
+#     """
+#     si_str = None
+#     outstanding_invoices = []
+#     pdf_doc = frappe.get_doc("Sales Invoice PDF", sales_invoice_pdf)
+#     if pdf_doc.customer and pdf_doc.customer == party:
+#         si_str = pdf_doc.customer_with_sales_invoice[0].sales_invoices
+#         outstanding_invoices = make_str_to_array(si_str)
+#     elif pdf_doc.customer:
+#         pass
+#     else:
+#         for row in pdf_doc.customer_with_sales_invoice:
+#             if row.customer == party:
+#                 si_str = row.sales_invoices
+#                 outstanding_invoices = make_str_to_array(si_str)
+#                 break
+            
+#     return outstanding_invoices
 
 
 

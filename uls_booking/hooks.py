@@ -156,7 +156,8 @@ fixtures = [
 # include js in doctype views
 doctype_js = {
     "Sales Invoice" : "uls_booking/client_scripts/sales_invoice.js",
-    "HD Ticket" : "uls_booking/client_scripts/hd_ticket.js"
+    "HD Ticket" : "uls_booking/client_scripts/hd_ticket.js",
+    "Payment Entry" : "uls_booking/client_scripts/payment_entry.js"
 }
 
 
@@ -307,7 +308,7 @@ doc_events = {
     "on_trash": "uls_booking.uls_booking.events.sales_invoice.before_delete"
   },
   "Sales Invoice Logs": {
-    "before_save": "uls_booking.uls_booking.events.sales_invoice_logs.before_save"
+    "after_save": "uls_booking.uls_booking.events.sales_invoice_logs.after_save"
   }
 }
 

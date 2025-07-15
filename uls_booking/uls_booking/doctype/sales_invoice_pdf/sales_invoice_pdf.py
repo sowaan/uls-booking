@@ -89,7 +89,9 @@ class SalesInvoicePDF(Document):
             values["customer"] = self.customer
 
         where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
-
+        peak_code = frappe.db.get_single_value("Manifest Setting Definition", "peak_charges")
+        values["peak_code"] = peak_code
+        
         query = f"""
             SELECT 
                 si.name,
@@ -103,13 +105,20 @@ class SalesInvoicePDF(Document):
                 si.total_taxes_and_charges,
                 si.base_total_taxes_and_charges,
                 si.plc_conversion_rate,
-                sn.station
+                sn.station,
+                MAX(
+                    CASE 
+                        WHEN sii.item_code = %(peak_code)s AND sii.amount > 0 THEN 1
+                        ELSE 0 
+                    END
+                ) AS item_status
             FROM (
                 SELECT * FROM `tabSales Invoice`
                 {where_clause}
             ) AS si
             LEFT JOIN `tabShipment Number` sn ON si.custom_shipment_number = sn.name
             LEFT JOIN `tabCustomer` c ON si.customer = c.name
+            LEFT JOIN `tabSales Invoice Item` sii ON si.name = sii.parent
         """
 
         outer_conditions = []
@@ -132,9 +141,12 @@ class SalesInvoicePDF(Document):
         if outer_conditions:
             query += " WHERE " + " AND ".join(outer_conditions)
 
+        query += " GROUP BY si.name"
+        
+
+
         results = frappe.db.sql(query, values, as_dict=True)
 
-        # frappe.msgprint(f"Values: {results}")
         if not results:
             frappe.msgprint("No matching Sales Invoices found.")
             return
@@ -157,8 +169,13 @@ class SalesInvoicePDF(Document):
                     "total_base_taxes_and_charges": 0,
                     "email": None,
                     "plc_conversion_rate": 0,
-                    "station": None
+                    "station": None,
+                    "is_peak": 0
                 }
+            
+            # test_customer = frappe.db.get_all("Sales Invoice Item", filters={"parent": row.name}, fields=["item_code", "amount"])
+            # frappe.msgprint(f"Processing Sales Invoice: {row.get('name')} for Customer: {customer} with Items: {test_customer}")
+            
             customer_sales_invoices[customer]["sales_invoices"].append(sales_invoice_name)
             customer_sales_invoices[customer]["total_grand_total"] += row["grand_total"]
             customer_sales_invoices[customer]["total_base_grand_total"] += row["base_grand_total"]
@@ -166,6 +183,8 @@ class SalesInvoicePDF(Document):
             customer_sales_invoices[customer]["total_base_taxes_and_charges"] += row["base_total_taxes_and_charges"]
             customer_sales_invoices[customer]["plc_conversion_rate"] = conversion_rate
             customer_sales_invoices[customer]["station"] = station
+            if row.get("item_status") == 1:
+                customer_sales_invoices[customer]["is_peak"] = 1
 
         self.all_sales_invoices = ", ".join(invoice_list)
 
@@ -196,7 +215,7 @@ class SalesInvoicePDF(Document):
             except Exception:
                 email = ""
 
-            email = email if email else "" 
+            email = email if email else ""
             row = {
                 "name1": f"{self.name}-{str(idx).zfill(3)}",
                 "customer": customer,
@@ -208,7 +227,8 @@ class SalesInvoicePDF(Document):
                 "sales_tax_amount_pkr": data["total_taxes_and_charges"] * data["plc_conversion_rate"],
                 "invoice_date": self.end_date,
                 "station": data["station"],
-                "total_invoices": len(data["sales_invoices"])
+                "total_invoices": len(data["sales_invoices"]),
+                "is_peak": data["is_peak"]
             }
             self.append("customer_with_sales_invoice", row)
 

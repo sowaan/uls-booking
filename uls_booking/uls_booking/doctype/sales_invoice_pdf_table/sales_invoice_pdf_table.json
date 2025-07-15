@@ -17,7 +17,8 @@
   "station",
   "net_total_in_usd",
   "net_total_in_pkr",
-  "include_in_print"
+  "include_in_print",
+  "is_peak"
  ],
  "fields": [
   {
@@ -87,12 +88,18 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Include In Print"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_peak",
+   "fieldtype": "Check",
+   "label": "Is Peak"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-02 12:51:23.020454",
+ "modified": "2025-07-14 17:23:16.954841",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice PDF table",
