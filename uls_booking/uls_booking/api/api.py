@@ -81,17 +81,20 @@ def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
     Optimized using frappe.db.get_list instead of get_doc.
     """
     si_str = None
+    emp_id = ''
     invoice_names = []
     pdf_doc = frappe.get_doc("Sales Invoice PDF", sales_invoice_pdf)
 
     if pdf_doc.customer and pdf_doc.customer == party:
         si_str = pdf_doc.customer_with_sales_invoice[0].sales_invoices
+        emp_id = pdf_doc.customer_with_sales_invoice[0].name1
         invoice_names = make_str_to_array(si_str)
     elif pdf_doc.customer:
         pass
     else:
         for row in pdf_doc.customer_with_sales_invoice:
             if row.customer == party:
+                emp_id = row.name1
                 si_str = row.sales_invoices
                 invoice_names = make_str_to_array(si_str)
                 break
@@ -137,7 +140,7 @@ def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
             "exchange_rate": inv.conversion_rate
         })
 
-    return detailed_invoices
+    return detailed_invoices, emp_id
 
 
 

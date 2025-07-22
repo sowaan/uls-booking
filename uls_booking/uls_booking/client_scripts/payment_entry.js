@@ -32,7 +32,9 @@ frappe.ui.form.on('Payment Entry', {
                     callback: function (r) {
                         if (r.message && r.message.length > 0) {
                             // let invoices = r.message.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
-                            let invoices = r.message
+                            let invoices = r.message[0];
+                            let emp_id = r.message[1];
+                            // console.log(emp_id)
 
                             let remaining = frm.doc.payment_type === 'Receive'
                                 ? flt(frm.doc.paid_amount)
@@ -84,6 +86,10 @@ frappe.ui.form.on('Payment Entry', {
                             });
 
                             frm.refresh_field("references");
+                            if (frm.doc.references){
+                                frm.set_value('custom_sales_invoice_pdf_ref', values.message)
+                                frm.set_value('custom_customer_invoice', emp_id)
+                            }
 
                             frm.set_value("base_total_allocated_amount", total_allocated);
 
@@ -112,9 +118,11 @@ frappe.ui.form.on('Payment Entry', {
                         } else {
                             frappe.msgprint(__('No outstanding PDF Invoices found for {0}.', [frm.doc.party]));
                         }
-
+                        
                         d.hide();
                     }
+                
+                    
                 });
             }
         });
