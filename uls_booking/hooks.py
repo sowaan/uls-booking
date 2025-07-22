@@ -137,7 +137,8 @@ fixtures = [
                                 "custom_edit_customer",
                                 "custom_shipment_type_dt",
                                 "custom_delivery_status",
-                                "custom_sales_invoice_pdf_ref"
+                                "custom_sales_invoice_pdf_ref",
+                                "custom_get_pdf_outstanding_invoices"
 
                                 )
 	  	  
@@ -308,7 +309,7 @@ doc_events = {
     "on_trash": "uls_booking.uls_booking.events.sales_invoice.before_delete"
   },
   "Sales Invoice Logs": {
-    "after_save": "uls_booking.uls_booking.events.sales_invoice_logs.after_save"
+    "on_update": "uls_booking.uls_booking.events.sales_invoice_logs.on_update"
   }
 }
 

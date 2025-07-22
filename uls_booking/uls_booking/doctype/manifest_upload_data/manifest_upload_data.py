@@ -840,204 +840,204 @@ def generate_remaining_sales_invoice():
 
 
 def storing_shipment_number(arrays, frm, to, doc):
+    try:
 
-    # doc = frappe.get_doc('Manifest Upload Data', doc_name)
+        # doc = frappe.get_doc('Manifest Upload Data', doc_name)
 
-    
-    shipment_numbers = set()  # Use a set to ensure uniqueness
+        
+        shipment_numbers = set()  # Use a set to ensure uniqueness
 
-    for line in arrays:
-        try:
-            shipment_num = line[frm:to].strip()
-            if shipment_num:
-                shipment_numbers.add(shipment_num)  # Add to the set
-        except IndexError:
-            frappe.log_error(f"IndexError processing line: {line}", "Data Processing Error")
-            continue
-        except Exception as e:
-            frappe.log_error(f"Unexpected error processing line: {line}. Error: {str(e)}", "Data Processing Error")
-            continue
+        for line in arrays:
+            try:
+                shipment_num = line[frm:to].strip()
+                if shipment_num:
+                    shipment_numbers.add(shipment_num)  # Add to the set
+            except IndexError:
+                frappe.log_error(f"IndexError processing line: {line}", "Data Processing Error")
+                continue
+            except Exception as e:
+                frappe.log_error(f"Unexpected error processing line: {line}. Error: {str(e)}", "Data Processing Error")
+                continue
 
-    unique_shipment_numbers = list(shipment_numbers)
-    # defintion = frappe.get_doc("Sales Invoice Definition", "4f1330rq6u")
-    setting = frappe.get_doc("Manifest Setting Definition")
-    origin_country = setting.origin_country
-    frappe.db.set_value("Manifest Upload Data",doc.name,"total_shipment_numbers" , len(unique_shipment_numbers))
-    for shipment in unique_shipment_numbers:
-        # Check if the shipment number already exists
-        # existing_doc = frappe.get_value("Shipment Number", {"shipment_number": shipment})
-        existing_doc = frappe.get_list("Shipment Number",filters={"shipment_number":shipment})
-        if existing_doc:
-            billing_term = frappe.get_value("R200000", {"shipment_number": shipment}, "billing_term_field")
-            date_shipped = frappe.get_value("R200000", {"shipment_number": shipment}, "shipped_date")
-            import_date = frappe.get_value("R200000", {"shipment_number": shipment}, "manifest_import_date")
-            file_type = frappe.get_value("R200000", {"shipment_number": shipment}, "file_type")
-            shipment_doc = frappe.get_doc("Shipment Number",shipment)
-            file_name = frappe.get_value("R200000",{"shipment_number":shipment},"file_name")
-            customer = None
-            icris_number = None
-            billing_type = None
-            station = None
-            import_export = None
-            # Fetch export shipments
-            export_array_temp = frappe.get_list("R300000",
-                filters=[
-                    ["shipper_country", "=", origin_country],
-                    ["shipment_number", "=", shipment]
-                ],
-                fields=["shipment_number", "shipper_number"]
-            )
-
-            if export_array_temp:
-                station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
-                shipper_number = export_array_temp[0].shipper_number
-                import_export = "Export"
-                icris = frappe.get_list("ICRIS Account",
+        unique_shipment_numbers = list(shipment_numbers)
+        # defintion = frappe.get_doc("Sales Invoice Definition", "4f1330rq6u")
+        setting = frappe.get_doc("Manifest Setting Definition")
+        origin_country = setting.origin_country
+        frappe.db.set_value("Manifest Upload Data",doc.name,"total_shipment_numbers" , len(unique_shipment_numbers))
+        for shipment in unique_shipment_numbers:
+            # Check if the shipment number already exists
+            # existing_doc = frappe.get_value("Shipment Number", {"shipment_number": shipment})
+            r2_data = frappe.db.get_value("R200000", {"shipment_number": shipment}, ["billing_term_field", "shipped_date", "manifest_import_date", "file_type", "file_name"], as_dict=True)
+            billing_term = r2_data.billing_term_field
+            date_shipped = r2_data.shipped_date
+            import_date = r2_data.manifest_import_date
+            file_type = r2_data.file_type
+            file_name = r2_data.file_name
+            existing_doc = frappe.get_list("Shipment Number",filters={"shipment_number":shipment})
+            if existing_doc:
+                shipment_doc = frappe.get_doc("Shipment Number",shipment)
+                customer = None
+                icris_number = None
+                billing_type = None
+                station = None
+                import_export = None
+                # Fetch export shipments
+                export_array_temp = frappe.get_list("R300000",
                     filters=[
-                        ["name", "=", shipper_number]
+                        ["shipper_country", "=", origin_country],
+                        ["shipment_number", "=", shipment]
                     ],
-                    fields=["shipper_name", "icris_account"]
+                    fields=["shipment_number", "shipper_number"]
                 )
-                if icris:
-                    customer = icris[0].shipper_name
-                    billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
-                    icris_number = icris[0].icris_account
 
-            # Fetch import shipments
-            import_array_temp = frappe.get_list("R400000",
-                filters=[
-                    ["consignee_country_code", "=", origin_country],
-                    ["shipment_number", "=", shipment]
-                ],
-                fields=["shipment_number", "consignee_number"]
-            )
+                if export_array_temp:
+                    station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
+                    shipper_number = export_array_temp[0].shipper_number
+                    import_export = "Export"
+                    icris = frappe.get_list("ICRIS Account",
+                        filters={
+                            "name": shipper_number
+                        },
+                        fields=["shipper_name", "icris_account"]
+                    )
+                    if icris:
+                        customer = icris[0].shipper_name
+                        billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
+                        icris_number = icris[0].icris_account
 
-            if import_array_temp:
-                station = frappe.get_value("R400000", {"shipment_number": shipment}, "consignee_city")
-                consignee_number = import_array_temp[0].consignee_number
-                import_export = "Import"
-                icris = frappe.get_list("ICRIS Account",
+                # Fetch import shipments
+                import_array_temp = frappe.get_list("R400000",
+                    filters={
+                        "consignee_country_code": origin_country,
+                        "shipment_number": shipment
+                    },
+                    fields=["shipment_number", "consignee_number"]
+                )
+
+                if import_array_temp:
+                    station = frappe.get_value("R400000", {"shipment_number": shipment}, "consignee_city")
+                    consignee_number = import_array_temp[0].consignee_number
+                    import_export = "Import"
+                    icris = frappe.get_list("ICRIS Account",
+                        filters={
+                            "name": consignee_number
+                        },
+                        fields=["shipper_name", "icris_account"]
+                    )
+                    if icris:
+                        customer = icris[0].shipper_name
+                        billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
+                        icris_number = icris[0].icris_account
+
+
+                # Create a new shipment document
+                
+                shipment_doc.set("shipment_number", shipment)
+                shipment_doc.set("customer", customer)
+                shipment_doc.set("date_shipped", date_shipped)
+                shipment_doc.set("station", station)
+                shipment_doc.set("icris_number", icris_number)
+                shipment_doc.set("billing_type", billing_type)
+                shipment_doc.set("billing_term",billing_term)
+                shipment_doc.set("file_name",file_name)
+                shipment_doc.set("import__export",import_export)
+                shipment_doc.set("import_date",import_date)
+                shipment_doc.set("manifest_file_type",file_type)
+                shipment_doc.set("manifest_upload_data",doc.name)
+                shipment_doc.set("gateway",doc.gateway)
+
+                # shipment_doc.insert()
+                shipment_doc.save()
+                # frappe.db.commit()
+                    # continue  # Skip if it already exists
+            else:
+                
+                customer = None
+                icris_number = None
+                billing_type = None
+                station = None
+                import_export = None
+                # Fetch export shipments
+                export_array_temp = frappe.get_list("R300000",
                     filters=[
-                        ["name", "=", consignee_number]
+                        ["shipper_country", "=", origin_country],
+                        ["shipment_number", "=", shipment]
                     ],
-                    fields=["shipper_name", "icris_account"]
+                    fields=["shipment_number", "shipper_number"]
                 )
-                if icris:
-                    customer = icris[0].shipper_name
-                    billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
-                    icris_number = icris[0].icris_account
 
+                if export_array_temp:
+                    station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
+                    shipper_number = export_array_temp[0].shipper_number
+                    import_export = "Export"
+                    icris = frappe.get_list("ICRIS Account",
+                        filters=[
+                            ["name", "=", shipper_number]
+                        ],
+                        fields=["shipper_name", "icris_account"]
+                    )
+                    if icris:
+                        customer = icris[0].shipper_name
+                        billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
+                        icris_number = icris[0].icris_account
 
-            # Create a new shipment document
-            
-            shipment_doc.set("shipment_number", shipment)
-            shipment_doc.set("customer", customer)
-            shipment_doc.set("date_shipped", date_shipped)
-            shipment_doc.set("station", station)
-            shipment_doc.set("icris_number", icris_number)
-            shipment_doc.set("billing_type", billing_type)
-            shipment_doc.set("billing_term",billing_term)
-            shipment_doc.set("file_name",file_name)
-            shipment_doc.set("import__export",import_export)
-            shipment_doc.set("import_date",import_date)
-            shipment_doc.set("manifest_file_type",file_type)
-            shipment_doc.set("manifest_upload_data",doc.name)
-            shipment_doc.set("gateway",doc.gateway)
-
-            # shipment_doc.insert()
-            shipment_doc.save()
-            # frappe.db.commit()
-                # continue  # Skip if it already exists
-        else:
-            date_shipped = frappe.get_value("R200000", {"shipment_number": shipment}, "shipped_date")
-            import_date = frappe.get_value("R200000", {"shipment_number": shipment}, "manifest_import_date")
-            file_type = frappe.get_value("R200000", {"shipment_number": shipment}, "file_type")
-            billing_term = frappe.get_value("R200000", {"shipment_number": shipment}, "billing_term_field")
-            file_name = frappe.get_value("R200000",{"shipment_number":shipment},"file_name")
-            customer = None
-            icris_number = None
-            billing_type = None
-            station = None
-            import_export = None
-            # Fetch export shipments
-            export_array_temp = frappe.get_list("R300000",
-                filters=[
-                    ["shipper_country", "=", origin_country],
-                    ["shipment_number", "=", shipment]
-                ],
-                fields=["shipment_number", "shipper_number"]
-            )
-
-            if export_array_temp:
-                station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
-                shipper_number = export_array_temp[0].shipper_number
-                import_export = "Export"
-                icris = frappe.get_list("ICRIS Account",
+                # Fetch import shipments
+                import_array_temp = frappe.get_list("R400000",
                     filters=[
-                        ["name", "=", shipper_number]
+                        ["consignee_country_code", "=", origin_country],
+                        ["shipment_number", "=", shipment]
                     ],
-                    fields=["shipper_name", "icris_account"]
+                    fields=["shipment_number", "consignee_number"]
                 )
-                if icris:
-                    customer = icris[0].shipper_name
-                    billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
-                    icris_number = icris[0].icris_account
 
-            # Fetch import shipments
-            import_array_temp = frappe.get_list("R400000",
-                filters=[
-                    ["consignee_country_code", "=", origin_country],
-                    ["shipment_number", "=", shipment]
-                ],
-                fields=["shipment_number", "consignee_number"]
-            )
-
-            if import_array_temp:
-                station = frappe.get_value("R400000", {"shipment_number": shipment}, "consignee_city")
-                consignee_number = import_array_temp[0].consignee_number
-                import_export = "Import"
-                icris = frappe.get_list("ICRIS Account",
-                    filters=[
-                        ["name", "=", consignee_number]
-                    ],
-                    fields=["shipper_name", "icris_account"]
-                )
-                if icris:
-                    customer = icris[0].shipper_name
-                    billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
-                    icris_number = icris[0].icris_account
+                if import_array_temp:
+                    station = frappe.get_value("R400000", {"shipment_number": shipment}, "consignee_city")
+                    consignee_number = import_array_temp[0].consignee_number
+                    import_export = "Import"
+                    icris = frappe.get_list("ICRIS Account",
+                        filters=[
+                            ["name", "=", consignee_number]
+                        ],
+                        fields=["shipper_name", "icris_account"]
+                    )
+                    if icris:
+                        customer = icris[0].shipper_name
+                        billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
+                        icris_number = icris[0].icris_account
 
 
-            # Create a new shipment document
-            shipment_doc = frappe.new_doc("Shipment Number")
-            shipment_doc.set("shipment_number", shipment)
-            shipment_doc.set("customer", customer)
-            shipment_doc.set("billing_term",billing_term)
-            shipment_doc.set("date_shipped", date_shipped)
-            shipment_doc.set("station", station)
-            shipment_doc.set("icris_number", icris_number)
-            shipment_doc.set("billing_type", billing_type)
-            shipment_doc.set("file_name",file_name)
-            shipment_doc.set("import__export",import_export)
-            shipment_doc.set("import_date",import_date)
-            shipment_doc.set("manifest_file_type",file_type)
-            shipment_doc.set("manifest_upload_data",doc.name)
-            shipment_doc.set("gateway",doc.gateway)
+                # Create a new shipment document
+                shipment_doc = frappe.new_doc("Shipment Number")
+                shipment_doc.set("shipment_number", shipment)
+                shipment_doc.set("customer", customer)
+                shipment_doc.set("billing_term",billing_term)
+                shipment_doc.set("date_shipped", date_shipped)
+                shipment_doc.set("station", station)
+                shipment_doc.set("icris_number", icris_number)
+                shipment_doc.set("billing_type", billing_type)
+                shipment_doc.set("file_name",file_name)
+                shipment_doc.set("import__export",import_export)
+                shipment_doc.set("import_date",import_date)
+                shipment_doc.set("manifest_file_type",file_type)
+                shipment_doc.set("manifest_upload_data",doc.name)
+                shipment_doc.set("gateway",doc.gateway)
 
-            shipment_doc.insert(ignore_permissions=True)
-            shipment_doc.save(ignore_permissions=True)
-            # frappe.db.commit()
+                shipment_doc.insert(ignore_permissions=True)
+                shipment_doc.save(ignore_permissions=True)
+                # frappe.db.commit()
 
-    shipment_numbers = frappe.db.get_all(
-        "Shipment Number",
-        filters={"manifest_upload_data": doc.name},
-        pluck="name"
-    )
+        shipment_numbers = frappe.db.get_all(
+            "Shipment Number",
+            filters={"manifest_upload_data": doc.name},
+            pluck="name"
+        )
+        unique_shipment_numbers_created = set(shipment_numbers)
+        frappe.db.set_value("Manifest Upload Data", doc.name, "created_shipments", len(unique_shipment_numbers_created))
+        frappe.db.set_value("Manifest Upload Data", doc.name, "status", "Completed")
+    except Exception as e:
+        frappe.log_error(f"Error in storing shipment numbers: {str(e)}", "Shipment Number Storage Error")
+        frappe.db.set_value("Manifest Upload Data", doc.name, "status", "Failed")
 
-
-    unique_shipment_numbers_created = set(shipment_numbers)
-
-    frappe.db.set_value("Manifest Upload Data", doc.name, "created_shipments", len(unique_shipment_numbers_created))
 
 
 
@@ -1065,12 +1065,7 @@ def make_R600000(self):
         self.dws_actual_weight = float(self.dws_actual_weight) / 10
 
 
-
-
-
-
-
-def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway, file_proper_name, shipped_date, import_date):
+def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway, file_proper_name, shipped_date, import_date, is_import):
     
     shipment_num = None
     pkg_trck = None
@@ -1085,7 +1080,6 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
     parent_doctype_map = {record.record[:2]: record.record for record in setting.doctypes_with_child_records}
 
     for line in arrays:
-       
         doctype_name = "R" + line[frm:to].strip()
         old_doctype_name = line[frm:to].strip()
         
@@ -1162,33 +1156,25 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
 
                 
                 if field_name in field_names_array:
-                    
-                    print(field_name," is present", doctype_name) 
+                    # print(field_name," is present", doctype_name) 
                     if field_data in country_map:
                         field_data = country_map[field_data]
-
-
-                key = (str(field_name), str(field_data)) 
-                print(f"Checking key: {key}")
+                key = (str(field_name), str(field_data))
+                # print(f"Checking key: {key}")
 
                 if key in replacement_map:
                     field_data = replacement_map[key]
-                    print(f"Replaced field data with: {field_data}")
-                else:
-                    print(f"Key {key} not found in replacement_map.")
-
+                
                 for field in setting.date_conversion_field_names:
                     if field_name == field.field_name and doctype_name == field.doctype_name:
                         try:
                             date_object = datetime.strptime(field_data, field.date_format)
                             output_date_format = "%Y-%m-%d"
                             field_data = date_object.strftime(output_date_format)
-
-                        except: 
+                        except:
                             pass
                             
                 for field in setting.fields_to_divide:
-                    
                     if doctype_name == field.doctype_name and field_name == field.field_name:
                         try:
                             field_data = float(field_data) if field_data else 0.0
@@ -1199,10 +1185,19 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
                         if field.number_divide_with:
                             field_data = field_data / field.number_divide_with
                         # print(field_data , field_name,"NEW")
-                if shipped_date and field_name == "shipped_date":
-                    field_data = shipped_date
-                if import_date and field_name == "manifest_import_date":
-                    field_data = import_date
+                
+                # if shipped_date and field_name == "shipped_date":
+                #     field_data = shipped_date
+                # if import_date and field_name == "manifest_import_date":
+                #     field_data = import_date
+
+                ######################## Umair Work #######################
+                # reverse work...means when import update shipped field , when export update import field
+                if is_import and field_name == "manifest_import_date":
+                    continue
+                if not is_import and field_name == "shipped_date":
+                    continue
+                ######################## Umair Work #######################
 
                 docss.set(field_name, field_data)
 
@@ -1221,7 +1216,6 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
             # frappe.db.commit()    
             # print(doctype_name, shipment_num, "Updating")
         else:
-            
             doc = frappe.new_doc(doctype_name)
             doc.set("file_name",file_proper_name)
             doc.set("manifest_upload_data",manifest_upload_data_name)
@@ -1256,7 +1250,7 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
                             output_date_format = "%Y-%m-%d"
                             field_data = date_object.strftime(output_date_format)
 
-                        except: 
+                        except:
                             pass
                 # doc.set(field_name, field_data)
                 for field in setting.fields_to_divide:
@@ -1265,15 +1259,21 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
                         try:
                             field_data = float(field_data) if field_data else 0.0
                         except ValueError:
-                            # Handle the case where field_data is not a number
-                            # frappe.log_error(f"Cannot convert field_data '{field_data}' to float", "Conversion Error")
+                            
                             field_data = 0.0
                         if field.number_divide_with:
                             field_data = field_data / field.number_divide_with
-                if shipped_date and field_name == "manifest_shipped_date":
-                    field_data = shipped_date
-                if import_date and field_name == "manifest_import_date":
-                    field_data = import_date
+                # if shipped_date and field_name == "manifest_shipped_date":
+                #     field_data = shipped_date
+                # if import_date and field_name == "manifest_import_date":
+                #     field_data = import_date
+                ######################## Umair Work #######################
+                # reverse work...means when import update shipped field , when export update import field
+                if is_import and field_name == "manifest_import_date":
+                    continue
+                if not is_import and field_name == "shipped_date":
+                    continue
+                ######################## Umair Work #######################
                 doc.set(field_name, field_data)
     
             if doctype_name == "R300000":
@@ -1290,8 +1290,6 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
             doc.save()
 
 
-       
-        
 def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_date, import_date, manifest_upload_data_name, gateway):
     shipment_num = None
     pkg_trck = None
@@ -1318,14 +1316,12 @@ def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_d
             doctype_name = parent_doctype_map[prefix]
         
         try:
-            
             definition = frappe.get_doc("Definition Manifest", doctype_name)
             for row in definition.opsys_definitions:
                 if row.field_name == "shipment_number":
                     shipst = row.from_index - 1
                     shipto = row.to_index
                     shipment_num = line[shipst:shipto].strip()
-                
                 if row.field_name == "expanded_package_tracking_number":
                     pkg_trckt = row.from_index - 1
                     pkg_trckto = row.to_index
@@ -1381,19 +1377,19 @@ def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_d
                 
                 if field_name in field_names_array:
                     
-                    print(field_name," is present", doctype_name) 
+                    # print(field_name," is present", doctype_name) 
                     if field_data in country_map:
                         field_data = country_map[field_data]
 
 
                 key = (str(field_name), str(field_data))
-                print(f"Checking key: {key}")
+                # print(f"Checking key: {key}")
 
                 if key in replacement_map:
                     field_data = replacement_map[key]
-                    print(f"Replaced field data with: {field_data}")
-                else:
-                    print(f"Key {key} not found in replacement_map.")
+                #     print(f"Replaced field data with: {field_data}")
+                # else:
+                #     print(f"Key {key} not found in replacement_map.")
 
                 for field in setting.date_conversion_field_names:
                     if field_name == field.field_name and doctype_name == field.doctype_name:
@@ -1408,7 +1404,6 @@ def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_d
                             # pass
         
                 for field in setting.fields_to_divide:
-                    
                     if doctype_name == field.doctype_name and field_name == field.field_name:
                         try:
                             field_data = float(field_data) if field_data else 0.0
@@ -1424,6 +1419,7 @@ def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_d
                     field_data = shipped_date
                 if import_date and field_name == "manifest_import_date":
                     field_data = import_date
+                
                 docss.set(field_name, field_data)
 
 
@@ -1506,40 +1502,45 @@ def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_d
 
 
 def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
-    setting = frappe.get_doc("Manifest Setting Definition")
-    
-    for line in arrays2:
-        pkg_trck = line[pkg_from:pkg_to].strip()
-        docl = frappe.get_list(main_doc.record_to_modify, filters={"expanded_package_tracking_number": pkg_trck })
-        if docl:
-            doc = frappe.get_doc(main_doc.record_to_modify , docl[0])
-            for child in setting.definition:
-                field_name = child.field_name
-                from_index = child.from_index - 1
-                to_index = child.to_index
-                field_data = line[from_index:to_index].strip()
-                for field in setting.date_conversion_field_names:
-                    if field_name == field.field_name and main_doc.record_to_modify == field.doctype_name:
+    try:
+        setting = frappe.get_doc("Manifest Setting Definition")
+        
+        for line in arrays2:
+            pkg_trck = line[pkg_from:pkg_to].strip()
+            docl = frappe.get_list(main_doc.record_to_modify, filters={"expanded_package_tracking_number": pkg_trck })
+            if docl:
+                doc = frappe.get_doc(main_doc.record_to_modify , docl[0])
+                for child in setting.definition:
+                    field_name = child.field_name
+                    from_index = child.from_index - 1
+                    to_index = child.to_index
+                    field_data = line[from_index:to_index].strip()
+                    for field in setting.date_conversion_field_names:
+                        if field_name == field.field_name and main_doc.record_to_modify == field.doctype_name:
 
-                        try:
-                            date_object = datetime.strptime(field_data, date_format)
-                            output_date_format = "%Y-%m-%d"
-                            field_data = date_object.strftime(output_date_format)
+                            try:
+                                date_object = datetime.strptime(field_data, date_format)
+                                output_date_format = "%Y-%m-%d"
+                                field_data = date_object.strftime(output_date_format)
 
-                        except: 
-                            pass
+                            except: 
+                                pass
 
-                doc.set(field_name,field_data)
-                print(field_name , "  ",field_data)
-            make_R600000(doc)
-            doc.save()
-        else:
-            frappe.get_doc({
-                "doctype": "Error Log",
-                "method": "Package tracking Number not found",
-                "error": f"""Package tracking Number:,{pkg_trck}"""
+                    doc.set(field_name,field_data)
+                    # print(field_name , "  ",field_data)
+                make_R600000(doc)
+                doc.save()
+            else:
+                frappe.get_doc({
+                    "doctype": "Error Log",
+                    "method": "Package tracking Number not found",
+                    "error": f"""Package tracking Number:,{pkg_trck}"""
 
-            }).insert()
+                }).insert()
+        frappe.db.set_value("Manifest Upload Data", main_doc.name, "status", "Completed")
+    except Exception as e:
+        frappe.log_error(f"Error in modified_manifest_update: {str(e)}", "Manifest Update Error")
+        frappe.db.set_value("Manifest Upload Data", main_doc.name, "status", "Failed")
 
 
 def safe_decode(file_doc):
@@ -1557,11 +1558,11 @@ def safe_decode(file_doc):
 
 class ManifestUploadData(Document):
     def on_submit(self):
+        self.db_set("status", "Started")
         shipped_date = self.shipped_date if self.shipped_date else None
         import_date = self.import_date if self.import_date else None
         if self.attach_file and self.manifest_file_type == "ISPS":
-            
-           
+            is_import = self.export_import.lower() == "import"
             file_name = frappe.db.get_value("File", {"file_url": self.attach_file}, "name")
             file_proper_name = frappe.get_value("File",file_name,"file_name")
             # print("File Name",file_proper_name,"\n\n\n\n\n")
@@ -1576,11 +1577,11 @@ class ManifestUploadData(Document):
             current_index = 0
             
             while current_index < len(arrays):
-                chunk = arrays[current_index:current_index + chunk_size]             
+                chunk = arrays[current_index:current_index + chunk_size]  
                 current_index += chunk_size
-                enqueue(insert_data, manifest_upload_data_name = self.name, gateway = self.gateway, shipped_date = shipped_date , import_date = import_date , file_proper_name = file_proper_name , arrays=chunk,frm=frm, to=to, date_format = self.date_format, queue="long")
+                enqueue(insert_data, manifest_upload_data_name = self.name, gateway = self.gateway, is_import = is_import, shipped_date = shipped_date , import_date = import_date , file_proper_name = file_proper_name , arrays=chunk, frm=frm, to=to, date_format = self.date_format, queue="long")
                 
-            enqueue(storing_shipment_number,arrays=arrays, frm=shipfrom, to=shipto, doc=self ,queue="long")
+            enqueue(storing_shipment_number, arrays=arrays, frm=shipfrom, to=shipto, doc=self, queue="long")
 
 
 

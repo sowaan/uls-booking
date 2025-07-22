@@ -29,7 +29,8 @@
   "record_to_modify",
   "modified_file",
   "opsys_upload_data",
-  "opsys_file"
+  "opsys_file",
+  "status"
  ],
  "fields": [
   {
@@ -128,6 +129,7 @@
    "fieldname": "total_shipment_numbers",
    "fieldtype": "Int",
    "label": "Total Shipment Numbers",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -188,13 +190,28 @@
   {
    "fieldname": "created_shipments",
    "fieldtype": "Int",
-   "label": "Created Shipments"
+   "label": "Created Shipments",
+   "no_copy": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nStarted\nCompleted\nFailed",
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-18 13:04:40.285075",
+ "modified": "2025-07-21 15:54:45.302843",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Upload Data",
@@ -214,6 +231,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

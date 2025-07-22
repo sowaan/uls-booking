@@ -4,6 +4,21 @@ from frappe.utils import getdate, cint, money_in_words
 import re
 import logging
 
+
+DEFAULT_CURRENCY = frappe.db.get_default("currency")
+
+def get_sales_team_from_customer(customer_name):
+    sales_team = frappe.get_all(
+        "Sales Team",
+        filters={"parenttype": "Customer", "parent": customer_name},
+        fields=["sales_person", "allocated_percentage", "incentives"],
+        order_by="idx"
+    )
+    if not sales_team:
+        return []
+
+    return sales_team
+
 def check_type(shipment, logs):
     third_party_code = frappe.db.get_value(
         "R200000",
@@ -106,6 +121,7 @@ def generate_invoice(self, method):
 
 
     shipment_number = sales_invoice.custom_shipment_number
+    
     discounted_amount = 0
     selling_rate_country = 0
     full_tariff = None
@@ -702,8 +718,7 @@ def generate_invoice(self, method):
                 pass
         
         max_insured = 0
-        # if sales_invoice.customer != customer.custom_default_customer:
-        #     sales_invoice.custom_freight_invoices = 1
+        
         if declared_value > 0:
             # percent = frappe.db.get_single_value('Additional Charges Page', 'percentage_on_declare_value')
             # minimum_amount = frappe.db.get_single_value('Additional Charges Page', 'minimum_amount_for_declare_value')
@@ -718,7 +733,7 @@ def generate_invoice(self, method):
         sales_invoice.custom_freight_charges = tarif
         amt = tarif - final_rate
         sales_invoice.discount_amount = round(amt, 2) or 0
-        sales_invoice.base_discount_amount = (sales_invoice.discount_amount or 0)  * (sales_invoice.conversion_rate or 0)
+        sales_invoice.base_discount_amount = (sales_invoice.discount_amount or 1)  * (sales_invoice.conversion_rate or 1)
         
 
         sales_invoice.custom_amount_after_discount = tarif - (sales_invoice.discount_amount or 0)
@@ -787,7 +802,7 @@ def generate_invoice(self, method):
 
     
 
-    if sales_invoice.custom_edit_selling_percentage == 1:
+    if sales_invoice.custom_edit_selling_percentage:
         final_discount_percentage = sales_invoice.custom_selling_percentage or 0
         sales_invoice.discount_amount = (sales_invoice.custom_freight_charges * final_discount_percentage / 100)
         sales_invoice.custom_amount_after_discount = sales_invoice.custom_freight_charges - sales_invoice.discount_amount
@@ -827,13 +842,18 @@ def generate_invoice(self, method):
             if row.item_code == setting.fuel_charges:
                 per = get_fuel_percentage_for_date(sales_invoice.custom_date_shipped)
                 row.rate = ((sales_invoice.custom_amount_after_discount + sales_invoice.custom_total_surcharges_incl_fuel) * per) / 100
+        
 
-
+    
     discounted_amount = discounted_amount - 1
-    # get_sales_tax(self, logs)
     get_sales_tax(sales_invoice, logs)
     log_text = "\n".join(logs)
     sales_invoice.set_missing_values()
+    sales_team = get_sales_team_from_customer(sales_invoice.customer)
+    sales_invoice.set("sales_team", [])
+    for member in sales_team:
+        sales_invoice.append("sales_team", member)
+    
     ############################################################################################
     exempt_case = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst')
     if exempt_case:
@@ -856,10 +876,18 @@ def generate_invoice(self, method):
         sales_invoice.base_outstanding_amount = sales_invoice.base_grand_total
 
         sales_invoice.in_words = money_in_words(sales_invoice.rounded_total, self.currency)
-        sales_invoice.base_in_words = money_in_words(sales_invoice.base_rounded_total, self.company_currency)
+        sales_invoice.base_in_words = money_in_words(sales_invoice.base_total, DEFAULT_CURRENCY)
     ############################################################################################
-
     sales_invoice.calculate_taxes_and_totals()
+    if sales_invoice.discount_amount > 0:
+        disc_per = (sales_invoice.discount_amount / sales_invoice.total) * 100 if sales_invoice.total > 0 else 0
+        sales_invoice.additional_discount_percentage = 0
+        sales_invoice.set("additional_discount_percentage", disc_per)
+        sales_invoice.calculate_taxes_and_totals()
+    sales_invoice.in_words = money_in_words(sales_invoice.rounded_total, sales_invoice.currency)
+    sales_invoice.base_in_words = money_in_words(sales_invoice.base_rounded_total, DEFAULT_CURRENCY)
+    
+    
     if logs:
         if frappe.db.exists("Shipment Number", shipment_number):
             log_doc.set("shipment_number" , shipment_number)
@@ -1006,6 +1034,7 @@ def set_default_tax(self) :
 
 
 def duty_and_tax_validation_on_submit(self, method):
+    
     if self.custom_duty_and_taxes_invoice == 1 :
         if self.taxes_and_charges :
             self.taxes_and_charges = None
@@ -1071,7 +1100,7 @@ def reset_tax_fields(self):
         self.base_outstanding_amount = self.base_grand_total
 
         self.in_words = money_in_words(self.rounded_total, self.currency)
-        self.base_in_words = money_in_words(self.base_rounded_total, self.company_currency)
+        self.base_in_words = money_in_words(self.base_rounded_total, DEFAULT_CURRENCY)
     else:
         if not self.taxes_and_charges and not self.taxes:
             get_sales_tax(self)

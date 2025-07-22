@@ -216,15 +216,29 @@ class SalesInvoicePDF(Document):
                 email = ""
 
             email = email if email else ""
+            # row = {
+            #     "name1": f"{self.name}-{str(idx).zfill(3)}",
+            #     "customer": customer,
+            #     "sales_invoices": ', '.join(data["sales_invoices"]),
+            #     "email": email,
+            #     "net_total_in_usd": data["total_grand_total"],
+            #     "net_total_in_pkr": data["total_grand_total"] * data["plc_conversion_rate"],
+            #     "sales_tax_amount_usd": data["total_taxes_and_charges"],
+            #     "sales_tax_amount_pkr": data["total_taxes_and_charges"] * data["plc_conversion_rate"],
+            #     "invoice_date": self.end_date,
+            #     "station": data["station"],
+            #     "total_invoices": len(data["sales_invoices"]),
+            #     "is_peak": data["is_peak"]
+            # }
             row = {
                 "name1": f"{self.name}-{str(idx).zfill(3)}",
                 "customer": customer,
                 "sales_invoices": ', '.join(data["sales_invoices"]),
                 "email": email,
                 "net_total_in_usd": data["total_grand_total"],
-                "net_total_in_pkr": data["total_grand_total"] * data["plc_conversion_rate"],
+                "net_total_in_pkr": data["total_base_grand_total"],
                 "sales_tax_amount_usd": data["total_taxes_and_charges"],
-                "sales_tax_amount_pkr": data["total_taxes_and_charges"] * data["plc_conversion_rate"],
+                "sales_tax_amount_pkr": data["total_base_taxes_and_charges"],
                 "invoice_date": self.end_date,
                 "station": data["station"],
                 "total_invoices": len(data["sales_invoices"]),

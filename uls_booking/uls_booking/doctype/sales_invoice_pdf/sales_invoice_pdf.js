@@ -47,8 +47,7 @@ frappe.ui.form.on("Sales Invoice PDF", {
             
                 const selected_names = selected.map(row => row.name);
 
-                // console.log("Selected Customers:", selected_names);
-                // return
+                
             
                 let overlay = document.getElementById('custom-loading-overlay');
                 if (!overlay) {
@@ -140,11 +139,6 @@ frappe.ui.form.on("Sales Invoice PDF", {
                     overlay.style.display = 'none';
                 }
             });
-        
-        
-        
-        
-        
         }
     }
 });

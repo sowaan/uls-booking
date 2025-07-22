@@ -223,9 +223,9 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
                 "qty": 1,
                 "rate": 0
             })
-        # print("insert")
+        print("insert")
         sales_invoice.insert()
-        # print("after insert")
+        print("after insert")
         log_filters = {'shipment_number': shipment_number}
         log_doc = frappe.get_doc("Sales Invoice Logs", log_filters) if frappe.db.exists("Sales Invoice Logs", log_filters) else frappe.new_doc("Sales Invoice Logs")
         if frappe.db.exists("Sales Invoice", sales_invoice.name):
@@ -343,6 +343,7 @@ def log_existing_invoice(invoice_type_fields, shipment_number, logs, login_usern
             "Sales Invoice",
             {
                 "custom_shipment_number": shipment_number,
+                "docstatus": ["!=", 2],
                 field: 1
             },
             "name"

@@ -11,23 +11,14 @@ def execute(filters=None):
         return txt.lower().replace(' ', '_').replace('-', '_').replace('/', '_').replace('&', '_')
 
     columns = [
-        {"label": "Posting Date", "fieldname": "posting_date", "fieldtype": "Date", "width": 120, "nowrap": 1},
+        # {"label": "Posting Date", "fieldname": "posting_date", "fieldtype": "Date", "width": 120, "nowrap": 1},
+        {"label": "Arrival Date", "fieldname": "custom_arrival_date", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
+        {"label": "MAWB Number", "fieldname": "custom_mawb_number", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
+        {"label": "Location", "fieldname": "custom_location", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
         {"label": "Invoice Number", "fieldname": "invoice", "fieldtype": "Link", "options": "Sales Invoice", "width": 150, "nowrap": 1, "word-break": "break-word"},
         {"label": "Tracking No", "fieldname": "custom_tracking_number", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
-        {"label": "Billing Term", "fieldname": "billing_term", "fieldtype": "Data", "width": 100, "nowrap": 1, "word-break": "break-word"},
-        {"label": "Customer", "fieldname": "customer", "fieldtype": "Link", "options": "Customer", "width": 150, "nowrap": 1, "word-break": "break-word"},
-        {
-            "label": "Customer Group",
-            "fieldname": "customer_grp",
-            "fieldtype": "Link",
-            "options": "Customer Group",
-            "width": 120
-        },
         {"label": "Shipper", "fieldname": "custom_shipper_name", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
-        {"label": "Consignee", "fieldname": "custom_consignee_name", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
-        {"label": "Arrival Date", "fieldname": "custom_arrival_date", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
-        {"label": "Location", "fieldname": "custom_location", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
-        {"label": "MAWB Number", "fieldname": "custom_mawb_number", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"},
+        {"label": "Consignee", "fieldname": "custom_consignee_name", "fieldtype": "Data", "width": 150, "nowrap": 1, "word-break": "break-word"}
     ]
 
     where_clause, filter_values = get_conditions(filters)
@@ -37,7 +28,7 @@ def execute(filters=None):
         FROM `tabSales Invoice Item` sii
         JOIN `tabSales Invoice` si ON sii.parent = si.name
         JOIN `tabItem` i ON sii.item_code = i.item_code
-        WHERE {where_clause}
+        WHERE {where_clause} AND sii.amount > 0
     """, values=filter_values, as_dict=True)
 
     item_columns = [item.item_code for item in item_list]
@@ -60,6 +51,12 @@ def execute(filters=None):
         "align": "center",
         "precision": 0
     })
+    columns.extend([
+        {"label": "Clearance Type", "fieldname": "clearance_type", "fieldtype": "Data", "width": 100, "nowrap": 1, "word-break": "break-word"},
+        {"label": "Billing Term", "fieldname": "billing_term", "fieldtype": "Data", "width": 100, "nowrap": 1, "word-break": "break-word"},
+        {"label": "Customer", "fieldname": "customer", "fieldtype": "Link", "options": "Customer", "width": 150, "nowrap": 1, "word-break": "break-word"},
+        {"label": "Customer Group", "fieldname": "customer_grp", "fieldtype": "Link", "options": "Customer Group", "width": 120}
+    ])
 
     results = frappe.db.sql(f"""
         SELECT
@@ -67,6 +64,7 @@ def execute(filters=None):
             si.posting_date,
             si.custom_billing_term AS billing_term,
             si.customer,
+            si.custom_clearance_type AS clearance_type,
             cust.customer_group AS customer_grp,
             si.custom_shipper_name,
             si.custom_tracking_number,
@@ -105,6 +103,7 @@ def execute(filters=None):
                 "custom_arrival_date": row.custom_arrival_date,
                 "custom_location": row.custom_location,
                 "custom_mawb_number": row.custom_mawb_number,
+                "clearance_type": row.clearance_type,
                 "total": row.total
             }
         invoice_map[invoice][custom_scrub(row.item_code)] = round(row.amount)

@@ -4,6 +4,16 @@
 
 
 frappe.ui.form.on('Manifest Upload Data', {
+    refresh: function(frm) {
+        if (frm.doc.docstatus === 1 && frm.doc.status) {
+            frm.page.set_indicator(frm.doc.status, {
+                "Started": "orange",
+                "Completed": "green",
+                "Failed": "red",
+                "Draft": "gray"
+            }[frm.doc.status]);
+        }
+    },
     // manifest_modification_process: function (frm) {
     //     if (frm.doc.manifest_modification_process == 1) {
     //         frm.set_value("date_format", "%Y-%m-%d");

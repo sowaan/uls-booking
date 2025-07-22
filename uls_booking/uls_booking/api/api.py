@@ -73,6 +73,7 @@ def make_str_to_array(str_value):
 
 
 
+
 @frappe.whitelist()
 def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
     """
@@ -102,7 +103,7 @@ def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
         "Sales Invoice",
         filters={"name": ["in", invoice_names], "outstanding_amount": [">", 0]},
         fields=[
-            "name", "due_date", "grand_total", "rounded_total",
+            "name", "due_date", "base_grand_total", "base_rounded_total",
             "outstanding_amount", "bill_no", "debit_to", "conversion_rate"
         ]
     )
@@ -112,28 +113,28 @@ def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
         payment_term = None
         payment_term_outstanding = inv.outstanding_amount
 
-        ps = frappe.db.get_list(
+        ps = frappe.db.get_value(
             "Payment Schedule",
-            filters={"parent": inv.name},
-            fields=["payment_term", "outstanding"],
-            limit=1
+            {"parent": inv.name},
+            ["payment_term", "outstanding"],
+            as_dict=True
         )
         if ps:
-            payment_term = ps[0].payment_term
-            payment_term_outstanding = ps[0].outstanding
+            payment_term = ps.payment_term
+            payment_term_outstanding = ps.outstanding
 
         detailed_invoices.append({
             "voucher_type": "Sales Invoice",
             "voucher_no": inv.name,
             "due_date": inv.due_date,
-            "invoice_amount": inv.rounded_total or inv.grand_total,
+            "invoice_amount": inv.base_rounded_total or inv.base_grand_total,
             "outstanding_amount": inv.outstanding_amount,
-            "allocated_amount": inv.outstanding_amount,
+            "allocated_amount": 0,
             "bill_no": inv.bill_no,
             "account": inv.debit_to,
             "payment_term": payment_term,
             "payment_term_outstanding": payment_term_outstanding,
-            "exchange_rate": inv.conversion_rate or 1
+            "exchange_rate": inv.conversion_rate
         })
 
     return detailed_invoices

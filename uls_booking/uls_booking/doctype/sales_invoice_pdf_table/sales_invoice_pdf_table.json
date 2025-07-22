@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_break_trlw",
   "name1",
   "customer",
   "total_invoices",
@@ -94,17 +95,23 @@
    "fieldname": "is_peak",
    "fieldtype": "Check",
    "label": "Is Peak"
+  },
+  {
+   "fieldname": "section_break_trlw",
+   "fieldtype": "Section Break"
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-14 17:23:16.954841",
+ "modified": "2025-07-21 21:22:25.542638",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice PDF table",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
