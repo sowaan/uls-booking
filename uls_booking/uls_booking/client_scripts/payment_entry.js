@@ -54,7 +54,7 @@ frappe.ui.form.on('Payment Entry', {
 
                                 total_allocated += to_allocate;
 
-                                let c = frm.add_child("references", {
+                                frm.add_child("references", {
                                     reference_doctype: inv.voucher_type,
                                     reference_name: inv.voucher_no,
                                     due_date: inv.due_date,
@@ -64,18 +64,20 @@ frappe.ui.form.on('Payment Entry', {
                                     bill_no: inv.bill_no,
                                     account: inv.account,
                                     payment_term: inv.payment_term,
-                                    payment_term_outstanding: inv.payment_term_outstanding
+                                    payment_term_outstanding: inv.payment_term_outstanding,
+                                    exchange_rate: 1
+                                    
                                 });
                                 
-                                var party_account_currency = frm.doc.payment_type == "Receive"
-                                    ? frm.doc.paid_from_account_currency
-                                    : frm.doc.paid_to_account_currency;
+                                // var party_account_currency = frm.doc.payment_type == "Receive"
+                                //     ? frm.doc.paid_from_account_currency
+                                //     : frm.doc.paid_to_account_currency;
                                 
-                                if (party_account_currency != company_currency) {
-                                    c.exchange_rate = inv.exchange_rate;
-                                } else {
-                                    c.exchange_rate = 1;
-                                }
+                                // if (party_account_currency != company_currency) {
+                                //     c.exchange_rate = inv.exchange_rate;
+                                // } else {
+                                //     c.exchange_rate = 1;
+                                // }
                                 
 
                                 if (flt(inv.outstanding_amount) > 0)
@@ -87,8 +89,8 @@ frappe.ui.form.on('Payment Entry', {
 
                             frm.refresh_field("references");
                             if (frm.doc.references){
-                                frm.set_value('custom_sales_invoice_pdf_ref', values.message)
-                                frm.set_value('custom_customer_invoice', emp_id)
+                                frm.set_value('custom_sales_invoice_pdf_ref', values.message);
+                                frm.set_value('custom_customer_invoice', emp_id);
                             }
 
                             frm.set_value("base_total_allocated_amount", total_allocated);
