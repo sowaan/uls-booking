@@ -1179,12 +1179,9 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
                         try:
                             field_data = float(field_data) if field_data else 0.0
                         except ValueError:
-                            # Handle the case where field_data is not a number
-                            # frappe.log_error(f"Cannot convert field_data '{field_data}' to float", "Conversion Error")
                             field_data = 0.0
                         if field.number_divide_with:
                             field_data = field_data / field.number_divide_with
-                        # print(field_data , field_name,"NEW")
                 
                 # if shipped_date and field_name == "shipped_date":
                 #     field_data = shipped_date
@@ -1192,7 +1189,7 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
                 #     field_data = import_date
 
                 ######################## Umair Work #######################
-                # reverse work...means when import update shipped field , when export update import field
+                # (Reverse work) Means when import.... update shipped field, when export.... update import field
                 if is_import and field_name == "manifest_import_date":
                     continue
                 if not is_import and field_name == "shipped_date":
@@ -1213,8 +1210,6 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
 
             docss.save()
 
-            # frappe.db.commit()    
-            # print(doctype_name, shipment_num, "Updating")
         else:
             doc = frappe.new_doc(doctype_name)
             doc.set("file_name",file_proper_name)

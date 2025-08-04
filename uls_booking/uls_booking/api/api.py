@@ -130,14 +130,14 @@ def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
             "voucher_type": "Sales Invoice",
             "voucher_no": inv.name,
             "due_date": inv.due_date,
-            "invoice_amount": inv.base_rounded_total or inv.base_grand_total,
-            "outstanding_amount": inv.outstanding_amount,
+            "invoice_amount": float(inv.base_rounded_total) or float(inv.base_grand_total),
+            "outstanding_amount": float(inv.outstanding_amount),
             "allocated_amount": 0,
             "bill_no": inv.bill_no,
             "account": inv.debit_to,
             "payment_term": payment_term,
             "payment_term_outstanding": payment_term_outstanding,
-            "exchange_rate": inv.conversion_rate
+            "exchange_rate": float(inv.conversion_rate)
         })
 
     return detailed_invoices, emp_id

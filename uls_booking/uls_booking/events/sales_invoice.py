@@ -186,6 +186,7 @@ def generate_invoice(self, method):
         elif imp_or_exp == "import":
             sales_invoice.custom_import__export_si = "Import"
             imp_exp = "Import"
+    # print("before")
             
     
 
@@ -627,7 +628,7 @@ def generate_invoice(self, method):
 
                 
                 if surcharge_amount is not None:
-                    if surcharge_amount > 0:
+                    if (surcharge_amount or 0) > 0:
                         amount = surcharge_amount
                 else:
                     if amount is not None:
@@ -719,7 +720,7 @@ def generate_invoice(self, method):
         
         max_insured = 0
         
-        if declared_value > 0:
+        if (declared_value or 0) > 0:
             # percent = frappe.db.get_single_value('Additional Charges Page', 'percentage_on_declare_value')
             # minimum_amount = frappe.db.get_single_value('Additional Charges Page', 'minimum_amount_for_declare_value')
             percent = additional_page.percentage_on_declare_value
@@ -727,7 +728,7 @@ def generate_invoice(self, method):
             result = declared_value * (percent / 100)
             max_insured = max(result , minimum_amount)
             
-            if max_insured > 0 and sales_invoice.custom_shipment_type == setting.insurance_shipment_type:
+            if (max_insured or 0) > 0 and sales_invoice.custom_shipment_type == setting.insurance_shipment_type:
                 rows = {'item_code': setting.insurance_charges, 'qty': '1', 'rate': max_insured}
                 sales_invoice.append('items', rows)
         sales_invoice.custom_freight_charges = tarif
@@ -759,7 +760,7 @@ def generate_invoice(self, method):
                     if sales_invoice.custom_shipment_weight <= 0.5:
                         peak_amount = row.amount
                         break
-                    elif sales_invoice.custom_shipment_weight > 0.5:
+                    elif (sales_invoice.custom_shipment_weight or 0) > 0.5:
                         peak_amount = sales_invoice.custom_shipment_weight * (row.amount)
         
         # exempt_peak_surcharge = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_peak_surcharge')
@@ -780,14 +781,6 @@ def generate_invoice(self, method):
 
 
 
-
-
-
-
-
-
-
-
     elif sales_invoice.custom_compensation_invoices:
         export_compensation_amount = 0
         # exempt_customer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst')
@@ -801,7 +794,7 @@ def generate_invoice(self, method):
                 break    
 
     
-
+    # print("after")
     if sales_invoice.custom_edit_selling_percentage:
         final_discount_percentage = sales_invoice.custom_selling_percentage or 0
         sales_invoice.discount_amount = (sales_invoice.custom_freight_charges * final_discount_percentage / 100)
@@ -879,8 +872,8 @@ def generate_invoice(self, method):
         sales_invoice.base_in_words = money_in_words(sales_invoice.base_total, DEFAULT_CURRENCY)
     ############################################################################################
     sales_invoice.calculate_taxes_and_totals()
-    if sales_invoice.discount_amount > 0:
-        disc_per = (sales_invoice.discount_amount / sales_invoice.total) * 100 if sales_invoice.total > 0 else 0
+    if (sales_invoice.discount_amount or 0) > 0:
+        disc_per = (sales_invoice.discount_amount / sales_invoice.total) * 100 if (sales_invoice.total or 0) > 0 else 0
         sales_invoice.additional_discount_percentage = 0
         sales_invoice.set("additional_discount_percentage", disc_per)
         sales_invoice.calculate_taxes_and_totals()
