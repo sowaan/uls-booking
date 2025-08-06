@@ -43,14 +43,18 @@ def get_data(filters=None):
     last_year_start = getdate(f"{last_year}-01-01")
     last_year_end = getdate(f"{last_year}-12-31")
 
-    query_filters = {
-        "quarter_start": quarter_start,
-        "quarter_end": quarter_end,
-        "ytd_start": ytd_start,
-        "ytd_end": ytd_end,
-        "last_year_start": last_year_start,
-        "last_year_end": last_year_end
-    }
+    # query_filters = {
+    #     "quarter_start": quarter_start,
+    #     "quarter_end": quarter_end,
+    #     "ytd_start": ytd_start,
+    #     "ytd_end": ytd_end,
+    #     "last_year_start": last_year_start,
+    #     "last_year_end": last_year_end,
+    #     "icris": filters.get("icris"),
+    #     ""
+    # }
+    filters["last_year_start"] = last_year_start
+    filters["ytd_end"] = ytd_end
 
     # msg = "<b>Query Filters:</b><br>"
     # for k, v in query_filters.items():
@@ -71,24 +75,29 @@ def get_data(filters=None):
                 ELSE si.custom_consignee_number
             END AS account_number,
             si.custom_import__export_si AS product,
-            si.posting_date,
+            CASE 
+                WHEN si.custom_import__export_si = 'Export' THEN si.custom_date_shipped
+                ELSE si.custom_import_date
+            END AS actual_date,
             si.custom_shipment_weight AS weight,
             si.base_grand_total AS revenue
         FROM(
 			SELECT *
 			FROM `tabSales Invoice`
 			WHERE docstatus = 1 AND custom_freight_invoices = 1
-			AND posting_date BETWEEN %(last_year_start)s AND %(ytd_end)s
-			) si
+			AND (
+                (custom_import__export_si = 'Export' AND custom_date_shipped BETWEEN %(last_year_start)s AND %(ytd_end)s)
+                OR
+                (custom_import__export_si = 'Import' AND custom_import_date BETWEEN %(last_year_start)s AND %(ytd_end)s)
+            )
+		) si
         JOIN `tabCustomer` cu ON cu.name = si.customer
         {join_icris}
         JOIN `tabSales Team` st ON st.parent = si.name AND st.parenttype = 'Sales Invoice'
         WHERE si.docstatus = 1
-            AND si.custom_freight_invoices = 1
-            AND si.posting_date BETWEEN %(last_year_start)s AND %(ytd_end)s
             {condition_str}
             {icris_condition}
-    """, values=query_filters, as_dict=True)
+    """, values=filters, as_dict=True)
 
     result = {}
 
@@ -122,21 +131,21 @@ def get_data(filters=None):
         if key not in result:
             result[key] = init_row(row)
 
-        posting_date = row.posting_date
+        actual_date = row.actual_date
         weight = row.weight or 0
         revenue = row.revenue or 0
 
-        if quarter_start <= posting_date <= quarter_end:
+        if quarter_start <= actual_date <= quarter_end:
             result[key]["quarterly_shipments"] += 1
             result[key]["quarterly_weight"] += weight
             result[key]["quarterly_revenue"] += revenue
 
-        if ytd_start <= posting_date <= ytd_end:
+        if ytd_start <= actual_date <= ytd_end:
             result[key]["ytd_shipments"] += 1
             result[key]["ytd_weight"] += weight
             result[key]["ytd_revenue"] += revenue
 
-        if last_year_start <= posting_date <= last_year_end:
+        if last_year_start <= actual_date <= last_year_end:
             result[key]["last_year_shipments"] += 1
             result[key]["last_year_weight"] += weight
             result[key]["last_year_revenue"] += revenue

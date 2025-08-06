@@ -61,7 +61,10 @@ def get_data(filters=None):
                 ELSE si.custom_consignee_number
             END AS account_number,
             si.custom_import__export_si AS product,
-            si.posting_date,
+            CASE 
+                WHEN si.custom_import__export_si = 'Export' THEN si.custom_date_shipped
+                ELSE si.custom_import_date
+            END AS actual_date,
             si.name AS invoice,
             si.custom_shipment_weight AS weight,
             si.base_grand_total AS revenue
@@ -69,14 +72,16 @@ def get_data(filters=None):
 			SELECT *
 			FROM `tabSales Invoice`
 			WHERE docstatus = 1 AND custom_freight_invoices = 1
-			AND posting_date BETWEEN %(start_date)s AND %(end_date)s
-			) si
+			AND (
+                (custom_import__export_si = 'Export' AND custom_date_shipped BETWEEN %(start_date)s AND %(end_date)s)
+                OR
+                (custom_import__export_si = 'Import' AND custom_import_date BETWEEN %(start_date)s AND %(end_date)s)
+            )
+		) si
         JOIN `tabCustomer` cu ON cu.name = si.customer
         {join_icris}
         JOIN `tabSales Team` st ON st.parent = si.name AND st.parenttype = 'Sales Invoice'
         WHERE si.docstatus = 1
-            AND si.custom_freight_invoices = 1
-            AND si.posting_date BETWEEN %(start_date)s AND %(end_date)s
             {condition_str}
             {icris_condition}
     """, values=query_filters, as_dict=True)
@@ -101,7 +106,6 @@ def get_data(filters=None):
             "last_month_revenue": 0,
         }
     
-	
 
     for row in raw_data:
         key = (
@@ -115,21 +119,21 @@ def get_data(filters=None):
         if key not in result:
             result[key] = init_row(row)
 
-        posting_date = row.posting_date
+        actual_date = row.actual_date
         weight = row.weight or 0
         revenue = row.revenue or 0
 
-        if posting_date == last_date:
+        if actual_date == last_date:
             result[key]["last_day_shipments"] += 1
             result[key]["last_day_weight"] += weight
             result[key]["last_day_revenue"] += revenue
 
-        if start_of_this_month <= posting_date <= last_date:
+        if start_of_this_month <= actual_date <= last_date:
             result[key]["mtd_shipments"] += 1
             result[key]["mtd_weight"] += weight
             result[key]["mtd_revenue"] += revenue
 
-        if start_of_last_month <= posting_date <= end_of_last_month:
+        if start_of_last_month <= actual_date <= end_of_last_month:
             result[key]["last_month_shipments"] += 1
             result[key]["last_month_weight"] += weight
             result[key]["last_month_revenue"] += revenue
