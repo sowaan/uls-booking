@@ -80,7 +80,7 @@ def get_data(filters=None):
                 ELSE si.custom_import_date
             END AS actual_date,
             si.custom_shipment_weight AS weight,
-            si.base_grand_total AS revenue
+            si.custom_amount_after_discount AS revenue
         FROM(
 			SELECT *
 			FROM `tabSales Invoice`
