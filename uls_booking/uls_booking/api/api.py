@@ -4,6 +4,7 @@
 import frappe
 import json
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt
 import requests
 import base64
 from frappe import _
@@ -130,14 +131,14 @@ def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
             "voucher_type": "Sales Invoice",
             "voucher_no": inv.name,
             "due_date": inv.due_date,
-            "invoice_amount": float(inv.base_rounded_total) or float(inv.base_grand_total),
-            "outstanding_amount": float(inv.outstanding_amount),
+            "invoice_amount": flt(inv.base_rounded_total) or flt(inv.base_grand_total),
+            "outstanding_amount": flt(inv.outstanding_amount),
             "allocated_amount": 0,
             "bill_no": inv.bill_no,
             "account": inv.debit_to,
             "payment_term": payment_term,
             "payment_term_outstanding": payment_term_outstanding,
-            "exchange_rate": float(inv.conversion_rate)
+            "exchange_rate": flt(inv.conversion_rate)
         })
 
     return detailed_invoices, emp_id
@@ -319,8 +320,8 @@ def duty_tax(add_charge_type , impexp):
 @frappe.whitelist()
 def area(add_charge_type, weight):
     add_charge_doc = frappe.get_doc('Additional Charges',add_charge_type)
-    amount_per_kg = float(add_charge_doc.amount_per_kg)
-    weight = float(weight)
+    amount_per_kg = flt(add_charge_doc.amount_per_kg)
+    weight = flt(weight)
     w = amount_per_kg * weight
     
     return max(add_charge_doc.amount_per_shipment, w)
@@ -1160,9 +1161,9 @@ def insert_rate_grp_from_erp(rec, full_tariff_group, doctype, rate_group) :
                 rate = package.get("rate")
 
                 existing_rec_doc.append('package_rate', {
-                    'weight': float(weight),
-                    'discount_percentage': float(discount),
-                    'rate': float(rate),
+                    'weight': flt(weight),
+                    'discount_percentage': flt(discount),
+                    'rate': flt(rate),
                 })
             existing_rec_doc.save()
             frappe.db.commit()
@@ -1182,9 +1183,9 @@ def insert_rate_grp_from_erp(rec, full_tariff_group, doctype, rate_group) :
                 rate = package.get("rate")
 
                 new_rate.append('package_rate', {
-                    'weight': float(weight),
-                    'discount_percentage': float(discount),
-                    'rate': float(rate),
+                    'weight': flt(weight),
+                    'discount_percentage': flt(discount),
+                    'rate': flt(rate),
                     'docstatus' : 0,
                 })
 
@@ -1213,9 +1214,9 @@ def insert_rate_grp_from_erp(rec, full_tariff_group, doctype, rate_group) :
                     rate = package.get("rate")
 
                     existing_rec_doc.append('package_rate', {
-                        'weight': float(weight),
-                        'discount_percentage': float(discount),
-                        'rate': float(rate),
+                        'weight': flt(weight),
+                        'discount_percentage': flt(discount),
+                        'rate': flt(rate),
                     })
                 existing_rec_doc.save()
                 frappe.db.commit()
@@ -1234,9 +1235,9 @@ def insert_rate_grp_from_erp(rec, full_tariff_group, doctype, rate_group) :
                     rate = package.get("rate")
 
                     new_rate.append('package_rate', {
-                        'weight': float(weight),
-                        'discount_percentage': float(discount),
-                        'rate': float(rate),
+                        'weight': flt(weight),
+                        'discount_percentage': flt(discount),
+                        'rate': flt(rate),
                         'docstatus' : 0,
                     })
 
@@ -1317,13 +1318,13 @@ def insert_add_discount_rate_grp_from_erp(rec, full_tariff_group, doctype, rate_
                         rate = package.get("rate")
 
                         for r in existing_rec_doc.package_rate :
-                            if float(r.weight) == float(weight) :
-                                rate = float(r.rate) * ( 1 - float(discount) / 100 )
+                            if flt(r.weight) == flt(weight) :
+                                rate = flt(r.rate) * ( 1 - flt(discount) / 100 )
 
                                 buy_sell_doc.append('package_rate', {
-                                    'weight': float(weight),
-                                    'discount_percentage': float(discount),
-                                    'rate': float(rate),
+                                    'weight': flt(weight),
+                                    'discount_percentage': flt(discount),
+                                    'rate': flt(rate),
                                 })
                                 break
 
@@ -1346,13 +1347,13 @@ def insert_add_discount_rate_grp_from_erp(rec, full_tariff_group, doctype, rate_
                         rate = package.get("rate")
 
                         for r in existing_rec_doc.package_rate :
-                            if float(r.weight) == float(weight) :
-                                rate = float(r.rate) * ( 1 - float(discount) / 100 )
+                            if flt(r.weight) == flt(weight) :
+                                rate = flt(r.rate) * ( 1 - flt(discount) / 100 )
 
                                 new_rate.append('package_rate', {
-                                    'weight': float(weight),
-                                    'discount_percentage': float(discount),
-                                    'rate': float(rate),
+                                    'weight': flt(weight),
+                                    'discount_percentage': flt(discount),
+                                    'rate': flt(rate),
                                     'docstatus' : 0,
                                 })
                                 break

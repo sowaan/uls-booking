@@ -6,7 +6,7 @@ from frappe.utils import getdate
 import json
 import re
 from datetime import datetime
-
+import requests
 
 
 def generate_sales_invoice_enqued(doc_str,doc,shipments,definition_record,name,end_date,chunk_size):
@@ -840,6 +840,7 @@ def generate_remaining_sales_invoice():
 
 
 def storing_shipment_number(arrays, frm, to, doc):
+    current_shipment = None
     try:
 
         # doc = frappe.get_doc('Manifest Upload Data', doc_name)
@@ -864,16 +865,23 @@ def storing_shipment_number(arrays, frm, to, doc):
         setting = frappe.get_doc("Manifest Setting Definition")
         origin_country = setting.origin_country
         frappe.db.set_value("Manifest Upload Data",doc.name,"total_shipment_numbers" , len(unique_shipment_numbers))
+        
         for shipment in unique_shipment_numbers:
+            current_shipment = shipment
+            shipment = (shipment or "").strip()
             # Check if the shipment number already exists
             # existing_doc = frappe.get_value("Shipment Number", {"shipment_number": shipment})
             r2_data = frappe.db.get_value("R200000", {"shipment_number": shipment}, ["billing_term_field", "shipped_date", "manifest_import_date", "file_type", "file_name"], as_dict=True)
-            billing_term = r2_data.billing_term_field
-            date_shipped = r2_data.shipped_date
-            import_date = r2_data.manifest_import_date
-            file_type = r2_data.file_type
-            file_name = r2_data.file_name
-            existing_doc = frappe.get_list("Shipment Number",filters={"shipment_number":shipment})
+            if r2_data:
+                billing_term = r2_data.billing_term_field
+                date_shipped = r2_data.shipped_date
+                import_date = r2_data.manifest_import_date
+                file_type = r2_data.file_type
+                file_name = r2_data.file_name
+            else:
+                frappe.log_error(f"No R200000 record found for shipment: {shipment}", "Missing R200000 Data")
+                continue
+            existing_doc = frappe.db.exists("Shipment Number", shipment)
             if existing_doc:
                 shipment_doc = frappe.get_doc("Shipment Number",shipment)
                 customer = None
@@ -947,7 +955,7 @@ def storing_shipment_number(arrays, frm, to, doc):
                 shipment_doc.set("gateway",doc.gateway)
 
                 # shipment_doc.insert()
-                shipment_doc.save()
+                shipment_doc.save(ignore_permissions=True)
                 # frappe.db.commit()
                     # continue  # Skip if it already exists
             else:
@@ -1023,7 +1031,7 @@ def storing_shipment_number(arrays, frm, to, doc):
                 shipment_doc.set("gateway",doc.gateway)
 
                 shipment_doc.insert(ignore_permissions=True)
-                shipment_doc.save(ignore_permissions=True)
+                # shipment_doc.save(ignore_permissions=True)
                 # frappe.db.commit()
 
         shipment_numbers = frappe.db.get_all(
@@ -1035,7 +1043,10 @@ def storing_shipment_number(arrays, frm, to, doc):
         frappe.db.set_value("Manifest Upload Data", doc.name, "created_shipments", len(unique_shipment_numbers_created))
         frappe.db.set_value("Manifest Upload Data", doc.name, "status", "Completed")
     except Exception as e:
-        frappe.log_error(f"Error in storing shipment numbers: {str(e)}", "Shipment Number Storage Error")
+        frappe.log_error(
+            f"Error in storing shipment numbers for shipment: {current_shipment}. Error: {str(e)}",
+            "Shipment Number Storage Error"
+        )
         frappe.db.set_value("Manifest Upload Data", doc.name, "status", "Failed")
 
 
@@ -1538,16 +1549,30 @@ def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
         frappe.db.set_value("Manifest Upload Data", main_doc.name, "status", "Failed")
 
 
+# def safe_decode(file_doc):
+#     content = file_doc.get_content()
+#     if isinstance(content, bytes):
+#         try:
+#             return content.decode("utf-8")
+#         except UnicodeDecodeError:
+#             return content.decode("ISO-8859-1", errors="ignore")
+#     return content
+
 def safe_decode(file_doc):
-    content = file_doc.get_content()
+    file_url = file_doc.file_url or ""
+    if file_url.startswith("http"):
+        response = requests.get(file_url)
+        response.raise_for_status()
+        content = response.content
+    else:
+        content = file_doc.get_content()
+
     if isinstance(content, bytes):
         try:
             return content.decode("utf-8")
         except UnicodeDecodeError:
             return content.decode("ISO-8859-1", errors="ignore")
     return content
-
-
 
 
 
