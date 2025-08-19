@@ -1219,7 +1219,7 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
                 docss.file_type = "ISPS"
 
 
-            docss.save()
+            docss.save(ignore_permissions=True)
 
         else:
             doc = frappe.new_doc(doctype_name)
@@ -1292,8 +1292,8 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
                 doc.file_type = "ISPS"
             
             # print(doctype_name, shipment_num, "Inserting")
-            doc.insert()
-            doc.save()
+            doc.insert(ignore_permissions=True)
+            doc.save(ignore_permissions=True)
 
 
 def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_date, import_date, manifest_upload_data_name, gateway):
@@ -1438,7 +1438,7 @@ def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_d
             if not docss.file_type:
                 docss.file_type = "OPSYS"
 
-            docss.save()
+            docss.save(ignore_permissions=True)
             # frappe.db.commit()
             # print(doctype_name, shipment_num, "Updating")
         
@@ -1503,8 +1503,8 @@ def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_d
             if not doc.file_type:
                 doc.file_type = "OPSYS"
 
-            doc.insert()
-            doc.save()
+            doc.insert(ignore_permissions=True)
+            doc.save(ignore_permissions=True)
 
 
 def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
@@ -1535,7 +1535,7 @@ def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
                     doc.set(field_name,field_data)
                     # print(field_name , "  ",field_data)
                 make_R600000(doc)
-                doc.save()
+                doc.save(ignore_permissions=True)
             else:
                 frappe.get_doc({
                     "doctype": "Error Log",

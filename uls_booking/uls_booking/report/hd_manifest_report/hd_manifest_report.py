@@ -6,143 +6,223 @@ from frappe import _
 
 def execute(filters=None):
     filters = filters or {}
+    messages = []
+    if not filters.get("date_type"):
+        messages.append("⚠️ Please select a Date Type.")
+    if not filters.get("from_date") or not filters.get("to_date"):
+        messages.append("⚠️ Please select a Date Range.")
 
-    # Build WHERE conditions
-    conditions = []
+    if messages:
+        columns = [{"label": "Error", "fieldname": "error", "fieldtype": "Data", "width": 300}]
+        data = [{"error": m} for m in messages]
+        return columns, data
+
+    inner_join_use = False
+    conditions_r2 = ["1=1"]
+    conditions_r3 = ["1=1"]
+    conditions_r4 = ["1=1"]
+    conditions_r22 = ["1=1"]
     values = {}
 
     field_map = {
-        "shipment_number": "shipment_number",
-        "origin_port": "origin_port",
-        "destination_port": "destination_port",
-        "origin_country": "origin_country",
-        "destination_country": "destination_country",
-        "billing_term_field": "billing_term_field",
+        "shipment_number": ("r2", "shipment_number"),
+        "origin_port": ("r2", "origin_port"),
+        "destination_port": ("r2", "destination_port"),
+        "origin_country": ("r2", "origin_country"),
+        "destination_country": ("r2", "destination_country"),
+        "billing_term_field": ("r2", "billing_term_field"),
+        "shipper_number": ("r3", "shipper_number"),
+        "shipper_country": ("r3", "shipper_country"),
+        "consignee_number": ("r4", "consignee_number"),
+        "consignee_country_code": ("r4", "consignee_country_code"),
+        "custom_package_tracking_number": ("r22", "custom_package_tracking_number"),
     }
 
-    for key, field in field_map.items():
+    for key, (alias, field) in field_map.items():
         if filters.get(key):
-            conditions.append(f"{field} = %(value_{key})s")
+            if alias == "r2":
+                conditions_r2.append(f"{field} = %(value_{key})s")
+            elif alias == "r3":
+                inner_join_use = True
+                conditions_r3.append(f"{field} = %(value_{key})s")
+            elif alias == "r4":
+                inner_join_use = True
+                conditions_r4.append(f"{field} = %(value_{key})s")
+            elif alias == "r22":
+                inner_join_use = True
+                conditions_r22.append(f"{field} = %(value_{key})s")
             values[f"value_{key}"] = filters[key]
 
     if filters.get("date_type") in ["Shipped Date", "Import Date"]:
         date_field = "shipped_date" if filters["date_type"] == "Shipped Date" else "manifest_import_date"
         if filters.get("from_date") and filters.get("to_date"):
-            conditions.append(f"{date_field} BETWEEN %(from_date)s AND %(to_date)s")
+            conditions_r2.append(f"{date_field} BETWEEN %(from_date)s AND %(to_date)s")
             values["from_date"] = filters["from_date"]
             values["to_date"] = filters["to_date"]
         elif filters.get("from_date"):
-            conditions.append(f"{date_field} >= %(from_date)s")
+            conditions_r2.append(f"{date_field} >= %(from_date)s")
             values["from_date"] = filters["from_date"]
         elif filters.get("to_date"):
-            conditions.append(f"{date_field} <= %(to_date)s")
+            conditions_r2.append(f"{date_field} <= %(to_date)s")
             values["to_date"] = filters["to_date"]
 
-    where_clause = " AND ".join(conditions)
-    if where_clause:
-        where_clause = "WHERE " + where_clause
+    where_r2 = "WHERE " + " AND ".join(conditions_r2)
+    where_r3 = "WHERE " + " AND ".join(conditions_r3)
+    where_r4 = "WHERE " + " AND ".join(conditions_r4)
+    where_r22 = "WHERE " + " AND ".join(conditions_r22)
 
-    query = f"""
-        SELECT
-            r2.shipment_number,
-            r2.shipped_date,
-            r2.manifest_import_date,
-            r2.origin_country,
-            r2.destination_country,
-            r2.origin_port,
-            r2.destination_port,
-            r2.shipment_type,
-            r2.shipment_weight,
-            r2.shipment_weight_unit,
-            r2.currency_code_for_invoice_total AS invoice_currency,
-            r2.invoice_total,
-            r2.billing_term_field,
-            r2.bill_term_surcharge_indicator,
-            r2.terms_of_shipment,
-            r2.number_of_packages_in_shipment,
-            r2.split_duty_and_vat_flag,
-            r2.biling_type_shipment AS shipment_billing_type,
-            r2.service_level,
-
-            r21.custom_minimum_bill_weight AS minimum_bill_weight,
-            r22.custom_package_tracking_number AS package_tracking_number,
-            
-
-            r3.shipper_number,
-            r3.shipper_name,
-            r3.shipper_postal_code,
-            r3.shipper_building,
-            r3.shipper_street,
-            r3.shipper_city,
-            r3.shipper_country,
-            r3.shipper_phone_number AS shipper_contact_number,
-
-            r4.consignee_number,
-            r4.consignee_name,
-            r4.consignee_contact_name,
-            r4.consignee_building,
-            r4.consignee_street,
-            r4.consignee_city,
-            r4.consignee_country_code AS consignee_country,
-            r4.consignee_postal_code,
-            r4.consignee_phone_number AS consignee_contact_number,
-            
-            r5.custom_invdesc AS invoice_description
-
-        FROM (
-            SELECT * FROM `tabR200000`
-            {where_clause}
-        ) AS r2
-
-        LEFT JOIN (
-            SELECT * FROM `tabR201000`
-            WHERE shipment_number IN (
-                SELECT shipment_number FROM `tabR200000`
-                {where_clause}
+    if inner_join_use:
+        query = f"""
+            WITH shipments AS (
+                SELECT shipment_number
+                FROM `tabR200000`
+                {where_r2}
             )
-        ) AS r21 ON r2.shipment_number = r21.shipment_number
-
-        LEFT JOIN (
-            SELECT * FROM `tabR202000`
-            WHERE shipment_number IN (
-                SELECT shipment_number FROM `tabR200000`
-                {where_clause}
+            SELECT
+                r2.shipment_number,
+                r2.shipped_date,
+                r2.manifest_import_date,
+                r2.origin_country,
+                r2.destination_country,
+                r2.origin_port,
+                r2.destination_port,
+                r2.shipment_type,
+                r2.shipment_weight,
+                r2.shipment_weight_unit,
+                r2.currency_code_for_invoice_total AS invoice_currency,
+                r2.invoice_total,
+                r2.billing_term_field,
+                r2.bill_term_surcharge_indicator,
+                r2.terms_of_shipment,
+                r2.number_of_packages_in_shipment,
+                r2.split_duty_and_vat_flag,
+                r2.biling_type_shipment AS shipment_billing_type,
+                r2.service_level,
+                r21.custom_minimum_bill_weight AS minimum_bill_weight,
+                r22.custom_package_tracking_number AS package_tracking_number,
+                r3.shipper_number,
+                r3.shipper_name,
+                r3.shipper_postal_code,
+                r3.shipper_building,
+                r3.shipper_street,
+                r3.shipper_city,
+                r3.shipper_country,
+                r3.shipper_phone_number AS shipper_contact_number,
+                r4.consignee_number,
+                r4.consignee_name,
+                r4.consignee_contact_name,
+                r4.consignee_building,
+                r4.consignee_street,
+                r4.consignee_city,
+                r4.consignee_country_code AS consignee_country,
+                r4.consignee_postal_code,
+                r4.consignee_phone_number AS consignee_contact_number,
+                r5.custom_invdesc AS invoice_description
+            FROM (
+                SELECT * FROM `tabR200000`
+                {where_r2}
+            ) AS r2
+            JOIN (
+                SELECT * FROM `tabR201000`
+                WHERE shipment_number IN (SELECT shipment_number FROM shipments)
+            ) AS r21 ON r2.shipment_number = r21.shipment_number
+            JOIN (
+                SELECT * FROM `tabR202000`
+                {where_r22} AND shipment_number IN (SELECT shipment_number FROM shipments)
+            ) AS r22 ON r2.shipment_number = r22.shipment_number
+            JOIN (
+                SELECT * FROM `tabR300000`
+                {where_r3} AND shipment_number IN (SELECT shipment_number FROM shipments)   
+            ) AS r3 ON r2.shipment_number = r3.shipment_number
+            JOIN (
+                SELECT * FROM `tabR400000`
+                {where_r4} AND shipment_number IN (SELECT shipment_number FROM shipments)
+            ) AS r4 ON r2.shipment_number = r4.shipment_number
+            JOIN (
+                SELECT * FROM `tabR500000`
+                WHERE shipment_number IN (SELECT shipment_number FROM shipments)
+            ) AS r5 ON r2.shipment_number = r5.shipment_number
+        """
+    else:
+        query = f"""
+            WITH shipments AS (
+                SELECT shipment_number
+                FROM `tabR200000`
+                {where_r2}
             )
-        ) AS r22 ON r2.shipment_number = r22.shipment_number
+            SELECT
+                r2.shipment_number,
+                r2.shipped_date,
+                r2.manifest_import_date,
+                r2.origin_country,
+                r2.destination_country,
+                r2.origin_port,
+                r2.destination_port,
+                r2.shipment_type,
+                r2.shipment_weight,
+                r2.shipment_weight_unit,
+                r2.currency_code_for_invoice_total AS invoice_currency,
+                r2.invoice_total,
+                r2.billing_term_field,
+                r2.bill_term_surcharge_indicator,
+                r2.terms_of_shipment,
+                r2.number_of_packages_in_shipment,
+                r2.split_duty_and_vat_flag,
+                r2.biling_type_shipment AS shipment_billing_type,
+                r2.service_level,
+                r21.custom_minimum_bill_weight AS minimum_bill_weight,
+                r22.custom_package_tracking_number AS package_tracking_number,
+                r3.shipper_number,
+                r3.shipper_name,
+                r3.shipper_postal_code,
+                r3.shipper_building,
+                r3.shipper_street,
+                r3.shipper_city,
+                r3.shipper_country,
+                r3.shipper_phone_number AS shipper_contact_number,
+                r4.consignee_number,
+                r4.consignee_name,
+                r4.consignee_contact_name,
+                r4.consignee_building,
+                r4.consignee_street,
+                r4.consignee_city,
+                r4.consignee_country_code AS consignee_country,
+                r4.consignee_postal_code,
+                r4.consignee_phone_number AS consignee_contact_number,
+                r5.custom_invdesc AS invoice_description
+            FROM (
+                SELECT * FROM `tabR200000`
+                {where_r2}
+            ) AS r2
+            LEFT JOIN (
+                SELECT * FROM `tabR201000`
+                WHERE shipment_number IN (SELECT shipment_number FROM shipments)
+            ) AS r21 ON r2.shipment_number = r21.shipment_number
+            LEFT JOIN (
+                SELECT * FROM `tabR202000`
+                {where_r22} AND shipment_number IN (SELECT shipment_number FROM shipments)
+            ) AS r22 ON r2.shipment_number = r22.shipment_number
+            LEFT JOIN (
+                SELECT * FROM `tabR300000`
+                {where_r3} AND shipment_number IN (SELECT shipment_number FROM shipments)   
+            ) AS r3 ON r2.shipment_number = r3.shipment_number
+            LEFT JOIN (
+                SELECT * FROM `tabR400000`
+                {where_r4} AND shipment_number IN (SELECT shipment_number FROM shipments)
+            ) AS r4 ON r2.shipment_number = r4.shipment_number
+            LEFT JOIN (
+                SELECT * FROM `tabR500000`
+                WHERE shipment_number IN (SELECT shipment_number FROM shipments)
+            ) AS r5 ON r2.shipment_number = r5.shipment_number
+        """
 
-        LEFT JOIN (
-            SELECT * FROM `tabR300000`
-            WHERE shipment_number IN (
-                SELECT shipment_number FROM `tabR200000`
-                {where_clause}
-            )
-        ) AS r3 ON r2.shipment_number = r3.shipment_number
-
-        LEFT JOIN (
-            SELECT * FROM `tabR400000`
-            WHERE shipment_number IN (
-                SELECT shipment_number FROM `tabR200000`
-                {where_clause}
-            )
-        ) AS r4 ON r2.shipment_number = r4.shipment_number
-
-        
-        LEFT JOIN (
-            SELECT * FROM `tabR500000`
-            WHERE shipment_number IN (
-                SELECT shipment_number FROM `tabR200000`
-                {where_clause}
-            )
-        ) AS r5 ON r2.shipment_number = r5.shipment_number
-
-    """
 
     data = frappe.db.sql(query, values, as_dict=True)
     columns = [
         {'fieldname': 'shipment_number', 'label': _('Shipment Number'), 'fieldtype': 'Link', 'options': 'Shipment Number', 'width': 150},
         {'fieldname': 'package_tracking_number', 'label': _('Package Tracking Number'), 'fieldtype': 'Data', 'width': 150},
         {'fieldname': 'shipped_date', 'label': _('Shipped Date'), 'fieldtype': 'Date', 'width': 150},
-        {'fieldname': 'import_date', 'label': _('Import Date'), 'fieldtype': 'Date', 'width': 150},
+        {'fieldname': 'manifest_import_date', 'label': _('Import Date'), 'fieldtype': 'Date', 'width': 150},
         {'fieldname': 'origin_country', 'label': _('Origin Country'), 'fieldtype': 'Data', 'width': 120},
         {'fieldname': 'destination_country', 'label': _('Destination Country'), 'fieldtype': 'Data', 'width': 120},
         {'fieldname': 'origin_port', 'label': _('Origin Port'), 'fieldtype': 'Data', 'width': 150},

@@ -7,20 +7,17 @@ frappe.query_reports["HD Manifest Report"] = {
             "fieldname": "date_type",
             "label": __("Date Type"),
             "fieldtype": "Select",
-            "options": "\nShipped Date\nImport Date",
-            "reqd": 1
+            "options": "\nShipped Date\nImport Date"
         },
 		{
             "fieldname": "from_date",
             "label": __("From Date"),
-            "fieldtype": "Date",
-			"reqd": 1
+            "fieldtype": "Date"
         },
         {
             "fieldname": "to_date",
             "label": __("To Date"),
-            "fieldtype": "Date",
-			"reqd": 1
+            "fieldtype": "Date"
         },
         {
             "fieldname": "shipment_number",
@@ -47,12 +44,14 @@ frappe.query_reports["HD Manifest Report"] = {
         {
             "fieldname": "shipper_number",
             "label": __("Shipper Number"),
-            "fieldtype": "Data"
+            "fieldtype": "Link",
+            "options": "ICRIS Account",
         },
         {
             "fieldname": "consignee_number",
             "label": __("Consignee Number"),
-            "fieldtype": "Data"
+            "fieldtype": "Link",
+            "options": "ICRIS Account",
         },
         {
             "fieldname": "shipper_country",
