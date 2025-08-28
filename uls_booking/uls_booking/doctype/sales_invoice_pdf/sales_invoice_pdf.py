@@ -1,6 +1,7 @@
 import frappe
 from frappe.model.document import Document
 from datetime import datetime
+from frappe import enqueue
 
 class SalesInvoicePDF(Document):
     def autoname(self):
@@ -48,11 +49,14 @@ class SalesInvoicePDF(Document):
 
 
     def before_save(self):
+
+
         self.customer_with_sales_invoice = []
         self.total_invoices = 0
         self.all_sales_invoices = ""
 
         conditions = ["docstatus = 1"]
+        conditions.append("(custom_sales_invoice_pdf_ref IS NULL OR custom_sales_invoice_pdf_ref = '')")
         values = {}
 
         date_field_map = {
@@ -253,8 +257,72 @@ class SalesInvoicePDF(Document):
             frappe.throw("No customer sales invoices found. Please check your filters and try again.")
 
         if self.all_sales_invoices:
-            for inv in self.all_sales_invoices.split(","):
-                inv = inv.strip()
-                frappe.db.set_value("Sales Invoice", inv, "custom_sales_invoice_pdf_ref", self.name)
+            invoices = self.all_sales_invoices.split(",")
+            enqueue(
+                update_sales_invoice_refs,
+                queue="default",
+                job_name=f"Update Sales Invoice refs for {self.name}",
+                docname=self.name,
+                invoices=invoices,
+                ref_name=self.name,
+                cancel=False
+            )
+            frappe.msgprint("Sales Invoice references are being updated in the background.", alert=True)
+
+    def before_cancel(self):
+        if not hasattr(self, "ignore_linked_doctypes"):
+            self.ignore_linked_doctypes = []
+        self.ignore_linked_doctypes.append("Sales Invoice")
+        if self.all_sales_invoices:
+            invoices = self.all_sales_invoices.split(",")
+            enqueue(
+                update_sales_invoice_refs,
+                queue="default",
+                job_name=f"Cleanup + Cancel {self.name}",
+                docname=self.name,
+                invoices=invoices,
+                ref_name=None,
+                cancel=True
+            )
             
+
+
+def update_sales_invoice_refs(docname, invoices, ref_name, cancel=False):
+    """Background job to update Sales Invoice references"""
+    for inv in invoices:
+        inv = inv.strip()
+        if not inv:
+            continue
+
+        if not frappe.db.exists("Sales Invoice", inv):
+            continue
+
+        if cancel:
+            frappe.db.set_value("Sales Invoice", inv, "custom_sales_invoice_pdf_ref", None)
+        else:
+            frappe.db.set_value("Sales Invoice", inv, "custom_sales_invoice_pdf_ref", ref_name)
+
+
+# def update_sales_invoice_refs(docname, invoices, ref_name, cancel=False):
+#     """Background job to update/remove Sales Invoice references"""
+
+#     for inv in invoices:
+#         inv = inv.strip()
+#         if not inv:
+#             continue
+
+#         if not frappe.db.exists("Sales Invoice", inv):
+#             continue
+
+#         if cancel:
+#             frappe.db.set_value("Sales Invoice", inv, "custom_sales_invoice_pdf_ref", None)
+#         else:
+#             frappe.db.set_value("Sales Invoice", inv, "custom_sales_invoice_pdf_ref", ref_name)
+        
+    
+
+    # if cancel:
+    #     doc = frappe.get_doc("Sales Invoice PDF", docname)
+    #     if doc.docstatus == 1:
+    #         doc.cancel()
 

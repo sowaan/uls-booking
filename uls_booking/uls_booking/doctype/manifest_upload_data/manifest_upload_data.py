@@ -861,178 +861,34 @@ def storing_shipment_number(arrays, frm, to, doc):
                 continue
 
         unique_shipment_numbers = list(shipment_numbers)
-        # defintion = frappe.get_doc("Sales Invoice Definition", "4f1330rq6u")
-        setting = frappe.get_doc("Manifest Setting Definition")
-        origin_country = setting.origin_country
-        frappe.db.set_value("Manifest Upload Data",doc.name,"total_shipment_numbers" , len(unique_shipment_numbers))
         
+        origin_country = frappe.db.get_single_value("Manifest Setting Definition", "origin_country")
+
+        frappe.db.set_value("Manifest Upload Data",doc.name,"total_shipment_numbers" , len(unique_shipment_numbers))
+        failed_shipments = []
+        again_failed_shipments = []
         for shipment in unique_shipment_numbers:
             current_shipment = shipment
             shipment = (shipment or "").strip()
             # Check if the shipment number already exists
             # existing_doc = frappe.get_value("Shipment Number", {"shipment_number": shipment})
             r2_data = frappe.db.get_value("R200000", {"shipment_number": shipment}, ["billing_term_field", "shipped_date", "manifest_import_date", "file_type", "file_name"], as_dict=True)
-            if r2_data:
-                billing_term = r2_data.billing_term_field
-                date_shipped = r2_data.shipped_date
-                import_date = r2_data.manifest_import_date
-                file_type = r2_data.file_type
-                file_name = r2_data.file_name
-            else:
+            if not r2_data:
+                failed_shipments.append(shipment)
+            create_shipment_number_record(shipment, origin_country, r2_data, doc)
+        for shipment in failed_shipments:
+            r2_data = frappe.db.get_value("R200000", {"shipment_number": shipment}, ["billing_term_field", "shipped_date", "manifest_import_date", "file_type", "file_name"], as_dict=True)
+            if not r2_data:
+                again_failed_shipments.append(shipment)
+                doc.append('failed_shipments', {
+                    "shipment": shipment,
+                    "reason": "No R200000 record found"
+                })
                 frappe.log_error(f"No R200000 record found for shipment: {shipment}", "Missing R200000 Data")
                 continue
-            existing_doc = frappe.db.exists("Shipment Number", shipment)
-            if existing_doc:
-                shipment_doc = frappe.get_doc("Shipment Number",shipment)
-                customer = None
-                icris_number = None
-                billing_type = None
-                station = None
-                import_export = None
-                # Fetch export shipments
-                export_array_temp = frappe.get_list("R300000",
-                    filters=[
-                        ["shipper_country", "=", origin_country],
-                        ["shipment_number", "=", shipment]
-                    ],
-                    fields=["shipment_number", "shipper_number"]
-                )
-
-                if export_array_temp:
-                    station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
-                    shipper_number = export_array_temp[0].shipper_number
-                    import_export = "Export"
-                    icris = frappe.get_list("ICRIS Account",
-                        filters={
-                            "name": shipper_number
-                        },
-                        fields=["shipper_name", "icris_account"]
-                    )
-                    if icris:
-                        customer = icris[0].shipper_name
-                        billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
-                        icris_number = icris[0].icris_account
-
-                # Fetch import shipments
-                import_array_temp = frappe.get_list("R400000",
-                    filters={
-                        "consignee_country_code": origin_country,
-                        "shipment_number": shipment
-                    },
-                    fields=["shipment_number", "consignee_number"]
-                )
-
-                if import_array_temp:
-                    station = frappe.get_value("R400000", {"shipment_number": shipment}, "consignee_city")
-                    consignee_number = import_array_temp[0].consignee_number
-                    import_export = "Import"
-                    icris = frappe.get_list("ICRIS Account",
-                        filters={
-                            "name": consignee_number
-                        },
-                        fields=["shipper_name", "icris_account"]
-                    )
-                    if icris:
-                        customer = icris[0].shipper_name
-                        billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
-                        icris_number = icris[0].icris_account
-
-
-                # Create a new shipment document
-                
-                shipment_doc.set("shipment_number", shipment)
-                shipment_doc.set("customer", customer)
-                shipment_doc.set("date_shipped", date_shipped)
-                shipment_doc.set("station", station)
-                shipment_doc.set("icris_number", icris_number)
-                shipment_doc.set("billing_type", billing_type)
-                shipment_doc.set("billing_term",billing_term)
-                shipment_doc.set("file_name",file_name)
-                shipment_doc.set("import__export",import_export)
-                shipment_doc.set("import_date",import_date)
-                shipment_doc.set("manifest_file_type",file_type)
-                shipment_doc.set("manifest_upload_data",doc.name)
-                shipment_doc.set("gateway",doc.gateway)
-
-                # shipment_doc.insert()
-                shipment_doc.save(ignore_permissions=True)
-                # frappe.db.commit()
-                    # continue  # Skip if it already exists
-            else:
-                
-                customer = None
-                icris_number = None
-                billing_type = None
-                station = None
-                import_export = None
-                # Fetch export shipments
-                export_array_temp = frappe.get_list("R300000",
-                    filters=[
-                        ["shipper_country", "=", origin_country],
-                        ["shipment_number", "=", shipment]
-                    ],
-                    fields=["shipment_number", "shipper_number"]
-                )
-
-                if export_array_temp:
-                    station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
-                    shipper_number = export_array_temp[0].shipper_number
-                    import_export = "Export"
-                    icris = frappe.get_list("ICRIS Account",
-                        filters=[
-                            ["name", "=", shipper_number]
-                        ],
-                        fields=["shipper_name", "icris_account"]
-                    )
-                    if icris:
-                        customer = icris[0].shipper_name
-                        billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
-                        icris_number = icris[0].icris_account
-
-                # Fetch import shipments
-                import_array_temp = frappe.get_list("R400000",
-                    filters=[
-                        ["consignee_country_code", "=", origin_country],
-                        ["shipment_number", "=", shipment]
-                    ],
-                    fields=["shipment_number", "consignee_number"]
-                )
-
-                if import_array_temp:
-                    station = frappe.get_value("R400000", {"shipment_number": shipment}, "consignee_city")
-                    consignee_number = import_array_temp[0].consignee_number
-                    import_export = "Import"
-                    icris = frappe.get_list("ICRIS Account",
-                        filters=[
-                            ["name", "=", consignee_number]
-                        ],
-                        fields=["shipper_name", "icris_account"]
-                    )
-                    if icris:
-                        customer = icris[0].shipper_name
-                        billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
-                        icris_number = icris[0].icris_account
-
-
-                # Create a new shipment document
-                shipment_doc = frappe.new_doc("Shipment Number")
-                shipment_doc.set("shipment_number", shipment)
-                shipment_doc.set("customer", customer)
-                shipment_doc.set("billing_term",billing_term)
-                shipment_doc.set("date_shipped", date_shipped)
-                shipment_doc.set("station", station)
-                shipment_doc.set("icris_number", icris_number)
-                shipment_doc.set("billing_type", billing_type)
-                shipment_doc.set("file_name",file_name)
-                shipment_doc.set("import__export",import_export)
-                shipment_doc.set("import_date",import_date)
-                shipment_doc.set("manifest_file_type",file_type)
-                shipment_doc.set("manifest_upload_data",doc.name)
-                shipment_doc.set("gateway",doc.gateway)
-
-                shipment_doc.insert(ignore_permissions=True)
-                # shipment_doc.save(ignore_permissions=True)
-                # frappe.db.commit()
+            create_shipment_number_record(shipment, origin_country, r2_data, doc)
+        if doc.failed_shipments > 0:
+            doc.save(ignore_permissions = True)
 
         shipment_numbers = frappe.db.get_all(
             "Shipment Number",
@@ -1548,6 +1404,194 @@ def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
         frappe.log_error(f"Error in modified_manifest_update: {str(e)}", "Manifest Update Error")
         frappe.db.set_value("Manifest Upload Data", main_doc.name, "status", "Failed")
 
+def create_shipment_number_record(shipment, origin_country, r2_data, doc):
+    billing_term = r2_data.billing_term_field
+    date_shipped = r2_data.shipped_date
+    import_date = r2_data.manifest_import_date
+    file_type = r2_data.file_type
+    file_name = r2_data.file_name
+    existing_doc = frappe.db.exists("Shipment Number", shipment)
+    if existing_doc:
+        shipment_doc = frappe.get_doc("Shipment Number",shipment)
+        customer = None
+        icris_number = None
+        billing_type = None
+        station = None
+        import_export = None
+        # Fetch export shipments
+        export_array_temp = frappe.get_list("R300000",
+            filters=[
+                ["shipper_country", "=", origin_country],
+                ["shipment_number", "=", shipment]
+            ],
+            fields=["shipment_number", "shipper_number"]
+        )
+
+        if export_array_temp:
+            station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
+            shipper_number = export_array_temp[0].shipper_number
+            import_export = "Export"
+            icris = frappe.get_list("ICRIS Account",
+                filters={
+                    "name": shipper_number
+                },
+                fields=["shipper_name", "icris_account"]
+            )
+            if icris:
+                customer = icris[0].shipper_name
+                billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
+                icris_number = icris[0].icris_account
+
+        # Fetch import shipments
+        import_array_temp = frappe.get_list("R400000",
+            filters={
+                "consignee_country_code": origin_country,
+                "shipment_number": shipment
+            },
+            fields=["shipment_number", "consignee_number"]
+        )
+
+        if import_array_temp:
+            station = frappe.get_value("R400000", {"shipment_number": shipment}, "consignee_city")
+            consignee_number = import_array_temp[0].consignee_number
+            import_export = "Import"
+            icris = frappe.get_list("ICRIS Account",
+                filters={
+                    "name": consignee_number
+                },
+                fields=["shipper_name", "icris_account"]
+            )
+            if icris:
+                customer = icris[0].shipper_name
+                billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
+                icris_number = icris[0].icris_account
+
+
+        # Create a new shipment document
+        
+        shipment_doc.set("shipment_number", shipment)
+        shipment_doc.set("customer", customer)
+        shipment_doc.set("date_shipped", date_shipped)
+        shipment_doc.set("station", station)
+        shipment_doc.set("icris_number", icris_number)
+        shipment_doc.set("billing_type", billing_type)
+        shipment_doc.set("billing_term",billing_term)
+        shipment_doc.set("file_name",file_name)
+        shipment_doc.set("import__export",import_export)
+        shipment_doc.set("import_date",import_date)
+        shipment_doc.set("manifest_file_type",file_type)
+        shipment_doc.set("manifest_upload_data",doc.name)
+        shipment_doc.set("gateway",doc.gateway)
+
+        # shipment_doc.insert()
+        shipment_doc.save(ignore_permissions=True)
+        # frappe.db.commit()
+            # continue  # Skip if it already exists
+    else:
+        
+        customer = None
+        icris_number = None
+        billing_type = None
+        station = None
+        import_export = None
+        # Fetch export shipments
+        export_array_temp = frappe.get_list("R300000",
+            filters=[
+                ["shipper_country", "=", origin_country],
+                ["shipment_number", "=", shipment]
+            ],
+            fields=["shipment_number", "shipper_number"]
+        )
+
+        if export_array_temp:
+            station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
+            shipper_number = export_array_temp[0].shipper_number
+            import_export = "Export"
+            icris = frappe.get_list("ICRIS Account",
+                filters=[
+                    ["name", "=", shipper_number]
+                ],
+                fields=["shipper_name", "icris_account"]
+            )
+            if icris:
+                customer = icris[0].shipper_name
+                billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
+                icris_number = icris[0].icris_account
+
+        # Fetch import shipments
+        import_array_temp = frappe.get_list("R400000",
+            filters=[
+                ["consignee_country_code", "=", origin_country],
+                ["shipment_number", "=", shipment]
+            ],
+            fields=["shipment_number", "consignee_number"]
+        )
+
+        if import_array_temp:
+            station = frappe.get_value("R400000", {"shipment_number": shipment}, "consignee_city")
+            consignee_number = import_array_temp[0].consignee_number
+            import_export = "Import"
+            icris = frappe.get_list("ICRIS Account",
+                filters=[
+                    ["name", "=", consignee_number]
+                ],
+                fields=["shipper_name", "icris_account"]
+            )
+            if icris:
+                customer = icris[0].shipper_name
+                billing_type = frappe.get_value("Customer", icris[0].shipper_name, "custom_billing_type")
+                icris_number = icris[0].icris_account
+
+
+
+        # Create a new shipment document
+        shipment_doc = frappe.new_doc("Shipment Number")
+        shipment_doc.set("shipment_number", shipment)
+        shipment_doc.set("customer", customer)
+        shipment_doc.set("billing_term",billing_term)
+        shipment_doc.set("date_shipped", date_shipped)
+        shipment_doc.set("station", station)
+        shipment_doc.set("icris_number", icris_number)
+        shipment_doc.set("billing_type", billing_type)
+        shipment_doc.set("file_name",file_name)
+        shipment_doc.set("import__export",import_export)
+        shipment_doc.set("import_date",import_date)
+        shipment_doc.set("manifest_file_type",file_type)
+        shipment_doc.set("manifest_upload_data",doc.name)
+        shipment_doc.set("gateway",doc.gateway)
+
+        shipment_doc.insert(ignore_permissions=True)
+        # shipment_doc.save(ignore_permissions=True)
+        # frappe.db.commit()
+
+
+
+@frappe.whitelist()
+def reprocess_shipments(docname):
+    failed = []
+    doc = frappe.get_doc('Manifest Upload Data', docname)
+    if not len(doc.failed_shipments) > 0:
+        return
+    origin_country = frappe.db.get_single_value("Manifest Setting Definition", "origin_country")
+
+    for shipment in doc.failed_shipments:
+        shipment_number = shipment.shipment
+        r2_data = frappe.db.get_value("R200000", {"shipment_number": shipment_number}, ["billing_term_field", "shipped_date", "manifest_import_date", "file_type", "file_name"], as_dict=True)
+        if not r2_data:
+            failed.append(shipment_number)
+            continue
+        create_shipment_number_record(shipment_number, origin_country, r2_data, doc)
+    doc.set("failed_shipments", [])
+    
+    if failed:
+        for ship in failed:
+            doc.append('failed_shipments', {
+                "shipment": ship,
+                "reason": "No R200000 record found"
+            })
+    doc.save(ignore_permissions = True)
+
+
 
 # def safe_decode(file_doc):
 #     content = file_doc.get_content()
@@ -1557,6 +1601,8 @@ def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
 #         except UnicodeDecodeError:
 #             return content.decode("ISO-8859-1", errors="ignore")
 #     return content
+
+
 
 def safe_decode(file_doc):
     file_url = file_doc.file_url or ""
@@ -1576,8 +1622,10 @@ def safe_decode(file_doc):
 
 
 
+
 class ManifestUploadData(Document):
     def on_submit(self):
+        frappe.msgprint("Manifest Data Processing Started", alert=True)
         self.db_set("status", "Started")
         shipped_date = self.shipped_date if self.shipped_date else None
         import_date = self.import_date if self.import_date else None

@@ -1,8 +1,7 @@
 
-
-
 import frappe
 import json
+from frappe.desk.form.linked_with import SubmittableDocumentTree
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 import requests
@@ -11,12 +10,55 @@ from frappe import _
 import zipfile
 import io
 from frappe.utils.pdf import get_pdf
+from frappe.desk.form import linked_with
+from frappe.model import delete_doc
+
+# save original
+_original_check = delete_doc.check_if_doc_is_linked
+
+def custom_check_if_doc_is_linked(doc, method=None, *args, **kwargs):
+    try:
+        _original_check(doc, method, *args, **kwargs)
+    except frappe.LinkExistsError as e:
+        # Skip if the linked doctype is Sales Invoice PDF
+        if "Sales Invoice PDF" in str(e):
+            return
+        raise
+
 
 def scrub(txt=None):
     if txt is None:
         return ""
     return txt.replace(' ', '_').lower()
 
+
+
+
+
+# @frappe.whitelist()
+# def get_submitted_linked_docs(doctype, name):
+#     if doctype == "Sales Invoice PDF":
+#         return {}
+    
+#     return linked_with.get_submitted_linked_docs(doctype, name)
+
+@frappe.whitelist()
+def get_submitted_linked_docs(doctype: str, name: str, ignore_doctypes_on_cancel_all=None):
+    if isinstance(ignore_doctypes_on_cancel_all, str):
+        ignore_doctypes_on_cancel_all = json.loads(ignore_doctypes_on_cancel_all or "[]")
+
+    always_ignore = ["Sales Invoice PDF"]
+    ignore_doctypes_on_cancel_all = (ignore_doctypes_on_cancel_all or []) + always_ignore
+
+    frappe.has_permission(doctype, doc=name, throw=True)
+    tree = SubmittableDocumentTree(doctype, name)
+    visited_documents = tree.get_all_children(ignore_doctypes_on_cancel_all)
+    docs = []
+
+    for dt, names in visited_documents.items():
+        docs.extend([{"doctype": dt, "name": name, "docstatus": 1} for name in names])
+
+    return {"docs": docs, "count": len(docs)}
 
 
 @frappe.whitelist()

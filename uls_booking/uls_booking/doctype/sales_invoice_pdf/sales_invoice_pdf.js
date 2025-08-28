@@ -8,6 +8,28 @@ frappe.ui.form.on("Sales Invoice PDF", {
         frm.fields_dict["customer_with_sales_invoice"].grid.wrapper.find('.grid-remove-rows').hide();
 
         if (frm.doc.docstatus === 1) {
+            // frm.page.clear_actions_menu();
+
+            // // Add custom Cancel button
+            // frm.page.add_menu_item(__('Cancel'), function() {
+            //     frappe.confirm(
+            //         'Do you want to cancel this record? (Invoices will not be cancelled, only references will be cleared)',
+            //         function() {
+            //             frappe.call({
+            //                 method: "frappe.client.cancel",
+            //                 args: {
+            //                     doctype: frm.doc.doctype,
+            //                     name: frm.doc.name
+            //                 },
+            //                 freeze: true,
+            //                 freeze_message: __("Cancelling..."),
+            //                 callback: function() {
+            //                     frm.reload_doc();
+            //                 }
+            //             });
+            //         }
+            //     );
+            // }, true);
             frm.add_custom_button("Send Sales Invoice Email", function() {
                 let selected_customers = [];
     

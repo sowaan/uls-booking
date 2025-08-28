@@ -13,6 +13,26 @@ frappe.ui.form.on('Manifest Upload Data', {
                 "Draft": "gray"
             }[frm.doc.status]);
         }
+
+        if (frm.doc.docstatus === 1 && frm.doc.failed_shipments > 0 && (frm.doc.status === "Failed" || frm.doc.status === "Completed")) {
+        // if (frm.doc.docstatus === 1 && (frm.doc.status === "Failed" || frm.doc.status === "Completed")) {
+            frm.add_custom_button(
+                __('Reprocess Shipments'),
+                function() {
+                    frappe.call({
+                        method: "uls_booking.uls_booking.doctype.manifest_upload_data.manifest_upload_data.reprocess_shipments",
+                        args: { docname: frm.doc.name },
+                        callback: function(r) {
+                            if (!r.exc) {
+                                frm.reload_doc();
+                            }
+                        }
+                    });
+                }
+            ).addClass('btn-primary');
+
+        }
+
     },
     // manifest_modification_process: function (frm) {
     //     if (frm.doc.manifest_modification_process == 1) {

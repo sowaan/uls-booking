@@ -19,6 +19,7 @@
   "export_import",
   "shipped_date",
   "import_date",
+  "failed_shipments",
   "column_break_xpdh",
   "from_index",
   "to_index",
@@ -206,12 +207,18 @@
    "options": "Draft\nStarted\nCompleted\nFailed",
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "failed_shipments",
+   "fieldtype": "Table",
+   "label": "Failed Shipments",
+   "options": "Failed Shipments"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-15 12:14:53.291991",
+ "modified": "2025-08-24 17:29:59.737139",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Upload Data",

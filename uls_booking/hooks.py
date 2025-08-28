@@ -357,6 +357,11 @@ scheduler_events = {
 # 	"frappe.desk.doctype.event.event.get_events": "uls_booking.event.get_events"
 # }
 #
+
+override_whitelisted_methods = {
+    "frappe.desk.form.linked_with.get_submitted_linked_docs": "uls_booking.uls_booking.api.api.get_submitted_linked_docs"
+}
+
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
@@ -372,6 +377,7 @@ scheduler_events = {
 # -----------------------------------------------------------
 
 # ignore_links_on_delete = ["Communication", "ToDo"]
+
 
 # Request Events
 # ----------------

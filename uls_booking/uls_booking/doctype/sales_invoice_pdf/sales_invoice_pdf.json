@@ -132,15 +132,17 @@
   },
   {
    "fieldname": "all_sales_invoices",
-   "fieldtype": "Text",
+   "fieldtype": "Long Text",
    "hidden": 1,
-   "label": "All Sales Invoices(Used in Code)"
+   "label": "All Sales Invoices(Used in Code)",
+   "no_copy": 1
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-01 15:32:26.821170",
+ "modified": "2025-08-26 15:58:54.703404",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice PDF",
@@ -160,6 +162,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
