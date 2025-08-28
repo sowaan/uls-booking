@@ -10,20 +10,6 @@ from frappe import _
 import zipfile
 import io
 from frappe.utils.pdf import get_pdf
-from frappe.desk.form import linked_with
-from frappe.model import delete_doc
-
-# save original
-_original_check = delete_doc.check_if_doc_is_linked
-
-def custom_check_if_doc_is_linked(doc, method=None, *args, **kwargs):
-    try:
-        _original_check(doc, method, *args, **kwargs)
-    except frappe.LinkExistsError as e:
-        # Skip if the linked doctype is Sales Invoice PDF
-        if "Sales Invoice PDF" in str(e):
-            return
-        raise
 
 
 def scrub(txt=None):
@@ -33,14 +19,6 @@ def scrub(txt=None):
 
 
 
-
-
-# @frappe.whitelist()
-# def get_submitted_linked_docs(doctype, name):
-#     if doctype == "Sales Invoice PDF":
-#         return {}
-    
-#     return linked_with.get_submitted_linked_docs(doctype, name)
 
 @frappe.whitelist()
 def get_submitted_linked_docs(doctype: str, name: str, ignore_doctypes_on_cancel_all=None):
