@@ -875,6 +875,7 @@ def storing_shipment_number(arrays, frm, to, doc):
             r2_data = frappe.db.get_value("R200000", {"shipment_number": shipment}, ["billing_term_field", "shipped_date", "manifest_import_date", "file_type", "file_name"], as_dict=True)
             if not r2_data:
                 failed_shipments.append(shipment)
+                continue
             create_shipment_number_record(shipment, origin_country, r2_data, doc)
         for shipment in failed_shipments:
             r2_data = frappe.db.get_value("R200000", {"shipment_number": shipment}, ["billing_term_field", "shipped_date", "manifest_import_date", "file_type", "file_name"], as_dict=True)
