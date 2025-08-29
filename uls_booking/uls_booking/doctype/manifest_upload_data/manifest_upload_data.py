@@ -888,7 +888,7 @@ def storing_shipment_number(arrays, frm, to, doc):
                 frappe.log_error(f"No R200000 record found for shipment: {shipment}", "Missing R200000 Data")
                 continue
             create_shipment_number_record(shipment, origin_country, r2_data, doc)
-        if doc.failed_shipments > 0:
+        if len(doc.failed_shipments) > 0:
             doc.save(ignore_permissions = True)
 
         shipment_numbers = frappe.db.get_all(
