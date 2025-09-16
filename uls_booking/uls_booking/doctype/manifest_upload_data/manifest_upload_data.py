@@ -1,7 +1,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+
 from frappe.utils.background_jobs import enqueue
+import time
+
 from frappe.utils import getdate
 import json
 import re
@@ -823,22 +826,6 @@ def generate_remaining_sales_invoice():
     # chunk_process(doc_str=doc_str,doc = doc,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size)
         # enqueue(chunk_process,doc_str=doc_dict,doc = doc_dict,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size,queue="default")
         
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def storing_shipment_number(arrays, frm, to, doc):
     current_shipment = None
     try:
@@ -854,10 +841,10 @@ def storing_shipment_number(arrays, frm, to, doc):
                 if shipment_num:
                     shipment_numbers.add(shipment_num)  # Add to the set
             except IndexError:
-                frappe.log_error(f"IndexError processing line: {line}", "Data Processing Error")
+                frappe.log_error("Data Processing Error", f"IndexError processing line: {line}")
                 continue
             except Exception as e:
-                frappe.log_error(f"Unexpected error processing line: {line}. Error: {str(e)}", "Data Processing Error")
+                frappe.log_error("Data Processing Error", f"Unexpected error processing line: {line}. Error: {str(e)}")
                 continue
 
         unique_shipment_numbers = list(shipment_numbers)
@@ -885,11 +872,11 @@ def storing_shipment_number(arrays, frm, to, doc):
                     "shipment": shipment,
                     "reason": "No R200000 record found"
                 })
-                frappe.log_error(f"No R200000 record found for shipment: {shipment}", "Missing R200000 Data")
+                #frappe.log_error("Missing R200000 Data", f"No R200000 record found for shipment: {shipment}")
                 continue
             create_shipment_number_record(shipment, origin_country, r2_data, doc)
-        if len(doc.failed_shipments) > 0:
-            doc.save(ignore_permissions = True)
+        # if len(doc.failed_shipments) > 0:
+        #     doc.save(ignore_permissions = True, ignore_version=True)
 
         shipment_numbers = frappe.db.get_all(
             "Shipment Number",
@@ -901,8 +888,8 @@ def storing_shipment_number(arrays, frm, to, doc):
         frappe.db.set_value("Manifest Upload Data", doc.name, "status", "Completed")
     except Exception as e:
         frappe.log_error(
-            f"Error in storing shipment numbers for shipment: {current_shipment}. Error: {str(e)}",
-            "Shipment Number Storage Error"
+            "Shipment Number Storage Error", f"Error in storing shipment numbers for shipment: {current_shipment}. Error: {str(e)}"
+            
         )
         frappe.db.set_value("Manifest Upload Data", doc.name, "status", "Failed")
 
@@ -1072,7 +1059,7 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
             elif doctype_name == "R400000":
                 if docss.consignee_city:
                     make_R400000(docss)
-            if not docss.file_type:
+            if hasattr(docss, "file_type") and not docss.file_type:
                 docss.file_type = "ISPS"
 
 
@@ -1145,7 +1132,7 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
             elif doctype_name == "R400000":
                 if doc.consignee_city:
                     make_R400000(doc)
-            if not doc.file_type:
+            if  hasattr(doc, "file_type") and not doc.file_type:
                 doc.file_type = "ISPS"
             
             # print(doctype_name, shipment_num, "Inserting")
@@ -1292,7 +1279,7 @@ def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_d
             elif doctype_name == "R400000":
                 if docss.consignee_city:
                     make_R400000(docss)
-            if not docss.file_type:
+            if hasattr(docss, "file_type") and not docss.file_type:
                 docss.file_type = "OPSYS"
 
             docss.save(ignore_permissions=True)
@@ -1357,7 +1344,7 @@ def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_d
             elif doctype_name == "R400000":
                 if doc.consignee_city:
                     make_R400000(doc)
-            if not doc.file_type:
+            if  hasattr(doc, "file_type") and not doc.file_type:
                 doc.file_type = "OPSYS"
 
             doc.insert(ignore_permissions=True)
@@ -1402,7 +1389,7 @@ def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
                 }).insert()
         frappe.db.set_value("Manifest Upload Data", main_doc.name, "status", "Completed")
     except Exception as e:
-        frappe.log_error(f"Error in modified_manifest_update: {str(e)}", "Manifest Update Error")
+        frappe.log_error("Manifest Update Error", f"Error in modified_manifest_update: {str(e)}")
         frappe.db.set_value("Manifest Upload Data", main_doc.name, "status", "Failed")
 
 def create_shipment_number_record(shipment, origin_country, r2_data, doc):
@@ -1630,6 +1617,9 @@ class ManifestUploadData(Document):
         self.db_set("status", "Started")
         shipped_date = self.shipped_date if self.shipped_date else None
         import_date = self.import_date if self.import_date else None
+
+        delay_seconds = 20
+
         if self.attach_file and self.manifest_file_type == "ISPS":
             is_import = self.export_import.lower() == "import"
             file_name = frappe.db.get_value("File", {"file_url": self.attach_file}, "name")
@@ -1645,12 +1635,44 @@ class ManifestUploadData(Document):
             chunk_size = 10  
             current_index = 0
             
-            while current_index < len(arrays):
-                chunk = arrays[current_index:current_index + chunk_size]  
-                current_index += chunk_size
-                enqueue(insert_data, manifest_upload_data_name = self.name, gateway = self.gateway, is_import = is_import, shipped_date = shipped_date , import_date = import_date , file_proper_name = file_proper_name , arrays=chunk, frm=frm, to=to, date_format = self.date_format, queue="long")
+            # while current_index < len(arrays):
+            #     chunk = arrays[current_index:current_index + chunk_size]  
+            #     current_index += chunk_size
+            #     enqueue(insert_data, manifest_upload_data_name = self.name, gateway = self.gateway, is_import = is_import, shipped_date = shipped_date , import_date = import_date , file_proper_name = file_proper_name , arrays=chunk, frm=frm, to=to, date_format = self.date_format, queue="long")
                 
-            enqueue(storing_shipment_number, arrays=arrays, frm=shipfrom, to=shipto, doc=self, queue="long")
+            # enqueue(storing_shipment_number, arrays=arrays, frm=shipfrom, to=shipto, doc=self, queue="long")
+            total_chunks = (len(arrays) + chunk_size - 1) // chunk_size
+            for i in range(total_chunks):
+                chunk = arrays[i*chunk_size:(i+1)*chunk_size]
+                is_last = i == total_chunks - 1
+                
+                enqueue(
+                    insert_data,
+                    manifest_upload_data_name=self.name,
+                    gateway=self.gateway,
+                    is_import=is_import,
+                    shipped_date=shipped_date,
+                    import_date=import_date,
+                    file_proper_name=file_proper_name,
+                    arrays=chunk,
+                    frm=frm,
+                    to=to,
+                    date_format=self.date_format,
+                    queue="long"
+                )
+                
+                if is_last:
+                    # Run storing_shipment_number s minutes later
+                    time.sleep(delay_seconds)
+                    enqueue(
+                        storing_shipment_number,
+                        arrays=arrays,
+                        frm=shipfrom,
+                        to=shipto,
+                        doc=self,
+                        queue="long"
+                    )
+
 
 
 
@@ -1685,11 +1707,41 @@ class ManifestUploadData(Document):
             chunk_size3 = 10  
             current_index3 = 0
             
-            while current_index3 < len(arrays3):
-                chunk = arrays3[current_index3:current_index3 + chunk_size3]             
-                current_index3 += chunk_size3
-                enqueue(opsys_insert_data, shipped_date = shipped_date, import_date = import_date, file_proper_name3 = file_proper_name3 , arrays=chunk, frm=frm, to=to, date_format = self.date_format, manifest_upload_data_name=self.name, gateway=self.gateway, queue="long")
+            # while current_index3 < len(arrays3):
+            #     chunk = arrays3[current_index3:current_index3 + chunk_size3]             
+            #     current_index3 += chunk_size3
+            #     enqueue(opsys_insert_data, shipped_date = shipped_date, import_date = import_date, file_proper_name3 = file_proper_name3 , arrays=chunk, frm=frm, to=to, date_format = self.date_format, manifest_upload_data_name=self.name, gateway=self.gateway, queue="long")
             
-            enqueue(storing_shipment_number,arrays=arrays3, frm=shipfrom, to=shipto, doc=self ,queue="long")
+            # enqueue(storing_shipment_number,arrays=arrays3, frm=shipfrom, to=shipto, doc=self ,queue="long")
+            total_chunks3 = (len(arrays3) + chunk_size3 - 1) // chunk_size3
+
+            for i in range(total_chunks3):
+                chunk = arrays3[i * chunk_size3:(i + 1) * chunk_size3]
+                is_last = i == total_chunks3 - 1
+
+                enqueue(
+                    opsys_insert_data,
+                    shipped_date=shipped_date,
+                    import_date=import_date,
+                    file_proper_name3=file_proper_name3,
+                    arrays=chunk,
+                    frm=frm,
+                    to=to,
+                    date_format=self.date_format,
+                    manifest_upload_data_name=self.name,
+                    gateway=self.gateway,
+                    queue="long"
+                )
+
+                if is_last:
+                    time.sleep(delay_seconds)
+                    enqueue(
+                        storing_shipment_number,
+                        arrays=arrays3,
+                        frm=shipfrom,
+                        to=shipto,
+                        doc=self,
+                        queue="long"
+                    )
                 
             
