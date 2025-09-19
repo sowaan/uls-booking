@@ -934,7 +934,9 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
     field_names_array = [record.field_names for record in setting.country_and_surcharge_codes_field_names]
     parent_doctype_map = {record.record[:2]: record.record for record in setting.doctypes_with_child_records}
 
+    count = 1           #counter to check loop count
     for line in arrays:
+        
         doctype_name = "R" + line[frm:to].strip()
         old_doctype_name = line[frm:to].strip()
         
@@ -1134,10 +1136,18 @@ def insert_data(arrays, frm, to, date_format, manifest_upload_data_name, gateway
                     make_R400000(doc)
             if  hasattr(doc, "file_type") and not doc.file_type:
                 doc.file_type = "ISPS"
+
             
-            # print(doctype_name, shipment_num, "Inserting")
             doc.insert(ignore_permissions=True)
-            doc.save(ignore_permissions=True)
+            doc.save(ignore_permissions=True)            
+            
+            # #added to commit record after every 10 lines
+            if (len(arrays) - count) > 10 and count % 10 == 0:
+                frappe.db.commit
+            count += 1
+           
+            # # print(doctype_name, shipment_num, "Inserting")
+            
 
 
 def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_date, import_date, manifest_upload_data_name, gateway):
@@ -1153,6 +1163,7 @@ def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_d
     field_names_array = [record.field_names for record in setting.country_and_surcharge_codes_field_names]
     parent_doctype_map = {record.record[:2]: record.record for record in setting.doctypes_with_child_records}
 
+    count = 1  
     for line in arrays:
        
         doctype_name = "R" + line[frm:to].strip()
@@ -1347,9 +1358,14 @@ def opsys_insert_data(arrays, frm, to, date_format, file_proper_name3, shipped_d
             if  hasattr(doc, "file_type") and not doc.file_type:
                 doc.file_type = "OPSYS"
 
+            
             doc.insert(ignore_permissions=True)
             doc.save(ignore_permissions=True)
 
+            # #added to commit record after every 10 lines
+            if (len(arrays) - count) > 10 and count % 10 == 0:
+                frappe.db.commit
+            count += 1
 
 def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
     try:
@@ -1632,8 +1648,9 @@ class ManifestUploadData(Document):
             to = int(self.to_index)
             shipfrom = int(self.shipment_number_from_index)-1
             shipto = int(self.shipment_number_to_index)
-            chunk_size = 10  
-            current_index = 0
+            #chunk_size = 10  
+            
+            # current_index = 0
             
             # while current_index < len(arrays):
             #     chunk = arrays[current_index:current_index + chunk_size]  
@@ -1641,12 +1658,15 @@ class ManifestUploadData(Document):
             #     enqueue(insert_data, manifest_upload_data_name = self.name, gateway = self.gateway, is_import = is_import, shipped_date = shipped_date , import_date = import_date , file_proper_name = file_proper_name , arrays=chunk, frm=frm, to=to, date_format = self.date_format, queue="long")
                 
             # enqueue(storing_shipment_number, arrays=arrays, frm=shipfrom, to=shipto, doc=self, queue="long")
-            total_chunks = (len(arrays) + chunk_size - 1) // chunk_size
-            for i in range(total_chunks):
-                chunk = arrays[i*chunk_size:(i+1)*chunk_size]
-                is_last = i == total_chunks - 1
+                        
+            # total_chunks = (len(arrays) + chunk_size - 1) // chunk_size
+
+            # for i in range(total_chunks):     #commented to send array instead of chunk
+            # for i in range(arrays):            #commented b/c loop is not needed here
+            # chunk = arrays[i*chunk_size:(i+1)*chunk_size]
+            # is_last = i == total_chunks - 1
                 
-                enqueue(
+            enqueue(
                     insert_data,
                     manifest_upload_data_name=self.name,
                     gateway=self.gateway,
@@ -1654,29 +1674,30 @@ class ManifestUploadData(Document):
                     shipped_date=shipped_date,
                     import_date=import_date,
                     file_proper_name=file_proper_name,
-                    arrays=chunk,
+                    #arrays=chunk,
+                    arrays=arrays,
                     frm=frm,
                     to=to,
                     date_format=self.date_format,
                     queue="long"
                 )
                 
-                if is_last:
+            # if is_last:           #commented no more need
                     # Run storing_shipment_number s minutes later
-                    time.sleep(delay_seconds)
-                    enqueue(
-                        storing_shipment_number,
-                        arrays=arrays,
-                        frm=shipfrom,
-                        to=shipto,
-                        doc=self,
-                        queue="long"
+            #time.sleep(delay_seconds)
+            enqueue(
+                storing_shipment_number,
+                arrays=arrays,
+                frm=shipfrom,
+                to=shipto,
+                doc=self,
+                queue="long"
                     )
 
 
 
 
-        if self.manifest_file_type == "DWS" and self.modified_file:
+        elif self.manifest_file_type == "DWS" and self.modified_file:
 
             file_name2 = frappe.db.get_value("File", {"file_url": self.modified_file}, "name")
             file_doc2 = frappe.get_doc("File", file_name2)
@@ -1694,7 +1715,7 @@ class ManifestUploadData(Document):
                 enqueue(modified_manifest_update,main_doc = self, arrays2 = chunk2, pkg_from = pkg_from , pkg_to= pkg_to, date_format = self.date_format,  queue = "default")
         
 
-        if self.manifest_file_type == "OPSYS" and self.opsys_file:
+        elif self.manifest_file_type == "OPSYS" and self.opsys_file:
             file_name3 = frappe.db.get_value("File", {"file_url": self.opsys_file}, "name")
             file_doc3 = frappe.get_doc("File", file_name3)
             file_proper_name3 = file_doc3.file_name
@@ -1704,8 +1725,8 @@ class ManifestUploadData(Document):
             to = int(self.to_index)
             shipfrom = int(self.shipment_number_from_index)-1
             shipto = int(self.shipment_number_to_index)
-            chunk_size3 = 10  
-            current_index3 = 0
+            # chunk_size3 = 100  
+            # current_index3 = 0
             
             # while current_index3 < len(arrays3):
             #     chunk = arrays3[current_index3:current_index3 + chunk_size3]             
@@ -1713,35 +1734,34 @@ class ManifestUploadData(Document):
             #     enqueue(opsys_insert_data, shipped_date = shipped_date, import_date = import_date, file_proper_name3 = file_proper_name3 , arrays=chunk, frm=frm, to=to, date_format = self.date_format, manifest_upload_data_name=self.name, gateway=self.gateway, queue="long")
             
             # enqueue(storing_shipment_number,arrays=arrays3, frm=shipfrom, to=shipto, doc=self ,queue="long")
-            total_chunks3 = (len(arrays3) + chunk_size3 - 1) // chunk_size3
+            # total_chunks3 = (len(arrays3) + chunk_size3 - 1) // chunk_size3
 
-            for i in range(total_chunks3):
-                chunk = arrays3[i * chunk_size3:(i + 1) * chunk_size3]
-                is_last = i == total_chunks3 - 1
+            # for i in range(total_chunks3):
+            #     chunk = arrays3[i * chunk_size3:(i + 1) * chunk_size3]
+            #     is_last = i == total_chunks3 - 1
 
-                enqueue(
-                    opsys_insert_data,
-                    shipped_date=shipped_date,
-                    import_date=import_date,
-                    file_proper_name3=file_proper_name3,
-                    arrays=chunk,
-                    frm=frm,
-                    to=to,
-                    date_format=self.date_format,
-                    manifest_upload_data_name=self.name,
-                    gateway=self.gateway,
-                    queue="long"
+            enqueue(
+                opsys_insert_data,
+                shipped_date=shipped_date,
+                import_date=import_date,
+                file_proper_name3=file_proper_name3,
+                arrays=arrays3,
+                frm=frm,
+                to=to,
+                date_format=self.date_format,
+                manifest_upload_data_name=self.name,
+                gateway=self.gateway,
+                queue="long"
                 )
 
-                if is_last:
-                    time.sleep(delay_seconds)
-                    enqueue(
-                        storing_shipment_number,
-                        arrays=arrays3,
-                        frm=shipfrom,
-                        to=shipto,
-                        doc=self,
-                        queue="long"
-                    )
+                #if is_last:
+            enqueue(
+                storing_shipment_number,
+                arrays=arrays3,
+                frm=shipfrom,
+                to=shipto,
+                doc=self,
+                queue="long"
+                )
                 
             
