@@ -59,13 +59,7 @@ def get_frt_cust(icris_number, unassign, shipment_number, logs):
     2. R300000 → alternate_tracking_number_1 → Customer
     3. Unassigned ICRIS Account
     """
-
-    shipper_name = frappe.db.get_value("ICRIS Account", icris_number, "shipper_name")
-    if shipper_name:
-        return shipper_name
-
-    logs.append(f"No shipper_name in ICRIS Account: {icris_number}, checking R300000...")
-
+    
     alt_track_r3 = frappe.db.get_value("R300000", {"shipment_number": shipment_number}, "alternate_tracking_number_1")
     if alt_track_r3:
         cust_name = frappe.db.get_value(
@@ -74,17 +68,38 @@ def get_frt_cust(icris_number, unassign, shipment_number, logs):
             "name"
         )
         if cust_name:
-            return cust_name
+            return cust_name    
+
+    shipper_name = frappe.db.get_value("ICRIS Account", icris_number, "shipper_name")
+    if shipper_name:
+        return shipper_name
 
     shipper_name = frappe.db.get_value("ICRIS Account", unassign, "shipper_name")
     if shipper_name:
         logs.append(f"Customer not found from R300000.So using ICRIS Account: {unassign}")
         return shipper_name
-
+    
+    logs.append(f"No shipper_name in ICRIS Account: {icris_number}, checking R300000...")
     return None
 
+def get_frt_cust_name(cust):
+    cust_name = frappe.db.get_value(
+            "Customer",
+            {"name": cust},
+            "customer_name"
+        )
+    if cust_name:
+        return cust_name 
 
-
+def get_frt_cust_account(cust):
+    account_no = frappe.db.get_value(
+            "Customer",
+            {"name": cust},
+            "custom_import_account_no"
+        )
+    if account_no:        
+        return account_no 
+    
 def get_exchange_rate(from_currency, to_currency, date):
     filters = {"from_currency": from_currency, "to_currency": to_currency, "date": date}
     rate = frappe.get_list("Currency Exchange", filters=filters, fields=["exchange_rate"], order_by="date desc", limit_page_length=1)
@@ -210,8 +225,15 @@ def generate_invoice(self, method):
             if definition.unassigned_icris_number:
                 icris_account = frappe.get_doc("ICRIS Account", definition.unassigned_icris_number)
         # print("frt")
-        cust = get_frt_cust(icris_number, definition.unassigned_icris_number, shipment_number, logs)
+        cust = get_frt_cust(icris_number, definition.unassigned_icris_number, shipment_number, logs)       
         sales_invoice.set("customer", cust)
+
+        custName = get_frt_cust_name(cust)
+        sales_invoice.set("customer_name", custName)
+
+        accountNo = get_frt_cust_account(cust)
+        sales_invoice.set("custom_account_no", accountNo)
+
         if is_export:
             if sales_invoice.custom_consignee_country:
                 origin_country = sales_invoice.custom_consignee_country.capitalize()
