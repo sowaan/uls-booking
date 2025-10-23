@@ -171,7 +171,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
         return "Shipment number missing"
 
     logs = []
-
+    
     # Step 1: Check if invoice already exists using SQL
     invoice_exists = frappe.db.sql("""
         SELECT sales_invoice, logs, sales_invoice_status
@@ -209,6 +209,8 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     si.custom_compensation_invoices = is_compensation
     si.custom_freight_invoices = not is_compensation
     si.custom_sales_invoice_definition = sales_invoice_definition
+    si.custom_created_byfrom_billing_tool = login_username
+    si.custom_parent_idfrom_billing_tool = parent_id
 
     # Map fields from reference docs
     apply_reference_docs_to_invoice(si, shipment_number, ref_doc_map)
@@ -263,8 +265,8 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
             log_doc.logs = "Sales Invoice Created Successfully"
             log_doc.sales_invoice = si.name
             log_doc.sales_invoice_status = "Created"
-            log_doc.created_byfrom_utility = login_username
-            log_doc.parent_idfrom_utility = parent_id
+            log_doc.custom_created_byfrom_billing_tool = login_username
+            log_doc.custom_parent_idfrom_billing_tool = parent_id
             log_doc.icris_number = icris_number
         else:
             log_doc = frappe.get_doc({
@@ -273,8 +275,8 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
                 "sales_invoice": si.name,
                 "logs": "Sales Invoice Created Successfully",
                 "sales_invoice_status": "Created",
-                "created_byfrom_utility": login_username,
-                "parent_idfrom_utility": parent_id,
+                "custom_created_byfrom_billing_tool": login_username,
+                "custom_parent_idfrom_billing_tool": parent_id,
                 "icris_number": icris_number
             })
         log_doc.insert(ignore_permissions=True)
@@ -287,8 +289,8 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
             "shipment_number": shipment_number,
             "logs": f"Failed: {str(e)}",
             "sales_invoice_status": "Failed",
-            "created_byfrom_utility": login_username,
-            "parent_idfrom_utility": parent_id
+            "custom_created_byfrom_billing_tool": login_username,
+            "custom_parent_idfrom_billing_tool": parent_id
         })
         log_doc.insert(ignore_permissions=True)
 
@@ -367,8 +369,8 @@ def log_existing_invoice(invoice_type_fields, shipment_number, logs, login_usern
         frappe.db.sql("""
             INSERT INTO `tabSales Invoice Logs`
                 (name, creation, modified, owner, docstatus, shipment_number,
-                 sales_invoice, sales_invoice_status, created_byfrom_utility,
-                 parent_idfrom_utility, logs)
+                 sales_invoice, sales_invoice_status, custom_created_byfrom_billing_tool,
+                 custom_parent_idfrom_billing_tool, logs)
             VALUES (%s, NOW(), NOW(), %s, 0, %s, %s, 'Already Created', %s, %s, %s)
         """, (
             frappe.generate_hash(length=10),
@@ -385,7 +387,7 @@ def log_existing_invoice(invoice_type_fields, shipment_number, logs, login_usern
             UPDATE `tabSales Invoice Logs`
             SET logs = %s,
                 sales_invoice_status = 'Already Created',
-                created_byfrom_utility = %s,
+                custom_created_byfrom_billing_tool = %s,
                 parent_idfrom_utility = %s,
                 sales_invoice = %s,
                 modified = NOW()
@@ -444,4 +446,3 @@ def get_sales_invoice_logs(shipment_number):
         "logs": log.logs,
         "sales_invoice_status": log.sales_invoice_status
     } if log else "No Logs Found"
-
