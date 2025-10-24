@@ -275,8 +275,8 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
                 "sales_invoice": si.name,
                 "logs": "Sales Invoice Created Successfully",
                 "sales_invoice_status": "Created",
-                "custom_created_byfrom_billing_tool": login_username,
-                "custom_parent_idfrom_billing_tool": parent_id,
+                "created_byfrom_utility": login_username,
+                "parent_idfrom_utility": parent_id,
                 "icris_number": icris_number
             })
         log_doc.insert(ignore_permissions=True)
@@ -289,8 +289,8 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
             "shipment_number": shipment_number,
             "logs": f"Failed: {str(e)}",
             "sales_invoice_status": "Failed",
-            "custom_created_byfrom_billing_tool": login_username,
-            "custom_parent_idfrom_billing_tool": parent_id
+            "created_byfrom_utility": login_username,
+            "parent_idfrom_utility": parent_id
         })
         log_doc.insert(ignore_permissions=True)
 
