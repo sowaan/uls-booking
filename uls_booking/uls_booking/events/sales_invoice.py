@@ -1060,10 +1060,12 @@ def duty_and_tax_validation_on_submit(self, method):
 def before_delete(self, method):
     frappe.db.sql("""
         DELETE FROM `tabDispute Invoice Number`
-        WHERE customers_sales_invoice = %(invoice)s;
-        
+        WHERE customers_sales_invoice = %(invoice)s
+    """, {"invoice": self.name})
+
+    frappe.db.sql("""
         DELETE FROM `tabSales Invoice Logs`
-        WHERE sales_invoice = %(invoice)s;
+        WHERE sales_invoice = %(invoice)s
     """, {"invoice": self.name})
 
 
