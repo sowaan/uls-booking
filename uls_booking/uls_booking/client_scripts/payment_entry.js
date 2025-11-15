@@ -6,12 +6,11 @@ frappe.ui.form.on('Payment Entry', {
                 {
                     label: 'Sales Invoice PDF',
                     fieldname: 'message',
-                    fieldtype: 'Link',
-                    options: 'Sales Invoice PDF',
+                    fieldtype: 'MultiSelectList',
                     reqd: 1,
-                    get_query: () => ({
-                        filters: { docstatus: 1 }
-                    })
+                    get_data: function (txt) {
+                        return frappe.db.get_link_options('Sales Invoice PDF', txt, { docstatus: 1 });
+                    }
                 }
             ],
             primary_action_label: 'Get Invoices',
@@ -20,40 +19,40 @@ frappe.ui.form.on('Payment Entry', {
                     frappe.msgprint('Please select a Customer first.');
                     return;
                 }
-
+    
                 frm.clear_table('references');
-
+    
                 frappe.call({
                     method: 'uls_booking.uls_booking.api.api.get_outstanding_pdf_invoices',
                     args: {
                         party: frm.doc.party,
                         sales_invoice_pdf: values.message
                     },
+                    freeze: true,
+                    freeze_message: __("Fetching outstanding invoices..."),
                     callback: function (r) {
-                        if (r.message && r.message.length > 0) {
-                            // let invoices = r.message.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
-                            let invoices = r.message[0];
-                            let emp_id = r.message[1];
-                            // console.log(emp_id)
-
+                        if (r.message && r.message.invoices && r.message.invoices.length > 0) {
+                            let invoices = r.message.invoices;
+                            let emp_id = r.message.emp_id;
+    
                             let remaining = frm.doc.payment_type === 'Receive'
                                 ? flt(frm.doc.paid_amount)
                                 : flt(frm.doc.received_amount);
-
+    
                             let total_allocated = 0;
                             let total_positive_outstanding = 0;
                             let total_negative_outstanding = 0;
-                            let company_currency = frappe.defaults.get_default("currency")
-
+                            let company_currency = frappe.defaults.get_default("currency");
+    
                             invoices.forEach(inv => {
                                 let to_allocate = 0;
                                 if (remaining > 0) {
                                     to_allocate = Math.min(remaining, flt(inv.outstanding_amount));
                                     remaining -= to_allocate;
                                 }
-
+    
                                 total_allocated += to_allocate;
-
+    
                                 frm.add_child("references", {
                                     reference_doctype: inv.voucher_type,
                                     reference_name: inv.voucher_no,
@@ -65,40 +64,31 @@ frappe.ui.form.on('Payment Entry', {
                                     account: inv.account,
                                     payment_term: inv.payment_term,
                                     payment_term_outstanding: inv.payment_term_outstanding,
-                                    exchange_rate: 1
-                                    
+                                    exchange_rate: inv.exchange_rate || 1
                                 });
-                                
-                                // var party_account_currency = frm.doc.payment_type == "Receive"
-                                //     ? frm.doc.paid_from_account_currency
-                                //     : frm.doc.paid_to_account_currency;
-                                
-                                // if (party_account_currency != company_currency) {
-                                //     c.exchange_rate = inv.exchange_rate;
-                                // } else {
-                                //     c.exchange_rate = 1;
-                                // }
-                                
-
+    
                                 if (flt(inv.outstanding_amount) > 0)
                                     total_positive_outstanding += flt(inv.outstanding_amount);
                                 else
                                     total_negative_outstanding += Math.abs(flt(inv.outstanding_amount));
-
                             });
-
+    
                             frm.refresh_field("references");
-                            if (frm.doc.references){
-                                frm.set_value('custom_sales_invoice_pdf_ref', values.message);
+                            if (frm.doc.references) {
+                                // Convert array to quoted string
+                                let pdf_refs = Array.isArray(values.message)
+                                    ? values.message.map(inv => `"${inv}"`).join(',')
+                                    : `"${values.message}"`;
+                            
+                                frm.set_value('custom_sales_invoice_pdf_refs', pdf_refs);
                                 frm.set_value('custom_customer_invoice', emp_id);
                             }
-
+    
                             frm.set_value("base_total_allocated_amount", total_allocated);
-
+    
                             if (
                                 (frm.doc.payment_type === "Receive" && frm.doc.party_type === "Customer") ||
-                                (frm.doc.payment_type === "Pay" && frm.doc.party_type === "Supplier") ||
-                                (frm.doc.payment_type === "Pay" && frm.doc.party_type === "Employee")
+                                (frm.doc.payment_type === "Pay" && ["Supplier", "Employee"].includes(frm.doc.party_type))
                             ) {
                                 if (total_positive_outstanding > total_negative_outstanding && !frm.doc.paid_amount) {
                                     frm.set_value("paid_amount", total_positive_outstanding - total_negative_outstanding);
@@ -110,27 +100,26 @@ frappe.ui.form.on('Payment Entry', {
                             ) {
                                 frm.set_value("received_amount", total_negative_outstanding - total_positive_outstanding);
                             }
-
+    
                             frm.events.allocate_party_amount_against_ref_docs(
                                 frm,
                                 frm.doc.payment_type === "Receive" ? frm.doc.paid_amount : frm.doc.received_amount,
                                 false
                             );
-
+    
                         } else {
                             frappe.msgprint(__('No outstanding PDF Invoices found for {0}.', [frm.doc.party]));
                         }
-                        
+    
                         d.hide();
                     }
-                
-                    
                 });
             }
         });
-
+    
         d.show();
     },
+    
 
     allocate_party_amount_against_ref_docs: async function (frm, paid_amount, paid_amount_change) {
 		await frm.call("allocate_amount_to_references", {

@@ -49,8 +49,6 @@ class SalesInvoicePDF(Document):
 
 
     def before_save(self):
-
-
         self.customer_with_sales_invoice = []
         self.total_invoices = 0
         self.all_sales_invoices = ""
@@ -59,6 +57,7 @@ class SalesInvoicePDF(Document):
         conditions.append("(custom_sales_invoice_pdf_ref IS NULL OR custom_sales_invoice_pdf_ref = '')")
         values = {}
 
+        # Map for date filtering
         date_field_map = {
             "Posting Date": "posting_date",
             "Shipped Date": "custom_date_shipped",
@@ -78,6 +77,7 @@ class SalesInvoicePDF(Document):
                 conditions.append(f"{date_field} <= %(end_date)s")
                 values["end_date"] = self.end_date
 
+        # Invoice type condition
         if self.invoice_type:
             invoice_type_map = {
                 "Freight Invoices": "custom_freight_invoices = 1",
@@ -88,14 +88,17 @@ class SalesInvoicePDF(Document):
             if condition:
                 conditions.append(condition)
 
+        # Filter by customer if provided
         if self.customer:
             conditions.append("customer = %(customer)s")
             values["customer"] = self.customer
 
+        # Build where clause
         where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
         peak_code = frappe.db.get_single_value("Manifest Setting Definition", "peak_charges")
         values["peak_code"] = peak_code
-        
+
+        # Base query
         query = f"""
             SELECT 
                 si.name,
@@ -146,14 +149,15 @@ class SalesInvoicePDF(Document):
             query += " WHERE " + " AND ".join(outer_conditions)
 
         query += " GROUP BY si.name"
-        
 
-
+        # Execute query
         results = frappe.db.sql(query, values, as_dict=True)
 
         if not results:
             frappe.msgprint("No matching Sales Invoices found.")
             return
+
+        # Group results by Customer + Import/Export
         customer_sales_invoices = {}
         invoice_list = []
 
@@ -163,9 +167,17 @@ class SalesInvoicePDF(Document):
             customer = row["customer"]
             sales_invoice_name = row["name"]
             conversion_rate = row.get("plc_conversion_rate") or 1
-            
-            if customer not in customer_sales_invoices:
-                customer_sales_invoices[customer] = {
+
+            # Get Import/Export type from Shipment Number
+            import_export = frappe.db.get_value("Shipment Number", row.get("custom_shipment_number"), "import__export") or "Unknown"
+
+            # Create group key by Customer + Import/Export
+            customer_key = f"{customer}__{import_export}"
+
+            if customer_key not in customer_sales_invoices:
+                customer_sales_invoices[customer_key] = {
+                    "customer": customer,
+                    "import_export": import_export,
                     "sales_invoices": [],
                     "total_grand_total": 0,
                     "total_base_grand_total": 0,
@@ -176,25 +188,26 @@ class SalesInvoicePDF(Document):
                     "station": None,
                     "is_peak": 0
                 }
-            
-            # test_customer = frappe.db.get_all("Sales Invoice Item", filters={"parent": row.name}, fields=["item_code", "amount"])
-            # frappe.msgprint(f"Processing Sales Invoice: {row.get('name')} for Customer: {customer} with Items: {test_customer}")
-            
-            customer_sales_invoices[customer]["sales_invoices"].append(sales_invoice_name)
-            customer_sales_invoices[customer]["total_grand_total"] += row["grand_total"]
-            customer_sales_invoices[customer]["total_base_grand_total"] += row["base_grand_total"]
-            customer_sales_invoices[customer]["total_taxes_and_charges"] += row["total_taxes_and_charges"]
-            customer_sales_invoices[customer]["total_base_taxes_and_charges"] += row["base_total_taxes_and_charges"]
-            customer_sales_invoices[customer]["plc_conversion_rate"] = conversion_rate
-            customer_sales_invoices[customer]["station"] = station
+
+            data = customer_sales_invoices[customer_key]
+            data["sales_invoices"].append(sales_invoice_name)
+            data["total_grand_total"] += row["grand_total"]
+            data["total_base_grand_total"] += row["base_grand_total"]
+            data["total_taxes_and_charges"] += row["total_taxes_and_charges"]
+            data["total_base_taxes_and_charges"] += row["base_total_taxes_and_charges"]
+            data["plc_conversion_rate"] = conversion_rate
+            data["station"] = station
             if row.get("item_status") == 1:
-                customer_sales_invoices[customer]["is_peak"] = 1
+                data["is_peak"] = 1
 
         self.all_sales_invoices = ", ".join(invoice_list)
 
+        # Create child table rows
+        for idx, (key, data) in enumerate(customer_sales_invoices.items(), start=1):
+            customer = data["customer"]
+            import_export = data["import_export"]
+            email = ""
 
-        for idx, (customer, data) in enumerate(customer_sales_invoices.items(), start=1):
-            email = None
             try:
                 if not customer:
                     continue
@@ -220,23 +233,11 @@ class SalesInvoicePDF(Document):
                 email = ""
 
             email = email if email else ""
-            # row = {
-            #     "name1": f"{self.name}-{str(idx).zfill(3)}",
-            #     "customer": customer,
-            #     "sales_invoices": ', '.join(data["sales_invoices"]),
-            #     "email": email,
-            #     "net_total_in_usd": data["total_grand_total"],
-            #     "net_total_in_pkr": data["total_grand_total"] * data["plc_conversion_rate"],
-            #     "sales_tax_amount_usd": data["total_taxes_and_charges"],
-            #     "sales_tax_amount_pkr": data["total_taxes_and_charges"] * data["plc_conversion_rate"],
-            #     "invoice_date": self.end_date,
-            #     "station": data["station"],
-            #     "total_invoices": len(data["sales_invoices"]),
-            #     "is_peak": data["is_peak"]
-            # }
+
             row = {
                 "name1": f"{self.name}-{str(idx).zfill(3)}",
                 "customer": customer,
+                "importexport": import_export,
                 "sales_invoices": ', '.join(data["sales_invoices"]),
                 "email": email,
                 "net_total_in_usd": data["total_grand_total"],
@@ -251,6 +252,7 @@ class SalesInvoicePDF(Document):
             self.append("customer_with_sales_invoice", row)
 
         self.total_invoices = len(results)
+
     
     def on_submit(self):
         if not self.customer_with_sales_invoice:

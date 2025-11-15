@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import getdate, cint, money_in_words
+from frappe.utils import getdate, cint, money_in_words,flt
 import re
 import logging
 
@@ -716,7 +716,8 @@ def generate_invoice(self, method):
             if shipmentbillingcheck and shipment_type in sbc_included and shipment_type not in sbc_excluded:
                 if shipmentbillingcheck and customer_doc.custom_shipping_billing_charges:
                         for row in customer_doc.custom_shipping_billing_charges:
-                            if float(row.from_weight) <= float(sales_invoice.custom_shipment_weight) <= float(row.to_weight):
+                            # if float(row.from_weight) <= float(sales_invoice.custom_shipment_weight) <= float(row.to_weight):
+                            if flt(row.from_weight) <= flt(sales_invoice.custom_shipment_weight) <= flt(row.to_weight) and row.import_export_type == imp_exp:
                                 shipmentbillingamount = row.amount
                                 sbc_flag = 1
                                 break

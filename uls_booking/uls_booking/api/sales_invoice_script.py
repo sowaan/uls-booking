@@ -262,7 +262,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
         # Create or update log
         if frappe.db.exists("Sales Invoice Logs", {"shipment_number": shipment_number}):
             log_doc = frappe.get_doc("Sales Invoice Logs", {"shipment_number": shipment_number})
-            log_doc.logs = "Sales Invoice Created Successfully"
+            log_doc.logs = "Created Successfully"
             log_doc.sales_invoice = si.name
             log_doc.sales_invoice_status = "Created"
             log_doc.custom_created_byfrom_billing_tool = login_username
@@ -273,7 +273,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
                 "doctype": "Sales Invoice Logs",
                 "shipment_number": shipment_number,
                 "sales_invoice": si.name,
-                "logs": "Sales Invoice Created Successfully",
+                "logs": "Created Successfully",
                 "sales_invoice_status": "Created",
                 "created_byfrom_utility": login_username,
                 "parent_idfrom_utility": parent_id,

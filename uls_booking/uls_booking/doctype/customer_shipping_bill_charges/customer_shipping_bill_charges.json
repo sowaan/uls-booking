@@ -8,7 +8,8 @@
  "field_order": [
   "from_weight",
   "to_weight",
-  "amount"
+  "amount",
+  "import__export"
  ],
  "fields": [
   {
@@ -28,12 +29,18 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Amount"
+  },
+  {
+   "fieldname": "import__export",
+   "fieldtype": "Select",
+   "label": "Import / Export",
+   "options": "Import\nExport"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-02-10 14:57:30.183948",
+ "modified": "2025-10-28 16:07:09.808047",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Customer Shipping Bill Charges",
