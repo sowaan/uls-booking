@@ -717,7 +717,7 @@ def generate_invoice(self, method):
                 if shipmentbillingcheck and customer_doc.custom_shipping_billing_charges:
                         for row in customer_doc.custom_shipping_billing_charges:
                             # if float(row.from_weight) <= float(sales_invoice.custom_shipment_weight) <= float(row.to_weight):
-                            if flt(row.from_weight) <= flt(sales_invoice.custom_shipment_weight) <= flt(row.to_weight) and row.import_export_type == imp_exp:
+                            if flt(row.from_weight) <= flt(sales_invoice.custom_shipment_weight) <= flt(row.to_weight) and row.import__export == imp_exp:
                                 shipmentbillingamount = row.amount
                                 sbc_flag = 1
                                 break
