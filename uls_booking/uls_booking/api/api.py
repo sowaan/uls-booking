@@ -99,39 +99,65 @@ def make_str_to_array(str_value):
 def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
     """
     Returns a list of outstanding invoice details for Payment Entry reference table.
-    Optimized using frappe.db.get_list instead of get_doc.
+    Supports multiple Sales Invoice PDF selections.
     """
-    si_str = None
+    # Step 1: Normalize input (convert to list)
+    if isinstance(sales_invoice_pdf, str):
+        try:
+            sales_invoice_pdf = json.loads(sales_invoice_pdf)
+        except Exception:
+            sales_invoice_pdf = [sales_invoice_pdf]
+
+    if not isinstance(sales_invoice_pdf, (list, tuple)):
+        sales_invoice_pdf = [sales_invoice_pdf]
+
+    all_invoice_names = set()
     emp_id = ''
-    invoice_names = []
-    pdf_doc = frappe.get_doc("Sales Invoice PDF", sales_invoice_pdf)
 
-    if pdf_doc.customer and pdf_doc.customer == party:
-        si_str = pdf_doc.customer_with_sales_invoice[0].sales_invoices
-        emp_id = pdf_doc.customer_with_sales_invoice[0].name1
-        invoice_names = make_str_to_array(si_str)
-    elif pdf_doc.customer:
-        pass
-    else:
-        for row in pdf_doc.customer_with_sales_invoice:
-            if row.customer == party:
-                emp_id = row.name1
-                si_str = row.sales_invoices
+    # Step 2: Loop through selected PDF docs
+    for pdf_name in sales_invoice_pdf:
+        if not frappe.db.exists("Sales Invoice PDF", pdf_name):
+            frappe.log_error(f"Sales Invoice PDF {pdf_name} not found", "get_outstanding_pdf_invoices")
+            continue
+
+        pdf_doc = frappe.get_doc("Sales Invoice PDF", pdf_name)
+        si_str = None
+        invoice_names = []
+
+        # Case 1: Direct match (PDF.customer == selected party)
+        if pdf_doc.customer and pdf_doc.customer == party:
+            first_row = pdf_doc.customer_with_sales_invoice[0] if pdf_doc.customer_with_sales_invoice else None
+            if first_row:
+                si_str = first_row.sales_invoices
+                emp_id = first_row.name1
                 invoice_names = make_str_to_array(si_str)
-                break
 
-    if not invoice_names:
-        return []
+        # Case 2: Loop through customer table if not directly matched
+        else:
+            for row in pdf_doc.customer_with_sales_invoice:
+                if row.customer == party:
+                    emp_id = row.name1
+                    si_str = row.sales_invoices
+                    invoice_names = make_str_to_array(si_str)
+                    break
 
+        if invoice_names:
+            all_invoice_names.update(invoice_names)
+
+    if not all_invoice_names:
+        return {"invoices": [], "emp_id": emp_id}
+
+    # Step 3: Fetch only outstanding invoices
     invoices = frappe.db.get_list(
         "Sales Invoice",
-        filters={"name": ["in", invoice_names], "outstanding_amount": [">", 0]},
+        filters={"name": ["in", list(all_invoice_names)],"docstatus": 1 ,"outstanding_amount": [">", 0]},
         fields=[
             "name", "due_date", "base_grand_total", "base_rounded_total",
             "outstanding_amount", "bill_no", "debit_to", "conversion_rate"
         ]
     )
 
+    # Step 4: Build detailed list
     detailed_invoices = []
     for inv in invoices:
         payment_term = None
@@ -161,7 +187,10 @@ def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
             "exchange_rate": flt(inv.conversion_rate)
         })
 
-    return detailed_invoices, emp_id
+    return {"invoices": detailed_invoices, "emp_id": emp_id}
+
+
+
 
 
 
@@ -1385,13 +1414,6 @@ def insert_add_discount_rate_grp_from_erp(rec, full_tariff_group, doctype, rate_
 
 
     return "Success"
-
-
-
-
-
-
-            
 
         
         

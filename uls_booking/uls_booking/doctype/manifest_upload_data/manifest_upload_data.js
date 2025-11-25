@@ -15,7 +15,7 @@ frappe.ui.form.on('Manifest Upload Data', {
         }
 
         if (frm.doc.docstatus === 1 && frm.doc.failed_shipments > 0 && (frm.doc.status === "Failed" || frm.doc.status === "Completed")) {
-        // if (frm.doc.docstatus === 1 && (frm.doc.status === "Failed" || frm.doc.status === "Completed")) {
+        //if (frm.doc.docstatus === 1 && (frm.doc.status === "Failed" || frm.doc.status === "Completed")) {
             frm.add_custom_button(
                 __('Reprocess Shipments'),
                 function() {

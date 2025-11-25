@@ -56,252 +56,249 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
 
 
 
+import frappe
+from frappe.utils.data import getdate
+import logging
+
+# Caches
+_customer_cache = {}
+_ref_doc_cache = {}
+_weight_cache = {}
+
+# ----------------- Helper Functions -----------------
+
+def get_definition_children(definition_name):
+    """Fetch child definitions and organize by ref_doctype using SQL."""
+    children = frappe.db.sql("""
+        SELECT ref_doctype, field_name, sales_invoice_field_name, linked_doctype, is_link
+        FROM `tabSales Invoice def`
+        WHERE parent=%s
+    """, definition_name, as_dict=True)
+
+    ref_doc_map = {}
+    for child in children:
+        ref_doc_map.setdefault(child['ref_doctype'], []).append(child)
+    return ref_doc_map
+
+
+def apply_reference_docs_to_invoice(si, shipment_number, ref_doc_map):
+    """Map reference docs to Sales Invoice fields, skipping 'name'."""
+    shipment_cache = _ref_doc_cache.get(shipment_number, {})
+    if not shipment_cache:
+        return
+
+    for ref_doctype, child_list in ref_doc_map.items():
+        ref_doc = shipment_cache.get(ref_doctype)
+        if not ref_doc:
+            continue
+
+        for child in child_list:
+            field_name = child["field_name"]
+            if field_name == "name":
+                continue
+            value = ref_doc.get(field_name)
+            if value:
+                if child["is_link"]:
+                    if frappe.db.exists(child["linked_doctype"], value):
+                        si.set(child["sales_invoice_field_name"], value)
+                else:
+                    si.set(child["sales_invoice_field_name"], value)
+
+
+def get_reference_docs(shipment_numbers, ref_doc_map):
+    """Fetch reference docs in bulk for multiple shipments using SQL."""
+    global _ref_doc_cache
+    for ref_doctype, child_list in ref_doc_map.items():
+        field_names = [child["field_name"] for child in child_list if child["field_name"] != "name"]
+        if not field_names:
+            continue
+
+        fields_sql = ", ".join(["`{}`".format(f) for f in field_names])
+        rows = frappe.db.sql(f"""
+            SELECT shipment_number, {fields_sql}
+            FROM `tab{ref_doctype}`
+            WHERE shipment_number IN ({', '.join(['%s']*len(shipment_numbers))})
+        """, shipment_numbers, as_dict=True)
+
+        for row in rows:
+            shipment = row["shipment_number"]
+            _ref_doc_cache.setdefault(shipment, {})[ref_doctype] = row
+
+
+def get_shipment_weights(shipment_numbers):
+    """Fetch weights from R202000 and R201000 using SQL."""
+    global _weight_cache
+
+    rows_202 = frappe.db.sql("""
+        SELECT shipment_number, custom_expanded_shipment_weight
+        FROM `tabR202000`
+        WHERE shipment_number IN ({0})
+    """.format(", ".join(["%s"]*len(shipment_numbers))), shipment_numbers, as_dict=True)
+
+    rows_201 = frappe.db.sql("""
+        SELECT shipment_number, custom_minimum_bill_weight
+        FROM `tabR201000`
+        WHERE shipment_number IN ({0})
+    """.format(", ".join(["%s"]*len(shipment_numbers))), shipment_numbers, as_dict=True)
+
+    for w in rows_202:
+        _weight_cache.setdefault(w["shipment_number"], {})["weight1"] = float(w.get("custom_expanded_shipment_weight") or 0)
+
+    for w in rows_201:
+        _weight_cache.setdefault(w["shipment_number"], {})["weight2"] = float(w.get("custom_minimum_bill_weight") or 0)
+
+
+def get_customer(icris_number, default_customer):
+    """Fetch customer with caching using SQL."""
+    global _customer_cache
+    if icris_number in _customer_cache:
+        return _customer_cache[icris_number]
+
+    exists = frappe.db.sql("""SELECT 1 FROM `tabCustomer` WHERE name=%s""", icris_number)
+    customer = icris_number if exists else default_customer
+    _customer_cache[icris_number] = customer
+    return customer
+
+
+# ----------------- Main Function -----------------
 
 @frappe.whitelist()
 def generate_single_invoice(parent_id=None, login_username=None, shipment_number=None, sales_invoice_definition=None, end_date=None):
+    import time
+    start_total = time.time()
+
     if not shipment_number:
-            return
-    invoice_types = ["custom_compensation_invoices", "custom_freight_invoices"]
+        return "Shipment number missing"
+
     logs = []
-    if log_existing_invoice(invoice_types, shipment_number, logs, login_username, parent_id):
-        log = frappe.db.get_value(
-            "Sales Invoice Logs",
-            {"shipment_number": shipment_number},
-            ['sales_invoice', 'logs', 'sales_invoice_status'],
-            as_dict=True
-        )
+    
+    # Step 1: Check if invoice already exists using SQL
+    invoice_exists = frappe.db.sql("""
+        SELECT sales_invoice, logs, sales_invoice_status
+        FROM `tabSales Invoice Logs`
+        WHERE shipment_number=%s
+        LIMIT 1
+    """, shipment_number, as_dict=True)
+
+    if invoice_exists:
+        log = invoice_exists[0]
         return {
             "sales_invoice_name": log.sales_invoice,
             "logs": log.logs,
             "sales_invoice_status": log.sales_invoice_status
-        } if log else "No Logs Found"
-    print("Processing Invoice")
-    sales_invoice = frappe.new_doc("Sales Invoice")
-    
-    
-    if check_type(shipment_number, logs):
-        sales_invoice.custom_compensation_invoices = True
-        sales_invoice.custom_freight_invoices = False
-    else:
-        sales_invoice.custom_compensation_invoices = False
-        sales_invoice.custom_freight_invoices = True
+        }
 
-    
+    # Step 2: Determine invoice type
+    is_compensation = check_type(shipment_number, logs)
 
-    definition = frappe.db.get_value(
-        "Sales Invoice Definition",
-        sales_invoice_definition,
-        ["default_company", "origin_country", "unassigned_icris_number"],
-        as_dict=True
-    )
-    if not definition:
-        logs.append("Sales Invoice Definition does not exist")
-        print("Sales Invoice Definition does not exist")
-        log = frappe.db.get_value(
-            "Sales Invoice Logs",
-            {"shipment_number": shipment_number},
-            ['sales_invoice', 'logs', 'sales_invoice_status'],
-            as_dict=True
-        )
-        return {
-            "sales_invoice_name": log.sales_invoice,
-            "logs": log.logs,
-            "sales_invoice_status": log.sales_invoice_status
-        } if log else "No Logs Found"
+    # Step 3: Fetch definition using SQL
+    definition = frappe.db.sql("""
+        SELECT default_company, origin_country, unassigned_icris_number
+        FROM `tabSales Invoice Definition`
+        WHERE name=%s
+    """, sales_invoice_definition, as_dict=True)[0]
 
-    definition_children = frappe.get_all(
-        "Sales Invoice def",
-        filters={"parent": sales_invoice_definition},
-        fields=["ref_doctype", "field_name", "sales_invoice_field_name", "linked_doctype", "is_link"]
-    )
-    if not definition_children:
-        logs.append("No child definitions found for this Sales Invoice Definition")
-        print("No child definitions found for this Sales Invoice Definition")
-        log = frappe.db.get_value(
-            "Sales Invoice Logs",
-            {"shipment_number": shipment_number},
-            ['sales_invoice', 'logs', 'sales_invoice_status'],
-            as_dict=True
-        )
-        return {
-            "sales_invoice_name": log.sales_invoice,
-            "logs": log.logs,
-            "sales_invoice_status": log.sales_invoice_status
-        } if log else "No Logs Found"
+    # Step 4: Fetch child definitions
+    ref_doc_map = get_definition_children(sales_invoice_definition)
+
+    # Step 5: Fetch reference docs
+    get_reference_docs([shipment_number], ref_doc_map)
+
+    # Step 6: Create Sales Invoice doc
+    si = frappe.new_doc("Sales Invoice")
+    si.custom_compensation_invoices = is_compensation
+    si.custom_freight_invoices = not is_compensation
+    si.custom_sales_invoice_definition = sales_invoice_definition
+    si.custom_created_byfrom_billing_tool = login_username
+    si.custom_parent_idfrom_billing_tool = parent_id
+
+    # Map fields from reference docs
+    apply_reference_docs_to_invoice(si, shipment_number, ref_doc_map)
+
+    # Step 7: ICRIS logic
+    shipper_country = (si.custom_shipper_country or "").upper()
+    origin_country = (definition["origin_country"] or "").upper()
+    is_export = shipper_country == origin_country
+    unassign = definition["unassigned_icris_number"]
+
+    if not is_export and not si.custom_consignee_number:
+        ship_icris = str(shipment_number)[:6]
+        exists = frappe.db.sql("""SELECT 1 FROM `tabICRIS Account` WHERE name=%s""", ship_icris)
+        si.custom_consignee_number = ship_icris if exists else unassign
+
+    if is_export and not si.custom_shipper_number:
+        si.custom_shipper_number = unassign
+
+    icris_number = si.custom_shipper_number if is_export else si.custom_consignee_number
+
+    # Step 8: Fetch weights
+    get_shipment_weights([shipment_number])
+    weight1 = _weight_cache.get(shipment_number, {}).get("weight1", 0)
+    weight2 = _weight_cache.get(shipment_number, {}).get("weight2", 0)
+    si.custom_shipment_weight = max(weight1, weight2)
+
+    # Step 9: Customer & Currency using SQL
+    default_customer = frappe.db.sql("""
+        SELECT custom_default_customer
+        FROM `tabCompany`
+        WHERE name=%s
+    """, definition["default_company"])[0][0]
+
+    customer = get_customer(icris_number, default_customer)
+    si.customer = customer
+    si.currency = frappe.db.sql("""SELECT default_currency FROM `tabCustomer` WHERE name=%s""", customer)[0][0]
+
+    # Step 10: Add dummy item
+    item_code = frappe.db.sql("""SELECT name FROM `tabItem` WHERE disabled=0 LIMIT 1""")
+    if item_code:
+        si.append("items", {"item_code": item_code[0][0], "qty": 1, "rate": 0})
+
+    # Step 11: Insert invoice and log using Frappe Doc API
     try:
-        company = definition.default_company
-        sales_invoice.custom_sales_invoice_definition = sales_invoice_definition
-        unassign = definition.unassigned_icris_number
+        si.posting_date = getdate(end_date)
+        si.set_posting_time = 1
+        si.insert()
 
-        ref_doc_map = {}
-        for child in definition_children:
-            ref_doc_map.setdefault(child.ref_doctype, []).append(child)
-
-        for ref_doctype, child_list in ref_doc_map.items():
-            field_names = list(set(child["field_name"] for child in child_list))
-            if not field_names:
-                continue
-
-            ref_doc_row = frappe.db.get_value(
-                ref_doctype,
-                {"shipment_number": shipment_number},
-                field_names,
-                as_dict=True
-            )
-            if not ref_doc_row:
-                continue
-
-
-            for child in child_list:
-                value = ref_doc_row.get(child["field_name"])
-                if not value:
-                    continue
-
-                if child["is_link"]:
-                    if frappe.db.exists(child["linked_doctype"], value):
-                        sales_invoice.set(child["sales_invoice_field_name"], value)
-                else:
-                    sales_invoice.set(child["sales_invoice_field_name"], value)
-        
-        shipper_country = (sales_invoice.custom_shipper_country or "").upper()
-        origin_country = (definition.origin_country or "").upper()
-        is_export = shipper_country == origin_country
-
-
-
-        ##############################  get icris from shipment number 1st 6 char  ##################################
-        if not is_export and not sales_invoice.custom_consignee_number:
-            ship_icris = str(shipment_number)[:6]
-            sales_invoice.custom_consignee_number = (
-                ship_icris if frappe.db.exists("ICRIS Account", ship_icris) else unassign
-            )
-        #############################################################################################################
-
-        if is_export and not sales_invoice.custom_shipper_number:
-            sales_invoice.custom_shipper_number = unassign
-
-        icris_number = (
-            sales_invoice.custom_shipper_number if is_export 
-            else sales_invoice.custom_consignee_number
-        ) or unassign
-
-        
-        
-
-        sales_invoice.posting_date = getdate(end_date)
-        sales_invoice.set_posting_time = 1
-        weight1 = frappe.db.get_value("R202000", {"shipment_number": shipment_number}, "custom_expanded_shipment_weight") or 0.0
-        weight2 = frappe.db.get_value("R201000", {"shipment_number": shipment_number}, "custom_minimum_bill_weight") or 0.0
-        sales_invoice.custom_shipment_weight = max(float(weight1), float(weight2))
-
-        
-        try:
-            if login_username and frappe.get_cached_value('User', login_username, 'name'):
-                sales_invoice.custom_created_byfrom_billing_tool = login_username
-        except frappe.DoesNotExistError:
-            pass
-
-        sales_invoice.custom_parent_idfrom_billing_tool = parent_id if parent_id else None
-        
-        if sales_invoice.custom_freight_invoices:
-            cust = get_frt_cust(icris_number, unassign, shipment_number, logs)
-        elif sales_invoice.custom_compensation_invoices:
-            cust = get_cached_value("Company", company, "custom_default_customer")
-        
-
-        if cust:
-            sales_invoice.set("customer", cust)
-        else:
-            sales_invoice.customer = get_cached_value("Company", company, "custom_default_customer")
-        
-        sales_invoice.currency = frappe.db.get_value("Customer", sales_invoice.customer, "default_currency")
-
-        item_code = frappe.db.get_value("Item", {"disabled": 0}, "name")
-        if item_code:
-            sales_invoice.append("items", {
-                "item_code": item_code,
-                "qty": 1,
-                "rate": 0
-            })
-        print("insert")
-        sales_invoice.insert()
-        print("after insert")
-        log_filters = {'shipment_number': shipment_number}
-        log_doc = frappe.get_doc("Sales Invoice Logs", log_filters) if frappe.db.exists("Sales Invoice Logs", log_filters) else frappe.new_doc("Sales Invoice Logs")
-        if frappe.db.exists("Sales Invoice", sales_invoice.name):
-            log_doc.update({
-                'shipment_number': shipment_number,
-                'sales_invoice': sales_invoice.name,
-                'logs': "Sales Invoice Created Successfully",
-                'created_byfrom_utility': login_username,
-                'parent_idfrom_utility': parent_id,
-                'sales_invoice_status': 'Created'
-            })
-            if sales_invoice.custom_import__export_si:
-                imp_exp = (sales_invoice.custom_import__export_si or "").strip().upper()
-            icris_field = 'custom_shipper_number' if imp_exp == 'EXPORT' else 'custom_consignee_number'
-            icris_number = sales_invoice.get(icris_field)
-
-            if icris_number:
-                if frappe.db.exists("ICRIS Account", icris_number):
-                    log_doc.icris_number = icris_number
-        else:
-            log_doc.update({
-            'shipment_number': shipment_number,
-            'created_byfrom_utility': login_username,
-            'parent_idfrom_utility': parent_id,
-            'sales_invoice_status': 'Failed',
-            'logs': log_doc.logs or "Sales Invoice not created"
-        })
-        log_doc.insert(ignore_permissions=True) if not log_doc.name else log_doc.save()
-    
-    except Exception as e:
-        error_msg = str(e)
-        print(f"Error: {error_msg}")
-        logging.error(f"An error occurred: {error_msg}")
-
-        shipper_country = (sales_invoice.custom_shipper_country or "").strip().upper() if sales_invoice else ""
-        origin_country = (definition.origin_country or "").strip().upper() if definition else ""
-
-        icris_field = 'custom_shipper_number' if shipper_country == origin_country else 'custom_consignee_number'
-        icris_number = getattr(sales_invoice, icris_field, None) if sales_invoice else None
-
-        log_filters = {'shipment_number': shipment_number}
-        log_doc = frappe.get_doc("Sales Invoice Logs", log_filters) if frappe.db.exists("Sales Invoice Logs", log_filters) else frappe.new_doc("Sales Invoice Logs")
-        log_messages = [f"Error while processing Sales Invoice: {error_msg}"]
-
-        try:
-            if login_username:
-                user = frappe.get_cached_value("User", login_username, "name")
-                log_doc.created_byfrom_utility = user
-        except frappe.DoesNotExistError:
-            log_messages.append(f"User '{login_username}' not found")
-        log_doc.update({
-            'shipment_number': shipment_number,
-            'sales_invoice_status': 'Failed',
-            'logs': "\n".join(log_messages),
-            'parent_idfrom_utility': parent_id
-        })
-        if icris_number and frappe.db.exists("ICRIS Account", icris_number):
+        # Create or update log
+        if frappe.db.exists("Sales Invoice Logs", {"shipment_number": shipment_number}):
+            log_doc = frappe.get_doc("Sales Invoice Logs", {"shipment_number": shipment_number})
+            log_doc.logs = "Created Successfully"
+            log_doc.sales_invoice = si.name
+            log_doc.sales_invoice_status = "Created"
+            log_doc.custom_created_byfrom_billing_tool = login_username
+            log_doc.custom_parent_idfrom_billing_tool = parent_id
             log_doc.icris_number = icris_number
-        log_doc.save(ignore_permissions=True)
-    log = frappe.db.get_value(
-        "Sales Invoice Logs",
-        {"shipment_number": shipment_number},
-        ['sales_invoice', 'logs', 'sales_invoice_status'],
-        as_dict=True
-    )
+        else:
+            log_doc = frappe.get_doc({
+                "doctype": "Sales Invoice Logs",
+                "shipment_number": shipment_number,
+                "sales_invoice": si.name,
+                "logs": "Created Successfully",
+                "sales_invoice_status": "Created",
+                "created_byfrom_utility": login_username,
+                "parent_idfrom_utility": parent_id,
+                "icris_number": icris_number
+            })
+        log_doc.insert(ignore_permissions=True)
+
+    except Exception as e:
+        logging.error(f"Error creating invoice {shipment_number}: {e}")
+        # Create failure log
+        log_doc = frappe.get_doc({
+            "doctype": "Sales Invoice Logs",
+            "shipment_number": shipment_number,
+            "logs": f"Failed: {str(e)}",
+            "sales_invoice_status": "Failed",
+            "created_byfrom_utility": login_username,
+            "parent_idfrom_utility": parent_id
+        })
+        log_doc.insert(ignore_permissions=True)
+
     return {
-        "sales_invoice_name": log.sales_invoice,
-        "logs": log.logs,
-        "sales_invoice_status": log.sales_invoice_status
-    } if log else "No Logs Found"
-
-
-
-
-
-
+        "sales_invoice_name": si.name if si else None,
+        "logs": "Created Successfully" if si else "Failed",
+        "sales_invoice_status": "Created" if si else "Failed"
+    }
 
 def check_type(shipment, logs):
     third_party_code = frappe.db.get_value(
@@ -336,40 +333,74 @@ def check_type(shipment, logs):
 
     return False
 
-
 def log_existing_invoice(invoice_type_fields, shipment_number, logs, login_username, parent_id):
-    for field in invoice_type_fields:
-        invoice_name = frappe.db.get_value(
-            "Sales Invoice",
-            {
-                "custom_shipment_number": shipment_number,
-                "docstatus": ["!=", 2],
-                field: 1
-            },
-            "name"
-        )
-        if invoice_name:
-            log_name = frappe.db.get_value("Sales Invoice Logs", {"shipment_number": shipment_number}, "name")
-            log_doc = frappe.get_doc("Sales Invoice Logs", log_name) if log_name else frappe.new_doc("Sales Invoice Logs")
+    """
+    Efficiently log already existing invoices.
+    Creates or updates logs for shipments **only if invoice exists**.
+    Returns True if any invoice found.
+    """
+    invoice_found = False
 
-            logs.append("Already Present In Sales Invoice")
+    #Single SQL query to check if any invoice exists for the shipment
+    invoice_query = f"""
+        SELECT name
+        FROM `tabSales Invoice`
+        WHERE custom_shipment_number = %s
+          AND docstatus != 2
+          AND ({' OR '.join(f'`{f}` = 1' for f in invoice_type_fields)})
+        LIMIT 1
+    """
+    invoice = frappe.db.sql(invoice_query, (shipment_number,), as_dict=True)
 
-            log_doc.update({
-                "logs": "\n".join(logs),
-                "shipment_number": shipment_number,
-                "sales_invoice_status": "Already Created",
-                "created_byfrom_utility": login_username,
-                "parent_idfrom_utility": parent_id,
-                "sales_invoice": invoice_name
-            })
+    if not invoice:
+        return False  #No invoice exists, do not create log
 
-            log_doc.save(ignore_permissions=True)
+    invoice_found = True
+    invoice_name = invoice[0]["name"]
 
-            return True
-    return False
+    #Check if a log already exists
+    log_query = "SELECT name FROM `tabSales Invoice Logs` WHERE shipment_number = %s LIMIT 1"
+    log_result = frappe.db.sql(log_query, (shipment_number,), as_dict=True)
 
+    log_message = "Already Present In Sales Invoice"
 
+    if not log_result:
+        #Insert a new log
+        frappe.db.sql("""
+            INSERT INTO `tabSales Invoice Logs`
+                (name, creation, modified, owner, docstatus, shipment_number,
+                 sales_invoice, sales_invoice_status, custom_created_byfrom_billing_tool,
+                 custom_parent_idfrom_billing_tool, logs)
+            VALUES (%s, NOW(), NOW(), %s, 0, %s, %s, 'Already Created', %s, %s, %s)
+        """, (
+            frappe.generate_hash(length=10),
+            login_username,
+            shipment_number,
+            invoice_name,
+            login_username,
+            parent_id,
+            log_message
+        ))
+    else:
+        #Update existing log
+        frappe.db.sql("""
+            UPDATE `tabSales Invoice Logs`
+            SET logs = %s,
+                sales_invoice_status = 'Already Created',
+                custom_created_byfrom_billing_tool = %s,
+                parent_idfrom_utility = %s,
+                sales_invoice = %s,
+                modified = NOW()
+            WHERE name = %s
+        """, (
+            log_message,
+            login_username,
+            parent_id,
+            invoice_name,
+            log_result[0]["name"]
+        ))
 
+    return invoice_found
 
 def get_frt_cust(icris_number, unassign, shipment_number, logs):
     """
@@ -402,8 +433,6 @@ def get_frt_cust(icris_number, unassign, shipment_number, logs):
 
     return None
 
-
-
 @frappe.whitelist()
 def get_sales_invoice_logs(shipment_number):
     log = frappe.db.get_value(
@@ -417,4 +446,3 @@ def get_sales_invoice_logs(shipment_number):
         "logs": log.logs,
         "sales_invoice_status": log.sales_invoice_status
     } if log else "No Logs Found"
-
