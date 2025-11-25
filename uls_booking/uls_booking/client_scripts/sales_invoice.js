@@ -15,44 +15,61 @@ async function load_manifest_codes() {
 
 frappe.ui.form.on('Sales Invoice', {
 
-    async custom_selling_percentage(frm) {
-        await load_manifest_codes();
+async custom_selling_percentage(frm) {
+    await load_manifest_codes();
 
-        frm.set_value("custom_inserted", 1);
-        const customPercentage = frm.doc.custom_selling_percentage;
+    frm.set_value("custom_inserted", 1);
+    const customPercentage = frm.doc.custom_selling_percentage;
 
-        const exportSaverItem = frm.doc.items.find(item => item.item_code === FCHG);
+    const exportSaverItem = frm.doc.items.find(item => item.item_code === FCHG);
 
-        if (exportSaverItem) {
-            const originalAmount = exportSaverItem.amount;
-            const discountAmount = (originalAmount * customPercentage) / 100;
-            frm.set_value("custom_amount_after_discount",  originalAmount - discountAmount);
-            frm.set_value("discount_amount", discountAmount);
+    if (!exportSaverItem) {
+        console.log(`${FCHG} item not found.`);
+        return;
+    }
 
-            frappe.call({
-                method: "uls_booking.uls_booking.events.sales_invoice.get_fuel_percentage_for_date",
-                args: {
-                    date_shipped: frm.doc.custom_date_shipped
-                },
-                callback: function(r) {
-                    const percentage = r.message;
-                    const total_fuel = frm.doc.custom_total_surcharges_incl_fuel || 0;
-                    const fsc_vv = (frm.doc.custom_amount_after_discount + total_fuel) * percentage / 100;
+    // 1. Customer discount logic
+    const originalAmount = exportSaverItem.amount;
+    const discountAmount = (originalAmount * customPercentage) / 100;
 
-                    const fscItem = frm.doc.items.find(item => item.item_code === FSC);
-                    if (fscItem) {
-                        frappe.model.set_value("Sales Invoice Item", fscItem.name, "rate", fsc_vv);
-                        frm.refresh_field('items');
-                    } else {
-                        console.log("FSC item not found.");
-                    }
-                }
-            });
+    frm.set_value("custom_amount_after_discount", originalAmount - discountAmount);
+    frm.set_value("discount_amount", discountAmount);
+    
+    console.log(`Discount Amount: ${discountAmount}`);
 
-        } else {
-            console.log(`${FCHG} item not found.`);
+    // 2. First try customer-specific fuel percentage
+    let percentage = await frappe.call({
+        method: "uls_booking.uls_booking.events.sales_invoice.get_customer_fuel_percentage_for_date",
+        args: {
+            date_shipped: frm.doc.custom_date_shipped,
+            customer: frm.doc.customer
         }
-    },
+    }).then(r => r.message || 0);
+    console.log(`Customer-specific Fuel Percentage: ${percentage}`);
+    // 3. If no customer-specific % found → fallback to general % API
+    if (!percentage || percentage === 0) {
+        percentage = await frappe.call({
+            method: "uls_booking.uls_booking.events.sales_invoice.get_fuel_percentage_for_date",
+            args: {
+                date_shipped: frm.doc.custom_date_shipped
+            }
+        }).then(r => r.message || 0);
+    }
+    console.log(`Final Fuel Percentage Used: ${percentage}`);
+    // 4. Apply calculated FSC
+    const total_fuel = frm.doc.custom_total_surcharges_incl_fuel || 0;
+    const fsc_vv = (frm.doc.custom_amount_after_discount + total_fuel) * percentage / 100;
+
+    const fscItem = frm.doc.items.find(item => item.item_code === FSC);
+
+    if (fscItem) {
+        frappe.model.set_value("Sales Invoice Item", fscItem.name, "rate", fsc_vv);
+        frm.refresh_field("items");
+    } else {
+        console.log("FSC item not found.");
+    }
+}
+,
 
     async custom_insurance_amount(frm) {
         await load_manifest_codes();

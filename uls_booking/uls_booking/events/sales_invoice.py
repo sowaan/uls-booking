@@ -671,16 +671,20 @@ def generate_invoice(self, method):
         sales_invoice.custom_total_surcharges_incl_fuel = total_charges_incl_fuel
         additional_page = frappe.get_doc("Additional Charges Page")
         # FSCpercentage = frappe.db.get_single_value('Additional Charges Page','feul_surcharge_percentage_on_freight_amount')
-        FSCpercentage = additional_page.feul_surcharge_percentage_on_freight_amount
-        for row in additional_page.fuel_surcharge_percentages_on_freight_amount:
-            if row.expiry_date < shipped_date:  
-                latest_valid_percentage = row.fuel_surcharge_percentage_on_freight_amount
-            
-            if row.from_date <= shipped_date <= row.expiry_date:
-                FSCpercentage = row.fuel_surcharge_percentage_on_freight_amount
-                break
-        if FSCpercentage == 0 and latest_valid_percentage != 0:
-            FSCpercentage = latest_valid_percentage
+
+        FSCpercentage = get_customer_fuel_percentage_for_date(shipped_date, sales_invoice.customer)
+
+        if not FSCpercentage:
+            FSCpercentage = additional_page.feul_surcharge_percentage_on_freight_amount
+            for row in additional_page.fuel_surcharge_percentages_on_freight_amount:
+                if row.expiry_date < shipped_date:  
+                    latest_valid_percentage = row.fuel_surcharge_percentage_on_freight_amount
+                
+                if row.from_date <= shipped_date <= row.expiry_date:
+                    FSCpercentage = row.fuel_surcharge_percentage_on_freight_amount
+                    break
+            if FSCpercentage == 0 and latest_valid_percentage != 0:
+                FSCpercentage = latest_valid_percentage
         
         if FSCpercentage and final_rate:
                 FSCcharges = (total_charges_incl_fuel + final_rate) * (FSCpercentage / 100 )
@@ -831,11 +835,23 @@ def generate_invoice(self, method):
         log_doc.save()
         return
     if sales_invoice.custom_edit_selling_percentage:
+        customer = sales_invoice.customer
+        date_shipped = sales_invoice.custom_date_shipped
+
+        # 1️⃣ Try customer-specific percentage
+        per = get_customer_fuel_percentage_for_date(date_shipped, customer)
+
+        # 2️⃣ If not found, use global setting
+        if not per:
+            per = get_fuel_percentage_for_date(date_shipped)
+
         for row in sales_invoice.items:
             if row.item_code == setting.fuel_charges:
-                per = get_fuel_percentage_for_date(sales_invoice.custom_date_shipped)
-                row.rate = ((sales_invoice.custom_amount_after_discount + sales_invoice.custom_total_surcharges_incl_fuel) * per) / 100
-        
+                base_amount = (
+                    sales_invoice.custom_amount_after_discount
+                    + sales_invoice.custom_total_surcharges_incl_fuel
+                )
+                row.rate = (base_amount * per) / 100
 
     
     discounted_amount = discounted_amount - 1
@@ -1062,7 +1078,21 @@ def get_fuel_percentage_for_date(date_shipped):
     percentage = records[0]["fuel_surcharge_percentage_on_freight_amount"] if records else 0
     return percentage 
 
-
+@frappe.whitelist()
+def get_customer_fuel_percentage_for_date(date_shipped, customer):
+    date = frappe.utils.getdate(date_shipped)
+    records = frappe.get_all("Fuel Surcharge Percentage on Freight Amount",
+        filters={
+            "parent": customer,
+            "parenttype": "Customer",
+            "from_date": ["<=", date],
+            "expiry_date": [">=", date]
+        },
+        fields=["fuel_surcharge_percentage_on_freight_amount"],
+        order_by="from_date desc"
+    )
+    percentage = records[0]["fuel_surcharge_percentage_on_freight_amount"] if records else 0
+    return percentage 
 
 @frappe.whitelist()
 def get_money_in_words(amount, currency=None):
