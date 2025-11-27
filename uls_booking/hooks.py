@@ -142,7 +142,8 @@ fixtures = [
                                 "custom_pdf_",
                                 "custom_column_break_tbj8f",
                                 "custom_sales_invoice_pdf_ref",
-                                "custom_customer_invoice"
+                                "custom_customer_invoice",
+                                "custom_fuel_surcharge_percentage"
 
                                 )
 	  	  
