@@ -19,16 +19,17 @@ class SalesInvoicePDF(Document):
             elif self.import__export == "Export":
                 prefix = "EPP"
 
-        if hasattr(self, 'station') and self.station:
-            station_map = {
-                "karachi": "1",
-                "lahore": "2",
-                "islamabad": "3",
-                "sialkot": "4",
-                "faisalabad": "5",
-                "peshawar": "6"
-            }
-            station = station_map.get(self.station.lower(), "0") if self.station else "0"
+        station_code = frappe.db.get_value("Station", self.station, "station_code") if hasattr(self, 'station') and self.station else "0"
+        # if hasattr(self, 'station') and self.station:
+        #     station_map = {
+        #         "karachi": "1",
+        #         "lahore": "2",
+        #         "islamabad": "3",
+        #         "sialkot": "4",
+        #         "faisalabad": "5",
+        #         "peshawar": "6"
+        #     }
+        #     station = station_map.get(self.station.lower(), "0") if self.station else "0"
 
         last_invoice_name = frappe.db.get_value("Sales Invoice PDF", {}, "name", order_by="creation DESC")
         current_year = datetime.today().strftime("%y")
@@ -45,7 +46,7 @@ class SalesInvoicePDF(Document):
                         if serial.isdigit():
                             serial = str(int(serial) + 1).zfill(3)
 
-        self.name = f"{prefix}-{station}-{current_year}{current_month}{serial}"
+        self.name = f"{prefix}-{station_code}-{current_year}{current_month}{serial}"
 
 
     def before_save(self):
@@ -145,11 +146,21 @@ class SalesInvoicePDF(Document):
                 outer_conditions.append("sn.import__export = %(import__export)s")
                 values["import__export"] = self.import__export
 
+        if self.billing_type and self.billing_type == "Single":
+            if self.tracking_number:
+                outer_conditions.append("custom_tracking_number = %(tracking_number)s")
+                values["tracking_number"] = self.tracking_number.strip()
+        
+            if self.shipment_number:
+                outer_conditions.append("custom_shipment_number = %(shipment_number)s")
+                values["shipment_number"] = self.shipment_number.strip()
+
         if outer_conditions:
             query += " WHERE " + " AND ".join(outer_conditions)
 
         query += " GROUP BY si.name"
 
+        print(f"\n\nFinal Query: \n\n{query}\n\n")
         # Execute query
         results = frappe.db.sql(query, values, as_dict=True)
 
@@ -173,6 +184,9 @@ class SalesInvoicePDF(Document):
 
             # Create group key by Customer + Import/Export
             customer_key = f"{customer}__{import_export}"
+
+            if self.billing_type and self.billing_type == "Single":
+                customer_key = f"{customer}__{sales_invoice_name}"
 
             if customer_key not in customer_sales_invoices:
                 customer_sales_invoices[customer_key] = {

@@ -14,12 +14,13 @@
   "customer",
   "billing_type",
   "import__export",
-  "ntn_no",
   "amended_from",
   "column_break_waxl",
   "end_date",
   "icris_number",
   "station",
+  "tracking_number",
+  "shipment_number",
   "all_sales_invoices",
   "section_break_ecaf",
   "total_invoices",
@@ -62,8 +63,9 @@
   {
    "depends_on": "eval: doc.invoice_type === \"Freight Invoices\";",
    "fieldname": "icris_number",
-   "fieldtype": "Data",
-   "label": "Icris Number"
+   "fieldtype": "Link",
+   "label": "Icris Number",
+   "options": "ICRIS Account"
   },
   {
    "fieldname": "column_break_waxl",
@@ -71,8 +73,9 @@
   },
   {
    "fieldname": "station",
-   "fieldtype": "Data",
-   "label": "Station"
+   "fieldtype": "Link",
+   "label": "Station",
+   "options": "Station"
   },
   {
    "fieldname": "section_break_ecaf",
@@ -138,18 +141,23 @@
    "no_copy": 1
   },
   {
-   "depends_on": "eval:doc.billing_type === \"Single\";",
-   "fetch_from": "customer.tax_id",
-   "fieldname": "ntn_no",
+   "depends_on": "eval: doc.billing_type === \"Single\";",
+   "fieldname": "tracking_number",
    "fieldtype": "Data",
-   "label": "NTN No.",
-   "read_only": 1
+   "label": "Tracking Number"
+  },
+  {
+   "depends_on": "eval: doc.billing_type === \"Single\";",
+   "fieldname": "shipment_number",
+   "fieldtype": "Data",
+   "label": "Shipment Number"
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-29 18:02:15.040187",
+ "modified": "2025-12-04 12:12:57.472812",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice PDF",
@@ -169,6 +177,8 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

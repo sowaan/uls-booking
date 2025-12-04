@@ -1,0 +1,52 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:station_name",
+ "creation": "2025-12-02 14:43:46.343534",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "station_name",
+  "station_code"
+ ],
+ "fields": [
+  {
+   "fieldname": "station_name",
+   "fieldtype": "Data",
+   "label": "Station Name",
+   "unique": 1
+  },
+  {
+   "fieldname": "station_code",
+   "fieldtype": "Data",
+   "label": "Station Code"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-02 14:47:34.543041",
+ "modified_by": "Administrator",
+ "module": "ULS Booking",
+ "name": "Station",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
