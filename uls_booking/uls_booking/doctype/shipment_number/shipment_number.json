@@ -98,13 +98,13 @@
    "read_only": 1
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-19 12:45:13.516779",
+ "modified": "2025-12-11 13:56:17.913519",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Shipment Number",
- "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -120,7 +120,11 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "shipment_number"
 }
