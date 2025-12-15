@@ -12,6 +12,7 @@ from datetime import datetime
 import requests
 import traceback
 
+TEST_MODE = False
 
 class ManifestUploadData(Document):
     def on_submit(self):
@@ -169,21 +170,13 @@ def _norm_date(value):
 
 def _find_candidates_for_doctype(doctype, shipment, limit=10):
     """
-    Return up to `limit` candidate rows for a doctype for the given shipment identifier.
-    Candidates include:
-      - name == shipment
-      - name LIKE 'shipment-%'
-      - shipment_number == shipment
-    Also includes import_date/date_shipped fields if present (used downstream).
+    Return up to `limit` candidate rows for `doctype` by matching shipment_number exactly.
+    Simpler and safer than combining name / name like / shipment_number filters.
     """
-    filters = ["or",
-               ["name", "=", shipment],
-               ["name", "like", f"{shipment}-%"],
-               ["shipment_number", "=", shipment]]
     try:
         candidates = frappe.get_list(
             doctype,
-            filters=filters,
+            filters={"shipment_number": shipment},
             fields=["name", "shipment_number", "import_date", "date_shipped", "manifest_import_date", "shipped_date"],
             order_by="modified desc",
             limit_page_length=limit
@@ -191,6 +184,7 @@ def _find_candidates_for_doctype(doctype, shipment, limit=10):
     except Exception:
         candidates = []
     return candidates
+
 
 def choose_best_shipment_candidate_invoice(candidates, incoming_manifest_date=None, incoming_shipped_date=None):
     """
@@ -813,50 +807,70 @@ def generate_remaining_sales_invoice():
         # enqueue(chunk_process,doc_str=doc_dict,doc = doc_dict,shipments = shipment_numbers_without_invoice,definition_record=definition_record,name = name,end_date=end_date,chunk_size=chunk_size,queue="default")
         
 
+def safe_like(value: str):
+    """Utility: return a safe LIKE filter dict."""
+    return {"name": ["like", value]}
+
+# Unified safe get_list wrapper
+
+def safe_get_list(doctype: str, filters=None, fields=None, order_by=None, limit=10):
+    """Wrapper around frappe.get_list ensuring valid filter formats.
+    - Dict filters preferred
+    - If OR/AND blocks are used, leave them untouched
+    """
+    try:
+        # Normalize simple list filters into dict
+        if isinstance(filters, list) and all(isinstance(x, list) for x in filters):
+            # Check OR/AND logical operators
+            if filters and filters[0][0] in ("or", "and"):
+                # example: [["or", [field,..],[field,..]]]
+                pass
+            else:
+                # Convert list-of-lists to dict: [[f, op, v]] -> {f: [op, v]}
+                new_filters = {}
+                for f in filters:
+                    if len(f) == 3:
+                        new_filters[f[0]] = [f[1], f[2]]
+                filters = new_filters
+
+        return frappe.get_list(
+            doctype,
+            filters=filters,
+            fields=fields,
+            order_by=order_by,
+            limit_page_length=limit
+        )
+    except Exception as e:
+        frappe.log_error(f"safe_get_list failed for {doctype}: {e}", "Safe Get List Error")
+        return []
+
+# Patched version of _find_shipment_number_docs
 
 def _find_shipment_number_docs(shipment, limit=5):
-    """
-    Return list of dicts for Shipment Number docs matching:
-      - name == shipment
-      - name LIKE 'shipment-%'
-      - shipment_number == shipment
-    """
-    base_filters = ["or",
-                    ["name", "=", shipment],
-                    ["name", "like", f"{shipment}-%"],
-                    ["shipment_number", "=", shipment]]
-    docs = frappe.get_list("Shipment Number",
-                           filters=base_filters,
-                           fields=["name", "shipment_number", "import_date", "date_shipped", "manifest_upload_data"],
-                           order_by="modified desc",
-                           limit_page_length=limit)
-    return docs
+    # Exact match first
+    docs = safe_get_list(
+        "Shipment Number",
+        filters={"shipment_number": shipment},
+        fields=["name", "shipment_number", "import_date", "date_shipped", "manifest_upload_data"],
+        order_by="modified desc",
+        limit=limit,
+    )
+    if docs:
+        return docs
 
-def _determine_action_for_shipment(existing_doc, incoming_manifest_date, incoming_shipped_date):
-    """
-    Returns "update" | "alert_update" | "create_new"
-    """
-    if not existing_doc:
-        return "create_new"
+    # Fallback LIKE search using safe dict format
+    like_filter = {"name": ["like", f"{shipment}-%"]}
+    docs_like = safe_get_list(
+        "Shipment Number",
+        filters=like_filter,
+        fields=["name", "shipment_number", "import_date", "date_shipped", "manifest_upload_data"],
+        order_by="modified desc",
+        limit=limit,
+    )
+    return docs_like or []
 
-    ex_manifest = _normalize_date_str(existing_doc.get("import_date") if isinstance(existing_doc, dict) else getattr(existing_doc, "import_date", None))
-    ex_shipped = _normalize_date_str(existing_doc.get("date_shipped") if isinstance(existing_doc, dict) else getattr(existing_doc, "date_shipped", None))
 
-    in_manifest = _normalize_date_str(incoming_manifest_date)
-    in_shipped = _normalize_date_str(incoming_shipped_date)
 
-    # Rule 1: all equal -> update
-    if ex_manifest and in_manifest and ex_shipped and in_shipped:
-        if ex_manifest == in_manifest and ex_shipped == in_shipped:
-            return "update"
-
-    # Rule 2: manifest equal but shipped differs -> alert_update
-    if ex_manifest and in_manifest and ex_manifest == in_manifest:
-        if ex_shipped != in_shipped:
-            return "alert_update"
-
-    # Else create new
-    return "create_new"
 
 def _notify_billing_simple(subject, message, recipients=None, reference_doctype=None, reference_name=None):
     """Small notify helper (best-effort)."""
@@ -945,7 +959,7 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_
     # Find existing Shipment Number docs robustly
     existing_candidates = _find_shipment_number_docs(shipment, limit=5)
 
-    candidate, action = choose_best_shipment_candidate(existing_candidates, incoming_manifest_date=import_date, incoming_shipped_date=shipped_date)
+    candidate, action = choose_best_shipment_candidate(existing_candidates, incoming_manifest_date=import_date, incoming_shipped_date=date_shipped)
     if candidate:
         existing = candidate.get("name")
     else:
@@ -1372,9 +1386,12 @@ def insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, manifest_upl
                 if hasattr(docss, "file_type") and not docss.file_type:
                     docss.file_type = "ISPS"
 
-
-                docss.save(ignore_permissions=True)
-                frappe.db.commit()
+                if TEST_MODE:
+                    frappe.log_error("TEST MODE - Not inserting", f"Shipment: {shipment}")
+                else:
+                    docss.save(ignore_permissions=True)
+                    frappe.db.commit()
+                
 
             else:
                 doc = frappe.new_doc(doctype_name)
@@ -1617,8 +1634,11 @@ def opsys_insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, file_p
                 if hasattr(docss, "file_type") and not docss.file_type:
                     docss.file_type = "OPSYS"
 
-                docss.save(ignore_permissions=True)
-                frappe.db.commit()
+                if TEST_MODE:
+                    frappe.log_error("TEST MODE - Not inserting", f"Shipment: {shipment}")
+                else:
+                    docss.save(ignore_permissions=True)
+                    frappe.db.commit()
                 # print(doctype_name, shipment_num, "Updating")
             
             else:
@@ -1682,12 +1702,15 @@ def opsys_insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, file_p
                 if  hasattr(doc, "file_type") and not doc.file_type:
                     doc.file_type = "OPSYS"
 
-                
-                doc.insert(ignore_permissions=True)
-                doc.save(ignore_permissions=True)
+                if TEST_MODE:
+                    frappe.log_error("TEST MODE - Not inserting", f"Doctype: {doctype_name}, Doc: {doc}")
+                else:
+                    doc.insert(ignore_permissions=True)
+                    doc.save(ignore_permissions=True)
 
-                #committing entry one by one
-                frappe.db.commit()                
+                    #committing entry one by one
+                    frappe.db.commit()               
+                               
               
     except Exception as e:
         frappe.log_error("Error in committing in OPSYS", f"Error in Manifest Upload Data: {str(e)}")
@@ -1770,31 +1793,30 @@ def opsys_insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, file_p
         # fallback: return stripped string (may be comparable if consistent)
         return s
 
-    def find_shipment_docs(doctype_name, shipment_num, pkg_trck=None, limit=5):
+    def find_shipment_docs(doctype_name, shipment_num, pkg_trck=None, extra_filters=None, limit=5):
         """
-        Robust search that tries:
-          - name == shipment_num
-          - name LIKE 'shipment_num-%'
-          - shipment_number == shipment_num
-        Optionally require expanded_package_tracking_number (pkg_trck) if provided.
-        Returns list of dicts with keys including 'name', 'manifest_import_date', 'shipped_date'.
+        Returns list of dicts of matching docs by shipment_number only.
+        Optionally restrict by extra_filters (dict — simple equality filters).
         """
-        base_filters = ["or",
-                        ["name", "=", shipment_num],
-                        ["name", "like", f"{shipment_num}-%"],
-                        ["shipment_number", "=", shipment_num]
-                       ]
-        if pkg_trck:
-            filters = ["and", base_filters, ["expanded_package_tracking_number", "=", pkg_trck]]
+        base_filters = {"shipment_number": shipment_num}
+        # Merge extra_filters if provided
+        if extra_filters and isinstance(extra_filters, dict):
+            filters = {**base_filters, **extra_filters}
         else:
             filters = base_filters
 
-        docs = frappe.get_list(doctype_name,
-                                filters=filters,
-                                fields=["name", "shipment_number", "manifest_import_date", "shipped_date"],
-                                order_by="modified desc",
-                                limit_page_length=limit)
+        try:
+            docs = frappe.get_list(
+                doctype_name,
+                filters=filters,
+                fields=["name", "shipment_number", "manifest_import_date", "shipped_date"],
+                order_by="modified desc",
+                limit_page_length=limit
+            )
+        except Exception:
+            docs = []
         return docs
+
 
     def determine_shipment_action(existing_doc, incoming_manifest_date, incoming_shipped_date):
         """
@@ -2009,8 +2031,11 @@ def opsys_insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, file_p
                     if hasattr(docss, "file_type") and not docss.file_type:
                         docss.file_type = "OPSYS"
 
-                    docss.save(ignore_permissions=True)
-                    frappe.db.commit()
+                    if TEST_MODE:
+                        frappe.log_error("SHIPMENT EXISTS", f"Shipment: {shipment_num}")
+                    else:
+                        docss.save(ignore_permissions=True)
+                        frappe.db.commit()
 
                 elif action == "alert_update":
                     # Notify billing and possibly update if override allowed
@@ -2086,8 +2111,11 @@ def opsys_insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, file_p
                         if hasattr(docss, "file_type") and not docss.file_type:
                             docss.file_type = "OPSYS"
 
-                        docss.save(ignore_permissions=True)
-                        frappe.db.commit()
+                        if TEST_MODE:
+                            frappe.log_error("CREATING NEW SHIPMENT", f"Shipment: {shipment_num}")
+                        else:
+                            docss.save(ignore_permissions=True)
+                            frappe.db.commit()
                     else:
                         # skip update - log for manual review
                         frappe.log_error(f"Upload skipped update for {shipment_num} due to date mismatch.", "Manifest Upload Alert")
@@ -2154,9 +2182,12 @@ def opsys_insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, file_p
                     if hasattr(doc, "file_type") and not doc.file_type:
                         doc.file_type = "OPSYS"
 
-                    doc.insert(ignore_permissions=True)
-                    doc.save(ignore_permissions=True)
-                    frappe.db.commit()
+                    if TEST_MODE:
+                        frappe.log_error("TEST MODE - Not inserting", f"doctype: {doctype_name}, document: {doc}")
+                    else:
+                        doc.insert(ignore_permissions=True)
+                        doc.save(ignore_permissions=True)
+                        frappe.db.commit()
 
             else:
                 # No docs matched at all -> simple insert path (mirrors previous 'else' insertion)
@@ -2217,9 +2248,12 @@ def opsys_insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, file_p
                 if hasattr(doc, "file_type") and not doc.file_type:
                     doc.file_type = "OPSYS"
 
-                doc.insert(ignore_permissions=True)
-                doc.save(ignore_permissions=True)
-                frappe.db.commit()
+                    if TEST_MODE:
+                        frappe.log_error("TEST MODE - Not inserting", f"doctye: {doctype_name}, document: {doc}")
+                    else:                
+                        doc.insert(ignore_permissions=True)
+                        doc.save(ignore_permissions=True)
+                        frappe.db.commit()
 
     except Exception as e:
         frappe.log_error("Error in committing in OPSYS", f"Error in Manifest Upload Data: {str(e)}")
