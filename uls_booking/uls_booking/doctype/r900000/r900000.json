@@ -49,8 +49,7 @@
   {
    "fieldname": "shipment_number",
    "fieldtype": "Data",
-   "label": "Shipment Number",
-   "unique": 1
+   "label": "Shipment Number"
   },
   {
    "fieldname": "import_date",
@@ -126,7 +125,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-14 11:05:25.223700",
+ "modified": "2025-12-15 18:28:36.103165",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R900000",
@@ -145,6 +144,8 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

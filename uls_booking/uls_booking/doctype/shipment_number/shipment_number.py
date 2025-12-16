@@ -15,6 +15,6 @@ class ShipmentNumber(Document):
         # Example result: ABC-00001
         series_key = f"{self.shipment_number}-"
 
-        new_name = frappe.model.naming.make_autoname(series_key + ".#####")
+        new_name = frappe.model.naming.make_autoname(series_key + ".###")
 
         self.name = new_name

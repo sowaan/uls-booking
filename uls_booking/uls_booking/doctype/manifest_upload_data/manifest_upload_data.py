@@ -960,10 +960,8 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_
     existing_candidates = _find_shipment_number_docs(shipment, limit=5)
 
     candidate, action = choose_best_shipment_candidate(existing_candidates, incoming_manifest_date=import_date, incoming_shipped_date=date_shipped)
-    if candidate:
-        existing = candidate.get("name")
-    else:
-        existing = None
+    existing_candidate = candidate        # dict or None
+    existing_name = candidate.get("name") if candidate else None
     # helper to fill fields (shared for update and new)
     def _populate_and_save_shipment_doc(shipment_doc):
         try:
@@ -989,10 +987,10 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_
             frappe.log_error(f"Error saving Shipment Number {shipment}: {e}", "Shipment Save Error")
             raise
 
-    if action == "update" and existing:
+    if action == "update" and existing_name:
         # Update the existing doc
         try:
-            shipment_doc = frappe.get_doc("Shipment Number", existing.get("name"))
+            shipment_doc = frappe.get_doc("Shipment Number", existing_name)
             # populate additional fields using R300000 / R400000 lookups as before
             try:
                 # Export shipments
@@ -1036,20 +1034,22 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_
             frappe.log_error("Error updating Shipment Number", f"Shipment: {shipment}. Error: {e}\n{traceback.format_exc()}")
             raise
 
-    elif action == "alert_update" and existing:
+    elif action == "alert_update" and existing_name:
         # Notify billing & append to manifest upload doc failed_shipments for manual review
-        cand_name = existing.get("name")
-        subject = f"Shipment {shipment} manifest/shipped date mismatch"
+        cand_name = existing_name
+
         msg = (
             f"A manifest upload attempted to update shipment {shipment}.\n\n"
-            f"Existing Manifest Import Date: {existing.get('import_date')}\n"
-            f"Existing Shipped Date: {existing.get('date_shipped')}\n\n"
+            f"Existing Manifest Import Date: {existing_candidate.get('import_date')}\n"
+            f"Existing Shipped Date: {existing_candidate.get('date_shipped')}\n\n"
             f"Incoming Manifest Import Date: {import_date}\n"
             f"Incoming Shipped Date: {date_shipped}\n\n"
             f"Manifest Upload File: {doc.name}\n"
             f"File Name: {file_name}\n\n"
             "Please review before updating. To force update via upload, set allow_update_override=True."
-        )
+        )        
+        subject = f"Shipment {shipment} manifest/shipped date mismatch"
+
         try:
             s = frappe.get_doc("Manifest Setting Definition")
             recipients = getattr(s, "billing_emails", None)
@@ -1063,7 +1063,6 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_
             "shipment": shipment,
             "reason": "Date mismatch: manifest import date same but shipped date differs"
         })
-        doc.save(ignore_permissions=True)
 
         if allow_update_override:
             # If override requested, perform the update (same as update branch)
