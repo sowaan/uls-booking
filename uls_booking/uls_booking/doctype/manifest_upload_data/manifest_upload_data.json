@@ -25,6 +25,7 @@
   "to_index",
   "total_shipment_numbers",
   "created_shipments",
+  "allow_update_override",
   "attach_file",
   "manifest_modification_process",
   "record_to_modify",
@@ -213,12 +214,18 @@
    "fieldtype": "Table",
    "label": "Failed Shipments",
    "options": "Failed Shipments"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_update_override",
+   "fieldtype": "Check",
+   "label": "Allow Update Override on Date Mismatch"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-24 17:29:59.737139",
+ "modified": "2025-12-17 12:48:32.285310",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Manifest Upload Data",
@@ -239,6 +246,7 @@
   }
  ],
  "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

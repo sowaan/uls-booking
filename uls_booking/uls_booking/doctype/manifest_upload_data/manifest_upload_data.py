@@ -987,8 +987,7 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_
             frappe.log_error(f"Error saving Shipment Number {shipment}: {e}", "Shipment Save Error")
             raise
 
-    if action == "update" and existing_name:
-        # Update the existing doc
+    def _update_existing_shipment(existing_name):
         try:
             shipment_doc = frappe.get_doc("Shipment Number", existing_name)
             # populate additional fields using R300000 / R400000 lookups as before
@@ -1032,10 +1031,14 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_
             _populate_and_save_shipment_doc(shipment_doc)
         except Exception as e:
             frappe.log_error("Error updating Shipment Number", f"Shipment: {shipment}. Error: {e}\n{traceback.format_exc()}")
-            raise
+            raise        
+    if action == "update" and existing_name:
+        # Update the existing doc
+        _update_existing_shipment(existing_name)
 
     elif action == "alert_update" and existing_name:
-        # Notify billing & append to manifest upload doc failed_shipments for manual review
+        # Always notify on alert_update
+        # Only update if allow_update_override is True
         cand_name = existing_name
 
         msg = (
@@ -1065,11 +1068,7 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_
         })
 
         if allow_update_override:
-            # If override requested, perform the update (same as update branch)
-            create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_update_override=False)
-        else:
-            # skip update
-            return
+            _update_existing_shipment(existing_name)
 
     else:
         # create_new: create a fresh Shipment Number record (autoname will generate full name)
@@ -1139,7 +1138,7 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_
                              title="Shipment Creation Error "+ str(shipment) + '-' + str(file_type) + '-' + str(doc.name))
             raise
 
-def storing_shipment_number(arrays, frm, to, doc):
+def storing_shipment_number(arrays, frm, to, doc, allow_update_override=False):
     """
     Parse unique shipment numbers from arrays and ensure Shipment Number records exist/updated.
     Applies date-based rules:
@@ -1189,7 +1188,7 @@ def storing_shipment_number(arrays, frm, to, doc):
 
             try:
                 # Pass allow_update_override maybe via Manifest Upload Data doc or other config; default False here
-                create_shipment_number_record(shipment, origin_country, r2_data, doc)
+                create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_update_override=allow_update_override)
             except Exception as cse1:
                 frappe.log_error("Create Shipment Number Record Error " + str(frm) + '-' + str(to),
                                  f"Error creating shipment numbers for shipment: {current_shipment}. Error: {str(cse1)}\n{traceback.format_exc()}")
@@ -1482,17 +1481,15 @@ def insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, manifest_upl
             
 
 
-def opsys_insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, file_proper_name3, shipped_date, import_date, manifest_upload_data_name, gateway):
+def opsys_insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, file_proper_name3, shipped_date, import_date, manifest_upload_data_name, gateway,
+    allow_update_override=False):
     shipment_num = None
     pkg_trck = None
     
     setting = frappe.get_doc("Manifest Setting Definition")
     
-    # --- BEFORE loop: accept or set allow_update_override (False by default)
-    # allow_update_override should be passed from the caller if you want to allow updates on alert condition automatically.
-    # e.g., opsys_insert_data(..., allow_update_override=True)
-    allow_update_override = globals().get('allow_update_override', False)  # or function parameter
-
+    allow_update_override = bool(getattr(docnew, "allow_update_override", False))
+    
     country_map = {j.code: j.country for j in setting.country_codes}
     replacement_map = {
         (record.field_name, record.code): record.replacement
@@ -2259,7 +2256,8 @@ def opsys_insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, file_p
 
     # final step: store extracted shipment numbers as before
     try:
-        storing_shipment_number(arrays=arrays, frm=shipf, to=shipt, doc=docnew)
+        storing_shipment_number(arrays=arrays, frm=shipf, to=shipt, doc=docnew,
+            allow_update_override=allow_update_override)
     except Exception as e:
         frappe.log_error("Error in storing shipment number " + str(shipf) + '-' + str(shipt), f"Error in storing shipment number: {str(e)}")
 
