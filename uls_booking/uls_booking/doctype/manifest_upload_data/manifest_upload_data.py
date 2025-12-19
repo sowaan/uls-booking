@@ -944,7 +944,7 @@ def choose_best_shipment_candidate(candidates, incoming_manifest_date, incoming_
     # 3) Otherwise, none match sufficiently -> create new
     return None, "create_new"
 
-def create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_update_override=False):
+def create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_update_override=True):
     """
     Create or update a Shipment Number record for the given shipment id based on r2_data.
     If a matching Shipment Number record exists (by name or shipment_number field), we apply date rules:
@@ -1138,7 +1138,7 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_
                              title="Shipment Creation Error "+ str(shipment) + '-' + str(file_type) + '-' + str(doc.name))
             raise
 
-def storing_shipment_number(arrays, frm, to, doc, allow_update_override=False):
+def storing_shipment_number(arrays, frm, to, doc, allow_update_override=True):
     """
     Parse unique shipment numbers from arrays and ensure Shipment Number records exist/updated.
     Applies date-based rules:
@@ -1188,7 +1188,7 @@ def storing_shipment_number(arrays, frm, to, doc, allow_update_override=False):
 
             try:
                 # Pass allow_update_override maybe via Manifest Upload Data doc or other config; default False here
-                create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_update_override=allow_update_override)
+                create_shipment_number_record(shipment, origin_country, r2_data, doc, allow_update_override=True)
             except Exception as cse1:
                 frappe.log_error("Create Shipment Number Record Error " + str(frm) + '-' + str(to),
                                  f"Error creating shipment numbers for shipment: {current_shipment}. Error: {str(cse1)}\n{traceback.format_exc()}")
@@ -1473,7 +1473,7 @@ def insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, manifest_upl
         frappe.log_error("Error in committing in ISPS", f"Error in ManifestUploadData: {str(e)}") 
 
     try:
-        storing_shipment_number(arrays=arrays, frm=shipf, to=shipt, doc=docnew)
+        storing_shipment_number(arrays=arrays, frm=shipf, to=shipt, doc=docnew, allow_update_override=True)
     except Exception as e:
         frappe.log_error("Error in storing shipment number ISPS" + str(shipf) + '-' + str(shipt), f"Error in storing shipment number: {str(e)}") 
     
@@ -1482,14 +1482,12 @@ def insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, manifest_upl
 
 
 def opsys_insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, file_proper_name3, shipped_date, import_date, manifest_upload_data_name, gateway,
-    allow_update_override=False):
+    allow_update_override=True):
     shipment_num = None
     pkg_trck = None
     
     setting = frappe.get_doc("Manifest Setting Definition")
-    
-    allow_update_override = bool(getattr(docnew, "allow_update_override", False))
-    
+
     country_map = {j.code: j.country for j in setting.country_codes}
     replacement_map = {
         (record.field_name, record.code): record.replacement
@@ -1712,7 +1710,7 @@ def opsys_insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, file_p
         frappe.log_error("Error in committing in OPSYS", f"Error in Manifest Upload Data: {str(e)}")
 
     try:
-        storing_shipment_number(arrays=arrays, frm=shipf, to=shipt, doc=docnew)
+        storing_shipment_number(arrays=arrays, frm=shipf, to=shipt, doc=docnew, allow_update_override=True)
     except Exception as e:
         frappe.log_error("Error in storing shipment number " + str(shipf) + '-' + str(shipt), f"Error in storing shipment number: {str(e)}")
         
@@ -2257,7 +2255,7 @@ def opsys_insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, file_p
     # final step: store extracted shipment numbers as before
     try:
         storing_shipment_number(arrays=arrays, frm=shipf, to=shipt, doc=docnew,
-            allow_update_override=allow_update_override)
+            allow_update_override=True)
     except Exception as e:
         frappe.log_error("Error in storing shipment number " + str(shipf) + '-' + str(shipt), f"Error in storing shipment number: {str(e)}")
 
