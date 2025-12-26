@@ -19,6 +19,7 @@
   "date_shipped",
   "import__export",
   "import_date",
+  "manifest_input_date",
   "manifest_file_type"
  ],
  "fields": [
@@ -95,15 +96,22 @@
    "label": "Gateway",
    "options": "Gateway",
    "read_only": 1
+  },
+  {
+   "fieldname": "manifest_input_date",
+   "fieldtype": "Date",
+   "label": "Manifest Input Date",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-16 14:04:28.049457",
+ "modified": "2025-12-24 19:00:17.929688",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Shipment Number",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
