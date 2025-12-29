@@ -1536,7 +1536,7 @@ def parse_opsys_line(line, definition, doctype_name, setting,
 
 @frappe.whitelist()
 def opsys_insert_data(arrays, docnew, shipf, shipt, frm, 
-                      to, file_proper_name3, 
+                      to, file_proper_name3, date_format,
                       shipped_date, import_date, manifest_upload_data_name, 
                       gateway):
     """
