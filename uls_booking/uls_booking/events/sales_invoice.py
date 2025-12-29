@@ -193,7 +193,10 @@ def generate_invoice(self, method):
     # imp_exp = "Export" if is_export else "Import"
     imp_or_exp = frappe.db.get_value("Shipment Number", sales_invoice.custom_shipment_number, "import__export")
     if imp_or_exp:
-        imp_or_exp = imp_or_exp.strip().lower()
+        if isinstance(imp_or_exp, list):
+            imp_or_exp = imp_or_exp[0] if imp_or_exp else ""
+
+        imp_or_exp = str(imp_or_exp).strip().lower()
         if imp_or_exp == "export":
             sales_invoice.custom_import__export_si = "Export"
             imp_exp = "Export"

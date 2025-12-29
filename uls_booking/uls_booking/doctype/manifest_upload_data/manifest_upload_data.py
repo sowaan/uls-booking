@@ -23,7 +23,13 @@ class ManifestUploadData(Document):
        
 
         if self.attach_file and self.manifest_file_type == "ISPS":
-            is_import = self.export_import.lower() == "import"
+            export_import = self.export_import
+
+            if isinstance(export_import, list):
+                export_import = ",".join(export_import)
+
+            is_import = export_import.lower() == "import"
+            
             file_name = frappe.db.get_value("File", {"file_url": self.attach_file}, "name")
             file_proper_name = frappe.get_value("File",file_name,"file_name")
             # print("File Name",file_proper_name,"\n\n\n\n\n")
@@ -1928,24 +1934,36 @@ def find_shipment_docs(doctype_name, shipment_num, pkg_trck=None, extra_filters=
       - shipment_number == shipment_num
     Optionally restrict by extra_filters (dict).
     """
-    base_filters = ["or",
-                    ["name", "=", shipment_num],
-                    ["name", "like", f"{shipment_num}-%"],
-                    ["shipment_number", "=", shipment_num]
-                   ]
+    or_filters = [
+            ["name", "=", shipment_num],
+            ["name", "like", f"{shipment_num}-%"],
+            ["shipment_number", "=", shipment_num],
+        ]
+
+    # AND conditions
+    filters = {}
+
     if extra_filters:
-        # convert dict to [ [k, '=', v], ... ]
         if isinstance(extra_filters, dict):
-            extra_list = [[k, "=", v] for k, v in extra_filters.items()]
-        else:
-            extra_list = extra_filters
-        filters = ["and", base_filters] + extra_list
-    else:
-        filters = base_filters
+            filters.update(extra_filters)
+        elif isinstance(extra_filters, list):
+            # already in frappe filter format
+            filters = extra_filters
 
-    docs = frappe.get_list(doctype_name, filters=filters, fields=["name", "shipment_number", "manifest_import_date", "shipped_date"], limit_page_length=limit, order_by="modified desc")
+    docs = frappe.get_list(
+        doctype_name,
+        filters=filters,
+        or_filters=or_filters,
+        fields=[
+            "name",
+            "shipment_number",
+            "manifest_import_date"
+        ],
+        limit_page_length=limit,
+        order_by="modified desc"
+    )
+
     return docs
-
 
 def normalize_date_str(value):
     """Return YYYY-MM-DD or None for comparable strings/dates. Accepts datetime/date/string."""
