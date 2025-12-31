@@ -2526,7 +2526,7 @@ def create_shipment_number_record_new(
 
     existing_name = find_existing_shipment_number(
         shipment_number,
-        r2_data.get("manifest_import_date")
+        running_manifest_input_date
     )
 
     frappe.log_error(
