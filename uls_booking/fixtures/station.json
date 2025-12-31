@@ -1,0 +1,50 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Station",
+  "modified": "2025-12-04 13:12:56.315968",
+  "name": "Karachi",
+  "station_code": "1",
+  "station_name": "Karachi"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Station",
+  "modified": "2025-12-04 13:13:07.462205",
+  "name": "Lahore",
+  "station_code": "2",
+  "station_name": "Lahore"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Station",
+  "modified": "2025-12-04 13:13:38.572374",
+  "name": "Sialkot",
+  "station_code": "4",
+  "station_name": "Sialkot"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Station",
+  "modified": "2025-12-04 13:13:53.485716",
+  "name": "Faisalabad",
+  "station_code": "5",
+  "station_name": "Faisalabad"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Station",
+  "modified": "2025-12-04 13:14:03.435439",
+  "name": "Peshawar",
+  "station_code": "6",
+  "station_name": "Peshawar"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Station",
+  "modified": "2025-12-04 13:13:22.519218",
+  "name": "Islamabad",
+  "station_code": "3",
+  "station_name": "Islamabad"
+ }
+]

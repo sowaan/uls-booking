@@ -34,7 +34,8 @@
   "manifest_upload_data",
   "gateway",
   "file_name",
-  "file_type"
+  "file_type",
+  "manifest_input_date"
  ],
  "fields": [
   {
@@ -187,11 +188,17 @@
    "label": "Gateway",
    "options": "Gateway",
    "read_only": 1
+  },
+  {
+   "fieldname": "manifest_input_date",
+   "fieldtype": "Date",
+   "label": "Manifest Input Date",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-15 18:27:26.092105",
+ "modified": "2025-12-30 15:17:03.446356",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R300000",

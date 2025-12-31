@@ -573,7 +573,8 @@
   {
    "fieldname": "manifest_input_date",
    "fieldtype": "Date",
-   "label": "Manifest Input Date"
+   "label": "Manifest Input Date",
+   "read_only": 1
   },
   {
    "fieldname": "manifest_upload_data",
@@ -590,7 +591,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-15 18:27:05.187257",
+ "modified": "2025-12-30 15:10:12.685882",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R200000",
