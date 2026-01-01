@@ -2195,6 +2195,10 @@ def opsys_insert_data_new(
                 manifest_input_date = parsed.get("manifest_input_date")
 
                 if not manifest_input_date:
+                    doc.append('failed_shipments', {
+                        "shipment": shipment_number,
+                        "reason": "Manifest Input Date Not Found in R200000"
+                    })                    
                     frappe.log_error(
                         title="OPSYS Missing Manifest Input Date",
                         message=f"Shipment {shipment_number} has no manifest_input_date in R200000"
