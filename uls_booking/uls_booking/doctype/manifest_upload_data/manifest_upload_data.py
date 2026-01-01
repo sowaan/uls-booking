@@ -2529,10 +2529,10 @@ def create_shipment_number_record_new(
         running_manifest_input_date
     )
 
-    frappe.log_error(
-        title=f"Upserting Shipment Number {shipment_number}",
-        message=f"Shipment: {shipment_number}\nManifest Input Date: {running_manifest_input_date} \nExisting: {existing_name}"
-    )
+    # frappe.log_error(
+    #     title=f"Upserting Shipment Number {shipment_number}",
+    #     message=f"Shipment: {shipment_number}\nManifest Input Date: {running_manifest_input_date} \nExisting: {existing_name}"
+    # )
 
     party = resolve_party_info(shipment_number, origin_country)
 
