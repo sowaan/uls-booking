@@ -2410,7 +2410,7 @@ def find_existing_shipment_number(shipment_number, manifest_input_date):
 def resolve_party_info(shipment_number, origin_country):
     """
     Returns:
-        dict(customer, billing_type, icris_number, station, import_export)
+        dict(customer, billing_type, icris_number, station, import__export)
     """
     result = {
         "customer": None,
@@ -2421,7 +2421,9 @@ def resolve_party_info(shipment_number, origin_country):
     }
 
     try:
-        # Export
+        # -----------------------
+        # EXPORT
+        # -----------------------
         export_row = frappe.get_value(
             "R300000",
             {
@@ -2433,27 +2435,34 @@ def resolve_party_info(shipment_number, origin_country):
         )
 
         if export_row:
+            result.update({
+                "station": export_row.shipper_city,
+                "import__export": "Export",
+            })
+
             icris = frappe.get_value(
                 "ICRIS Account",
                 export_row.shipper_number,
                 ["shipper_name", "icris_account"],
                 as_dict=True,
             )
+
             if icris:
                 result.update({
                     "customer": icris.shipper_name,
+                    "icris_number": icris.icris_account,
                     "billing_type": frappe.get_value(
                         "Customer",
                         icris.shipper_name,
                         "custom_billing_type",
                     ),
-                    "icris_number": icris.icris_account,
-                    "station": export_row.shipper_city,
-                    "import__export": "Export",
                 })
-                return result
 
-        # Import
+            return result  # Export resolved (with or without ICRIS)
+
+        # -----------------------
+        # IMPORT
+        # -----------------------
         import_row = frappe.get_value(
             "R400000",
             {
@@ -2465,23 +2474,27 @@ def resolve_party_info(shipment_number, origin_country):
         )
 
         if import_row:
+            result.update({
+                "station": import_row.consignee_city,
+                "import__export": "Import",
+            })
+
             icris = frappe.get_value(
                 "ICRIS Account",
                 import_row.consignee_number,
                 ["shipper_name", "icris_account"],
                 as_dict=True,
             )
+
             if icris:
                 result.update({
                     "customer": icris.shipper_name,
+                    "icris_number": icris.icris_account,
                     "billing_type": frappe.get_value(
                         "Customer",
                         icris.shipper_name,
                         "custom_billing_type",
                     ),
-                    "icris_number": icris.icris_account,
-                    "station": import_row.consignee_city,
-                    "import__export": "Import",
                 })
 
     except Exception:
@@ -2491,6 +2504,7 @@ def resolve_party_info(shipment_number, origin_country):
         )
 
     return result
+
 
 def populate_shipment_number_fields(doc, base, party, manifest_doc):
     doc.shipment_number = base["shipment_number"]
@@ -2532,11 +2546,6 @@ def create_shipment_number_record_new(
         shipment_number,
         running_manifest_input_date
     )
-
-    # frappe.log_error(
-    #     title=f"Upserting Shipment Number {shipment_number}",
-    #     message=f"Shipment: {shipment_number}\nManifest Input Date: {running_manifest_input_date} \nExisting: {existing_name}"
-    # )
 
     party = resolve_party_info(shipment_number, origin_country)
 
