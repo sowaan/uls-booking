@@ -106,19 +106,19 @@ def get_data(filters):
         SELECT
             si.custom_sales_invoice_pdf_child_ref AS pdf_child,
 
-            SUM(CASE WHEN it.report_item = 'INSURANCE'
+            SUM(CASE WHEN it.custom_report_item = 'INSURANCE'
                 THEN sii.base_net_amount ELSE 0 END) AS insurance,
 
-            SUM(CASE WHEN it.report_item = 'Fuel Surcharges'
+            SUM(CASE WHEN it.custom_report_item = 'Fuel Surcharges'
                 THEN sii.base_net_amount ELSE 0 END) AS fuel_surcharges,
 
-            SUM(CASE WHEN it.report_item = 'SBC'
+            SUM(CASE WHEN it.custom_report_item = 'SBC'
                 THEN sii.base_net_amount ELSE 0 END) AS shipping_bill_charges,
 
-            SUM(CASE WHEN it.report_item = 'OTHER CHARGES'
+            SUM(CASE WHEN it.custom_report_item = 'OTHER CHARGES'
                 THEN sii.base_net_amount ELSE 0 END) AS total_other_charges,
 
-            SUM(CASE WHEN it.report_item = 'PEAK SURCHARGE'
+            SUM(CASE WHEN it.custom_report_item = 'PEAK SURCHARGE'
                 THEN sii.base_net_amount ELSE 0 END) AS total_peak_charges
 
         FROM `tabSales Invoice` si

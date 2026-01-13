@@ -113,7 +113,7 @@ fixtures = [
                                 "custom_sales_invoice_definition",
                                 "custom_invoice_logs",
                                 "custom_sales_invoice_log",
-
+                                "custom_report_item",
 
 
                                 "custom_freight_charges",
