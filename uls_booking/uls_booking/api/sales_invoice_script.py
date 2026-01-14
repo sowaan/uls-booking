@@ -11,7 +11,18 @@ import logging
 
 
 @frappe.whitelist()
-def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, billing_type=None, icris_number=None, customer=None, import__export=None, date_type=None, manifest_file_type=None, gateway=None):
+def get_shipment_numbers_and_sales_invoices(
+    start_date,
+    end_date,
+    station=None,
+    billing_type=None,
+    icris_number=None,
+    customer=None,
+    import__export=None,
+    date_type=None,
+    manifest_file_type=None,
+    gateway=None
+):
     values = {
         "start_date": start_date,
         "end_date": end_date,
@@ -27,7 +38,9 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
     date_field = "sn.date_shipped" if date_type == "Shipped Date" else "sn.import_date"
 
     base_query = f"""
-        SELECT shipment_number
+        SELECT
+            sn.shipment_number,
+            sn.manifest_input_date
         FROM `tabShipment Number` AS sn
         WHERE {date_field} BETWEEN %(start_date)s AND %(end_date)s
     """
@@ -47,11 +60,12 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
         base_query += " AND " + " AND ".join(conditions)
 
     try:
-        results = frappe.db.sql(base_query, values)
-        return [row[0] for row in results]
+        results = frappe.db.sql(base_query, values, as_dict=True)
+        return results
     except Exception as e:
         frappe.log_error(str(e), "get_shipment_numbers_and_sales_invoices")
         return []
+
 
 
 
@@ -161,32 +175,78 @@ def get_customer(icris_number, default_customer):
 
 
 # ----------------- Main Function -----------------
+def insert_sales_invoice_log(
+    shipment_number,
+    manifest_input_date,
+    sales_invoice,
+    status,
+    logs
+):
+    frappe.get_doc({
+        "doctype": "Sales Invoice Logs",
+        "shipment_number": shipment_number,
+        "manifest_input_date": manifest_input_date,
+        "sales_invoice": sales_invoice,
+        "sales_invoice_status": status,
+        "logs": logs
+    }).insert(ignore_permissions=True)
+
+    frappe.db.commit()
 
 @frappe.whitelist()
-def generate_single_invoice(parent_id=None, login_username=None, shipment_number=None, sales_invoice_definition=None, end_date=None):
+def generate_single_invoice(parent_id=None, login_username=None, shipment_number=None, sales_invoice_definition=None, end_date=None, manifest_input_date=None):
     import time
     start_total = time.time()
 
     if not shipment_number:
         return "Shipment number missing"
 
-    logs = []
+    if not manifest_input_date:
+        return {
+            "sales_invoice_name": None,
+            "logs": "Manifest input date missing",
+            "sales_invoice_status": "Failed"
+        }
+    logs = ""
     
     # Step 1: Check if invoice already exists using SQL
-    invoice_exists = frappe.db.sql("""
-        SELECT sales_invoice, logs, sales_invoice_status
+    # ------------------------------------------------------------------
+    # STEP 1: Fetch ALL logs for this shipment (any date)
+    # ------------------------------------------------------------------
+    invoice_logs = frappe.db.sql("""
+        SELECT
+            sales_invoice,
+            logs,
+            sales_invoice_status,
+            manifest_input_date
         FROM `tabSales Invoice Logs`
-        WHERE shipment_number=%s
-        LIMIT 1
+        WHERE shipment_number = %s
+        ORDER BY creation DESC
     """, shipment_number, as_dict=True)
 
-    if invoice_exists:
-        log = invoice_exists[0]
-        return {
-            "sales_invoice_name": log.sales_invoice,
-            "logs": log.logs,
-            "sales_invoice_status": log.sales_invoice_status
+    # ------------------------------------------------------------------
+    # STEP 2: If same manifest_input_date exists → RETURN EXISTING
+    # ------------------------------------------------------------------
+    for log in invoice_logs:
+        if log.get("manifest_input_date") == manifest_input_date:
+            return {
+                "sales_invoice_name": log.get("sales_invoice"),
+                "logs": log.get("logs"),
+                "sales_invoice_status": "Already Created"
+            }
+
+    # ------------------------------------------------------------------
+    # STEP 3: Decide if this is a DUPLICATE shipment
+    # ------------------------------------------------------------------
+    is_duplicate_shipment = bool(invoice_logs)
+
+    previous_manifest_dates = list(
+        {
+            l.get("manifest_input_date")
+            for l in invoice_logs
+            if l.get("manifest_input_date")
         }
+    )
 
     # Step 2: Determine invoice type
     is_compensation = check_type(shipment_number, logs)
@@ -257,29 +317,19 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     try:
         si.posting_date = getdate(end_date)
         si.set_posting_time = 1
-        si.insert()
+        si.insert(ignore_permissions=True)
+        si.submit()
+
+        sales_invoice_name = si.name
 
         # Create or update log
-        if frappe.db.exists("Sales Invoice Logs", {"shipment_number": shipment_number}):
-            log_doc = frappe.get_doc("Sales Invoice Logs", {"shipment_number": shipment_number})
-            log_doc.logs = "Created Successfully"
-            log_doc.sales_invoice = si.name
-            log_doc.sales_invoice_status = "Created"
-            log_doc.custom_created_byfrom_billing_tool = login_username
-            log_doc.custom_parent_idfrom_billing_tool = parent_id
-            log_doc.icris_number = icris_number
-        else:
-            log_doc = frappe.get_doc({
-                "doctype": "Sales Invoice Logs",
-                "shipment_number": shipment_number,
-                "sales_invoice": si.name,
-                "logs": "Created Successfully",
-                "sales_invoice_status": "Created",
-                "created_byfrom_utility": login_username,
-                "parent_idfrom_utility": parent_id,
-                "icris_number": icris_number
-            })
-        log_doc.insert(ignore_permissions=True)
+        # insert_sales_invoice_log(
+        #     shipment_number=shipment_number,
+        #     manifest_input_date=manifest_input_date,
+        #     sales_invoice=sales_invoice_name,
+        #     status="Created",
+        #     logs="Sales Invoice created successfully."
+        # )
 
     except Exception as e:
         logging.error(f"Error creating invoice {shipment_number}: {e}")
@@ -289,15 +339,51 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
             "shipment_number": shipment_number,
             "logs": f"Failed: {str(e)}",
             "sales_invoice_status": "Failed",
+            "manifest_input_date": manifest_input_date,
             "created_byfrom_utility": login_username,
             "parent_idfrom_utility": parent_id
         })
         log_doc.insert(ignore_permissions=True)
+        return {
+            "sales_invoice_name": None,
+            "logs": str(e),
+            "sales_invoice_status": "Failed"
+        }        
 
+    # ------------------------------------------------------------------
+    # STEP 5: PREPARE LOG MESSAGE
+    # ------------------------------------------------------------------
+    if is_duplicate_shipment:
+        status = "Created (Duplicate Shipment)"
+        logs = (
+            f"Duplicate invoice created for shipment {shipment_number}. "
+            f"Previous manifest date(s): {', '.join(previous_manifest_dates)}"
+        )
+    else:
+        status = "Created"
+        logs = "Sales Invoice created successfully."
+
+    # ------------------------------------------------------------------
+    # STEP 6: INSERT LOG RECORD
+    # ------------------------------------------------------------------
+    frappe.get_doc({
+        "doctype": "Sales Invoice Logs",
+        "shipment_number": shipment_number,
+        "manifest_input_date": manifest_input_date,
+        "sales_invoice": sales_invoice_name,
+        "sales_invoice_status": status,
+        "logs": logs
+    }).insert(ignore_permissions=True)
+
+    frappe.db.commit()
+
+    # ------------------------------------------------------------------
+    # STEP 7: RETURN RESPONSE
+    # ------------------------------------------------------------------
     return {
-        "sales_invoice_name": si.name if si else None,
-        "logs": "Created Successfully" if si else "Failed",
-        "sales_invoice_status": "Created" if si else "Failed"
+        "sales_invoice_name": sales_invoice_name,
+        "logs": logs,
+        "sales_invoice_status": status
     }
 
 def check_type(shipment, logs):

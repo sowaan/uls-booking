@@ -150,7 +150,8 @@
    "depends_on": "eval: doc.billing_type === \"Single\";",
    "fieldname": "shipment_number",
    "fieldtype": "Data",
-   "label": "Shipment Number"
+   "label": "Shipment Number",
+   "unique": 0
   }
  ],
  "grid_page_length": 50,

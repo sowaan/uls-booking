@@ -77,7 +77,8 @@
   {
    "fieldname": "shipment_number",
    "fieldtype": "Data",
-   "label": "Shipment Number"
+   "label": "Shipment Number",
+   "unique": 0
   },
   {
    "fieldname": "record_type",
