@@ -382,45 +382,72 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     # ------------------------------------------------------------------
     return {
         "sales_invoice_name": sales_invoice_name,
-        "logs": logs,
+        "logs": final_log_message,
         "sales_invoice_status": status
     }
 
 def check_type(shipment, logs):
+    # Defensive: ensure logs is always a list
     if not isinstance(logs, list):
         logs = []
-        
-    third_party_code = frappe.db.get_value(
-        "R200000",
-        {"shipment_number": shipment},
-        "third_party_indicator_code"
-    )
 
-    if third_party_code is None:
-        logs.append(f"No R200000 found for shipment {shipment}")
-        third_party_code = "0"
+    try:
+        # -------------------------------
+        # Fetch third party indicator
+        # -------------------------------
+        third_party_code = frappe.db.get_value(
+            "R200000",
+            {"shipment_number": shipment},
+            "third_party_indicator_code"
+        )
 
-    shipment_info = frappe.db.get_value(
-        "Shipment Number",
-        shipment,
-        ["billing_term", "import__export"],
-        as_dict=True
-    )
+        if third_party_code is None:
+            logs.append(f"No R200000 found for shipment {shipment}")
+            third_party_code = "0"
 
-    if not shipment_info:
-        logs.append(f"No Shipment Number found for {shipment}")
+        # -------------------------------
+        # Fetch shipment master data
+        # -------------------------------
+        shipment_info = frappe.db.get_value(
+            "Shipment Number",
+            shipment,
+            ["billing_term", "import__export"],
+            as_dict=True
+        )
+
+        if not shipment_info:
+            logs.append(f"No Shipment Number found for {shipment}")
+            return False
+
+        billing_term = (shipment_info.billing_term or "").strip().upper()
+        imp_exp = (shipment_info.import__export or "").strip().upper()
+
+        # -------------------------------
+        # Business rules
+        # -------------------------------
+        if imp_exp == "EXPORT":
+            return billing_term == "F/C" or third_party_code != "0"
+
+        if imp_exp == "IMPORT":
+            return billing_term in {"P/P", "F/D"}
+
+        # Unknown import/export type
+        logs.append(
+            f"Unknown import/export value '{shipment_info.import__export}' for shipment {shipment}"
+        )
         return False
 
-    billing_term = (shipment_info.billing_term or "").strip().upper()
-    imp_exp = (shipment_info.import__export or "").strip().upper()
+    except Exception as e:
+        # Absolute safety net
+        logs.append(
+            f"Error determining invoice type for shipment {shipment}: {str(e)}"
+        )
+        frappe.log_error(
+            frappe.get_traceback(),
+            "check_type failure"
+        )
+        return False
 
-    if imp_exp == "EXPORT":
-        return billing_term == "F/C" or third_party_code != "0"
-
-    if imp_exp == "IMPORT":
-        return billing_term in {"P/P", "F/D"}
-
-    return False
 
 def log_existing_invoice(invoice_type_fields, shipment_number, logs, login_username, parent_id):
     """
