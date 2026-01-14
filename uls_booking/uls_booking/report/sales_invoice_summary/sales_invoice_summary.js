@@ -19,11 +19,6 @@ frappe.query_reports["Sales Invoice Summary"] = {
             label: "Customer",
             fieldtype: "Link",
             options: "Customer"
-        },
-        {
-            fieldname: "custom_shipment_number",
-            label: "Shipment Number",
-            fieldtype: "Data"
         }
     ]
 };
