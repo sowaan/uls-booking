@@ -201,12 +201,12 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     if not shipment_number:
         return "Shipment number missing"
 
-    if not manifest_input_date:
-        return {
-            "sales_invoice_name": None,
-            "logs": "Manifest input date missing",
-            "sales_invoice_status": "Failed"
-        }
+    # if not manifest_input_date:
+    #     return {
+    #         "sales_invoice_name": None,
+    #         "logs": "Manifest input date missing",
+    #         "sales_invoice_status": "Failed"
+    #     }
     logs = []
     
     # Step 1: Check if invoice already exists using SQL
@@ -228,7 +228,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     # STEP 2: If same manifest_input_date exists → RETURN EXISTING
     # ------------------------------------------------------------------
     for log in invoice_logs:
-        if log.get("manifest_input_date") == manifest_input_date:
+        if  not manifest_input_date or log.get("manifest_input_date") == manifest_input_date:
             return {
                 "sales_invoice_name": log.get("sales_invoice"),
                 "logs": log.get("logs"),
