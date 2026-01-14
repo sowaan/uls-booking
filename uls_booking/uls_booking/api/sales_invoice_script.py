@@ -207,7 +207,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
             "logs": "Manifest input date missing",
             "sales_invoice_status": "Failed"
         }
-    logs = ""
+    logs = []
     
     # Step 1: Check if invoice already exists using SQL
     # ------------------------------------------------------------------
@@ -355,13 +355,13 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     # ------------------------------------------------------------------
     if is_duplicate_shipment:
         status = "Created (Duplicate Shipment)"
-        logs = (
+        final_log_message = (
             f"Duplicate invoice created for shipment {shipment_number}. "
             f"Previous manifest date(s): {', '.join(previous_manifest_dates)}"
         )
     else:
         status = "Created"
-        logs = "Sales Invoice created successfully."
+        final_log_message = "Sales Invoice created successfully."
 
     # ------------------------------------------------------------------
     # STEP 6: INSERT LOG RECORD
@@ -372,7 +372,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
         "manifest_input_date": manifest_input_date,
         "sales_invoice": sales_invoice_name,
         "sales_invoice_status": status,
-        "logs": logs
+        "logs": final_log_message
     }).insert(ignore_permissions=True)
 
     frappe.db.commit()
@@ -387,6 +387,9 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     }
 
 def check_type(shipment, logs):
+    if not isinstance(logs, list):
+        logs = []
+        
     third_party_code = frappe.db.get_value(
         "R200000",
         {"shipment_number": shipment},
