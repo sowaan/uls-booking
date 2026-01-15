@@ -390,6 +390,8 @@ def check_type(shipment, logs):
     # Defensive: ensure logs is always a list
     if not isinstance(logs, list):
         logs = []
+    
+    imp_exp = "Export"  # Default assumption
 
     try:
         # -------------------------------
