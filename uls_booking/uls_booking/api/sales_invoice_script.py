@@ -333,6 +333,11 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
 
     except Exception as e:
         logging.error(f"Error creating invoice {shipment_number}: {e}")
+        frappe.log_error(
+            "Generate Single Invoice failure",
+            frappe.get_traceback()
+            
+        )
         # Create failure log
         log_doc = frappe.get_doc({
             "doctype": "Sales Invoice Logs",
@@ -445,8 +450,9 @@ def check_type(shipment, logs):
             f"Error determining invoice type for shipment {shipment}: {str(e)}"
         )
         frappe.log_error(
-            frappe.get_traceback(),
-            "check_type failure"
+            "check_type failure",
+            frappe.get_traceback()
+            
         )
         return False
 
