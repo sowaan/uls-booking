@@ -198,7 +198,10 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     import time
     start_total = time.time()
 
-    frappe.error_log(f"generate_single_invoice called with shipment_number: {shipment_number}, manifest_input_date: {manifest_input_date}", "generate_single_invoice")
+    frappe.log_error(
+        title="generate_single_invoice",
+        message=f"called with shipment_number={shipment_number}, manifest_input_date={manifest_input_date}"
+    )
 
     if not shipment_number:
         return "Shipment number missing"
@@ -223,6 +226,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
             manifest_input_date
         FROM `tabSales Invoice Logs`
         WHERE shipment_number = %s
+                                 and sales_invoice_status IN ('Created', 'Created (Duplicate Shipment)')
         ORDER BY creation DESC
     """, shipment_number, as_dict=True)
 
