@@ -198,6 +198,8 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     import time
     start_total = time.time()
 
+    frappe.error_log(f"generate_single_invoice called with shipment_number: {shipment_number}, manifest_input_date: {manifest_input_date}", "generate_single_invoice")
+    
     if not shipment_number:
         return "Shipment number missing"
 
@@ -333,11 +335,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
 
     except Exception as e:
         logging.error(f"Error creating invoice {shipment_number}: {e}")
-        frappe.log_error(
-            "Generate Single Invoice failure",
-            frappe.get_traceback()
-            
-        )
+
         # Create failure log
         log_doc = frappe.get_doc({
             "doctype": "Sales Invoice Logs",
@@ -349,6 +347,11 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
             "parent_idfrom_utility": parent_id
         })
         log_doc.insert(ignore_permissions=True)
+        frappe.log_error(
+            "Generate Single Invoice failure",
+            frappe.get_traceback()
+            
+        )        
         return {
             "sales_invoice_name": None,
             "logs": str(e),
