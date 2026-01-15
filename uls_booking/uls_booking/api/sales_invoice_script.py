@@ -342,7 +342,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
         log_doc = frappe.get_doc({
             "doctype": "Sales Invoice Logs",
             "shipment_number": shipment_number,
-            "logs": f"Failed: {str(e)}",
+            "logs": f"Failed: {frappe.get_traceback()}",
             "sales_invoice_status": "Failed",
             "manifest_input_date": manifest_input_date,
             "created_byfrom_utility": login_username,
