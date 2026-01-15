@@ -226,7 +226,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
             manifest_input_date
         FROM `tabSales Invoice Logs`
         WHERE shipment_number = %s
-                                 and sales_invoice_status IN ('Created', 'Created (Duplicate Shipment)')
+            and sales_invoice_status IN ('Created', 'Created (Duplicate Shipment)')
         ORDER BY creation DESC
     """, shipment_number, as_dict=True)
 
@@ -324,7 +324,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
         si.posting_date = getdate(end_date)
         si.set_posting_time = 1
         si.insert(ignore_permissions=True)
-        si.submit()
+        # si.submit()
 
         sales_invoice_name = si.name
 
