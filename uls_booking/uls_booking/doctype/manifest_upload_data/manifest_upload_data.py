@@ -204,6 +204,7 @@ def generate_sales_invoice_enqued(doc_str, doc, shipments, definition_record, na
         selling_rate_country = 0
         arrayy = []
         sales_name = []
+        imp_exp = "Export"
 
         # Load Sales Invoice Definition
         try:

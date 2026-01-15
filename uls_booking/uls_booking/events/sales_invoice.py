@@ -112,6 +112,7 @@ def get_exchange_rate(from_currency, to_currency, date):
 
 def generate_invoice(self, method):
     logs = []
+    imp_exp = "Export"
     sales_invoice = self
     if sales_invoice.custom_edit_customer:
         return
