@@ -8,7 +8,8 @@ import json
 import re
 from datetime import datetime
 import logging
-
+from frappe.utils import getdate
+import logging
 
 @frappe.whitelist()
 def get_shipment_numbers_and_sales_invoices(
@@ -198,6 +199,10 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     import time
     start_total = time.time()
 
+    sales_invoice_name = None
+    manifest_input_date = getdate(manifest_input_date) if manifest_input_date else None
+
+
     # frappe.log_error(
     #     title="generate_single_invoice",
     #     message=f"called with shipment_number={shipment_number}, manifest_input_date={manifest_input_date}"
@@ -230,6 +235,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
         ORDER BY creation DESC
     """, shipment_number, as_dict=True)
 
+   
     # ------------------------------------------------------------------
     # STEP 2: If same manifest_input_date exists → RETURN EXISTING
     # ------------------------------------------------------------------
@@ -367,10 +373,16 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     # ------------------------------------------------------------------
     if is_duplicate_shipment:
         status = "Created (Duplicate Shipment)"
+        formatted_dates = [
+            d.strftime("%Y-%m-%d") if hasattr(d, "strftime") else str(d)
+            for d in previous_manifest_dates
+        ]
+
         final_log_message = (
             f"Duplicate invoice created for shipment {shipment_number}. "
-            f"Previous manifest date(s): {', '.join(previous_manifest_dates)}"
+            f"Previous manifest date(s): {', '.join(formatted_dates)}"
         )
+
     else:
         status = "Created"
         final_log_message = "Sales Invoice created successfully."
