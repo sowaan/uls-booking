@@ -933,7 +933,8 @@ def choose_best_shipment_candidate(candidates, incoming_manifest_input_date):
     # 2️⃣ No match → create new
     return None, "create_new"
 
-def create_shipment_number_record(shipment, origin_country, r2_data, doc,running_manifest_input_date ):
+def create_shipment_number_record(
+        shipment, origin_country, r2_data, doc,running_manifest_input_date ):
     """
     Create or update a Shipment Number record for the given shipment id based on r2_data.
     If a matching Shipment Number record exists (by name or shipment_number field), we apply date rules:
@@ -978,18 +979,19 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc,running
             frappe.log_error(f"Error saving Shipment Number {shipment}: {e}", "Shipment Save Error")
             raise
 
-    def _update_existing_shipment(existing_name):
+    def _update_existing_shipment(existing_name, u_manifest_input_date):
         try:
             shipment_doc = frappe.get_doc("Shipment Number", existing_name)
             # populate additional fields using R300000 / R400000 lookups as before
             try:
                 # Export shipments
                 export_array_temp = frappe.get_list("R300000",
-                    filters=[["shipper_country", "=", origin_country], ["shipment_number", "=", shipment]],
+                    filters=[["shipper_country", "=", origin_country], ["shipment_number", "=", shipment],
+                             ["manifest_input_date", "=", u_manifest_input_date]],
                     fields=["shipment_number", "shipper_number"]
                 )
                 if export_array_temp:
-                    station = frappe.get_value("R300000", {"shipment_number": shipment}, "shipper_city")
+                    station = frappe.get_value("R300000", {"shipment_number": shipment, "manifest_input_date": u_manifest_input_date}, "shipper_city")
                     shipper_number = export_array_temp[0].get("shipper_number")
                     import_export = "Export"
                     icris = frappe.get_list("ICRIS Account", filters=[["name", "=", shipper_number]], fields=["shipper_name", "icris_account"])
@@ -1001,7 +1003,7 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc,running
                         shipment_doc.import__export = import_export
                 # Import shipments
                 import_array_temp = frappe.get_list("R400000",
-                    filters=[["consignee_country_code", "=", origin_country], ["shipment_number", "=", shipment]],
+                    filters=[["consignee_country_code", "=", origin_country], ["shipment_number", "=", shipment], ["manifest_input_date", "=", u_manifest_input_date]],
                     fields=["shipment_number", "consignee_number"]
                 )
                 if import_array_temp:
@@ -1025,7 +1027,7 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc,running
             raise        
     if action == "update" and existing_name:
         # Update the existing doc
-        _update_existing_shipment(existing_name)
+        _update_existing_shipment(existing_name, running_manifest_input_date)
 
     elif action == "alert_update" and existing_name:
         # Always notify on alert_update
@@ -1058,7 +1060,7 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc,running
             "reason": "Date mismatch: manifest import date same but shipped date differs"
         })
 
-        _update_existing_shipment(existing_name)
+        _update_existing_shipment(existing_name, running_manifest_input_date)
 
     else:
         # create_new: create a fresh Shipment Number record (autoname will generate full name)
@@ -1072,7 +1074,7 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc,running
 
             try:
                 export_array_temp = frappe.get_list("R300000",
-                    filters=[["shipper_country", "=", origin_country], ["shipment_number", "=", shipment]],
+                    filters=[["shipper_country", "=", origin_country], ["shipment_number", "=", shipment], ["manifest_input_date", "=", running_manifest_input_date]],
                     fields=["shipment_number", "shipper_number"]
                 )
 
@@ -1087,12 +1089,12 @@ def create_shipment_number_record(shipment, origin_country, r2_data, doc,running
                         icris_number = icris[0].get("icris_account")
 
                 import_array_temp = frappe.get_list("R400000",
-                    filters=[["consignee_country_code", "=", origin_country], ["shipment_number", "=", shipment]],
+                    filters=[["consignee_country_code", "=", origin_country], ["shipment_number", "=", shipment], ["manifest_input_date", "=", running_manifest_input_date]],
                     fields=["shipment_number", "consignee_number"]
                 )
 
                 if import_array_temp:
-                    station = frappe.get_value("R400000", {"shipment_number": shipment}, "consignee_city")
+                    station = frappe.get_value("R400000", {"shipment_number": shipment, "manifest_input_date": running_manifest_input_date}, "consignee_city")
                     consignee_number = import_array_temp[0].get("consignee_number")
                     import_export = "Import"
                     icris = frappe.get_list("ICRIS Account", filters=[["name", "=", consignee_number]], fields=["shipper_name", "icris_account"])
