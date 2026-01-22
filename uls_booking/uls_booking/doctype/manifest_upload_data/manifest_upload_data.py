@@ -352,8 +352,29 @@ def generate_sales_invoice_enqued(doc_str, doc, shipments, definition_record, na
                     log.append("No Consignee Number Found: Shipment Number: {0}".format(shipment))
 
             # retrieve weights
-            weight_frm_R200000 = frappe.get_value("R202000", {"shipment_number": shipment}, "custom_expanded_shipment_weight") or 0
-            weight_frm_R201000 = frappe.get_value("R201000", {"shipment_number": shipment}, "custom_minimum_bill_weight") or 0
+            weight_frm_R200000 = (
+                    frappe.db.get_value(
+                        "R202000",
+                        {
+                            "shipment_number": shipment,
+                            "manifest_input_date": incoming_input_date,
+                        },
+                        "custom_expanded_shipment_weight",
+                    )
+                    or 0
+                )
+            weight_frm_R201000 = (
+                    frappe.db.get_value(
+                        "R201000",
+                        {
+                            "shipment_number": shipment,
+                            "manifest_input_date": incoming_input_date,
+                        },
+                        "custom_minimum_bill_weight",
+                    )
+                    or 0
+                )
+            # weight_frm_R201000 = frappe.get_value("R201000", {"shipment_number": shipment}, "custom_minimum_bill_weight") or 0
             try:
                 weight_frm_R200000 = float(weight_frm_R200000)
             except Exception:
