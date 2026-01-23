@@ -176,6 +176,15 @@ def get_latest_by_manifest(doctype, shipment_number, fields, manifest_input_date
     if isinstance(fields, str):
         fields = [fields]
 
+    frappe.logger("invoice").info(
+        f"""
+        get_latest_by_manifest DEBUG
+        doctype={doctype}
+        shipment_number={shipment_number}
+        manifest_input_date={manifest_input_date}
+        type={type(manifest_input_date)}
+        """
+    )
     rows = frappe.db.sql(
         f"""
         SELECT {", ".join(fields)}
@@ -188,7 +197,14 @@ def get_latest_by_manifest(doctype, shipment_number, fields, manifest_input_date
         (shipment_number, manifest_input_date, manifest_input_date),
         as_dict=True,
     )
+    
     return rows[0] if rows else None
+
+def to_float(val):
+    try:
+        return float(val) if val is not None else 0.0
+    except (TypeError, ValueError):
+        return 0.0
 
 def get_shipment_weight(shipment_number, manifest_input_date):
     r202 = get_latest_by_manifest(
@@ -205,10 +221,16 @@ def get_shipment_weight(shipment_number, manifest_input_date):
         manifest_input_date,
     )
 
-    weight1 = float(r202.get("custom_expanded_shipment_weight", 0)) if r202 else 0
-    weight2 = float(r201.get("custom_minimum_bill_weight", 0)) if r201 else 0
+    weight1 = to_float(
+        r202.get("custom_expanded_shipment_weight") if r202 else 0
+    )
+
+    weight2 = to_float(
+        r201.get("custom_minimum_bill_weight") if r201 else 0
+    )
 
     return max(weight1, weight2)
+
 
 def get_shipment_weights(shipment_numbers, manifest_input_date):
     global _weight_cache
