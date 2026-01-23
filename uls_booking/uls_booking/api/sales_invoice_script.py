@@ -121,24 +121,53 @@ def apply_reference_docs_to_invoice(si, shipment_number, ref_doc_map):
 
 
 def get_reference_docs(shipment_numbers, ref_doc_map, manifest_input_date=None):
-    """Fetch reference docs in bulk for multiple shipments using SQL."""
     global _ref_doc_cache
+
     for ref_doctype, child_list in ref_doc_map.items():
-        field_names = [child["field_name"] for child in child_list if child["field_name"] != "name"]
-        if not field_names:
-            continue
+        try:
+            field_names = [
+                child["field_name"]
+                for child in child_list
+                if child["field_name"] != "name"
+            ]
 
-        fields_sql = ", ".join(["`{}`".format(f) for f in field_names])
-        rows = frappe.db.sql(f"""
-            SELECT shipment_number, {fields_sql}
-            FROM `tab{ref_doctype}`
-            WHERE shipment_number IN ({', '.join(['%s']*len(shipment_numbers))})
-            and ({'manifest_input_date = %s' if manifest_input_date else '1=1'})
-        """, shipment_numbers, manifest_input_date, as_dict=True)
+            if not field_names:
+                continue
 
-        for row in rows:
-            shipment = row["shipment_number"]
-            _ref_doc_cache.setdefault(shipment, {})[ref_doctype] = row
+            fields_sql = ", ".join(f"`{f}`" for f in field_names)
+
+            query = f"""
+                SELECT shipment_number, {fields_sql}
+                FROM `tab{ref_doctype}`
+                WHERE shipment_number = %s
+                  AND manifest_input_date = %s
+            """
+
+            frappe.logger("invoice").info(
+                f"[REF DOC QUERY] Doctype={ref_doctype} | Shipment={shipment_numbers[0]}"
+            )
+
+            rows = frappe.db.sql(
+                query,
+                (shipment_numbers[0], manifest_input_date),
+                as_dict=True
+            )
+
+            for row in rows:
+                shipment = row["shipment_number"]
+                _ref_doc_cache.setdefault(shipment, {})[ref_doctype] = row
+
+        except Exception:
+            # 🔴 THIS IS THE MONEY LOG
+            frappe.log_error(
+                title="Reference Doc SQL Failed",
+                message=(
+                    f"Doctype: {ref_doctype}\n"
+                    f"Shipment: {shipment_numbers[0]}\n"
+                    f"Query:\n{query}"
+                ),
+            )
+            raise
 
 def get_latest_by_manifest(doctype, shipment_number, fields, manifest_input_date):
     """
@@ -152,7 +181,7 @@ def get_latest_by_manifest(doctype, shipment_number, fields, manifest_input_date
         SELECT {", ".join(fields)}
         FROM `tab{doctype}`
         WHERE shipment_number = %s
-          AND (%s IS NULL OR manifest_input_date <= %s)
+          AND (%s IS NULL OR manifest_input_date = %s)
         ORDER BY manifest_input_date DESC
         LIMIT 1
         """,
@@ -160,6 +189,26 @@ def get_latest_by_manifest(doctype, shipment_number, fields, manifest_input_date
         as_dict=True,
     )
     return rows[0] if rows else None
+
+def get_shipment_weight(shipment_number, manifest_input_date):
+    r202 = get_latest_by_manifest(
+        "R202000",
+        shipment_number,
+        ["custom_expanded_shipment_weight"],
+        manifest_input_date,
+    )
+
+    r201 = get_latest_by_manifest(
+        "R201000",
+        shipment_number,
+        ["custom_minimum_bill_weight"],
+        manifest_input_date,
+    )
+
+    weight1 = float(r202.get("custom_expanded_shipment_weight", 0)) if r202 else 0
+    weight2 = float(r201.get("custom_minimum_bill_weight", 0)) if r201 else 0
+
+    return max(weight1, weight2)
 
 def get_shipment_weights(shipment_numbers, manifest_input_date):
     global _weight_cache
@@ -353,11 +402,14 @@ def generate_single_invoice(parent_id=None, login_username=None,
     icris_number = si.custom_shipper_number if is_export else si.custom_consignee_number
 
     # Step 8: Fetch weights
-    get_shipment_weights(shipment_number, manifest_input_date)
-    weight1 = _weight_cache.get(shipment_number, {}).get("weight1", 0)
-    weight2 = _weight_cache.get(shipment_number, {}).get("weight2", 0)
-    si.custom_shipment_weight = max(weight1, weight2)
-
+    # get_shipment_weights(shipment_number, manifest_input_date)
+    # weight1 = _weight_cache.get(shipment_number, {}).get("weight1", 0)
+    # weight2 = _weight_cache.get(shipment_number, {}).get("weight2", 0)
+    # si.custom_shipment_weight = max(weight1, weight2)
+    si.custom_shipment_weight = get_shipment_weight(
+            shipment_number,
+            manifest_input_date
+        )
     # Step 9: Customer & Currency using SQL
     default_customer = frappe.db.sql("""
         SELECT custom_default_customer

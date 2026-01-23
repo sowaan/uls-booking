@@ -254,7 +254,7 @@ def generate_invoice(self, method):
                         break
                     
                 if not selling_group:
-                    logs.append(f"No selling group Found thats why using Default Selling group")
+                    # logs.append(f"No selling group Found thats why using Default Selling group")
                     selling_group = definition.default_selling_group
                 if frappe.db.exists("Selling Rate Group", selling_group):
                     sales_invoice.set("custom_selling_rate_group", selling_group)
@@ -447,7 +447,7 @@ def generate_invoice(self, method):
                         selling_group = icris.rate_group
                         break
             if not selling_group:
-                logs.append(f"No selling group Found thats why using Default Selling group")
+                # logs.append(f"No selling group Found thats why using Default Selling group")
                 selling_group = definition.default_selling_group
             if frappe.db.exists("Selling Rate Group", selling_group):
                 sales_invoice.set("custom_selling_rate_group", selling_group)
