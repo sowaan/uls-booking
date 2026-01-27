@@ -29,12 +29,15 @@ def get_columns():
         {"label": "Total Weight", "fieldname": "weight", "fieldtype": "Float"},
         {"label": "No of Shipments", "fieldname": "no_shipment", "fieldtype": "Int"},
         {"label": "Freight (Tariff Amount)", "fieldname": "freight", "fieldtype": "Currency"},
-        {"label": "Discount", "fieldname": "discount", "fieldtype": "Currency"},
         {"label": "Net Amount", "fieldname": "net_amount", "fieldtype": "Currency"},
+        {"label": "Discount", "fieldname": "discount", "fieldtype": "Currency"},        
         {"label": "Fuel Surcharges", "fieldname": "fuel_surcharges", "fieldtype": "Currency"},
         {"label": "Shipping Bill Charges", "fieldname": "shipping_bill_charges", "fieldtype": "Currency"},
-        {"label": "Total Other Charges", "fieldname": "total_other_charges", "fieldtype": "Currency"},
-        {"label": "Total Peak Charges", "fieldname": "total_peak_charges", "fieldtype": "Currency"}, 
+        {"label": "Total Other Charges", "fieldname": "total_other_charges", "fieldtype": "Currency"},         
+        {"label": "Surcharge Excl. FSC", "fieldname": "sur_excl_fsc", "fieldtype": "Currency"},
+        {"label": "Surcharge Incl. FSC", "fieldname": "sur_incl_fsc", "fieldtype": "Currency"},
+        {"label": "Total Surcharges", "fieldname": "total_surcharges", "fieldtype": "Currency"},
+        {"label": "Total Peak Charges", "fieldname": "total_peak_charges", "fieldtype": "Currency"},
         {"label": "Insurance", "fieldname": "insurance", "fieldtype": "Currency"}, 
         {"label": "Total Amount", "fieldname": "total_amount", "fieldtype": "Currency"}, 
         {"label": "Sales Tax", "fieldname": "sales_tax", "fieldtype": "Currency"},
@@ -68,32 +71,32 @@ def get_data(filters):
     COALESCE(inv.no_shipment, 0) AS no_shipment,
     COALESCE(inv.weight, 0) AS weight,
     COALESCE(inv.discount, 0) AS discount,
+   
 
     /* ================= NET AMOUNT ================= */
     (COALESCE(itm.freight, 0) - COALESCE(inv.discount, 0)) AS net_amount,
 
     /* ================= TOTAL AMOUNT ================= */
     (
+      (COALESCE(itm.freight, 0) - COALESCE(inv.discount, 0))
+    + COALESCE(itm.fuel_surcharges, 0)
+    + COALESCE(itm.shipping_bill_charges, 0)
+    + COALESCE(itm.total_surcharges, 0)
+    + COALESCE(itm.total_peak_charges, 0)    
+    ) AS total_amount,
+
+
+    /* ================= NET BILLING ================= */
+        (
+    (
         (COALESCE(itm.freight, 0) - COALESCE(inv.discount, 0))
       + COALESCE(itm.fuel_surcharges, 0)
       + COALESCE(itm.shipping_bill_charges, 0)
-      + COALESCE(itm.total_other_charges, 0)
-      + COALESCE(itm.total_peak_charges, 0)
-      + COALESCE(itm.insurance, 0)
-    ) AS total_amount,
-
-    /* ================= NET BILLING ================= */
-    (
-        (
-            (COALESCE(itm.freight, 0) - COALESCE(inv.discount, 0))
-          + COALESCE(itm.fuel_surcharges, 0)
-          + COALESCE(itm.shipping_bill_charges, 0)
-          + COALESCE(itm.total_other_charges, 0)
-          + COALESCE(itm.total_peak_charges, 0)
-          + COALESCE(itm.insurance, 0)
-        )
-      + COALESCE(inv.sales_tax, 0)
-    ) AS net_billing,
+      + COALESCE(itm.total_surcharges, 0)
+      + COALESCE(itm.total_peak_charges, 0)     
+    )
+        + COALESCE(inv.sales_tax, 0)
+        ) AS net_billing,
 
     COALESCE(inv.sales_tax, 0) AS sales_tax,
 
@@ -103,7 +106,10 @@ def get_data(filters):
     COALESCE(itm.fuel_surcharges, 0) AS fuel_surcharges,
     COALESCE(itm.shipping_bill_charges, 0) AS shipping_bill_charges,
     COALESCE(itm.total_other_charges, 0) AS total_other_charges,
-    COALESCE(itm.total_peak_charges, 0) AS total_peak_charges
+    COALESCE(itm.total_peak_charges, 0) AS total_peak_charges,
+    COALESCE(itm.sur_excl_fsc, 0) AS sur_excl_fsc,
+    COALESCE(itm.sur_incl_fsc, 0) AS sur_incl_fsc,
+    COALESCE(itm.total_surcharges, 0) AS total_surcharges
 
     FROM `tabSales Invoice PDF table` cws
 
@@ -141,26 +147,36 @@ def get_data(filters):
 
     /* ================= ITEM LEVEL (BOUND TO PDF DATE) ================= */
     LEFT JOIN (
-        SELECT
-            si.custom_sales_invoice_pdf_child_ref AS pdf_child,
-            
-            SUM(CASE WHEN it.custom_report_item = 'Freight'
+    SELECT
+        si.custom_sales_invoice_pdf_child_ref AS pdf_child,
+
+        SUM(CASE WHEN it.custom_report_item = 'Freight'
             THEN sii.base_rate ELSE 0 END) AS freight,
 
-            SUM(CASE WHEN it.custom_report_item = 'INSURANCE'
-                THEN sii.base_rate ELSE 0 END) AS insurance,
+        SUM(CASE WHEN it.custom_report_item = 'INSURANCE'
+            THEN sii.base_rate ELSE 0 END) AS insurance,
 
-            SUM(CASE WHEN it.custom_report_item = 'Fuel Surcharges'
-                THEN sii.base_rate ELSE 0 END) AS fuel_surcharges,
+        SUM(CASE WHEN it.custom_report_item = 'Fuel Surcharges'
+            THEN sii.base_rate ELSE 0 END) AS fuel_surcharges,
 
-            SUM(CASE WHEN it.custom_report_item = 'SBC'
-                THEN sii.base_rate ELSE 0 END) AS shipping_bill_charges,
+        SUM(CASE WHEN it.custom_report_item = 'SBC'
+            THEN sii.base_rate ELSE 0 END) AS shipping_bill_charges,
 
-            SUM(CASE WHEN it.custom_report_item = 'OTHER CHARGES'
-                THEN sii.base_rate ELSE 0 END) AS total_other_charges,
+        SUM(CASE WHEN it.custom_report_item = 'OTHER CHARGES'
+            THEN sii.base_rate ELSE 0 END) AS total_other_charges,
 
-            SUM(CASE WHEN it.custom_report_item = 'PEAK SURCHARGE'
-                THEN sii.base_rate ELSE 0 END) AS total_peak_charges
+        SUM(CASE WHEN it.custom_report_item = 'PEAK SURCHARGE'
+            THEN sii.base_rate ELSE 0 END) AS total_peak_charges,
+
+        /* ✅ NEW COLUMNS */
+        SUM(CASE WHEN it.custom_report_item = 'Surcharge Excl. FSC'
+            THEN sii.base_rate ELSE 0 END) AS sur_excl_fsc,
+
+        SUM(CASE WHEN it.custom_report_item = 'Surcharge Incl. FSC'
+            THEN sii.base_rate ELSE 0 END) AS sur_incl_fsc,
+
+        SUM(CASE WHEN it.custom_report_item IN ('Surcharge Excl. FSC', 'Surcharge Incl. FSC')
+            THEN sii.base_rate ELSE 0 END) AS total_surcharges
 
         FROM `tabSales Invoice` si
         JOIN `tabSales Invoice Item` sii ON sii.parent = si.name
@@ -175,6 +191,7 @@ def get_data(filters):
         GROUP BY si.custom_sales_invoice_pdf_child_ref
     ) itm
         ON itm.pdf_child = cws.name
+
 
     ORDER BY sip.end_date DESC, cws.name1
     """
