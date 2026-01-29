@@ -14,6 +14,7 @@
   "column_break_nhom",
   "created_byfrom_utility",
   "parent_idfrom_utility",
+  "manifest_input_date",
   "invoice_logs_section",
   "logs"
  ],
@@ -34,7 +35,7 @@
   },
   {
    "fieldname": "shipment_number",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Shipment Number",
    "options": "Shipment Number",
    "read_only": 1
@@ -54,19 +55,22 @@
   {
    "fieldname": "logs",
    "fieldtype": "Long Text",
-   "label": "Logs"
+   "label": "Logs",
+   "read_only": 1
   },
   {
    "fieldname": "sales_invoice",
    "fieldtype": "Link",
    "label": "Sales Invoice",
-   "options": "Sales Invoice"
+   "options": "Sales Invoice",
+   "read_only": 1
   },
   {
    "fieldname": "sales_invoice_status",
    "fieldtype": "Select",
    "label": "Sales Invoice Status",
-   "options": "\nAlready Created\nCreated\nFailed"
+   "options": "\nAlready Created\nCreated\nCreated (Duplicate Shipment)\nFailed",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_nhom",
@@ -84,11 +88,18 @@
    "fieldtype": "Data",
    "label": "Parent ID(From Utility)",
    "read_only": 1
+  },
+  {
+   "fieldname": "manifest_input_date",
+   "fieldtype": "Date",
+   "label": "Manifest Input Date",
+   "read_only": 1
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-05 15:50:56.351475",
+ "modified": "2026-01-14 18:13:41.868021",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "Sales Invoice Logs",
@@ -107,6 +118,8 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

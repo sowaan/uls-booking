@@ -34,7 +34,8 @@
   "manifest_upload_data",
   "gateway",
   "file_name",
-  "file_type"
+  "file_type",
+  "manifest_input_date"
  ],
  "fields": [
   {
@@ -51,7 +52,7 @@
    "fieldname": "shipment_number",
    "fieldtype": "Data",
    "label": "Shipment Number",
-   "unique": 1
+   "unique": 0
   },
   {
    "fieldname": "import_date",
@@ -188,11 +189,17 @@
    "label": "Gateway",
    "options": "Gateway",
    "read_only": 1
+  },
+  {
+   "fieldname": "manifest_input_date",
+   "fieldtype": "Date",
+   "label": "Manifest Input Date",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-14 11:12:34.722499",
+ "modified": "2025-12-30 15:17:03.446356",
  "modified_by": "Administrator",
  "module": "ULS Booking",
  "name": "R300000",
@@ -211,6 +218,8 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

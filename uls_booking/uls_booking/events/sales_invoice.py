@@ -112,6 +112,7 @@ def get_exchange_rate(from_currency, to_currency, date):
 
 def generate_invoice(self, method):
     logs = []
+    imp_exp = "Export"
     sales_invoice = self
     if sales_invoice.custom_edit_customer:
         return
@@ -193,7 +194,10 @@ def generate_invoice(self, method):
     # imp_exp = "Export" if is_export else "Import"
     imp_or_exp = frappe.db.get_value("Shipment Number", sales_invoice.custom_shipment_number, "import__export")
     if imp_or_exp:
-        imp_or_exp = imp_or_exp.strip().lower()
+        if isinstance(imp_or_exp, list):
+            imp_or_exp = imp_or_exp[0] if imp_or_exp else ""
+
+        imp_or_exp = str(imp_or_exp).strip().lower()
         if imp_or_exp == "export":
             sales_invoice.custom_import__export_si = "Export"
             imp_exp = "Export"
@@ -250,7 +254,7 @@ def generate_invoice(self, method):
                         break
                     
                 if not selling_group:
-                    logs.append(f"No selling group Found thats why using Default Selling group")
+                    # logs.append(f"No selling group Found thats why using Default Selling group")
                     selling_group = definition.default_selling_group
                 if frappe.db.exists("Selling Rate Group", selling_group):
                     sales_invoice.set("custom_selling_rate_group", selling_group)
@@ -443,7 +447,7 @@ def generate_invoice(self, method):
                         selling_group = icris.rate_group
                         break
             if not selling_group:
-                logs.append(f"No selling group Found thats why using Default Selling group")
+                # logs.append(f"No selling group Found thats why using Default Selling group")
                 selling_group = definition.default_selling_group
             if frappe.db.exists("Selling Rate Group", selling_group):
                 sales_invoice.set("custom_selling_rate_group", selling_group)

@@ -8,10 +8,22 @@ import json
 import re
 from datetime import datetime
 import logging
-
+from frappe.utils import getdate
+import logging
 
 @frappe.whitelist()
-def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, billing_type=None, icris_number=None, customer=None, import__export=None, date_type=None, manifest_file_type=None, gateway=None):
+def get_shipment_numbers_and_sales_invoices(
+    start_date,
+    end_date,
+    station=None,
+    billing_type=None,
+    icris_number=None,
+    customer=None,
+    import__export=None,
+    date_type=None,
+    manifest_file_type=None,
+    gateway=None
+):
     values = {
         "start_date": start_date,
         "end_date": end_date,
@@ -27,7 +39,9 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
     date_field = "sn.date_shipped" if date_type == "Shipped Date" else "sn.import_date"
 
     base_query = f"""
-        SELECT shipment_number
+        SELECT
+            sn.shipment_number,
+            sn.manifest_input_date
         FROM `tabShipment Number` AS sn
         WHERE {date_field} BETWEEN %(start_date)s AND %(end_date)s
     """
@@ -47,11 +61,12 @@ def get_shipment_numbers_and_sales_invoices(start_date, end_date, station=None, 
         base_query += " AND " + " AND ".join(conditions)
 
     try:
-        results = frappe.db.sql(base_query, values)
-        return [row[0] for row in results]
+        results = frappe.db.sql(base_query, values, as_dict=True)
+        return results
     except Exception as e:
         frappe.log_error(str(e), "get_shipment_numbers_and_sales_invoices")
         return []
+
 
 
 
@@ -105,47 +120,164 @@ def apply_reference_docs_to_invoice(si, shipment_number, ref_doc_map):
                     si.set(child["sales_invoice_field_name"], value)
 
 
-def get_reference_docs(shipment_numbers, ref_doc_map):
-    """Fetch reference docs in bulk for multiple shipments using SQL."""
+def get_reference_docs(shipment_numbers, ref_doc_map, manifest_input_date=None):
     global _ref_doc_cache
+
     for ref_doctype, child_list in ref_doc_map.items():
-        field_names = [child["field_name"] for child in child_list if child["field_name"] != "name"]
-        if not field_names:
-            continue
+        try:
+            field_names = [
+                child["field_name"]
+                for child in child_list
+                if child["field_name"] != "name"
+            ]
 
-        fields_sql = ", ".join(["`{}`".format(f) for f in field_names])
-        rows = frappe.db.sql(f"""
-            SELECT shipment_number, {fields_sql}
-            FROM `tab{ref_doctype}`
-            WHERE shipment_number IN ({', '.join(['%s']*len(shipment_numbers))})
-        """, shipment_numbers, as_dict=True)
+            if not field_names:
+                continue
 
-        for row in rows:
-            shipment = row["shipment_number"]
-            _ref_doc_cache.setdefault(shipment, {})[ref_doctype] = row
+            fields_sql = ", ".join(f"`{f}`" for f in field_names)
+
+            query = f"""
+                SELECT shipment_number, {fields_sql}
+                FROM `tab{ref_doctype}`
+                WHERE shipment_number = %s
+                  AND manifest_input_date = %s
+            """
+
+            frappe.logger("invoice").info(
+                f"[REF DOC QUERY] Doctype={ref_doctype} | Shipment={shipment_numbers[0]}"
+            )
+
+            rows = frappe.db.sql(
+                query,
+                (shipment_numbers[0], manifest_input_date),
+                as_dict=True
+            )
+
+            for row in rows:
+                shipment = row["shipment_number"]
+                _ref_doc_cache.setdefault(shipment, {})[ref_doctype] = row
+
+        except Exception:
+            # 🔴 THIS IS THE MONEY LOG
+            frappe.log_error(
+                title="Reference Doc SQL Failed",
+                message=(
+                    f"Doctype: {ref_doctype}\n"
+                    f"Shipment: {shipment_numbers[0]}\n"
+                    f"Query:\n{query}"
+                ),
+            )
+            raise
+
+def get_latest_by_manifest(doctype, shipment_number, fields, manifest_input_date):
+    """
+    Fetch latest row for a shipment up to a given manifest_input_date
+    """
+    if isinstance(fields, str):
+        fields = [fields]
+
+    frappe.logger("invoice").info(
+        f"""
+        get_latest_by_manifest DEBUG
+        doctype={doctype}
+        shipment_number={shipment_number}
+        manifest_input_date={manifest_input_date}
+        type={type(manifest_input_date)}
+        """
+    )
+    rows = frappe.db.sql(
+        f"""
+        SELECT {", ".join(fields)}
+        FROM `tab{doctype}`
+        WHERE shipment_number = %s
+          AND (%s IS NULL OR manifest_input_date = %s)
+        ORDER BY manifest_input_date DESC
+        LIMIT 1
+        """,
+        (shipment_number, manifest_input_date, manifest_input_date),
+        as_dict=True,
+    )
+    
+    return rows[0] if rows else None
+
+def to_float(val):
+    try:
+        return float(val) if val is not None else 0.0
+    except (TypeError, ValueError):
+        return 0.0
+
+def get_shipment_weight(shipment_number, manifest_input_date):
+    r202 = get_latest_by_manifest(
+        "R202000",
+        shipment_number,
+        ["custom_expanded_shipment_weight"],
+        manifest_input_date,
+    )
+
+    r201 = get_latest_by_manifest(
+        "R201000",
+        shipment_number,
+        ["custom_minimum_bill_weight"],
+        manifest_input_date,
+    )
+
+    weight1 = to_float(
+        r202.get("custom_expanded_shipment_weight") if r202 else 0
+    )
+
+    weight2 = to_float(
+        r201.get("custom_minimum_bill_weight") if r201 else 0
+    )
+
+    return max(weight1, weight2)
 
 
-def get_shipment_weights(shipment_numbers):
-    """Fetch weights from R202000 and R201000 using SQL."""
+def get_shipment_weights(shipment_numbers, manifest_input_date):
     global _weight_cache
 
-    rows_202 = frappe.db.sql("""
-        SELECT shipment_number, custom_expanded_shipment_weight
-        FROM `tabR202000`
-        WHERE shipment_number IN ({0})
-    """.format(", ".join(["%s"]*len(shipment_numbers))), shipment_numbers, as_dict=True)
+    for shipment in shipment_numbers:
+        r202 = get_latest_by_manifest(
+            "R202000",
+            shipment,
+            ["custom_expanded_shipment_weight"],
+            manifest_input_date,
+        )
 
-    rows_201 = frappe.db.sql("""
-        SELECT shipment_number, custom_minimum_bill_weight
-        FROM `tabR201000`
-        WHERE shipment_number IN ({0})
-    """.format(", ".join(["%s"]*len(shipment_numbers))), shipment_numbers, as_dict=True)
+        r201 = get_latest_by_manifest(
+            "R201000",
+            shipment,
+            ["custom_minimum_bill_weight"],
+            manifest_input_date,
+        )
 
-    for w in rows_202:
-        _weight_cache.setdefault(w["shipment_number"], {})["weight1"] = float(w.get("custom_expanded_shipment_weight") or 0)
+        _weight_cache.setdefault(shipment, {})["weight1"] = float(
+            r202.get("custom_expanded_shipment_weight", 0) if r202 else 0
+        )
+        _weight_cache.setdefault(shipment, {})["weight2"] = float(
+            r201.get("custom_minimum_bill_weight", 0) if r201 else 0
+        )
 
-    for w in rows_201:
-        _weight_cache.setdefault(w["shipment_number"], {})["weight2"] = float(w.get("custom_minimum_bill_weight") or 0)
+# def get_shipment_weights(shipment_numbers):
+#     """Fetch weights from R202000 and R201000 using SQL."""
+#     global _weight_cache
+
+#     rows_202 = frappe.db.sql("""
+#         SELECT shipment_number, custom_expanded_shipment_weight
+#         FROM `tabR202000`
+#         WHERE shipment_number IN ({0})
+#     """.format(", ".join(["%s"]*len(shipment_numbers))), shipment_numbers, as_dict=True)
+
+#     rows_201 = frappe.db.sql("""
+#         SELECT shipment_number, custom_minimum_bill_weight
+#         FROM `tabR201000`
+#         WHERE shipment_number IN ({0})
+#     """.format(", ".join(["%s"]*len(shipment_numbers))), shipment_numbers, as_dict=True)
+
+#     for w in rows_202:
+#         _weight_cache.setdefault(w["shipment_number"], {})["weight1"] = float(w.get("custom_expanded_shipment_weight") or 0)
+
+#     for w in rows_201:
+#         _weight_cache.setdefault(w["shipment_number"], {})["weight2"] = float(w.get("custom_minimum_bill_weight") or 0)
 
 
 def get_customer(icris_number, default_customer):
@@ -161,35 +293,95 @@ def get_customer(icris_number, default_customer):
 
 
 # ----------------- Main Function -----------------
+def insert_sales_invoice_log(
+    shipment_number,
+    manifest_input_date,
+    sales_invoice,
+    status,
+    logs
+):
+    frappe.get_doc({
+        "doctype": "Sales Invoice Logs",
+        "shipment_number": shipment_number,
+        "manifest_input_date": manifest_input_date,
+        "sales_invoice": sales_invoice,
+        "sales_invoice_status": status,
+        "logs": logs
+    }).insert(ignore_permissions=True)
+
+    frappe.db.commit()
 
 @frappe.whitelist()
-def generate_single_invoice(parent_id=None, login_username=None, shipment_number=None, sales_invoice_definition=None, end_date=None):
+def generate_single_invoice(parent_id=None, login_username=None, 
+                            shipment_number=None, 
+                            sales_invoice_definition=None, 
+                            end_date=None, manifest_input_date=None):
     import time
     start_total = time.time()
+
+    sales_invoice_name = None
+    manifest_input_date = getdate(manifest_input_date) if manifest_input_date else None
+
+
+    # frappe.log_error(
+    #     title="generate_single_invoice",
+    #     message=f"called with shipment_number={shipment_number}, manifest_input_date={manifest_input_date}"
+    # )
 
     if not shipment_number:
         return "Shipment number missing"
 
+    # if not manifest_input_date:
+    #     return {
+    #         "sales_invoice_name": None,
+    #         "logs": "Manifest input date missing",
+    #         "sales_invoice_status": "Failed"
+    #     }
     logs = []
     
     # Step 1: Check if invoice already exists using SQL
-    invoice_exists = frappe.db.sql("""
-        SELECT sales_invoice, logs, sales_invoice_status
+    # ------------------------------------------------------------------
+    # STEP 1: Fetch ALL logs for this shipment (any date)
+    # ------------------------------------------------------------------
+    invoice_logs = frappe.db.sql("""
+        SELECT
+            sales_invoice,
+            logs,
+            sales_invoice_status,
+            manifest_input_date
         FROM `tabSales Invoice Logs`
-        WHERE shipment_number=%s
-        LIMIT 1
+        WHERE shipment_number = %s
+            and sales_invoice_status IN ('Created', 'Created (Duplicate Shipment)')
+        ORDER BY creation DESC
     """, shipment_number, as_dict=True)
 
-    if invoice_exists:
-        log = invoice_exists[0]
-        return {
-            "sales_invoice_name": log.sales_invoice,
-            "logs": log.logs,
-            "sales_invoice_status": log.sales_invoice_status
+   
+    # ------------------------------------------------------------------
+    # STEP 2: If same manifest_input_date exists → RETURN EXISTING
+    # ------------------------------------------------------------------
+    for log in invoice_logs:
+        if  not manifest_input_date or log.get("manifest_input_date") == manifest_input_date:
+            return {
+                "sales_invoice_name": log.get("sales_invoice"),
+                "logs->": log.get("logs"),
+                "sales_invoice_status": "Already Created"
+            }
+
+    # ------------------------------------------------------------------
+    # STEP 3: Decide if this is a DUPLICATE shipment
+    # ------------------------------------------------------------------
+    is_duplicate_shipment = bool(invoice_logs)
+
+    previous_manifest_dates = list(
+        {
+            l.get("manifest_input_date")
+            for l in invoice_logs
+            if l.get("manifest_input_date")
         }
+    )
 
     # Step 2: Determine invoice type
-    is_compensation = check_type(shipment_number, logs)
+    is_compensation = check_type(shipment_number, logs, manifest_input_date)
 
     # Step 3: Fetch definition using SQL
     definition = frappe.db.sql("""
@@ -202,7 +394,7 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     ref_doc_map = get_definition_children(sales_invoice_definition)
 
     # Step 5: Fetch reference docs
-    get_reference_docs([shipment_number], ref_doc_map)
+    get_reference_docs([shipment_number], ref_doc_map, manifest_input_date)
 
     # Step 6: Create Sales Invoice doc
     si = frappe.new_doc("Sales Invoice")
@@ -232,11 +424,14 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     icris_number = si.custom_shipper_number if is_export else si.custom_consignee_number
 
     # Step 8: Fetch weights
-    get_shipment_weights([shipment_number])
-    weight1 = _weight_cache.get(shipment_number, {}).get("weight1", 0)
-    weight2 = _weight_cache.get(shipment_number, {}).get("weight2", 0)
-    si.custom_shipment_weight = max(weight1, weight2)
-
+    # get_shipment_weights(shipment_number, manifest_input_date)
+    # weight1 = _weight_cache.get(shipment_number, {}).get("weight1", 0)
+    # weight2 = _weight_cache.get(shipment_number, {}).get("weight2", 0)
+    # si.custom_shipment_weight = max(weight1, weight2)
+    si.custom_shipment_weight = get_shipment_weight(
+            shipment_number,
+            manifest_input_date
+        )
     # Step 9: Customer & Currency using SQL
     default_customer = frappe.db.sql("""
         SELECT custom_default_customer
@@ -257,81 +452,156 @@ def generate_single_invoice(parent_id=None, login_username=None, shipment_number
     try:
         si.posting_date = getdate(end_date)
         si.set_posting_time = 1
-        si.insert()
+        si.insert(ignore_permissions=True)
+        # si.submit()
+
+        sales_invoice_name = si.name
 
         # Create or update log
-        if frappe.db.exists("Sales Invoice Logs", {"shipment_number": shipment_number}):
-            log_doc = frappe.get_doc("Sales Invoice Logs", {"shipment_number": shipment_number})
-            log_doc.logs = "Created Successfully"
-            log_doc.sales_invoice = si.name
-            log_doc.sales_invoice_status = "Created"
-            log_doc.custom_created_byfrom_billing_tool = login_username
-            log_doc.custom_parent_idfrom_billing_tool = parent_id
-            log_doc.icris_number = icris_number
-        else:
-            log_doc = frappe.get_doc({
-                "doctype": "Sales Invoice Logs",
-                "shipment_number": shipment_number,
-                "sales_invoice": si.name,
-                "logs": "Created Successfully",
-                "sales_invoice_status": "Created",
-                "created_byfrom_utility": login_username,
-                "parent_idfrom_utility": parent_id,
-                "icris_number": icris_number
-            })
-        log_doc.insert(ignore_permissions=True)
+        # insert_sales_invoice_log(
+        #     shipment_number=shipment_number,
+        #     manifest_input_date=manifest_input_date,
+        #     sales_invoice=sales_invoice_name,
+        #     status="Created",
+        #     logs="Sales Invoice created successfully."
+        # )
 
     except Exception as e:
         logging.error(f"Error creating invoice {shipment_number}: {e}")
+
         # Create failure log
         log_doc = frappe.get_doc({
             "doctype": "Sales Invoice Logs",
             "shipment_number": shipment_number,
-            "logs": f"Failed: {str(e)}",
+            "logs": f"Failed: {frappe.get_traceback()}",
             "sales_invoice_status": "Failed",
+            "manifest_input_date": manifest_input_date,
             "created_byfrom_utility": login_username,
             "parent_idfrom_utility": parent_id
         })
         log_doc.insert(ignore_permissions=True)
+        frappe.log_error(
+            "Generate Single Invoice failure",
+            frappe.get_traceback()
+            
+        )        
+        return {
+            "sales_invoice_name": None,
+            "logs": str(e),
+            "sales_invoice_status": "Failed"
+        }        
 
+    # ------------------------------------------------------------------
+    # STEP 5: PREPARE LOG MESSAGE
+    # ------------------------------------------------------------------
+    if is_duplicate_shipment:
+        status = "Created (Duplicate Shipment)"
+        formatted_dates = [
+            d.strftime("%Y-%m-%d") if hasattr(d, "strftime") else str(d)
+            for d in previous_manifest_dates
+        ]
+
+        final_log_message = (
+            f"Duplicate invoice created for shipment {shipment_number}. "
+            f"Previous manifest date(s): {', '.join(formatted_dates)}"
+        )
+
+    else:
+        status = "Created"
+        final_log_message = "Sales Invoice created successfully."
+
+    # ------------------------------------------------------------------
+    # STEP 6: INSERT LOG RECORD
+    # ------------------------------------------------------------------
+    frappe.get_doc({
+        "doctype": "Sales Invoice Logs",
+        "shipment_number": shipment_number,
+        "manifest_input_date": manifest_input_date,
+        "sales_invoice": sales_invoice_name,
+        "sales_invoice_status": status,
+        "logs": final_log_message
+    }).insert(ignore_permissions=True)
+
+    frappe.db.commit()
+
+    # ------------------------------------------------------------------
+    # STEP 7: RETURN RESPONSE
+    # ------------------------------------------------------------------
     return {
-        "sales_invoice_name": si.name if si else None,
-        "logs": "Created Successfully" if si else "Failed",
-        "sales_invoice_status": "Created" if si else "Failed"
+        "sales_invoice_name": sales_invoice_name,
+        "logs": final_log_message,
+        "sales_invoice_status": status
     }
 
-def check_type(shipment, logs):
-    third_party_code = frappe.db.get_value(
-        "R200000",
-        {"shipment_number": shipment},
-        "third_party_indicator_code"
-    )
+def check_type(shipment, logs, manifest_input_date=None):
+    # Defensive: ensure logs is always a list
+    if not isinstance(logs, list):
+        logs = []
+    
+    imp_exp = "Export"  # Default assumption
 
-    if third_party_code is None:
-        logs.append(f"No R200000 found for shipment {shipment}")
-        third_party_code = "0"
+    try:
+        # -------------------------------
+        # Fetch third party indicator
+        # -------------------------------
+        r200 = get_latest_by_manifest(
+            "R200000",
+            shipment,
+            ["third_party_indicator_code"],
+            manifest_input_date,
+        )
 
-    shipment_info = frappe.db.get_value(
-        "Shipment Number",
-        shipment,
-        ["billing_term", "import__export"],
-        as_dict=True
-    )
+        third_party_code = r200["third_party_indicator_code"] if r200 else "0"
 
-    if not shipment_info:
-        logs.append(f"No Shipment Number found for {shipment}")
+        if third_party_code is None:
+            logs.append(f"No R200000 found for shipment {shipment}")
+            third_party_code = "0"
+
+        # -------------------------------
+        # Fetch shipment master data
+        # -------------------------------
+        shipment_info = get_latest_by_manifest(
+                "Shipment Number",
+                shipment,
+                ["billing_term", "import__export"],
+                manifest_input_date,
+            )
+
+
+        if not shipment_info:
+            logs.append(f"No Shipment Number found for {shipment}")
+            return False
+
+        billing_term = (shipment_info.billing_term or "").strip().upper()
+        imp_exp = (shipment_info.import__export or "").strip().upper()
+
+        # -------------------------------
+        # Business rules
+        # -------------------------------
+        if imp_exp == "EXPORT":
+            return billing_term == "F/C" or third_party_code != "0"
+
+        if imp_exp == "IMPORT":
+            return billing_term in {"P/P", "F/D"}
+
+        # Unknown import/export type
+        logs.append(
+            f"Unknown import/export value '{shipment_info.import__export}' for shipment {shipment}"
+        )
         return False
 
-    billing_term = (shipment_info.billing_term or "").strip().upper()
-    imp_exp = (shipment_info.import__export or "").strip().upper()
+    except Exception as e:
+        # Absolute safety net
+        logs.append(
+            f"Error determining invoice type for shipment {shipment}: {str(e)}"
+        )
+        frappe.log_error(
+            "check_type failure",
+            frappe.get_traceback()
+            
+        )
+        return False
 
-    if imp_exp == "EXPORT":
-        return billing_term == "F/C" or third_party_code != "0"
-
-    if imp_exp == "IMPORT":
-        return billing_term in {"P/P", "F/D"}
-
-    return False
 
 def log_existing_invoice(invoice_type_fields, shipment_number, logs, login_username, parent_id):
     """
