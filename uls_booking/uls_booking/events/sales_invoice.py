@@ -818,6 +818,19 @@ def generate_invoice(self, method):
         # if not exempt_customer:
         #     sales_invoice.taxes_and_charges = None
         #     sales_invoice.taxes = []
+
+        frappe.log_error(
+            title="Sales Invoice Item Debug",
+            message={
+                "items_count": len(sales_invoice.items or []),
+                "billing_term": sales_invoice.custom_billing_term,
+                "shipment_type": sales_invoice.custom_shipment_type,
+                "imp_exp": imp_exp,
+                "definition": definition.name if definition else None,
+                "compensation_rows": len(definition.compensation_table or []),
+            },
+        )
+
         for comp in definition.compensation_table:
             if (
                     (sales_invoice.custom_billing_term or "").upper() ==
