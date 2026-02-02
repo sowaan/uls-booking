@@ -819,7 +819,17 @@ def generate_invoice(self, method):
         #     sales_invoice.taxes_and_charges = None
         #     sales_invoice.taxes = []
         for comp in definition.compensation_table:
-            if sales_invoice.custom_billing_term.upper() == comp.shipment_billing_term.upper() and sales_invoice.custom_shipment_type.upper() == comp.shipping_billing_type.upper() and imp_exp.upper() == comp.case.upper():
+            if (
+                    (sales_invoice.custom_billing_term or "").upper() ==
+                    (comp.shipment_billing_term or "").upper()
+                    and
+                    (sales_invoice.custom_shipment_type or "").upper() ==
+                    (comp.shipping_billing_type or "").upper()
+                    and
+                    (imp_exp or "").upper() ==
+                    (comp.case or "").upper()
+                ):
+
                 export_compensation_amount = comp.document_amount
                 sales_invoice.append('items', {'item_code': setting.compensation_charges , 'qty': '1', 'rate': export_compensation_amount})
                 break    
