@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
+ "autoname": "format:{shipment_number}-{####}",
  "allow_rename": 1,
  "creation": "2024-04-01 13:58:11.086737",
  "doctype": "DocType",

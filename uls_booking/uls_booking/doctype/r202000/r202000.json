@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:{shipment_number}-{####}",
  "creation": "2024-04-08 10:07:12.444682",
  "doctype": "DocType",
  "editable_grid": 1,
