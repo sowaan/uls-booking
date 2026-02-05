@@ -59,7 +59,7 @@ def get_frt_cust(icris_number, unassign, shipment_number, logs):
     2. R300000 → alternate_tracking_number_1 → Customer
     3. Unassigned ICRIS Account
     """
-    
+    # frappe.log_error("inside frt cust", f"icris: {icris_number}\nunassign:{unassign}\nshipment_Number:{shipment_number}")
     alt_track_r3 = frappe.db.get_value("R300000", {"shipment_number": shipment_number}, "alternate_tracking_number_1")
     if alt_track_r3:
         cust_name = frappe.db.get_value(
@@ -192,28 +192,25 @@ def generate_invoice(self, method):
     is_export = False
     # is_export = sales_invoice.custom_shipper_country.upper() == definition.origin_country.upper()
     # imp_exp = "Export" if is_export else "Import"
-    imp_or_exp = frappe.db.get_value("Shipment Number", sales_invoice.custom_shipment_number, "import__export")
-    if imp_or_exp:
-        if isinstance(imp_or_exp, list):
-            imp_or_exp = imp_or_exp[0] if imp_or_exp else ""
+    # imp_or_exp = frappe.db.get_value("Shipment Number", sales_invoice.custom_shipment_number, "import__export")
+    shipper_country = (sales_invoice.custom_shipper_country or "").upper()
+    origin_country = (definition.origin_country or "").upper()
 
-        imp_or_exp = str(imp_or_exp).strip().lower()
-        if imp_or_exp == "export":
-            sales_invoice.custom_import__export_si = "Export"
-            imp_exp = "Export"
-            is_export = True
-        elif imp_or_exp == "import":
-            sales_invoice.custom_import__export_si = "Import"
-            imp_exp = "Import"
+    
+    is_export = shipper_country == origin_country   
+
+    if is_export:
+        sales_invoice.custom_import__export_si = "Export"
+        imp_exp = "Export"
+        is_export = True
+    else:
+        sales_invoice.custom_import__export_si = "Import"
+        imp_exp = "Import"
     # print("before")
             
     
-
-
-
-
     if sales_invoice.custom_freight_invoices:
-        
+
         if is_export:
             icris_number = sales_invoice.custom_shipper_number or definition.unassigned_icris_number
         else:
@@ -226,9 +223,11 @@ def generate_invoice(self, method):
         
         except frappe.DoesNotExistError:
             logs.append(f"No icris Account Found {icris_number}")
+            frappe.log_error(f"ICRIS Error {icris_number}", f"si.shippper: {sales_invoice.custom_shipper_number}\nis export:{is_export}\nconsignee: {sales_invoice.custom_consignee_number}")
             if definition.unassigned_icris_number:
                 icris_account = frappe.get_doc("ICRIS Account", definition.unassigned_icris_number)
         # print("frt")
+        
         cust = get_frt_cust(icris_number, definition.unassigned_icris_number, shipment_number, logs)       
         sales_invoice.set("customer", cust)
 
@@ -819,17 +818,17 @@ def generate_invoice(self, method):
         #     sales_invoice.taxes_and_charges = None
         #     sales_invoice.taxes = []
 
-        frappe.log_error(
-            title="Sales Invoice Item Debug",
-            message={
-                "items_count": len(sales_invoice.items or []),
-                "billing_term": sales_invoice.custom_billing_term,
-                "shipment_type": sales_invoice.custom_shipment_type,
-                "imp_exp": imp_exp,
-                "definition": definition.name if definition else None,
-                "compensation_rows": len(definition.compensation_table or []),
-            },
-        )
+        # frappe.log_error(
+        #     title="Sales Invoice Item Debug",
+        #     message={
+        #         "items_count": len(sales_invoice.items or []),
+        #         "billing_term": sales_invoice.custom_billing_term,
+        #         "shipment_type": sales_invoice.custom_shipment_type,
+        #         "imp_exp": imp_exp,
+        #         "definition": definition.name if definition else None,
+        #         "compensation_rows": len(definition.compensation_table or []),
+        #     },
+        # )
 
         for comp in definition.compensation_table:
             if (
