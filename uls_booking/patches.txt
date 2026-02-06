@@ -7,8 +7,7 @@ uls_booking.uls_booking.doctype.manifest_upload_data.patches.set_importdate_r200
 uls_booking.uls_booking.doctype.manifest_upload_data.patches.set_input_date
 uls_booking.uls_booking.doctype.manifest_upload_data.patches.icris_list_to_icris_account
 uls_booking.uls_booking.doctype.manifest_upload_data.patches.add_opsys_unique_indexes
-
-
+uls_booking.uls_booking.doctype.manifest_upload_data.patches.add_sales_invoice_logs_indexes
 
 
 [pre_model_sync]

@@ -2,20 +2,8 @@ import frappe # type: ignore
 
 UNIQUE_DOCTYPES = (
     "Shipment Number",
-    "R200000",
-    "R300000",
-    "R400000",
 )
 
-INDEX_ONLY_DOCTYPES = (
-    "R201000",
-    "R202000",
-    "R401000",
-    "R402000",
-    "R500000",
-    "R600000",
-    "R900000",
-)
 
 FIELDS = ["shipment_number", "manifest_input_date"]
 
@@ -24,8 +12,6 @@ def execute():
     for doctype in UNIQUE_DOCTYPES:
         add_index(doctype, FIELDS, unique=False)
 
-    for doctype in INDEX_ONLY_DOCTYPES:
-        add_index(doctype, FIELDS, unique=False)
 
 
 def add_index(doctype, fields, unique=False):
