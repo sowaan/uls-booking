@@ -143,6 +143,16 @@ def get_exchange_rate(from_currency, to_currency, date):
 
     return rate[0].exchange_rate if rate else 0
 
+def save_si_log(shipment_number, manifest_input_date, icris_number, status, message):
+    log = frappe.new_doc("Sales Invoice Logs")
+    log.shipment_number = shipment_number
+    log.manifest_input_date = manifest_input_date
+    log.icris_number = icris_number
+    log.sales_invoice_status = status
+    log.logs = message
+    log.insert(ignore_permissions=True)
+    frappe.db.commit()
+
 def generate_invoice(self, method):
     logs = []
     imp_exp = "Export"
@@ -225,6 +235,7 @@ def generate_invoice(self, method):
     shipped_date = getdate(sales_invoice.custom_date_shipped)
     sales_invoice.conversion_rate = get_exchange_rate("USD", "PKR", shipped_date)
     is_export = False
+    icris_account = None
     # is_export = sales_invoice.custom_shipper_country.upper() == definition.origin_country.upper()
     # imp_exp = "Export" if is_export else "Import"
     # imp_or_exp = frappe.db.get_value("Shipment Number", sales_invoice.custom_shipment_number, "import__export")
@@ -909,38 +920,29 @@ def generate_invoice(self, method):
 
         
     # log_name = frappe.db.get_value("Sales Invoice Logs", {"shipment_number": shipment_number}, "name")
-    log_doc = frappe.new_doc("Sales Invoice Logs")
-    log_doc.shipment_number = shipment_number
-    log_doc.manifest_input_date = manifest_input_date
-    log_doc.logs = log_text
-    log_doc.insert(ignore_permissions=True)
+    log_status = None
+    log_message = ""
+
 
     if not sales_invoice.items:
-        
-        log_doc.set("sales_invoice_status", "Failed")
+        log_status = "Failed"
         logs.append(f"No Items shipment number {shipment_number}, icris number {icris_number}")
-        log_text = "\n".join(logs)
+
         if sales_invoice.custom_compensation_invoices:
-            log_doc.set(
-                'logs',
+            log_message = (
                 f"No Items shipment number {shipment_number}, icris number {icris_number}\n"
                 f"Shipment Billing Term: {sales_invoice.custom_billing_term}, "
                 f"Shipment Type: {sales_invoice.custom_shipment_type}, "
                 f"Imp/Exp: {imp_exp}"
             )
         else:
-            log_doc.set("logs", log_text)
-        
-        if frappe.db.exists("Shipment Number", shipment_number):
-            log_doc.set("shipment_number", shipment_number)
-            log_doc.set("manifest_input_date", manifest_input_date)
-        
-        if frappe.db.exists("ICRIS Account", icris_number):
-            log_doc.set("icris_number" , icris_number)
+            log_message = "\n".join(logs)
 
-        frappe.db.commit()    
-        log_doc.save()
+
+        save_si_log(shipment_number, manifest_input_date, icris_number, log_status, log_message)
+
         return
+
     if sales_invoice.custom_edit_selling_percentage:
         customer = sales_invoice.customer
         date_shipped = sales_invoice.custom_date_shipped
@@ -963,7 +965,7 @@ def generate_invoice(self, method):
     
     discounted_amount = discounted_amount - 1
     get_sales_tax(sales_invoice, logs)
-    log_text = "\n".join(logs)
+    log_message = "\n".join(logs)
     sales_invoice.set_missing_values()
     sales_team = get_sales_team_from_customer(sales_invoice.customer)
     sales_invoice.set("sales_team", [])
@@ -1005,15 +1007,10 @@ def generate_invoice(self, method):
     
     
     if logs:
-        if frappe.db.exists("Shipment Number", shipment_number):
-            log_doc.set("shipment_number", shipment_number)
-            log_doc.set("manifest_input_date", manifest_input_date)
-        if frappe.db.exists("ICRIS Account", icris_number):
-            log_doc.set("icris_number" , icris_number)
-        log_doc.set("logs", log_text)
-        frappe.db.commit()
-        log_doc.save()
-    frappe.db.commit()
+        log_status = "Success"
+        log_message = "\n".join(logs)
+        save_si_log(shipment_number, manifest_input_date, icris_number, log_status, log_message)
+
     # print("si end")
     
 
