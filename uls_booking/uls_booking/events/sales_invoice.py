@@ -274,7 +274,7 @@ def generate_invoice(self, method):
 
         if is_export:
             if sales_invoice.custom_consignee_country:
-                origin_country = sales_invoice.custom_consignee_country
+                origin_country = sales_invoice.custom_consignee_country.strip()
                 
             zone_with_out_country = None
             selling_rate_name = None
@@ -468,7 +468,11 @@ def generate_invoice(self, method):
 
         else:
             if sales_invoice.custom_shipper_country:
-                origin_country = sales_invoice.custom_shipper_country
+                origin_country = sales_invoice.custom_shipper_country.strip()
+
+            frappe.log_error("Temporary Error", 
+                             f"imp_exp:{imp_exp}\norigin country:{origin_country}\nservice: {sales_invoice.custom_service_type}\nicris: {icris_account}")    
+
             zone_with_out_country = None
             selling_rate_name = None
             service_type = frappe.get_list("Service Type",
@@ -487,6 +491,8 @@ def generate_invoice(self, method):
                 sales_invoice.set("custom_selling_rate_group", selling_group)
             full_tariff_flag = 0
             
+            frappe.log_error("Temporary Error 2", 
+                             f"selling group: {selling_group}\nfull terrif:{full_tariff_flag}\nimp_exp:{imp_exp}\norigin country:{origin_country}\nservice: {sales_invoice.custom_service_type}\nicris: {icris_account}")    
 
             if selling_group == definition.default_selling_group:
                 # Look for Full Tariff
@@ -606,8 +612,10 @@ def generate_invoice(self, method):
 
                 if flag == 1 :
                     try:
-                        countries = frappe.db.get_all("Country Names", filters={"countries":origin_country} , fields = ['parent'])
                         
+
+                        countries = frappe.db.get_all("Country Names", filters={"countries":origin_country} , fields = ['parent'])
+                           
                         if countries:
                             zone_with_out_country = countries[0].parent
                             if zone_with_out_country:
@@ -901,16 +909,11 @@ def generate_invoice(self, method):
 
         
     # log_name = frappe.db.get_value("Sales Invoice Logs", {"shipment_number": shipment_number}, "name")
-    log_name = frappe.db.get_value(
-        "Sales Invoice Logs",
-        {
-            "shipment_number": shipment_number,
-            "manifest_input_date": manifest_input_date
-        },
-        "name"
-    )
-    
-    log_doc = frappe.get_doc("Sales Invoice Logs", log_name) if log_name else frappe.new_doc("Sales Invoice Logs")
+    log_doc = frappe.new_doc("Sales Invoice Logs")
+    log_doc.shipment_number = shipment_number
+    log_doc.manifest_input_date = manifest_input_date
+    log_doc.logs = log_text
+    log_doc.insert(ignore_permissions=True)
 
     if not sales_invoice.items:
         
@@ -934,6 +937,8 @@ def generate_invoice(self, method):
         
         if frappe.db.exists("ICRIS Account", icris_number):
             log_doc.set("icris_number" , icris_number)
+
+        frappe.db.commit()    
         log_doc.save()
         return
     if sales_invoice.custom_edit_selling_percentage:
@@ -1006,6 +1011,7 @@ def generate_invoice(self, method):
         if frappe.db.exists("ICRIS Account", icris_number):
             log_doc.set("icris_number" , icris_number)
         log_doc.set("logs", log_text)
+        frappe.db.commit()
         log_doc.save()
     frappe.db.commit()
     # print("si end")
