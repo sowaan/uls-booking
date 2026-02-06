@@ -52,6 +52,39 @@ def check_type(shipment, logs):
 
     return False
 
+def check_type(shipment, manifest_input_date, logs):
+    third_party_code = frappe.db.get_value(
+        "R200000",
+        {"shipment_number": shipment,
+    "manifest_input_date": manifest_input_date},
+        "third_party_indicator_code"
+    )
+
+    if third_party_code is None:
+        logs.append(f"No R200000 found for shipment {shipment}")
+        third_party_code = "0"
+
+    shipment_info = frappe.db.get_value(
+        "Shipment Number",
+        shipment,
+        ["billing_term", "import__export"],
+        as_dict=True
+    )
+
+    if not shipment_info:
+        logs.append(f"No Shipment Number found for {shipment}")
+        return False
+
+    billing_term = (shipment_info.billing_term or "").strip().upper()
+    imp_exp = (shipment_info.import__export or "").strip().upper()
+
+    if imp_exp == "EXPORT":
+        return billing_term == "F/C" or third_party_code != "0"
+
+    if imp_exp == "IMPORT":
+        return billing_term in {"P/P", "F/D"}
+
+    return False
 def get_frt_cust(icris_number, unassign, shipment_number, logs):
     """
     Determine customer from:
@@ -121,12 +154,14 @@ def generate_invoice(self, method):
         reset_tax_fields(self)
         return
 
+    shipment_number = sales_invoice.custom_shipment_number
+    manifest_input_date = sales_invoice.custom_booking_date
 
     if sales_invoice.custom_edit_items:
         edit_items = sales_invoice.get("items")
 
     if not sales_invoice.custom_compensation_invoices and not sales_invoice.custom_freight_invoices:
-        if check_type(shipment_number, logs):
+        if check_type(shipment_number, manifest_input_date, logs):
             sales_invoice.custom_compensation_invoices = True
             sales_invoice.custom_freight_invoices = False
         else:
@@ -136,8 +171,8 @@ def generate_invoice(self, method):
 
 
 
-    shipment_number = sales_invoice.custom_shipment_number
-    
+
+
     discounted_amount = 0
     selling_rate_country = 0
     full_tariff = None
@@ -239,7 +274,7 @@ def generate_invoice(self, method):
 
         if is_export:
             if sales_invoice.custom_consignee_country:
-                origin_country = sales_invoice.custom_consignee_country.capitalize()
+                origin_country = sales_invoice.custom_consignee_country
                 
             zone_with_out_country = None
             selling_rate_name = None
@@ -433,7 +468,7 @@ def generate_invoice(self, method):
 
         else:
             if sales_invoice.custom_shipper_country:
-                origin_country = sales_invoice.custom_shipper_country.capitalize()
+                origin_country = sales_invoice.custom_shipper_country
             zone_with_out_country = None
             selling_rate_name = None
             service_type = frappe.get_list("Service Type",
@@ -624,8 +659,16 @@ def generate_invoice(self, method):
         codes_other_charges = []
         amounts_other_charges = []
         surcharge_codes_other_charges = []
-        r201 = frappe.get_list("R201000", filters={'shipment_number': shipment_number},)
-        
+        # r201 = frappe.get_list("R201000", filters={'shipment_number': shipment_number},)
+        r201 = frappe.get_list(
+            "R201000",
+            filters={
+                'shipment_number': shipment_number,
+                'manifest_input_date': manifest_input_date
+            },
+            order_by="manifest_input_date desc",
+            limit=1
+        )        
         if r201:
             docn = frappe.get_doc("R201000", r201[0].name)
             
@@ -857,7 +900,16 @@ def generate_invoice(self, method):
         sales_invoice.custom_inserted = 1
 
         
-    log_name = frappe.db.get_value("Sales Invoice Logs", {"shipment_number": shipment_number}, "name")
+    # log_name = frappe.db.get_value("Sales Invoice Logs", {"shipment_number": shipment_number}, "name")
+    log_name = frappe.db.get_value(
+        "Sales Invoice Logs",
+        {
+            "shipment_number": shipment_number,
+            "manifest_input_date": manifest_input_date
+        },
+        "name"
+    )
+    
     log_doc = frappe.get_doc("Sales Invoice Logs", log_name) if log_name else frappe.new_doc("Sales Invoice Logs")
 
     if not sales_invoice.items:
@@ -877,7 +929,8 @@ def generate_invoice(self, method):
             log_doc.set("logs", log_text)
         
         if frappe.db.exists("Shipment Number", shipment_number):
-            log_doc.set("shipment_number" , shipment_number)
+            log_doc.set("shipment_number", shipment_number)
+            log_doc.set("manifest_input_date", manifest_input_date)
         
         if frappe.db.exists("ICRIS Account", icris_number):
             log_doc.set("icris_number" , icris_number)
@@ -948,7 +1001,8 @@ def generate_invoice(self, method):
     
     if logs:
         if frappe.db.exists("Shipment Number", shipment_number):
-            log_doc.set("shipment_number" , shipment_number)
+            log_doc.set("shipment_number", shipment_number)
+            log_doc.set("manifest_input_date", manifest_input_date)
         if frappe.db.exists("ICRIS Account", icris_number):
             log_doc.set("icris_number" , icris_number)
         log_doc.set("logs", log_text)
