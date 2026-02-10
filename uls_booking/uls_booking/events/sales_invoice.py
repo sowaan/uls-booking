@@ -1121,9 +1121,12 @@ def find_selling_rate(
 
     if zone:
         filters["country"] = origin_country
-        sales_invoice.custom_zone = zone
+        sales_invoice.set("custom_zone", zone)
+        # sales_invoice.custom_zone = zone
     else:
         filters["zone"] = get_region_zone(origin_country)
+        
+        
 
     rates = frappe.get_list("Selling Rate", filters=filters)
 
@@ -1136,7 +1139,8 @@ def find_selling_rate(
         """
     )
     if rates:
-        sales_invoice.custom_zone = zone or filters.get("zone")
+        # sales_invoice.custom_zone = zone or filters.get("zone")
+        sales_invoice.set("custom_zone", zone or filters.get("zone")
         return frappe.get_doc("Selling Rate", rates[0].name)
 
     logs.append("Using Default Selling Rate")
