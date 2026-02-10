@@ -1093,7 +1093,7 @@ def query_full_tariff(*, country=None, zone=None, service_type, shipment_type, s
     else:
         return None
 
-    records = frappe.get_all("Full Tariff rESULT", filters=filters, limit=1)
+    records = frappe.get_all("Full Tariff", filters=filters, limit=1)
     frappe.log_error(
         title=f"FULL TARIFF ",
         message=f"""
