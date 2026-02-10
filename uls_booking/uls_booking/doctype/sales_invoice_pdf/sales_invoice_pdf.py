@@ -53,6 +53,8 @@ class SalesInvoicePDF(Document):
 
         # 🔥 NEW: in-memory map (invoice → child row)
         self._invoice_child_map = {}
+        customer_sales_invoices = {}
+        invoice_list = []
 
         conditions = ["docstatus = 1"]
         conditions.append("(custom_sales_invoice_pdf_ref IS NULL OR custom_sales_invoice_pdf_ref = '')")
@@ -82,10 +84,23 @@ class SalesInvoicePDF(Document):
             if self.invoice_type in invoice_type_map:
                 conditions.append(invoice_type_map[self.invoice_type])
 
+        if self.import__export:
+            conditions.append("custom_import__export_si = %(import_export)s")
+            values["import_export"] = self.import__export
+
         if self.customer:
             conditions.append("customer = %(customer)s")
             values["customer"] = self.customer
 
+        if self.station:
+            if self.import__export == "Import":
+                conditions.append("custom_consignee_city = %(station)s")
+                values["station"] = self.station
+            elif self.import__export == "Export":
+                conditions.append("custom_shipper_city = %(station)s")
+                values["station"] = self.station
+
+                
         where_clause = "WHERE " + " AND ".join(conditions)
 
         query = f"""
@@ -101,14 +116,18 @@ class SalesInvoicePDF(Document):
             GROUP BY si.name
         """
 
+        # frappe.msgprint(f"VALUES = {values}")
+        # frappe.msgprint(f"CONDITIONS = {conditions}")
+
+
         results = frappe.db.sql(query, values, as_dict=True)
 
         if not results:
+            self.total_invoices = 0
             frappe.msgprint("No matching Sales Invoices found.")
             return
 
-        customer_sales_invoices = {}
-        invoice_list = []
+        
 
         for row in results:
             invoice_list.append(row["name"])

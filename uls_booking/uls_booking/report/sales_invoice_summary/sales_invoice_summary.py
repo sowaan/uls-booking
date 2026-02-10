@@ -119,6 +119,7 @@ def get_data(filters):
         AND cws.name1 IS NOT NULL
         AND cws.name1 <> ''
         AND sip.end_date BETWEEN %(from_date)s AND %(to_date)s
+        AND (%(customer)s IS NULL OR cws.customer = %(customer)s)
 
     LEFT JOIN `tabCustomer` cust
         ON cust.name = cws.customer
