@@ -364,16 +364,16 @@ def generate_invoice(self, method):
             sales_invoice.custom_selling_percentage = final_discount_percentage
                         
 
-            frappe.log_error(
-                title="TARIFF RESULT",
-                message=f"""
-            Tariff: {tarif}
-            Base Rate: {base_rate}
-            Discount %: {discount_pct}
-            Customer: {sales_invoice.customer}
-            final discount percentage: {final_discount_percentage}
-            """
-            )
+            # frappe.log_error(
+            #     title="TARIFF RESULT",
+            #     message=f"""
+            # Tariff: {tarif}
+            # Base Rate: {base_rate}
+            # Discount %: {discount_pct}
+            # Customer: {sales_invoice.customer}
+            # final discount percentage: {final_discount_percentage}
+            # """
+            # )
 
             if not tarif:
                 frappe.log_error(
@@ -432,15 +432,15 @@ def generate_invoice(self, method):
             sales_invoice.custom_selling_percentage = final_discount_percentage
                         
 
-            frappe.log_error(
-                title="TARIFF RESULT",
-                message=f"""
-            Tariff: {tarif}
-            Base Rate: {base_rate}
-            Discount %: {discount_pct}
-            Customer: {sales_invoice.customer}
-            final discount percentage: {final_discount_percentage}
-            """)
+            # frappe.log_error(
+            #     title="TARIFF RESULT",
+            #     message=f"""
+            # Tariff: {tarif}
+            # Base Rate: {base_rate}
+            # Discount %: {discount_pct}
+            # Customer: {sales_invoice.customer}
+            # final discount percentage: {final_discount_percentage}
+            # """)
 
             if not tarif:
                 frappe.log_error(
@@ -453,6 +453,7 @@ def generate_invoice(self, method):
                     {chr(10).join(logs)}
                     """
                         )
+                
 
             # --------------------------------------------------
             # Freight Amounts
@@ -584,12 +585,12 @@ def generate_invoice(self, method):
         if FSCpercentage and final_rate:
                 FSCcharges = (total_charges_incl_fuel + final_rate) * (FSCpercentage / 100 )
         
-        frappe.log_error("FSC Percentage Value", f"""
-            fsc percentage: {FSCpercentage}
-            latest valid percentage: {latest_valid_percentage}
-            final rate: {final_rate}
-            fsc charges: {FSCcharges}
-                """)        
+        # frappe.log_error("FSC Percentage Value", f"""
+        #     fsc percentage: {FSCpercentage}
+        #     latest valid percentage: {latest_valid_percentage}
+        #     final rate: {final_rate}
+        #     fsc charges: {FSCcharges}
+        #         """)        
         
         shipmentbillingcheck = 0
         shipmentbillingamount = 0
@@ -724,14 +725,14 @@ def generate_invoice(self, method):
                 sales_invoice.append('items', {'item_code': setting.compensation_charges , 'qty': '1', 'rate': export_compensation_amount})
                 break    
 
-    frappe.log_error(
-    "SELLING % DECISION",
-    f"""
-    Edit Allowed: {sales_invoice.custom_edit_selling_percentage}
-    Final %: {final_discount_percentage}
-    Customer: {sales_invoice.customer}
-    """
-)
+#     frappe.log_error(
+#     "SELLING % DECISION",
+#     f"""
+#     Edit Allowed: {sales_invoice.custom_edit_selling_percentage}
+#     Final %: {final_discount_percentage}
+#     Customer: {sales_invoice.customer}
+#     """
+# )
 
     # print("after")
     # if sales_invoice.custom_edit_selling_percentage:
@@ -860,17 +861,17 @@ def calculate_export_or_import_tariff(
     # --------------------------------------------------
     # ENTRY LOG (SAFE)
     # --------------------------------------------------
-    frappe.log_error(
-        title=f"PRICING ENGINE START {sales_invoice.custom_shipment_number}",
-        message=f"""
-        sales invoice: {sales_invoice.name}
-Origin Country: {origin_country}
-Service Type: {service_type}
-Shipment Type: {shipment_type}
-Weight: {weight}
-Imp/Exp: {imp_exp}
-"""
-    )
+#     frappe.log_error(
+#         title=f"PRICING ENGINE START {sales_invoice.custom_shipment_number}",
+#         message=f"""
+#         sales invoice: {sales_invoice.name}
+# Origin Country: {origin_country}
+# Service Type: {service_type}
+# Shipment Type: {shipment_type}
+# Weight: {weight}
+# Imp/Exp: {imp_exp}
+# """
+#     )
 
     if weight <= 0:
         logs.append("Invalid shipment weight")
@@ -892,10 +893,10 @@ Imp/Exp: {imp_exp}
         definition.default_selling_group,
     )
 
-    frappe.log_error(
-        title=f"SELLING GROUP RESOLVED {sales_invoice.custom_shipment_number}",
-        message=f"Selling Group: {selling_group}"
-    )
+    # frappe.log_error(
+    #     title=f"SELLING GROUP RESOLVED {sales_invoice.custom_shipment_number}",
+    #     message=f"Selling Group: {selling_group}"
+    # )
 
     # --------------------------------------------------
     # 1️⃣ SELLING RATE
@@ -918,10 +919,10 @@ Imp/Exp: {imp_exp}
                 return_all=True,
             )
 
-            frappe.log_error(
-                title=f"PRICING HIT {sales_invoice.custom_shipment_number}",
-                message=f"Source: SELLING_RATE | Group: {selling_group}"
-            )
+            # frappe.log_error(
+            #     title=f"PRICING HIT {sales_invoice.custom_shipment_number}",
+            #     message=f"Source: SELLING_RATE | Group: {selling_group}"
+            # )
 
             return {
                 "tariff": tariff,
@@ -953,10 +954,10 @@ Imp/Exp: {imp_exp}
             return_all=True,
         )
 
-        frappe.log_error(
-            title=f"FULL TARIFF PRICING HIT {sales_invoice.custom_shipment_number}",
-            message="Source: FULL_TARIFF"
-        )
+        # frappe.log_error(
+        #     title=f"FULL TARIFF PRICING HIT {sales_invoice.custom_shipment_number}",
+        #     message="Source: FULL_TARIFF"
+        # )
 
         return {
             "tariff": tariff,
@@ -982,10 +983,10 @@ Imp/Exp: {imp_exp}
             return_all=True,
         )
 
-        frappe.log_error(
-            title=f"DEFAULT PRICING HIT {sales_invoice.custom_shipment_number}",
-            message=f"Source: DEFAULT_SELLING_RATE ({definition.default_selling_rate})"
-        )
+        # frappe.log_error(
+        #     title=f"DEFAULT PRICING HIT {sales_invoice.custom_shipment_number}",
+        #     message=f"Source: DEFAULT_SELLING_RATE ({definition.default_selling_rate})"
+        # )
 
         return {
             "tariff": tariff,
@@ -1000,15 +1001,15 @@ Imp/Exp: {imp_exp}
     # --------------------------------------------------
     logs.append("No pricing rule matched")
 
-    frappe.log_error(
-        title="PRICING FAILED",
-        message=f"""
-Origin: {origin_country}
-Service: {service_type}
-Shipment Type: {shipment_type}
-Weight: {weight}
-"""
-    )
+#     frappe.log_error(
+#         title="PRICING FAILED",
+#         message=f"""
+# Origin: {origin_country}
+# Service: {service_type}
+# Shipment Type: {shipment_type}
+# Weight: {weight}
+# """
+#     )
 
     return {
         "tariff": 0,
@@ -1094,14 +1095,14 @@ def query_full_tariff(*, country=None, zone=None, service_type, shipment_type, s
         return None
 
     records = frappe.get_all("Full Tariff", filters=filters, limit=1)
-    frappe.log_error(
-        title=f"FULL TARIFF ",
-        message=f"""
+    # frappe.log_error(
+    #     title=f"FULL TARIFF ",
+    #     message=f"""
 
-        Filters: {filters}
-        rates: {records}
-        """
-    )
+    #     Filters: {filters}
+    #     rates: {records}
+    #     """
+    # )
     return frappe.get_doc("Full Tariff", records[0].name) if records else None
 def find_selling_rate(
     origin_country,
@@ -1128,14 +1129,14 @@ def find_selling_rate(
 
         rates = frappe.get_list("Selling Rate", filters=filters)
 
-        frappe.log_error(
-            title=f"SELLING RATE QUERY (COUNTRY ) - {sales_invoice.custom_shipment_number}",
-            message=f"""
-            Zone: {zone}
-            Filters: {filters}
-            Rates: {rates}
-            """
-        )
+        # frappe.log_error(
+        #     title=f"SELLING RATE QUERY (COUNTRY ) - {sales_invoice.custom_shipment_number}",
+        #     message=f"""
+        #     Zone: {zone}
+        #     Filters: {filters}
+        #     Rates: {rates}
+        #     """
+        # )
 
         if rates:
             sales_invoice.set("custom_zone", zone)
@@ -1154,23 +1155,23 @@ def find_selling_rate(
 
         rates = frappe.get_list("Selling Rate", filters=filters)
 
-        frappe.log_error(
-            title=f"SELLING RATE QUERY (REGION ZONE) - {sales_invoice.custom_shipment_number}",
-            message=f"""
-            Region Zone: {region_zone}
-            Filters: {filters}
-            Rates: {rates}
-            """
-        )
+        # frappe.log_error(
+        #     title=f"SELLING RATE QUERY (REGION ZONE) - {sales_invoice.custom_shipment_number}",
+        #     message=f"""
+        #     Region Zone: {region_zone}
+        #     Filters: {filters}
+        #     Rates: {rates}
+        #     """
+        # )
 
-        frappe.log_error(
-            title=f"SELLING RATE QUERY (ZONE) - {sales_invoice.custom_shipment_number}",
-            message=f"""
-            Zone: {region_zone}
-            Filters: {filters}
-            Rates: {rates}
-            """
-        )
+        # frappe.log_error(
+        #     title=f"SELLING RATE QUERY (ZONE) - {sales_invoice.custom_shipment_number}",
+        #     message=f"""
+        #     Zone: {region_zone}
+        #     Filters: {filters}
+        #     Rates: {rates}
+        #     """
+        # )
         if rates:
             sales_invoice.set("custom_zone", region_zone)
             return frappe.get_doc("Selling Rate", rates[0].name)
@@ -1775,8 +1776,8 @@ def reset_tax_fields(self):
             if sales_invoice.custom_shipper_country:
                 origin_country = sales_invoice.custom_shipper_country.strip()
 
-            frappe.log_error("Temporary Error", 
-                             f"imp_exp:{imp_exp}\norigin country:{origin_country}\nservice: {sales_invoice.custom_service_type}\nicris: {icris_account}")    
+            # frappe.log_error("Temporary Error", 
+            #                  f"imp_exp:{imp_exp}\norigin country:{origin_country}\nservice: {sales_invoice.custom_service_type}\nicris: {icris_account}")    
 
             zone_with_out_country = None
             selling_rate_name = None
@@ -1796,8 +1797,8 @@ def reset_tax_fields(self):
                 sales_invoice.set("custom_selling_rate_group", selling_group)
             full_tariff_flag = 0
             
-            frappe.log_error("Temporary Error 2", 
-                             f"selling group: {selling_group}\nfull terrif:{full_tariff_flag}\nimp_exp:{imp_exp}\norigin country:{origin_country}\nservice: {sales_invoice.custom_service_type}\nicris: {icris_account}")    
+            # frappe.log_error("Temporary Error 2", 
+            #                  f"selling group: {selling_group}\nfull terrif:{full_tariff_flag}\nimp_exp:{imp_exp}\norigin country:{origin_country}\nservice: {sales_invoice.custom_service_type}\nicris: {icris_account}")    
 
             if selling_group == definition.default_selling_group:
                 # Look for Full Tariff
