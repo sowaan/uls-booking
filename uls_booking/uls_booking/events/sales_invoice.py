@@ -331,9 +331,8 @@ def generate_invoice(self, method):
 
         accountNo = get_frt_cust_account(cust)
         sales_invoice.set("custom_account_no", accountNo)
-        
+        origin_country = get_origin_country(sales_invoice=sales_invoice, is_export=is_export)
         if is_export:
-            origin_country = get_origin_country(sales_invoice=sales_invoice, is_export=is_export)
             # --------------------------------------------------
             # TARIFF ENGINE (SINGLE SOURCE OF TRUTH)
             # --------------------------------------------------
@@ -403,8 +402,6 @@ def generate_invoice(self, method):
             
 
         else:
-            if sales_invoice.custom_shipper_country:
-                origin_country = sales_invoice.custom_shipper_country.strip()
 
             # --------------------------------------------------
             # TARIFF ENGINE (SINGLE SOURCE OF TRUTH)
@@ -1024,9 +1021,9 @@ Weight: {weight}
 
 def get_origin_country(sales_invoice, is_export):
     country = (
-        sales_invoice.custom_consignee_country
+        sales_invoice.custom_shipper_country
         if is_export
-        else sales_invoice.custom_shipper_country
+        else sales_invoice.custom_consignee_country
     )
     return country.strip() if country else None
 
