@@ -1354,6 +1354,12 @@ def get_money_in_words(amount, currency=None):
 
 
 def reset_tax_fields(self):
+    codes_incl_fuel = []
+    amounts_incl_fuel = []
+    surcharge_codes_incl_fuel = []
+    codes_other_charges = []
+    amounts_other_charges = []
+    surcharge_codes_other_charges = []    
     exempt = frappe.db.get_value("Customer", self.customer, "custom_exempt_gst")
     if exempt:
         self.taxes = []
