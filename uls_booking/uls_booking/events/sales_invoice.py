@@ -864,8 +864,9 @@ def calculate_export_or_import_tariff(
     # ENTRY LOG (SAFE)
     # --------------------------------------------------
     frappe.log_error(
-        title="PRICING ENGINE START",
+        title=f"PRICING ENGINE START {sales_invoice.custom_shipment_number}",
         message=f"""
+        sales invoice: {sales_invoice.name}
 Origin Country: {origin_country}
 Service Type: {service_type}
 Shipment Type: {shipment_type}
@@ -895,7 +896,7 @@ Imp/Exp: {imp_exp}
     )
 
     frappe.log_error(
-        title="SELLING GROUP RESOLVED",
+        title=f"SELLING GROUP RESOLVED {sales_invoice.custom_shipment_number}",
         message=f"Selling Group: {selling_group}"
     )
 
@@ -921,7 +922,7 @@ Imp/Exp: {imp_exp}
             )
 
             frappe.log_error(
-                title="PRICING HIT",
+                title=f"PRICING HIT {sales_invoice.custom_shipment_number}",
                 message=f"Source: SELLING_RATE | Group: {selling_group}"
             )
 
@@ -956,7 +957,7 @@ Imp/Exp: {imp_exp}
         )
 
         frappe.log_error(
-            title="PRICING HIT",
+            title=f"FULL TARIFF PRICING HIT {sales_invoice.custom_shipment_number}",
             message="Source: FULL_TARIFF"
         )
 
@@ -985,7 +986,7 @@ Imp/Exp: {imp_exp}
         )
 
         frappe.log_error(
-            title="PRICING HIT",
+            title=f"DEFAULT PRICING HIT {sales_invoice.custom_shipment_number}",
             message=f"Source: DEFAULT_SELLING_RATE ({definition.default_selling_rate})"
         )
 
