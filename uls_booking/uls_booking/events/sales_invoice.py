@@ -1085,7 +1085,15 @@ def query_full_tariff(*, country=None, zone=None, service_type, shipment_type, s
     else:
         return None
 
-    records = frappe.get_all("Full Tariff", filters=filters, limit=1)
+    records = frappe.get_all("Full Tariff rESULT", filters=filters, limit=1)
+    frappe.log_error(
+        title=f"FULL TARIFF ",
+        message=f"""
+
+        Filters: {filters}
+        rates: {records}
+        """
+    )
     return frappe.get_doc("Full Tariff", records[0].name) if records else None
 
 def find_selling_rate(
@@ -1111,6 +1119,14 @@ def find_selling_rate(
 
     rates = frappe.get_list("Selling Rate", filters=filters)
 
+    frappe.log_error(
+        title=f"SELLING RATE QUERY - {sales_invoice.custom_shipment_number}",
+        message=f"""
+        Selling Group: {selling_group}
+        Filters: {filters}
+        rates: {rates}
+        """
+    )
     if rates:
         sales_invoice.custom_zone = zone or filters.get("zone")
         return frappe.get_doc("Selling Rate", rates[0].name)
