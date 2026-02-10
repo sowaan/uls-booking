@@ -1383,8 +1383,6 @@ def reset_tax_fields(self):
 
 
 
-#backup of generate_invoice
-def generate_invoice_backup(self, method):
     logs = []
     imp_exp = "Export"
     sales_invoice = self
