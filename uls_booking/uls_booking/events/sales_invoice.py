@@ -1103,7 +1103,6 @@ def query_full_tariff(*, country=None, zone=None, service_type, shipment_type, s
         """
     )
     return frappe.get_doc("Full Tariff", records[0].name) if records else None
-
 def find_selling_rate(
     origin_country,
     service_type,
@@ -1112,37 +1111,71 @@ def find_selling_rate(
     sales_invoice,
     logs,
 ):
-    zone = get_zone_by_country(origin_country)
-    filters = {
+    base_filters = {
         "service_type": service_type,
         "package_type": shipment_type,
         "rate_group": selling_group,
     }
 
+    zone = get_zone_by_country(origin_country)
+
+    # 1️⃣ Try country-specific zone first (if it exists)
     if zone:
-        filters["country"] = origin_country
-        sales_invoice.set("custom_zone", zone)
-        # sales_invoice.custom_zone = zone
-    else:
-        filters["zone"] = get_region_zone(origin_country)
-        
-        
+        filters = {
+            **base_filters,
+            "country": origin_country,
+        }
 
-    rates = frappe.get_list("Selling Rate", filters=filters)
+        rates = frappe.get_list("Selling Rate", filters=filters)
 
-    frappe.log_error(
-        title=f"SELLING RATE QUERY - {sales_invoice.custom_shipment_number}",
-        message=f"""
-        Selling Group: {selling_group}
-        Filters: {filters}
-        rates: {rates}
-        """
-    )
-    if rates:
-        # sales_invoice.custom_zone = zone or filters.get("zone")
-        sales_invoice.set("custom_zone", zone or filters.get("zone")
-        return frappe.get_doc("Selling Rate", rates[0].name)
+        frappe.log_error(
+            title=f"SELLING RATE QUERY (COUNTRY ) - {sales_invoice.custom_shipment_number}",
+            message=f"""
+            Zone: {zone}
+            Filters: {filters}
+            Rates: {rates}
+            """
+        )
 
+        if rates:
+            sales_invoice.set("custom_zone", zone)
+            return frappe.get_doc("Selling Rate", rates[0].name)
+
+    # 2️⃣ Fallback to region zone if:
+    #    - zone does not exist OR
+    #    - zone exists but no rates were found
+    region_zone = get_region_zone(origin_country)
+
+    if region_zone:
+        filters = {
+            **base_filters,
+            "zone": region_zone,
+        }
+
+        rates = frappe.get_list("Selling Rate", filters=filters)
+
+        frappe.log_error(
+            title=f"SELLING RATE QUERY (REGION ZONE) - {sales_invoice.custom_shipment_number}",
+            message=f"""
+            Region Zone: {region_zone}
+            Filters: {filters}
+            Rates: {rates}
+            """
+        )
+
+        frappe.log_error(
+            title=f"SELLING RATE QUERY (ZONE) - {sales_invoice.custom_shipment_number}",
+            message=f"""
+            Zone: {region_zone}
+            Filters: {filters}
+            Rates: {rates}
+            """
+        )
+        if rates:
+            sales_invoice.set("custom_zone", region_zone)
+            return frappe.get_doc("Selling Rate", rates[0].name)
+
+    # 3️⃣ Nothing matched
     logs.append("Using Default Selling Rate")
     return None
 
