@@ -1021,9 +1021,17 @@ Weight: {weight}
 
 def get_origin_country(sales_invoice, is_export):
     country = (
+        sales_invoice.custom_consignee_country
+        if is_export
+        else sales_invoice.custom_shipper_country
+    )
+    return country.strip() if country else None
+
+def get_destination_country(sales_invoice, is_export):
+    country = (
         sales_invoice.custom_shipper_country
         if is_export
-        else sales_invoice.custom_consignee_country
+        else sales_invoice.custom_shipper_country
     )
     return country.strip() if country else None
 
