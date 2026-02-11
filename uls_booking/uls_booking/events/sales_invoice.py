@@ -864,10 +864,10 @@ def calculate_export_or_import_tariff(
             return_all=True,
         )
 
-        # frappe.log_error(
-        #     title=f"FULL TARIFF PRICING HIT {sales_invoice.custom_shipment_number}",
-        #     message="Source: FULL_TARIFF"
-        # )
+        frappe.log_error(
+            title=f"FULL TARIFF PRICING HIT {sales_invoice.custom_shipment_number}",
+            message="Source: FULL_TARIFF"
+        )
 
         return {
             "tariff": tariff,
@@ -979,10 +979,12 @@ def find_full_tariff(
         service_type=service_type,
         shipment_type=shipment_type,
         shipped_date=shipped_date,
+        sales_invoice = sales_invoice
     )
 
     if tariff:
-        sales_invoice.custom_zone = origin_country
+        sales_invoice.set("custom_zone", zone)
+        # sales_invoice.custom_zone = origin_country
         return tariff
 
     # 2️⃣ Fallback to Zone (only if zone exists)
@@ -995,13 +997,14 @@ def find_full_tariff(
         )
 
         if tariff:
+            sales_invoice.set("custom_zone", zone)
             sales_invoice.custom_zone = zone
             return tariff
 
     logs.append("No Full Tariff Found (Country & Zone)")
     return None
 
-def query_full_tariff(*, country=None, zone=None, service_type, shipment_type, shipped_date):
+def query_full_tariff(*, country=None, zone=None, service_type, shipment_type, shipped_date, sales_invoice):
 
     filters = {
         "rate_type": "Selling",
@@ -1017,6 +1020,14 @@ def query_full_tariff(*, country=None, zone=None, service_type, shipment_type, s
     if zone:
         filters["zone"] = zone
 
+    frappe.log_error (f"FULL TARIFF - {sales_invoice.name}",f"""
+        rate_type: Selling,
+        service_type: {service_type},
+        package_type: {shipment_type},
+        valid_from: (<=, {shipped_date}),
+        expiry_date: (>=, {shipped_date}),                      
+    filters:{filters}
+""")
     records = frappe.get_all(
         "Full Tariff",
         filters=filters,
