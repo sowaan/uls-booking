@@ -987,6 +987,8 @@ def find_full_tariff(
         # sales_invoice.custom_zone = origin_country
         return tariff
 
+    zone = get_region_zone(origin_country)
+    
     # 2️⃣ Fallback to Zone (only if zone exists)
     if zone:
         tariff = query_full_tariff(
@@ -994,6 +996,7 @@ def find_full_tariff(
             service_type=service_type,
             shipment_type=shipment_type,
             shipped_date=shipped_date,
+            sales_invoice = sales_invoice
         )
 
         if tariff:
