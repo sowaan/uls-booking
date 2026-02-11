@@ -416,7 +416,6 @@ def generate_invoice(self, method):
         # -------------------------------
         # DISCOUNT CALCULATION
         # -------------------------------
-
         sales_invoice.custom_freight_charges = tarif
 
         # Freight based discount
@@ -425,12 +424,6 @@ def generate_invoice(self, method):
             (tarif or 0)
             - (freight_discount or 0)
         )
-        # sales_invoice.discount_amount = freight_discount
-
-        # sales_invoice.base_discount_amount = (
-        #     freight_discount 
-        #     * (sales_invoice.conversion_rate or 1)
-        # )
 
         sales_invoice.custom_amount_after_discount = after_discount_amount
 
@@ -442,6 +435,7 @@ def generate_invoice(self, method):
         amount_after_discoun: {after_discount_amount}
         final discount percentage: {final_discount_percentage}
         """)
+
         # r201 = frappe.get_list("R201000", filters={'shipment_number': shipment_number},)
         r201 = frappe.get_list(
             "R201000",
@@ -730,23 +724,37 @@ def generate_invoice(self, method):
 
 
     if freight_discount > 0:
-        frappe.log_error(
-            title="TARIFF RESULT AGAIN",
-            message=f"""
-        Tariff: {tarif}
-        discount amount: {freight_discount}
-        amount_after_discoun: {after_discount_amount}
-        final discount percentage: {final_discount_percentage}
-        """)
         sales_invoice.apply_discount_on = "Net Total"
-        sales_invoice.discount_amount = freight_discount   
+        sales_invoice.discount_amount = freight_discount
+
+        sales_invoice.base_discount_amount = (
+            freight_discount 
+            * (sales_invoice.conversion_rate or 1)
+        )   
+        frappe.log_error(
+            title="TARIFF RESULT before calculate taxes",
+            message=f"""
+        net_total: {sales_invoice.net_total}
+        gross_total: {sales_invoice.gross_total}
+        discount amount: {sales_invoice.discount_amount}
+        base_discount_amount: {sales_invoice.base_discount_amount}
+        additional_discount_percentage: {sales_invoice.additional_discount_percentage}
+        """)    
 
     # Calculate everything ONCE
     sales_invoice.calculate_taxes_and_totals()     
 
     sales_invoice.in_words = money_in_words(sales_invoice.rounded_total, sales_invoice.currency)
     sales_invoice.base_in_words = money_in_words(sales_invoice.base_rounded_total, DEFAULT_CURRENCY)
-    
+    frappe.log_error(
+        title="TARIFF RESULT after calculate taxes",
+        message=f"""
+    net_total: {sales_invoice.net_total}
+    gross_total: {sales_invoice.gross_total}
+    discount amount: {sales_invoice.discount_amount}
+    base_discount_amount: {sales_invoice.base_discount_amount}
+    additional_discount_percentage: {sales_invoice.additional_discount_percentage}
+    """)    
     
     if logs:
         log_status = "Created"
