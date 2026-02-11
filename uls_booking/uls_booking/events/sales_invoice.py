@@ -229,6 +229,7 @@ def generate_invoice(self, method):
 
     discounted_amount = 0
     freight_discount = 0
+    after_discount_amount = 0
 
     definition = frappe.get_doc("Sales Invoice Definition", sales_invoice.custom_sales_invoice_definition)
     setting = frappe.get_doc("Manifest Setting Definition")
@@ -411,16 +412,7 @@ def generate_invoice(self, method):
             final_discount_percentage = discount_pct
             sales_invoice.custom_selling_percentage = final_discount_percentage
         
-        frappe.log_error(
-            title="TARIFF RESULT",
-            message=f"""
-        Tariff: {tarif}
-        final Rate: {final_rate}
-        Discount %: {discount_pct}
-        Customer: {sales_invoice.customer}
-        final discount percentage: {final_discount_percentage}
-        """)
-        
+       
         # -------------------------------
         # DISCOUNT CALCULATION
         # -------------------------------
@@ -429,7 +421,10 @@ def generate_invoice(self, method):
 
         # Freight based discount
         freight_discount = (tarif or 0) * (final_discount_percentage or 0) / 100
-
+        after_discount_amount = (
+            (tarif or 0)
+            - (freight_discount or 0)
+        )
         # sales_invoice.discount_amount = freight_discount
 
         # sales_invoice.base_discount_amount = (
@@ -437,11 +432,16 @@ def generate_invoice(self, method):
         #     * (sales_invoice.conversion_rate or 1)
         # )
 
-        sales_invoice.custom_amount_after_discount = (
-            (tarif or 0)
-            - (freight_discount or 0)
-        )
+        sales_invoice.custom_amount_after_discount = after_discount_amount
 
+        frappe.log_error(
+            title="TARIFF RESULT",
+            message=f"""
+        Tariff: {tarif}
+        discount amount: {freight_discount}
+        amount_after_discoun: {after_discount_amount}
+        final discount percentage: {final_discount_percentage}
+        """)
         # r201 = frappe.get_list("R201000", filters={'shipment_number': shipment_number},)
         r201 = frappe.get_list(
             "R201000",
@@ -730,8 +730,16 @@ def generate_invoice(self, method):
 
 
     if freight_discount > 0:
+        frappe.log_error(
+            title="TARIFF RESULT AGAIN",
+            message=f"""
+        Tariff: {tarif}
+        discount amount: {freight_discount}
+        amount_after_discoun: {after_discount_amount}
+        final discount percentage: {final_discount_percentage}
+        """)
         sales_invoice.apply_discount_on = "Net Total"
-        sales_invoice.additional_discount_amount = freight_discount   
+        sales_invoice.discount_amount = freight_discount   
 
     # Calculate everything ONCE
     sales_invoice.calculate_taxes_and_totals()     
