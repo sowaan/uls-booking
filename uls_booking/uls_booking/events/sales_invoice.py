@@ -718,12 +718,12 @@ def generate_invoice(self, method):
     if freight_discount > 0:
         sales_invoice.apply_discount_on = "Net Total"
         sales_invoice.additional_discount_amount = freight_discount
-        # sales_invoice.discount_amount = freight_discount
+        sales_invoice.discount_amount = freight_discount
 
-        # sales_invoice.base_discount_amount = (
-        #     freight_discount 
-        #     * (sales_invoice.conversion_rate or 1)
-        # )   
+        sales_invoice.base_discount_amount = (
+            freight_discount 
+            * (sales_invoice.conversion_rate or 1)
+        )   
         frappe.log_error(
             title="TARIFF RESULT before calculate taxes",
             message=f"""
