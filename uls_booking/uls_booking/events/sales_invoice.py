@@ -427,14 +427,6 @@ def generate_invoice(self, method):
 
         sales_invoice.custom_amount_after_discount = after_discount_amount
 
-        frappe.log_error(
-            title="TARIFF RESULT",
-            message=f"""
-        Tariff: {tarif}
-        discount amount: {freight_discount}
-        amount_after_discoun: {after_discount_amount}
-        final discount percentage: {final_discount_percentage}
-        """)
 
         # r201 = frappe.get_list("R201000", filters={'shipment_number': shipment_number},)
         r201 = frappe.get_list(
@@ -725,18 +717,21 @@ def generate_invoice(self, method):
 
     if freight_discount > 0:
         sales_invoice.apply_discount_on = "Net Total"
-        sales_invoice.discount_amount = freight_discount
+        sales_invoice.additional_discount_amount = freight_discount
+        # sales_invoice.discount_amount = freight_discount
 
-        sales_invoice.base_discount_amount = (
-            freight_discount 
-            * (sales_invoice.conversion_rate or 1)
-        )   
+        # sales_invoice.base_discount_amount = (
+        #     freight_discount 
+        #     * (sales_invoice.conversion_rate or 1)
+        # )   
         frappe.log_error(
             title="TARIFF RESULT before calculate taxes",
             message=f"""
+        freight_discount: {freight_discount}
         net_total: {sales_invoice.net_total}
         discount amount: {sales_invoice.discount_amount}
         base_discount_amount: {sales_invoice.base_discount_amount}
+        additional_discount_amount: {sales_invoice.additional_discount_amount}
         additional_discount_percentage: {sales_invoice.additional_discount_percentage}
         """)    
 
@@ -748,11 +743,13 @@ def generate_invoice(self, method):
     frappe.log_error(
         title="TARIFF RESULT after calculate taxes",
         message=f"""
-    net_total: {sales_invoice.net_total}
-    discount amount: {sales_invoice.discount_amount}
-    base_discount_amount: {sales_invoice.base_discount_amount}
-    additional_discount_percentage: {sales_invoice.additional_discount_percentage}
-    """)    
+        freight_discount: {freight_discount}
+        net_total: {sales_invoice.net_total}
+        discount amount: {sales_invoice.discount_amount}
+        base_discount_amount: {sales_invoice.base_discount_amount}
+        additional_discount_amount: {sales_invoice.additional_discount_amount}
+        additional_discount_percentage: {sales_invoice.additional_discount_percentage}
+        """)    
     
     if logs:
         log_status = "Created"
