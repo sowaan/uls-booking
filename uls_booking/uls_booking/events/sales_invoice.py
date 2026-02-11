@@ -228,6 +228,7 @@ def generate_invoice(self, method):
 
 
     discounted_amount = 0
+    freight_discount = 0
 
     definition = frappe.get_doc("Sales Invoice Definition", sales_invoice.custom_sales_invoice_definition)
     setting = frappe.get_doc("Manifest Setting Definition")
@@ -257,7 +258,9 @@ def generate_invoice(self, method):
     tarif = 0
     final_discount_percentage = 0
     origin_country = None
-    
+
+    discount_pct = 0
+        
     company = definition.default_company
     # customer = frappe.get_doc("Company",company)
 
@@ -348,32 +351,10 @@ def generate_invoice(self, method):
             )
 
             tarif = pricing.get("tariff", 0)
-            base_rate = pricing.get("base_rate", 0)
+            # base_rate = pricing.get("base_rate", 0)
             final_rate = pricing.get("base_rate", 0)
-           
             discount_pct = pricing.get("discount_pct", 0)
             
-            # -------------------------------
-            # SELLING PERCENTAGE DECISION
-            # -------------------------------
-            if sales_invoice.custom_edit_selling_percentage:
-                final_discount_percentage = sales_invoice.custom_selling_percentage or 0
-            else:
-                final_discount_percentage = pricing.get("discount_pct", 0)
-
-            sales_invoice.custom_selling_percentage = final_discount_percentage
-                        
-
-            # frappe.log_error(
-            #     title="TARIFF RESULT",
-            #     message=f"""
-            # Tariff: {tarif}
-            # Base Rate: {base_rate}
-            # Discount %: {discount_pct}
-            # Customer: {sales_invoice.customer}
-            # final discount percentage: {final_discount_percentage}
-            # """
-            # )
 
             if not tarif:
                 frappe.log_error(
@@ -387,19 +368,6 @@ def generate_invoice(self, method):
                     """
                         )
 
-            # --------------------------------------------------
-            # Freight Amounts
-            # --------------------------------------------------
-            # discount_amount = tarif - base_rate
-            # sales_invoice.custom_freight_charges = tarif
-            # sales_invoice.discount_amount = round(discount_amount, 2) or 0
-            # sales_invoice.base_discount_amount = (
-            #     (sales_invoice.discount_amount or 1) * (sales_invoice.conversion_rate or 1)
-            # )
-            # sales_invoice.custom_amount_after_discount = tarif - sales_invoice.discount_amount
-            # sales_invoice.custom_selling_percentage = discount_pct
-
-            
 
         else:
 
@@ -421,26 +389,6 @@ def generate_invoice(self, method):
             base_rate = pricing.get("base_rate", 0)
             final_rate = pricing.get("base_rate", 0)
             discount_pct = pricing.get("discount_pct", 0)
-            # -------------------------------
-            # SELLING PERCENTAGE DECISION
-            # -------------------------------
-            if sales_invoice.custom_edit_selling_percentage:
-                final_discount_percentage = sales_invoice.custom_selling_percentage or 0
-            else:
-                final_discount_percentage = pricing.get("discount_pct", 0)
-
-            sales_invoice.custom_selling_percentage = final_discount_percentage
-                        
-
-            # frappe.log_error(
-            #     title="TARIFF RESULT",
-            #     message=f"""
-            # Tariff: {tarif}
-            # Base Rate: {base_rate}
-            # Discount %: {discount_pct}
-            # Customer: {sales_invoice.customer}
-            # final discount percentage: {final_discount_percentage}
-            # """)
 
             if not tarif:
                 frappe.log_error(
@@ -454,37 +402,44 @@ def generate_invoice(self, method):
                     """
                         )
                 
-
-            # --------------------------------------------------
-            # Freight Amounts
-            # --------------------------------------------------
-            # discount_amount = tarif - base_rate
-            # sales_invoice.custom_freight_charges = tarif
-            # sales_invoice.discount_amount = round(discount_amount, 2) or 0
-            # sales_invoice.base_discount_amount = (
-            #     (sales_invoice.discount_amount or 1) * (sales_invoice.conversion_rate or 1)
-            # )
-            # sales_invoice.custom_amount_after_discount = tarif - sales_invoice.discount_amount
-            # sales_invoice.custom_selling_percentage = discount_pct
-
+        # -------------------------------
+        # SELLING PERCENTAGE DECISION
+        # -------------------------------
+        if sales_invoice.custom_edit_selling_percentage:
+            final_discount_percentage = sales_invoice.custom_selling_percentage or 0
+        else:
+            final_discount_percentage = discount_pct
+            sales_invoice.custom_selling_percentage = final_discount_percentage
+        
+        frappe.log_error(
+            title="TARIFF RESULT",
+            message=f"""
+        Tariff: {tarif}
+        final Rate: {final_rate}
+        Discount %: {discount_pct}
+        Customer: {sales_invoice.customer}
+        final discount percentage: {final_discount_percentage}
+        """)
+        
         # -------------------------------
         # DISCOUNT CALCULATION
         # -------------------------------
-        sales_invoice.custom_freight_charges = tarif
-        sales_invoice.discount_amount = (
-            (sales_invoice.custom_freight_charges or 0)
-            * (final_discount_percentage or 0)
-            / 100
-        )
 
-        sales_invoice.base_discount_amount = (
-            (sales_invoice.discount_amount or 0)
-            * (sales_invoice.conversion_rate or 1)
-        )
+        sales_invoice.custom_freight_charges = tarif
+
+        # Freight based discount
+        freight_discount = (tarif or 0) * (final_discount_percentage or 0) / 100
+
+        # sales_invoice.discount_amount = freight_discount
+
+        # sales_invoice.base_discount_amount = (
+        #     freight_discount 
+        #     * (sales_invoice.conversion_rate or 1)
+        # )
 
         sales_invoice.custom_amount_after_discount = (
-            (sales_invoice.custom_freight_charges or 0)
-            - (sales_invoice.discount_amount or 0)
+            (tarif or 0)
+            - (freight_discount or 0)
         )
 
         # r201 = frappe.get_list("R201000", filters={'shipment_number': shipment_number},)
@@ -583,14 +538,7 @@ def generate_invoice(self, method):
                 FSCpercentage = latest_valid_percentage
         
         if FSCpercentage and final_rate:
-                FSCcharges = (total_charges_incl_fuel + final_rate) * (FSCpercentage / 100 )
-        
-        # frappe.log_error("FSC Percentage Value", f"""
-        #     fsc percentage: {FSCpercentage}
-        #     latest valid percentage: {latest_valid_percentage}
-        #     final rate: {final_rate}
-        #     fsc charges: {FSCcharges}
-        #         """)        
+                FSCcharges = (total_charges_incl_fuel + final_rate) * (FSCpercentage / 100 )     
         
         shipmentbillingcheck = 0
         shipmentbillingamount = 0
@@ -640,14 +588,6 @@ def generate_invoice(self, method):
             if (max_insured or 0) > 0 and sales_invoice.custom_shipment_type == setting.insurance_shipment_type:
                 rows = {'item_code': setting.insurance_charges, 'qty': '1', 'rate': max_insured}
                 sales_invoice.append('items', rows)
-        # sales_invoice.custom_freight_charges = tarif
-        # amt = tarif - final_rate
-        # sales_invoice.discount_amount = round(amt, 2) or 0
-        # sales_invoice.base_discount_amount = (sales_invoice.discount_amount or 1)  * (sales_invoice.conversion_rate or 1)
-        
-
-        # sales_invoice.custom_amount_after_discount = tarif - (sales_invoice.discount_amount or 0)
-        
         
         if total_charges_other_charges:
             sales_invoice.append('items', {'item_code': setting.other_charges, 'qty': 1 , 'rate' :total_charges_other_charges})
@@ -685,29 +625,12 @@ def generate_invoice(self, method):
                 )
             sales_invoice.custom_freight_charges = freight_in_items
 
-
-
-
-
-
     elif sales_invoice.custom_compensation_invoices:
         export_compensation_amount = 0
         # exempt_customer = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_gst')
         # if not exempt_customer:
         #     sales_invoice.taxes_and_charges = None
         #     sales_invoice.taxes = []
-
-        # frappe.log_error(
-        #     title="Sales Invoice Item Debug",
-        #     message={
-        #         "items_count": len(sales_invoice.items or []),
-        #         "billing_term": sales_invoice.custom_billing_term,
-        #         "shipment_type": sales_invoice.custom_shipment_type,
-        #         "imp_exp": imp_exp,
-        #         "definition": definition.name if definition else None,
-        #         "compensation_rows": len(definition.compensation_table or []),
-        #     },
-        # )
 
         for comp in definition.compensation_table:
             if (
@@ -725,26 +648,6 @@ def generate_invoice(self, method):
                 sales_invoice.append('items', {'item_code': setting.compensation_charges , 'qty': '1', 'rate': export_compensation_amount})
                 break    
 
-#     frappe.log_error(
-#     "SELLING % DECISION",
-#     f"""
-#     Edit Allowed: {sales_invoice.custom_edit_selling_percentage}
-#     Final %: {final_discount_percentage}
-#     Customer: {sales_invoice.customer}
-#     """
-# )
-
-    # print("after")
-    # if sales_invoice.custom_edit_selling_percentage:
-    #     final_discount_percentage = sales_invoice.custom_selling_percentage or 0
-    #     sales_invoice.discount_amount = (sales_invoice.custom_freight_charges * (final_discount_percentage or 1) / 100)
-    #     sales_invoice.custom_amount_after_discount = sales_invoice.custom_freight_charges - sales_invoice.discount_amount
-    # else:
-    #     sales_invoice.custom_inserted = 1
-    
-    # sales_invoice.custom_selling_percentage = final_discount_percentage 
-        
-    # log_name = frappe.db.get_value("Sales Invoice Logs", {"shipment_number": shipment_number}, "name")
     log_status = None
     log_message = ""
 
@@ -787,7 +690,7 @@ def generate_invoice(self, method):
                 )
                 row.rate = (base_amount * per) / 100
 
-    
+  
     discounted_amount = discounted_amount - 1
     get_sales_tax(sales_invoice, logs)
     log_message = "\n".join(logs)
@@ -821,12 +724,18 @@ def generate_invoice(self, method):
         sales_invoice.in_words = money_in_words(sales_invoice.rounded_total, self.currency)
         sales_invoice.base_in_words = money_in_words(sales_invoice.base_total, DEFAULT_CURRENCY)
     ############################################################################################
-    sales_invoice.calculate_taxes_and_totals()
-    if (sales_invoice.discount_amount or 0) > 0:
-        disc_per = (sales_invoice.discount_amount / sales_invoice.total) * 100 if (sales_invoice.total or 0) > 0 else 0
-        sales_invoice.additional_discount_percentage = 0
-        sales_invoice.set("additional_discount_percentage", disc_per)
-        sales_invoice.calculate_taxes_and_totals()
+
+    sales_invoice.additional_discount_amount = 0
+    sales_invoice.apply_discount_on = None
+
+
+    if freight_discount > 0:
+        sales_invoice.apply_discount_on = "Net Total"
+        sales_invoice.additional_discount_amount = freight_discount   
+
+    # Calculate everything ONCE
+    sales_invoice.calculate_taxes_and_totals()     
+
     sales_invoice.in_words = money_in_words(sales_invoice.rounded_total, sales_invoice.currency)
     sales_invoice.base_in_words = money_in_words(sales_invoice.base_rounded_total, DEFAULT_CURRENCY)
     
@@ -861,17 +770,6 @@ def calculate_export_or_import_tariff(
     # --------------------------------------------------
     # ENTRY LOG (SAFE)
     # --------------------------------------------------
-#     frappe.log_error(
-#         title=f"PRICING ENGINE START {sales_invoice.custom_shipment_number}",
-#         message=f"""
-#         sales invoice: {sales_invoice.name}
-# Origin Country: {origin_country}
-# Service Type: {service_type}
-# Shipment Type: {shipment_type}
-# Weight: {weight}
-# Imp/Exp: {imp_exp}
-# """
-#     )
 
     if weight <= 0:
         logs.append("Invalid shipment weight")
