@@ -735,7 +735,6 @@ def generate_invoice(self, method):
             title="TARIFF RESULT before calculate taxes",
             message=f"""
         net_total: {sales_invoice.net_total}
-        gross_total: {sales_invoice.gross_total}
         discount amount: {sales_invoice.discount_amount}
         base_discount_amount: {sales_invoice.base_discount_amount}
         additional_discount_percentage: {sales_invoice.additional_discount_percentage}
@@ -750,7 +749,6 @@ def generate_invoice(self, method):
         title="TARIFF RESULT after calculate taxes",
         message=f"""
     net_total: {sales_invoice.net_total}
-    gross_total: {sales_invoice.gross_total}
     discount amount: {sales_invoice.discount_amount}
     base_discount_amount: {sales_invoice.base_discount_amount}
     additional_discount_percentage: {sales_invoice.additional_discount_percentage}
