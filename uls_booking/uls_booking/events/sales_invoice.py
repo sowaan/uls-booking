@@ -973,22 +973,36 @@ def find_full_tariff(
 ):
     zone = get_zone_by_country(origin_country)
 
+    # 1️⃣ Try Country First
     tariff = query_full_tariff(
-        country=origin_country if zone else None,
-        zone=zone,
+        country=origin_country,
         service_type=service_type,
         shipment_type=shipment_type,
         shipped_date=shipped_date,
     )
 
     if tariff:
-        sales_invoice.custom_zone = zone or origin_country
+        sales_invoice.custom_zone = origin_country
         return tariff
 
-    logs.append("No Full Tariff Found")
+    # 2️⃣ Fallback to Zone (only if zone exists)
+    if zone:
+        tariff = query_full_tariff(
+            zone=zone,
+            service_type=service_type,
+            shipment_type=shipment_type,
+            shipped_date=shipped_date,
+        )
+
+        if tariff:
+            sales_invoice.custom_zone = zone
+            return tariff
+
+    logs.append("No Full Tariff Found (Country & Zone)")
     return None
 
 def query_full_tariff(*, country=None, zone=None, service_type, shipment_type, shipped_date):
+
     filters = {
         "rate_type": "Selling",
         "service_type": service_type,
@@ -999,21 +1013,18 @@ def query_full_tariff(*, country=None, zone=None, service_type, shipment_type, s
 
     if country:
         filters["country"] = country
-    elif zone:
+
+    if zone:
         filters["zone"] = zone
-    else:
-        return None
 
-    records = frappe.get_all("Full Tariff", filters=filters, limit=1)
-    # frappe.log_error(
-    #     title=f"FULL TARIFF ",
-    #     message=f"""
+    records = frappe.get_all(
+        "Full Tariff",
+        filters=filters,
+        limit=1
+    )
 
-    #     Filters: {filters}
-    #     rates: {records}
-    #     """
-    # )
     return frappe.get_doc("Full Tariff", records[0].name) if records else None
+
 def find_selling_rate(
     origin_country,
     service_type,
