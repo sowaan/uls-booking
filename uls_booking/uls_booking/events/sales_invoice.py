@@ -428,7 +428,7 @@ def generate_invoice(self, method):
         sales_invoice.custom_amount_after_discount = after_discount_amount
 
         sales_invoice.additional_discount_amount = 0
-        sales_invoice.apply_discount_on = None
+        sales_invoice.apply_discount_on = "Net Total"
 
 
         if freight_discount > 0:
@@ -864,10 +864,10 @@ def calculate_export_or_import_tariff(
             return_all=True,
         )
 
-        frappe.log_error(
-            title=f"FULL TARIFF PRICING HIT {sales_invoice.custom_shipment_number}",
-            message="Source: FULL_TARIFF"
-        )
+        # frappe.log_error(
+        #     title=f"FULL TARIFF PRICING HIT {sales_invoice.custom_shipment_number}",
+        #     message="Source: FULL_TARIFF"
+        # )
 
         return {
             "tariff": tariff,
@@ -1023,14 +1023,14 @@ def query_full_tariff(*, country=None, zone=None, service_type, shipment_type, s
     if zone:
         filters["zone"] = zone
 
-    frappe.log_error (f"FULL TARIFF - {sales_invoice.name}",f"""
-        rate_type: Selling,
-        service_type: {service_type},
-        package_type: {shipment_type},
-        valid_from: (<=, {shipped_date}),
-        expiry_date: (>=, {shipped_date}),                      
-    filters:{filters}
-""")
+#     frappe.log_error (f"FULL TARIFF - {sales_invoice.name}",f"""
+#         rate_type: Selling,
+#         service_type: {service_type},
+#         package_type: {shipment_type},
+#         valid_from: (<=, {shipped_date}),
+#         expiry_date: (>=, {shipped_date}),                      
+#     filters:{filters}
+# """)
     records = frappe.get_all(
         "Full Tariff",
         filters=filters,
