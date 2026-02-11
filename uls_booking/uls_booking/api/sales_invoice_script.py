@@ -423,7 +423,7 @@ def generate_single_invoice(parent_id=None, login_username=None,
     if is_export and not si.custom_shipper_number:
         si.custom_shipper_number = unassign
 
-    # icris_number = si.custom_shipper_number if is_export else si.custom_consignee_number
+    icris_number = si.custom_shipper_number if is_export else si.custom_consignee_number
 
     # Step 8: Fetch weights
     # get_shipment_weights(shipment_number, manifest_input_date)
@@ -441,17 +441,17 @@ def generate_single_invoice(parent_id=None, login_username=None,
         WHERE name=%s
     """, definition["default_company"])[0][0]
 
-    customer = frappe.db.get_value(
-            "Shipment Number",
-            {
-                "shipment_number": shipment_number,
-                "manifest_input_date": manifest_input_date
-            },
-            "customer",
-            order_by="modified desc"
-        ) or default_customer
+    # customer = frappe.db.get_value(
+    #         "Shipment Number",
+    #         {
+    #             "shipment_number": shipment_number,
+    #             "manifest_input_date": manifest_input_date
+    #         },
+    #         "customer",
+    #         order_by="modified desc"
+    #     ) or default_customer
 
-
+    customer = get_customer(icris_number, default_customer)
     si.customer = customer
     si.currency = frappe.db.sql("""SELECT default_currency FROM `tabCustomer` WHERE name=%s""", customer)[0][0]
 
