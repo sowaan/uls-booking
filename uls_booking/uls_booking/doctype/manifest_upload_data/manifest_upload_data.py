@@ -1629,8 +1629,12 @@ def insert_data_new(arrays, docnew, shipf, shipt, frm, to, date_format,
             if doctype_name == "R200000":
                 for row in definition.definitions:
                     if row.field_name == "manifest_input_date":
-                        running_manifest_input_date = line[row.from_index - 1:row.to_index].strip()
-
+                        temp_date = line[row.from_index - 1:row.to_index].strip()
+                        try:
+                            running_manifest_input_date = datetime.strptime(temp_date, "%d%b%Y").date()
+                        except:
+                            frappe.log_error("Invalid manifest_input_date", temp_date)
+                            running_manifest_input_date = None
                 if running_manifest_input_date:
                     shipment_context[shipment_num] = running_manifest_input_date
 
@@ -1641,25 +1645,28 @@ def insert_data_new(arrays, docnew, shipf, shipt, frm, to, date_format,
             # ---------------------------------------------------------
 
             docs = []
-
+            
             if prefix in parent_doctype_map:
                 for record in setting.doctypes_with_child_records:
                     if doctype_name == record.record:
-                        filter_str = record.filter
+                        
+                        filters = {}
 
-                        if "pkg_trck" in filter_str and pkg_trck:
-                            filter_str = re.sub(r'\b(pkg_trck)\b', f'"{pkg_trck}"', filter_str)
+                        meta = frappe.get_meta(doctype_name)
 
-                        if "shipment_num" in filter_str:
-                            filter_str = re.sub(r'\b(shipment_num)\b', f'"{shipment_num}"', filter_str)
+                        if shipment_num and meta.has_field("shipment_number"):
+                            filters["shipment_number"] = shipment_num
 
-                        if manifest_date:
-                            filter_str += f' and manifest_input_date="{manifest_date}"'
+                        if pkg_trck and meta.has_field("expanded_package_tracking_number"):
+                            filters["expanded_package_tracking_number"] = pkg_trck
 
-                        if "old_doctype_name" in filter_str:
-                            filter_str = re.sub(r'\b(old_doctype_name)\b', f'"{old_doctype_name}"', filter_str)
+                        if manifest_date and meta.has_field("manifest_input_date"):
+                            filters["manifest_input_date"] = manifest_date
 
-                        docs = frappe.get_list(doctype_name, filters=filter_str)
+                        if old_doctype_name and meta.has_field("record_type"):
+                            filters["record_type"] = old_doctype_name
+
+                        docs = frappe.get_list(doctype_name, filters=filters)
 
             else:
                 filters = {"shipment_number": shipment_num}
@@ -1718,13 +1725,26 @@ def insert_data_new(arrays, docnew, shipf, shipt, frm, to, date_format,
                     field_data = replacement_map[key]
 
                 # Date conversion
+                # Date conversion (safe & strict)
                 for field in setting.date_conversion_field_names:
                     if field_name == field.field_name and doctype_name == field.doctype_name:
-                        try:
-                            date_object = datetime.strptime(field_data, field.date_format)
-                            field_data = date_object.strftime("%Y-%m-%d")
-                        except:
-                            pass
+
+                        if field_data:
+                            try:
+                                date_object = datetime.strptime(field_data, field.date_format)
+                            except Exception:
+                                try:
+                                    # Fallback for manifest format like 10FEB2026
+                                    date_object = datetime.strptime(field_data, "%d%b%Y")
+                                except Exception:
+                                    frappe.log_error(
+                                        f"Invalid Date Format in {doctype_name}",
+                                        f"Field: {field_name}\nValue: {field_data}"
+                                    )
+                                    date_object = None
+
+                            field_data = date_object.strftime("%Y-%m-%d") if date_object else None
+
 
                 # Division fields
                 for field in setting.fields_to_divide:
