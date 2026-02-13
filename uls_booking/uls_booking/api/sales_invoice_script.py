@@ -287,6 +287,10 @@ def get_customer(icris_number, default_customer):
         return _customer_cache[icris_number]
 
     exists = frappe.db.sql("""SELECT 1 FROM `tabCustomer` WHERE name=%s""", icris_number)
+    
+    # TODO: REPLACE SELECT QUERY WITH FOLLOWING
+    # exists = frappe.db.exists("Customer", icris_number)
+
     customer = icris_number if exists else default_customer
     _customer_cache[icris_number] = customer
     return customer
@@ -390,6 +394,14 @@ def generate_single_invoice(parent_id=None, login_username=None,
         WHERE name=%s
     """, sales_invoice_definition, as_dict=True)[0]
 
+    # TODO: REPLACE SELECT QUERY WITH FOLLOWING
+    # definition = frappe.get_value(
+    #         "Sales Invoice Definition",
+    #         sales_invoice_definition,
+    #         ["default_company", "origin_country", "unassigned_icris_number"],
+    #         as_dict=True
+    #     )
+
     # Step 4: Fetch child definitions
     ref_doc_map = get_definition_children(sales_invoice_definition)
 
@@ -440,6 +452,13 @@ def generate_single_invoice(parent_id=None, login_username=None,
         FROM `tabCompany`
         WHERE name=%s
     """, definition["default_company"])[0][0]
+
+    # TODO: REPLACE SELECT QUERY WITH FOLLOWING
+    # default_customer = frappe.get_value(
+    #     "Company",
+    #     definition["default_company"],
+    #     "custom_default_customer"
+    # )
 
     # customer = frappe.db.get_value(
     #         "Shipment Number",

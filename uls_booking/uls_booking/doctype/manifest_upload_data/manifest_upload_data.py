@@ -58,7 +58,7 @@ class ManifestUploadData(Document):
             # is_last = i == total_chunks - 1
                 
             enqueue(
-                    insert_data,
+                    insert_data_new,
                     manifest_upload_data_name=self.name,
                     gateway=self.gateway,
                     is_import=is_import,
@@ -1292,6 +1292,9 @@ def insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, manifest_upl
     shipment_num = None
     pkg_trck = None
     
+    shipment_context = {}
+    running_manifest_input_date = None  
+
     setting = frappe.get_doc("Manifest Setting Definition")
     country_map = {j.code: j.country for j in setting.country_codes}
     replacement_map = {
@@ -1322,12 +1325,23 @@ def insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, manifest_upl
                         shipst = row.from_index - 1
                         shipto = row.to_index
                         shipment_num = line[shipst:shipto].strip()
-                    
+
+
                     if row.field_name == "expanded_package_tracking_number":
                         pkg_trckt = row.from_index - 1
                         pkg_trckto = row.to_index
                         pkg_trck = line[pkg_trckt:pkg_trckto].strip()
 
+                # Extract manifest_input_date only for R200000
+                if doctype_name == "R200000":
+                    for row in definition.definitions:
+                        if row.field_name == "manifest_input_date":
+                            from_index = row.from_index - 1
+                            to_index = row.to_index
+                            running_manifest_input_date = line[from_index:to_index].strip()
+
+                    if running_manifest_input_date and shipment_num:
+                        shipment_context[shipment_num] = running_manifest_input_date
                 print(f"Looking for docs with: Shipment Num: {shipment_num}, Package Tracking: {pkg_trck}")
 
             except frappe.DoesNotExistError:
@@ -1347,7 +1361,10 @@ def insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, manifest_upl
                         if "shipment_num" in filter_str and shipment_num:
                             filter_str = re.sub(r'\b(shipment_num)\b', f'"{shipment_num}"', filter_str)
                             
-                    
+                        if shipment_num in shipment_context:
+                            manifest_date = shipment_context[shipment_num]
+                            filter_str = filter_str + f' and manifest_input_date="{manifest_date}"'
+
                         if "old_doctype_name" in filter_str and old_doctype_name:
                             filter_str = re.sub(r'\b(old_doctype_name)\b', f'"{old_doctype_name}"', filter_str)
                         print(filter_str)
@@ -1357,7 +1374,15 @@ def insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, manifest_upl
 
             
             else:
-                docs = frappe.get_list(doctype_name, filters={'shipment_number': shipment_num})
+                filters = {'shipment_number': shipment_num}
+
+                if shipment_num in shipment_context:
+                    filters['manifest_input_date'] = shipment_context[shipment_num]
+
+                docs = frappe.get_list(
+                    doctype_name,
+                    filters=filters
+                )
 
             
             # frappe.msgprint(str(doctype_name))
@@ -1367,6 +1392,12 @@ def insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, manifest_upl
                 
                 print("Doc found:", docs[0])
                 docss = frappe.get_doc(doctype_name, docs[0])
+                if shipment_num in shipment_context:
+                    if docss.manifest_input_date != shipment_context[shipment_num]:
+                        # Different manifest → treat as new record
+                        docss = frappe.new_doc(doctype_name)
+                        docss.shipment_number = shipment_num
+                        docss.manifest_input_date = shipment_context[shipment_num]
                 # docss.set("check", 0)
                 docss.set("file_name",file_proper_name)
                 docss.set("manifest_upload_data",manifest_upload_data_name)
@@ -1440,6 +1471,11 @@ def insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, manifest_upl
                 doc.set("file_name",file_proper_name)
                 doc.set("manifest_upload_data",manifest_upload_data_name)
                 doc.set("gateway",gateway)
+
+                doc.shipment_number = shipment_num
+
+                if shipment_num in shipment_context:
+                    doc.manifest_input_date = shipment_context[shipment_num]
 
                 for child_record in definition.definitions:
                     field_name = child_record.field_name
@@ -1517,10 +1553,242 @@ def insert_data(arrays, docnew, shipf, shipt, frm, to, date_format, manifest_upl
         frappe.log_error("Error in committing in ISPS", f"Error in ManifestUploadData: {str(e)}") 
 
     try:
-        storing_shipment_number(arrays=arrays, frm=shipf, to=shipt, doc=docnew, running_manifest_input_date=import_date)
+        storing_shipment_number(
+            arrays=arrays,
+            frm=shipf,
+            to=shipt,
+            doc=docnew,
+            running_manifest_input_date=running_manifest_input_date
+        )
+
     except Exception as e:
         frappe.log_error("Error in storing shipment number ISPS" + str(shipf) + '-' + str(shipt), f"Error in storing shipment number: {str(e)}") 
     
+def insert_data_new(arrays, docnew, shipf, shipt, frm, to, date_format,
+                manifest_upload_data_name, gateway, file_proper_name,
+                shipped_date, import_date, is_import):
+
+    shipment_context = {}
+    running_manifest_input_date = None
+
+    setting = frappe.get_doc("Manifest Setting Definition")
+
+    country_map = {j.code: j.country for j in setting.country_codes}
+
+    replacement_map = {
+        (record.field_name, record.code): record.replacement
+        for record in setting.field_names_and_records
+    }
+
+    field_names_array = [
+        record.field_names
+        for record in setting.country_and_surcharge_codes_field_names
+    ]
+
+    parent_doctype_map = {
+        record.record[:2]: record.record
+        for record in setting.doctypes_with_child_records
+    }
+
+    try:
+        for line in arrays:
+
+            shipment_num = None
+            pkg_trck = None
+
+            doctype_name = "R" + line[frm:to].strip()
+            old_doctype_name = line[frm:to].strip()
+
+            prefix = doctype_name[:2]
+
+            if prefix in parent_doctype_map:
+                doctype_name = parent_doctype_map[prefix]
+
+            try:
+                definition = frappe.get_doc("Definition Manifest", doctype_name)
+            except frappe.DoesNotExistError:
+                continue
+
+            # ---------------------------------------------------------
+            # Extract shipment_number & tracking
+            # ---------------------------------------------------------
+            for row in definition.definitions:
+
+                if row.field_name == "shipment_number":
+                    shipment_num = line[row.from_index - 1:row.to_index].strip()
+
+                if row.field_name == "expanded_package_tracking_number":
+                    pkg_trck = line[row.from_index - 1:row.to_index].strip()
+
+            if not shipment_num:
+                continue
+
+            # ---------------------------------------------------------
+            # Extract manifest_input_date (ONLY R200000)
+            # ---------------------------------------------------------
+            if doctype_name == "R200000":
+                for row in definition.definitions:
+                    if row.field_name == "manifest_input_date":
+                        running_manifest_input_date = line[row.from_index - 1:row.to_index].strip()
+
+                if running_manifest_input_date:
+                    shipment_context[shipment_num] = running_manifest_input_date
+
+            manifest_date = shipment_context.get(shipment_num)
+
+            # ---------------------------------------------------------
+            # DUPLICATE-SAFE LOOKUP
+            # ---------------------------------------------------------
+
+            docs = []
+
+            if prefix in parent_doctype_map:
+                for record in setting.doctypes_with_child_records:
+                    if doctype_name == record.record:
+                        filter_str = record.filter
+
+                        if "pkg_trck" in filter_str and pkg_trck:
+                            filter_str = re.sub(r'\b(pkg_trck)\b', f'"{pkg_trck}"', filter_str)
+
+                        if "shipment_num" in filter_str:
+                            filter_str = re.sub(r'\b(shipment_num)\b', f'"{shipment_num}"', filter_str)
+
+                        if manifest_date:
+                            filter_str += f' and manifest_input_date="{manifest_date}"'
+
+                        if "old_doctype_name" in filter_str:
+                            filter_str = re.sub(r'\b(old_doctype_name)\b', f'"{old_doctype_name}"', filter_str)
+
+                        docs = frappe.get_list(doctype_name, filters=filter_str)
+
+            else:
+                filters = {"shipment_number": shipment_num}
+
+                if manifest_date:
+                    filters["manifest_input_date"] = manifest_date
+
+                docs = frappe.get_list(doctype_name, filters=filters)
+
+            # ---------------------------------------------------------
+            # GET OR CREATE DOCUMENT (Version Safe)
+            # ---------------------------------------------------------
+
+            if docs:
+                doc = frappe.get_doc(doctype_name, docs[0].name)
+
+                # Safety: if manifest mismatches → create new
+                if manifest_date and doc.manifest_input_date != manifest_date:
+                    doc = frappe.new_doc(doctype_name)
+                    doc.shipment_number = shipment_num
+                    doc.manifest_input_date = manifest_date
+
+            else:
+                doc = frappe.new_doc(doctype_name)
+                doc.shipment_number = shipment_num
+                if manifest_date:
+                    doc.manifest_input_date = manifest_date
+
+            # ---------------------------------------------------------
+            # Set File Metadata
+            # ---------------------------------------------------------
+
+            doc.file_name = file_proper_name
+            doc.manifest_upload_data = manifest_upload_data_name
+            doc.gateway = gateway
+
+            # ---------------------------------------------------------
+            # Parse & Apply Fields
+            # ---------------------------------------------------------
+
+            for child_record in definition.definitions:
+
+                field_name = child_record.field_name
+                field_data = line[
+                    child_record.from_index - 1:
+                    child_record.to_index
+                ].strip()
+
+                # Country mapping
+                if field_name in field_names_array and field_data in country_map:
+                    field_data = country_map[field_data]
+
+                # Replacement mapping
+                key = (field_name, field_data)
+                if key in replacement_map:
+                    field_data = replacement_map[key]
+
+                # Date conversion
+                for field in setting.date_conversion_field_names:
+                    if field_name == field.field_name and doctype_name == field.doctype_name:
+                        try:
+                            date_object = datetime.strptime(field_data, field.date_format)
+                            field_data = date_object.strftime("%Y-%m-%d")
+                        except:
+                            pass
+
+                # Division fields
+                for field in setting.fields_to_divide:
+                    if doctype_name == field.doctype_name and field_name == field.field_name:
+                        try:
+                            field_data = float(field_data) if field_data else 0.0
+                        except:
+                            field_data = 0.0
+                        if field.number_divide_with:
+                            field_data = field_data / field.number_divide_with
+
+                # Reverse logic
+                if is_import and field_name == "manifest_import_date":
+                    continue
+                if not is_import and field_name == "shipped_date":
+                    continue
+
+                doc.set(field_name, field_data)
+
+            # ---------------------------------------------------------
+            # Post Processing
+            # ---------------------------------------------------------
+
+            if doctype_name == "R300000" and doc.shipper_city:
+                make_R300000(doc)
+
+            elif doctype_name == "R400000" and doc.consignee_city:
+                make_R400000(doc)
+
+            if hasattr(doc, "file_type") and not doc.file_type:
+                doc.file_type = "ISPS"
+
+            # ---------------------------------------------------------
+            # SAVE (Safe)
+            # ---------------------------------------------------------
+
+            if doc.is_new():
+                doc.insert(ignore_permissions=True)
+            else:
+                doc.save(ignore_permissions=True)
+
+        frappe.db.commit()
+
+    except Exception as e:
+        frappe.log_error("Error in committing in ISPS", str(e))
+        raise
+
+    # ---------------------------------------------------------
+    # Store Shipment Summary
+    # ---------------------------------------------------------
+
+    try:
+        storing_shipment_number(
+            arrays=arrays,
+            frm=shipf,
+            to=shipt,
+            doc=docnew,
+            running_manifest_input_date=running_manifest_input_date
+        )
+    except Exception as e:
+        frappe.log_error(
+            f"Error in storing shipment number ISPS {shipf}-{shipt}",
+            str(e)
+        )
     
 def modified_manifest_update(main_doc,arrays2,pkg_from,pkg_to,date_format):
     try:
