@@ -205,8 +205,8 @@ def generate_invoice(self, method):
         return
     
     if sales_invoice.custom_duty_and_taxes_invoice:
-        reset_tax_fields(self)
-        # return
+        reset_tax_fields(sales_invoice)
+        return
 
     shipment_number = sales_invoice.custom_shipment_number
     manifest_input_date = sales_invoice.custom_booking_date
@@ -231,7 +231,7 @@ def generate_invoice(self, method):
     freight_discount = 0
     after_discount_amount = 0
 
-    definition = frappe.get_doc("Sales Invoice Definition", sales_invoice.custom_sales_invoice_definition)
+    definition = frappe.get_doc("Sales Invoice Definition", sales_invoice.custom_sales_invoice_definition or "Default")
     setting = frappe.get_doc("Manifest Setting Definition")
     
     if sales_invoice.taxes_and_charges:
@@ -1380,6 +1380,7 @@ def reset_tax_fields(self):
         self.base_in_words = money_in_words(self.base_rounded_total, DEFAULT_CURRENCY)
 
 
+
 # def reset_tax_fields(self):
 #     codes_incl_fuel = []
 #     amounts_incl_fuel = []
@@ -1448,7 +1449,7 @@ def reset_tax_fields(self):
 #     discounted_amount = 0
 #     selling_rate_country = 0
 #     full_tariff = None
-#     definition = frappe.get_doc("Sales Invoice Definition", sales_invoice.custom_sales_invoice_definition)
+#     definition = frappe.get_doc("Sales Invoice Definition", sales_invoice.custom_sales_invoice_definition or "Default")
 #     setting = frappe.get_doc("Manifest Setting Definition")
     
 #     if sales_invoice.taxes_and_charges:
@@ -1641,7 +1642,8 @@ def reset_tax_fields(self):
 
 #                 # **Calculate Rate if Full Tariff is Found**
 #                 if full_tariff:
-#                     my_weight = float(sales_invoice.custom_shipment_weight)
+#                     my_weight = flt(sales_invoice.custom_shipment_weight)
+
 #                     flg = 0
 #                     last_row = {}
 
@@ -1720,7 +1722,7 @@ def reset_tax_fields(self):
 #                         selling_rate = frappe.get_doc("Selling Rate",definition.default_selling_rate)
                         
                 
-#                 my_weight = float(sales_invoice.custom_shipment_weight)
+#                 my_weight = flt(sales_invoice.custom_shipment_weight)
 #                 if selling_rate :
 #                     flg = 0
 #                     last_row = {}
@@ -1838,7 +1840,7 @@ def reset_tax_fields(self):
 
 #                 # **Calculate Rate if Full Tariff is Found**
 #                 if full_tariff:
-#                     my_weight = float(sales_invoice.custom_shipment_weight)
+#                     my_weight = flt(sales_invoice.custom_shipment_weight)
 #                     flg = 0
 #                     last_row = {}
 
@@ -1917,7 +1919,7 @@ def reset_tax_fields(self):
 #                     except:
 #                         logs.append(f"No Selling Rate Found Thats why using Default Selling Rate")
 #                         selling_rate = frappe.get_doc("Selling Rate",definition.default_selling_rate)
-#                 my_weight = float(sales_invoice.custom_shipment_weight)
+#                 my_weight = flt(sales_invoice.custom_shipment_weight)
 #                 if selling_rate :
 #                     flg = 0
 #                     last_row = {}
@@ -2110,7 +2112,7 @@ def reset_tax_fields(self):
 #                         peak_amount = row.amount
 #                         break
 #                     elif (sales_invoice.custom_shipment_weight or 0) > 0.5:
-#                         peak_amount = sales_invoice.custom_shipment_weight * (row.amount)
+#                         peak_amount = (sales_invoice.custom_shipment_weight or 0) * (row.amount)
         
 #         # exempt_peak_surcharge = frappe.db.get_value('Customer', sales_invoice.customer, 'custom_exempt_peak_surcharge')
 #         exempt_peak_surcharge = customer_doc.custom_exempt_peak_surcharge
