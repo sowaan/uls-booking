@@ -2390,16 +2390,15 @@ def find_existing_doc(doctype, shipment_number, manifest_input_date):
         "shipment_number": shipment_number
     }
 
-    # Only apply manifest_input_date filter if MATCH_MANIFEST_DATE is True
     if MATCH_MANIFEST_DATE and manifest_input_date:
         filters["manifest_input_date"] = manifest_input_date
 
     docs = frappe.get_list(
         doctype,
-        filters,
-        fields=["name", "creation"],
-        order_by="creation desc",   # 🔑 deterministic choice
-        limit_page_length=1        # 🔑 pick first only
+        filters=filters,                  # ✅ MUST be keyword
+        fields=["name", "creation"],      # ✅ no conflict now
+        order_by="creation desc",
+        limit_page_length=1
     )
 
     return docs[0]["name"] if docs else None
@@ -2466,7 +2465,7 @@ def opsys_insert_data_new(
     manifest_upload_data_name, gateway
 ):
     import traceback
-
+    frappe.log_error("opsys insert started", "nothing special")
     setting = frappe.get_doc("Manifest Setting Definition")
     country_map = {c.code: c.country for c in setting.country_codes}
     replacement_map = {
@@ -2513,11 +2512,21 @@ def opsys_insert_data_new(
             )
 
             shipment_number = parsed.get("shipment_number")
+
+            # frappe.log_error (f"shipment number {shipment_number}", f"parsed: {parsed}")
             if not shipment_number:
                 continue
 
+            if shipment_number not in shipment_context:
+                shipment_context[shipment_number] = {
+                    "manifest_input_date": None
+                }
+
             if doctype_name == "R200000":
+            
+                # manifest_input_date = parsed.get("manifest_input_date")
                 manifest_input_date = parsed.get("manifest_input_date")
+
 
                 if MATCH_MANIFEST_DATE and not manifest_input_date:
                     doc.append('failed_shipments', {
@@ -2535,11 +2544,13 @@ def opsys_insert_data_new(
                 }
 
                 running_manifest_input_date = manifest_input_date
+                # frappe.log_error(f"Shipment context {shipment_number}", f"{shipment_context}")
 
 
-            if shipment_number not in shipment_context:
-                # Child record before R200000 → skip safely
-                continue
+            # if shipment_number not in shipment_context:
+            #     frappe.log_error("Skipping Shipment", f"shipment number: {shipment_number}")
+            #     # Child record before R200000 → skip safely
+            #     continue
 
             existing_name = find_existing_doc(
                 doctype_name,
@@ -2552,7 +2563,8 @@ def opsys_insert_data_new(
             else:
                 doc = frappe.new_doc(doctype_name)
                 doc.shipment_number = shipment_number
-                
+            
+
             doc.manifest_input_date = running_manifest_input_date
             doc.file_name = file_proper_name3
             doc.manifest_upload_data = manifest_upload_data_name
@@ -2629,6 +2641,7 @@ def get_r200000_by_manifest(shipment_number, manifest_input_date):
             "file_name"
         ],
         as_dict=True
+    
     )
 
 def storing_shipment_number_new(shipment_context, doc):
@@ -2641,7 +2654,7 @@ def storing_shipment_number_new(shipment_context, doc):
 
     try:
         # shipments = extract_unique_shipments(arrays, frm, to)
-
+        frappe.log_error("Inside storing shipment", f"context: {shipment_context}")
         origin_country = frappe.db.get_single_value(
             "Manifest Setting Definition",
             "origin_country"
@@ -2670,7 +2683,14 @@ def storing_shipment_number_new(shipment_context, doc):
                     "reason": "Missing R200000 for Shipment Number"
                 })
                 continue
-
+            # frappe.log_error(f"create shipment record {shipment_number} - {manifest_input_date}", f"""
+            #     creating shipment record
+            #         shipment_number={shipment_number},
+            #         origin_country={origin_country},
+            #         r2_data={r2_data},
+            #         manifest_doc={doc},
+            #         running_manifest_input_date={manifest_input_date},                             
+            #                  """)
             create_shipment_number_record_new(
                 shipment_number=shipment_number,
                 origin_country=origin_country,
@@ -2728,7 +2748,7 @@ def find_existing_shipment_number(shipment_number, manifest_input_date):
 
     docs = frappe.get_list(
         "Shipment Number",
-        filters,
+        filters=filters,
         fields=["name"],
         order_by="creation desc",
         limit_page_length=1,
