@@ -771,11 +771,14 @@ base_discount_amount: {sales_invoice.base_discount_amount}
     # Now apply freight-based discount
     if freight_discount > 0:
         sales_invoice.apply_discount_on = "Net Total"
-        sales_invoice.additional_discount_amount = freight_discount
+        sales_invoice.set("discount_amount", freight_discount)
+        base_discount_amount = (freight_discount or 1)  * (sales_invoice.conversion_rate or 1)
+        sales_invoice.set("base_discount_amount", base_discount_amount)
+        disc_per = (sales_invoice.discount_amount / sales_invoice.total) * 100 if (sales_invoice.total or 0) > 0 else 0
         sales_invoice.additional_discount_percentage = 0
-
-        # Force full recalculation
-        sales_invoice.calculate_taxes_and_totals()    
+        sales_invoice.set("additional_discount_percentage", disc_per)
+        sales_invoice.calculate_taxes_and_totals()
+ 
 
     frappe.log_error("DEBUG", f"""
             apply_discount_on: {sales_invoice.apply_discount_on}
