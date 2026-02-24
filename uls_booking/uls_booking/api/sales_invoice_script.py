@@ -11,6 +11,9 @@ import logging
 from frappe.utils import getdate
 import logging
 
+# --- Helpers used by the main function ---
+MATCH_MANIFEST_DATE = False 
+
 @frappe.whitelist()
 def get_shipment_numbers_and_sales_invoices(
     start_date,
@@ -171,33 +174,41 @@ def get_reference_docs(shipment_numbers, ref_doc_map, manifest_input_date=None):
 
 def get_latest_by_manifest(doctype, shipment_number, fields, manifest_input_date):
     """
-    Fetch latest row for a shipment up to a given manifest_input_date
+    Fetch latest row for a shipment.
+    If MATCH_MANIFEST_DATE is True → match exact manifest_input_date.
+    Otherwise → ignore manifest_input_date filter.
     """
+
     if isinstance(fields, str):
         fields = [fields]
+
+    conditions = ["shipment_number = %s"]
+    values = [shipment_number]
+
+    if MATCH_MANIFEST_DATE:
+        conditions.append("manifest_input_date = %s")
+        values.append(manifest_input_date)
+
+    query = f"""
+        SELECT {", ".join(fields)}
+        FROM `tab{doctype}`
+        WHERE {" AND ".join(conditions)}
+        ORDER BY manifest_input_date DESC, creation DESC
+        LIMIT 1
+    """
 
     frappe.logger("invoice").info(
         f"""
         get_latest_by_manifest DEBUG
+        MATCH_MANIFEST_DATE={MATCH_MANIFEST_DATE}
         doctype={doctype}
         shipment_number={shipment_number}
         manifest_input_date={manifest_input_date}
-        type={type(manifest_input_date)}
         """
     )
-    rows = frappe.db.sql(
-        f"""
-        SELECT {", ".join(fields)}
-        FROM `tab{doctype}`
-        WHERE shipment_number = %s
-          AND (%s IS NULL OR manifest_input_date = %s)
-        ORDER BY manifest_input_date DESC
-        LIMIT 1
-        """,
-        (shipment_number, manifest_input_date, manifest_input_date),
-        as_dict=True,
-    )
-    
+
+    rows = frappe.db.sql(query, tuple(values), as_dict=True)
+
     return rows[0] if rows else None
 
 def to_float(val):
@@ -473,7 +484,7 @@ def generate_single_invoice(parent_id=None, login_username=None,
     customer = get_customer(icris_number, default_customer)
     si.customer = customer
     si.currency = frappe.db.sql("""SELECT default_currency FROM `tabCustomer` WHERE name=%s""", customer)[0][0]
-
+    
     # Step 10: Add dummy item
     item_code = frappe.db.sql("""SELECT name FROM `tabItem` WHERE disabled=0 LIMIT 1""")
     if item_code:
@@ -483,6 +494,7 @@ def generate_single_invoice(parent_id=None, login_username=None,
     try:
         si.posting_date = getdate(end_date)
         si.set_posting_time = 1
+        si.set_missing_values()
         si.insert(ignore_permissions=True)
         # si.submit()
 

@@ -6,6 +6,8 @@ import logging
 
 
 DEFAULT_CURRENCY = frappe.db.get_default("currency")
+# --- Helpers used by the main function ---
+MATCH_MANIFEST_DATE = False 
 
 def get_sales_team_from_customer(customer_name):
     sales_team = frappe.get_all(
@@ -327,6 +329,7 @@ def generate_invoice(self, method):
                 icris_account = frappe.get_doc("ICRIS Account", definition.unassigned_icris_number)
         # print("frt")
         
+
         cust = get_frt_cust(icris_number, definition.unassigned_icris_number, shipment_number, logs)       
         sales_invoice.set("customer", cust)
 
@@ -335,6 +338,8 @@ def generate_invoice(self, method):
 
         accountNo = get_frt_cust_account(cust)
         sales_invoice.set("custom_account_no", accountNo)
+       
+        
         origin_country = get_origin_country(sales_invoice=sales_invoice, is_export=is_export)
         if is_export:
             # --------------------------------------------------
@@ -427,36 +432,23 @@ def generate_invoice(self, method):
 
         sales_invoice.custom_amount_after_discount = after_discount_amount
 
-        sales_invoice.additional_discount_amount = 0
-        sales_invoice.apply_discount_on = "Net Total"
 
+        # if freight_discount > 0:
+        #     sales_invoice.apply_discount_on = "Net Total"
+        #     sales_invoice.additional_discount_amount = freight_discount
+        #     sales_invoice.discount_amount = freight_discount
 
-        if freight_discount > 0:
-            sales_invoice.apply_discount_on = "Net Total"
-            sales_invoice.additional_discount_amount = freight_discount
-            sales_invoice.discount_amount = freight_discount
-
-            sales_invoice.base_discount_amount = (
-                freight_discount 
-                * (sales_invoice.conversion_rate or 1)
-            )   
-            # frappe.log_error(
-            #     title=f"TARIFF RESULT before {sales_invoice.name}",
-            #     message=f"""
-            # freight_discount: {freight_discount}
-            # net_total: {sales_invoice.net_total}
-            # discount amount: {sales_invoice.discount_amount}
-            # base_discount_amount: {sales_invoice.base_discount_amount}
-            # additional_discount_amount: {sales_invoice.additional_discount_amount}
-            # additional_discount_percentage: {sales_invoice.additional_discount_percentage}
-            # """)  
+        #     sales_invoice.base_discount_amount = (
+        #         freight_discount 
+        #         * (sales_invoice.conversion_rate or 1)
+        #     )   
 
         # r201 = frappe.get_list("R201000", filters={'shipment_number': shipment_number},)
         r201 = frappe.get_list(
             "R201000",
             filters={
                 'shipment_number': shipment_number,
-                'manifest_input_date': manifest_input_date
+                # 'manifest_input_date': manifest_input_date
             },
             order_by="manifest_input_date desc",
             limit=1
@@ -660,7 +652,7 @@ def generate_invoice(self, method):
     log_status = None
     log_message = ""
 
-
+    
     if not sales_invoice.items:
         log_status = "Failed"
         logs.append(f"No Items shipment number {shipment_number}, icris number {icris_number}")
@@ -703,7 +695,33 @@ def generate_invoice(self, method):
     discounted_amount = discounted_amount - 1
     get_sales_tax(sales_invoice, logs)
     log_message = "\n".join(logs)
+
+    # if not sales_invoice.debit_to:
+    # Reset first
+    sales_invoice.debit_to = None
+
+    # 1️⃣ Try Customer Account grid (per company)
+    customer_receivable = frappe.db.get_value(
+        "Customer Account",
+        {
+            "parent": sales_invoice.customer,
+            "company": sales_invoice.company
+        },
+        "account"
+    )
+
+    # 2️⃣ Fallback to Company default
+    if not customer_receivable:
+        customer_receivable = frappe.db.get_value(
+            "Company",
+            sales_invoice.company,
+            "default_receivable_account"
+        )
+
+    sales_invoice.debit_to = customer_receivable
+
     sales_invoice.set_missing_values()
+
     sales_team = get_sales_team_from_customer(sales_invoice.customer)
     sales_invoice.set("sales_team", [])
     for member in sales_team:
@@ -734,11 +752,38 @@ def generate_invoice(self, method):
         sales_invoice.base_in_words = money_in_words(sales_invoice.base_total, DEFAULT_CURRENCY)
     ############################################################################################
 
-  
+    frappe.log_error(
+                title=f"Before - Freight Discount {sales_invoice.name}",
+                message=f"""
+sales_invoice.apply_discount_on: {sales_invoice.apply_discount_on}
+sales_invoice.discount_amount: { sales_invoice.discount_amount}
+additional_discount_percentage: {sales_invoice.additional_discount_percentage}
+base_discount_amount: {sales_invoice.base_discount_amount}                 
+"""
+            )
+    
+    # First calculate everything normally
+    sales_invoice.apply_discount_on = "Net Total"
+    sales_invoice.additional_discount_amount = 0
+    sales_invoice.additional_discount_percentage = 0
+    sales_invoice.calculate_taxes_and_totals()
 
-    # Calculate everything ONCE
-    sales_invoice.calculate_taxes_and_totals()     
+    # Now apply freight-based discount
+    if freight_discount > 0:
+        sales_invoice.apply_discount_on = "Net Total"
+        sales_invoice.additional_discount_amount = freight_discount
+        sales_invoice.additional_discount_percentage = 0
 
+        # Force full recalculation
+        sales_invoice.calculate_taxes_and_totals()    
+
+    frappe.log_error("DEBUG", f"""
+            apply_discount_on: {sales_invoice.apply_discount_on}
+            additional_discount_amount: {sales_invoice.additional_discount_amount}
+            discount_amount: {sales_invoice.discount_amount}
+            net_total: {sales_invoice.net_total}
+            grand_total: {sales_invoice.grand_total}
+            """)
     sales_invoice.in_words = money_in_words(sales_invoice.rounded_total, sales_invoice.currency)
     sales_invoice.base_in_words = money_in_words(sales_invoice.base_rounded_total, DEFAULT_CURRENCY)
     # frappe.log_error(
