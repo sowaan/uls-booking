@@ -1624,6 +1624,12 @@ def insert_data_new(arrays, docnew, shipf, shipt, frm, to, date_format,
             if not shipment_num:
                 continue
 
+            # Always register shipment number in context
+            if shipment_num and shipment_num not in shipment_context:
+                shipment_context[shipment_num] = {
+                    "manifest_input_date": None
+                }
+
             # ---------------------------------------------------------
             # Extract manifest_input_date (ONLY R200000)
             # ---------------------------------------------------------
@@ -1636,10 +1642,9 @@ def insert_data_new(arrays, docnew, shipf, shipt, frm, to, date_format,
                         except:
                             frappe.log_error("Invalid manifest_input_date", temp_date)
                             running_manifest_input_date = None
+                
                 if running_manifest_input_date:
-                    shipment_context[shipment_num] = {
-                            "manifest_input_date": running_manifest_input_date
-                        }
+                    shipment_context[shipment_num]["manifest_input_date"] = running_manifest_input_date
 
 
             manifest_data = shipment_context.get(shipment_num)
@@ -2660,6 +2665,17 @@ def storing_shipment_number_new(shipment_context, doc):
             "origin_country"
         )
 
+        if not shipment_context:
+            frappe.db.set_value(
+                "Manifest Upload Data",
+                doc.name,
+                {
+                    "status": "Failed",
+                    "remarks": "No R200000 (Manifest Header) found in file"
+                }
+            )
+            return
+        
         frappe.db.set_value(
             "Manifest Upload Data",
             doc.name,
