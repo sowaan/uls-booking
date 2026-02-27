@@ -568,6 +568,15 @@ def generate_single_invoice(parent_id=None, login_username=None,
 
     frappe.db.commit()
 
+    data = si.as_dict()
+
+    # Remove child tables you don't want
+    data.pop("items", None)
+    
+    frappe.log_error(
+        title=f"Generate Single Invoice {si.name}",
+        message=json.dumps(data, indent=4, default=str)
+    )
     # ------------------------------------------------------------------
     # STEP 7: RETURN RESPONSE
     # ------------------------------------------------------------------

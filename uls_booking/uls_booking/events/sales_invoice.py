@@ -3,7 +3,7 @@ import frappe
 from frappe.utils import getdate, cint, money_in_words,flt
 import re
 import logging
-
+import json
 
 DEFAULT_CURRENCY = frappe.db.get_default("currency")
 # --- Helpers used by the main function ---
@@ -752,15 +752,7 @@ def generate_invoice(self, method):
         sales_invoice.base_in_words = money_in_words(sales_invoice.base_total, DEFAULT_CURRENCY)
     ############################################################################################
 
-    frappe.log_error(
-                title=f"Before - Freight Discount {sales_invoice.name}",
-                message=f"""
-sales_invoice.apply_discount_on: {sales_invoice.apply_discount_on}
-sales_invoice.discount_amount: { sales_invoice.discount_amount}
-additional_discount_percentage: {sales_invoice.additional_discount_percentage}
-base_discount_amount: {sales_invoice.base_discount_amount}                 
-"""
-            )
+
     
     # First calculate everything normally
     sales_invoice.apply_discount_on = "Net Total"
@@ -789,16 +781,15 @@ base_discount_amount: {sales_invoice.base_discount_amount}
             """)
     sales_invoice.in_words = money_in_words(sales_invoice.rounded_total, sales_invoice.currency)
     sales_invoice.base_in_words = money_in_words(sales_invoice.base_rounded_total, DEFAULT_CURRENCY)
-    # frappe.log_error(
-    #     title=f"TARIFF RESULT after  {sales_invoice.name}",
-    #     message=f"""
-    #     freight_discount: {freight_discount}
-    #     net_total: {sales_invoice.net_total}
-    #     discount amount: {sales_invoice.discount_amount}
-    #     base_discount_amount: {sales_invoice.base_discount_amount}
-    #     additional_discount_amount: {sales_invoice.additional_discount_amount}
-    #     additional_discount_percentage: {sales_invoice.additional_discount_percentage}
-    #     """)    
+
+    data = sales_invoice.as_dict()
+
+    # Remove child tables you don't want
+    data.pop("items", None)
+    frappe.log_error(
+        title=f"Invoice Save {sales_invoice.name}",
+        message=json.dumps(data, indent=4, default=str)
+    )   
     
     if logs:
         log_status = "Created"
