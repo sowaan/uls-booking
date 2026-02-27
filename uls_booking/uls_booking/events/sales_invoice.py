@@ -772,13 +772,13 @@ def generate_invoice(self, method):
         sales_invoice.calculate_taxes_and_totals()
  
 
-    frappe.log_error("DEBUG", f"""
-            apply_discount_on: {sales_invoice.apply_discount_on}
-            additional_discount_amount: {sales_invoice.additional_discount_amount}
-            discount_amount: {sales_invoice.discount_amount}
-            net_total: {sales_invoice.net_total}
-            grand_total: {sales_invoice.grand_total}
-            """)
+    # frappe.log_error("DEBUG", f"""
+    #         apply_discount_on: {sales_invoice.apply_discount_on}
+    #         additional_discount_amount: {sales_invoice.additional_discount_amount}
+    #         discount_amount: {sales_invoice.discount_amount}
+    #         net_total: {sales_invoice.net_total}
+    #         grand_total: {sales_invoice.grand_total}
+    #         """)
     sales_invoice.in_words = money_in_words(sales_invoice.rounded_total, sales_invoice.currency)
     sales_invoice.base_in_words = money_in_words(sales_invoice.base_rounded_total, DEFAULT_CURRENCY)
 
