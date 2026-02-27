@@ -428,6 +428,11 @@ def generate_single_invoice(parent_id=None, login_username=None,
     si.custom_created_byfrom_billing_tool = login_username
     si.custom_parent_idfrom_billing_tool = parent_id
 
+    data = si.as_dict()
+
+    # Remove child tables you don't want
+    data.pop("items", None)
+
     frappe.log_error(
         title=f"Step1 - Generate Single Invoice {si.name}",
         message=json.dumps(data, indent=4, default=str)
@@ -444,6 +449,10 @@ def generate_single_invoice(parent_id=None, login_username=None,
     is_export = shipper_country == origin_country
     unassign = definition["unassigned_icris_number"]
 
+    data = si.as_dict()
+
+    # Remove child tables you don't want
+    data.pop("items", None)
     frappe.log_error(
         title=f"Step2 - Generate Single Invoice {si.name}",
         message=json.dumps(data, indent=4, default=str)
