@@ -98,15 +98,16 @@ def get_definition_children(definition_name):
         ref_doc_map.setdefault(child['ref_doctype'], []).append(child)
     return ref_doc_map
 
-
 def apply_reference_docs_to_invoice(si, shipment_number, ref_doc_map):
-    """Map reference docs to Sales Invoice fields, skipping 'name'."""
-    shipment_cache = _ref_doc_cache.get(shipment_number, {})
-    if not shipment_cache:
-        return
-
     for ref_doctype, child_list in ref_doc_map.items():
-        ref_doc = shipment_cache.get(ref_doctype)
+
+        ref_doc = frappe.db.get_value(
+            ref_doctype,
+            {"shipment_number": shipment_number},
+            "*",
+            as_dict=True
+        )
+
         if not ref_doc:
             continue
 
@@ -114,6 +115,7 @@ def apply_reference_docs_to_invoice(si, shipment_number, ref_doc_map):
             field_name = child["field_name"]
             if field_name == "name":
                 continue
+
             value = ref_doc.get(field_name)
             if value:
                 if child["is_link"]:
@@ -121,7 +123,6 @@ def apply_reference_docs_to_invoice(si, shipment_number, ref_doc_map):
                         si.set(child["sales_invoice_field_name"], value)
                 else:
                     si.set(child["sales_invoice_field_name"], value)
-
 
 def get_reference_docs(shipment_numbers, ref_doc_map, manifest_input_date=None):
     global _ref_doc_cache
@@ -427,6 +428,11 @@ def generate_single_invoice(parent_id=None, login_username=None,
     si.custom_created_byfrom_billing_tool = login_username
     si.custom_parent_idfrom_billing_tool = parent_id
 
+    frappe.log_error(
+        title=f"Step1 - Generate Single Invoice {si.name}",
+        message=json.dumps(data, indent=4, default=str)
+    )
+
     # Map fields from reference docs
     apply_reference_docs_to_invoice(si, shipment_number, ref_doc_map)
 
@@ -438,6 +444,10 @@ def generate_single_invoice(parent_id=None, login_username=None,
     is_export = shipper_country == origin_country
     unassign = definition["unassigned_icris_number"]
 
+    frappe.log_error(
+        title=f"Step2 - Generate Single Invoice {si.name}",
+        message=json.dumps(data, indent=4, default=str)
+    )
     if not is_export and not si.custom_consignee_number:
         ship_icris = str(shipment_number)[:6]
         exists = frappe.db.sql("""SELECT 1 FROM `tabICRIS Account` WHERE name=%s""", ship_icris)
@@ -572,9 +582,9 @@ def generate_single_invoice(parent_id=None, login_username=None,
 
     # Remove child tables you don't want
     data.pop("items", None)
-    
+
     frappe.log_error(
-        title=f"Generate Single Invoice {si.name}",
+        title=f"Step3 -Generate Single Invoice {si.name}",
         message=json.dumps(data, indent=4, default=str)
     )
     # ------------------------------------------------------------------
