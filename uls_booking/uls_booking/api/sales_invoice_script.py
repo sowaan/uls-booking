@@ -428,16 +428,6 @@ def generate_single_invoice(parent_id=None, login_username=None,
     si.custom_created_byfrom_billing_tool = login_username
     si.custom_parent_idfrom_billing_tool = parent_id
 
-    data = si.as_dict()
-
-    # Remove child tables you don't want
-    data.pop("items", None)
-
-    frappe.log_error(
-        title=f"Step1 - Generate Single Invoice {si.name}",
-        message=json.dumps(data, indent=4, default=str)
-    )
-
     # Map fields from reference docs
     apply_reference_docs_to_invoice(si, shipment_number, ref_doc_map)
 
@@ -449,14 +439,6 @@ def generate_single_invoice(parent_id=None, login_username=None,
     is_export = shipper_country == origin_country
     unassign = definition["unassigned_icris_number"]
 
-    data = si.as_dict()
-
-    # Remove child tables you don't want
-    data.pop("items", None)
-    frappe.log_error(
-        title=f"Step2 - Generate Single Invoice {si.name}",
-        message=json.dumps(data, indent=4, default=str)
-    )
     if not is_export and not si.custom_consignee_number:
         ship_icris = str(shipment_number)[:6]
         exists = frappe.db.sql("""SELECT 1 FROM `tabICRIS Account` WHERE name=%s""", ship_icris)
@@ -587,15 +569,15 @@ def generate_single_invoice(parent_id=None, login_username=None,
 
     frappe.db.commit()
 
-    data = si.as_dict()
+    # data = si.as_dict()
 
-    # Remove child tables you don't want
-    data.pop("items", None)
+    # # Remove child tables you don't want
+    # data.pop("items", None)
 
-    frappe.log_error(
-        title=f"Step3 -Generate Single Invoice {si.name}",
-        message=json.dumps(data, indent=4, default=str)
-    )
+    # frappe.log_error(
+    #     title=f"Step3 -Generate Single Invoice {si.name}",
+    #     message=json.dumps(data, indent=4, default=str)
+    # )
     # ------------------------------------------------------------------
     # STEP 7: RETURN RESPONSE
     # ------------------------------------------------------------------

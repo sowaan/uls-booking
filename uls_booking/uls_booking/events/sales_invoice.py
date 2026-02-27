@@ -782,14 +782,14 @@ def generate_invoice(self, method):
     sales_invoice.in_words = money_in_words(sales_invoice.rounded_total, sales_invoice.currency)
     sales_invoice.base_in_words = money_in_words(sales_invoice.base_rounded_total, DEFAULT_CURRENCY)
 
-    data = sales_invoice.as_dict()
+    # data = sales_invoice.as_dict()
 
-    # Remove child tables you don't want
-    data.pop("items", None)
-    frappe.log_error(
-        title=f"Invoice Save {sales_invoice.name}",
-        message=json.dumps(data, indent=4, default=str)
-    )   
+    # # Remove child tables you don't want
+    # data.pop("items", None)
+    # frappe.log_error(
+    #     title=f"Invoice Save {sales_invoice.name}",
+    #     message=json.dumps(data, indent=4, default=str)
+    # )   
     
     if logs:
         log_status = "Created"
