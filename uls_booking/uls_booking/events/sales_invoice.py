@@ -333,11 +333,19 @@ def generate_invoice(self, method):
         cust = get_frt_cust(icris_number, definition.unassigned_icris_number, shipment_number, logs)       
         sales_invoice.set("customer", cust)
 
+        customer_doc = frappe.get_cached_doc("Customer", cust)
+
+        # Set missing fields
+        sales_invoice.custom_customer_group = customer_doc.customer_group
+        sales_invoice.custom_billing_type = customer_doc.custom_billing_type
+
         custName = get_frt_cust_name(cust)
         sales_invoice.set("customer_name", custName)
 
         accountNo = get_frt_cust_account(cust)
         sales_invoice.set("custom_account_no", accountNo)
+
+
        
         
         origin_country = get_origin_country(sales_invoice=sales_invoice, is_export=is_export)

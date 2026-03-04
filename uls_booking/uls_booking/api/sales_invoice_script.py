@@ -293,19 +293,14 @@ def get_shipment_weights(shipment_numbers, manifest_input_date):
 
 
 def get_customer(icris_number, default_customer):
-    """Fetch customer with caching using SQL."""
-    global _customer_cache
-    if icris_number in _customer_cache:
-        return _customer_cache[icris_number]
-
-    exists = frappe.db.sql("""SELECT 1 FROM `tabCustomer` WHERE name=%s""", icris_number)
+    """Fetch customer without caching."""
     
-    # TODO: REPLACE SELECT QUERY WITH FOLLOWING
-    # exists = frappe.db.exists("Customer", icris_number)
+    exists = frappe.db.exists("Customer", icris_number)
 
-    customer = icris_number if exists else default_customer
-    _customer_cache[icris_number] = customer
-    return customer
+    if exists:
+        return icris_number
+    else:
+        return default_customer
 
 
 # ----------------- Main Function -----------------
