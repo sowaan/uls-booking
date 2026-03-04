@@ -332,7 +332,9 @@ def generate_invoice(self, method):
 
         cust = get_frt_cust(icris_number, definition.unassigned_icris_number, shipment_number, logs)       
         sales_invoice.set("customer", cust)
-
+        sales_invoice.customer = cust
+        sales_invoice.set_missing_values()
+        
         customer_doc = frappe.get_cached_doc("Customer", cust)
 
         # Set missing fields
