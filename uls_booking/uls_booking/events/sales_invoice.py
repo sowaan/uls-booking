@@ -347,7 +347,16 @@ def generate_invoice(self, method):
         accountNo = get_frt_cust_account(cust)
         sales_invoice.set("custom_account_no", accountNo)
 
+        frappe.log_error(
+            title=f"{sales_invoice.name} - Stage 1",
+            message=f"""
+            Shipment: {sales_invoice.shipment_number}
+            ICRIS: {sales_invoice.icris_number}
+            Billing Type: {sales_invoice.custom_billing_type}
+            Customer Group: {sales_invoice.custom_customer_group}
 
+            """
+                )
        
         
         origin_country = get_origin_country(sales_invoice=sales_invoice, is_export=is_export)
@@ -792,6 +801,16 @@ def generate_invoice(self, method):
     sales_invoice.in_words = money_in_words(sales_invoice.rounded_total, sales_invoice.currency)
     sales_invoice.base_in_words = money_in_words(sales_invoice.base_rounded_total, DEFAULT_CURRENCY)
 
+    frappe.log_error(
+        title=f"{sales_invoice.name} - Stage 2",
+        message=f"""
+        Shipment: {sales_invoice.shipment_number}
+        ICRIS: {sales_invoice.icris_number}
+        Billing Type: {sales_invoice.custom_billing_type}
+        Customer Group: {sales_invoice.custom_customer_group}
+
+        """
+            )
     # data = sales_invoice.as_dict()
 
     # # Remove child tables you don't want
