@@ -350,8 +350,8 @@ def generate_invoice(self, method):
         frappe.log_error(
             title=f"{sales_invoice.name} - Stage 1",
             message=f"""
-            Shipment: {sales_invoice.shipment_number}
-            ICRIS: {sales_invoice.icris_number}
+            Shipment: {sales_invoice.custom_shipment_number}
+            ICRIS: {sales_invoice.customer}
             Billing Type: {sales_invoice.custom_billing_type}
             Customer Group: {sales_invoice.custom_customer_group}
 
@@ -801,11 +801,12 @@ def generate_invoice(self, method):
     sales_invoice.in_words = money_in_words(sales_invoice.rounded_total, sales_invoice.currency)
     sales_invoice.base_in_words = money_in_words(sales_invoice.base_rounded_total, DEFAULT_CURRENCY)
 
+
     frappe.log_error(
         title=f"{sales_invoice.name} - Stage 2",
         message=f"""
-        Shipment: {sales_invoice.shipment_number}
-        ICRIS: {sales_invoice.icris_number}
+        Shipment: {sales_invoice.custom_shipment_number}
+        ICRIS: {sales_invoice.customer}
         Billing Type: {sales_invoice.custom_billing_type}
         Customer Group: {sales_invoice.custom_customer_group}
 
