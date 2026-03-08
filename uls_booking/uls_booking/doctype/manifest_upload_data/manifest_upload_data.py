@@ -2686,7 +2686,7 @@ def storing_shipment_number_new(shipment_context, doc):
         failed_shipments = []
 
         for shipment_number, ctx in shipment_context.items():
-            manifest_input_date = ctx["manifest_input_date"]
+            manifest_input_date = ctx.get("manifest_input_date")
 
             r2_data = get_r200000_by_manifest(
                 shipment_number=shipment_number,
@@ -2880,7 +2880,9 @@ def populate_shipment_number_fields(doc, base, party, manifest_doc):
     doc.manifest_file_type = base["file_type"]
     doc.manifest_upload_data = manifest_doc.name
     doc.gateway = getattr(manifest_doc, "gateway", None)
-    doc.manifest_input_date = base["manifest_input_date"]
+    
+    if base.get("manifest_input_date"):
+        doc.manifest_input_date = base["manifest_input_date"]
 
     for k, v in party.items():
         if v is not None:
