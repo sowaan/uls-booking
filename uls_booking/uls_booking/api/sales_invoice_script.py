@@ -559,7 +559,9 @@ def generate_single_invoice(parent_id=None, login_username=None,
         "manifest_input_date": manifest_input_date,
         "sales_invoice": sales_invoice_name,
         "sales_invoice_status": status,
-        "logs": final_log_message
+        "logs": final_log_message,
+        "created_byfrom_utility": login_username,
+        "parent_idfrom_utility": parent_id
     }).insert(ignore_permissions=True)
 
     frappe.db.commit()
