@@ -31,9 +31,17 @@ frappe.ui.form.on('Payment Entry', {
                     freeze: true,
                     freeze_message: __("Fetching outstanding invoices..."),
                     callback: function (r) {
+                        let selected_pdfs = Array.isArray(values.message)
+                            ? values.message
+                            : (values.message ? [values.message] : []);
+                        let pdf_ref_value = selected_pdfs.join(', ');
+                        let emp_id = r.message ? r.message.emp_id : '';
+
+                        frm.set_value('custom_sales_invoice_pdf_ref', pdf_ref_value || null);
+                        frm.set_value('custom_customer_invoice', emp_id || null);
+
                         if (r.message && r.message.invoices && r.message.invoices.length > 0) {
                             let invoices = r.message.invoices;
-                            let emp_id = r.message.emp_id;
     
                             let remaining = frm.doc.payment_type === 'Receive'
                                 ? flt(frm.doc.paid_amount)
@@ -74,16 +82,6 @@ frappe.ui.form.on('Payment Entry', {
                             });
     
                             frm.refresh_field("references");
-                            if (frm.doc.references) {
-                                // Convert array to quoted string
-                                let pdf_refs = Array.isArray(values.message)
-                                    ? values.message.map(inv => `"${inv}"`).join(',')
-                                    : `"${values.message}"`;
-                            
-                                frm.set_value('custom_sales_invoice_pdf_refs', pdf_refs);
-                                frm.set_value('custom_customer_invoice', emp_id);
-                            }
-    
                             frm.set_value("base_total_allocated_amount", total_allocated);
     
                             if (
@@ -108,6 +106,7 @@ frappe.ui.form.on('Payment Entry', {
                             );
     
                         } else {
+                            frm.refresh_field("references");
                             frappe.msgprint(__('No outstanding PDF Invoices found for {0}.', [frm.doc.party]));
                         }
     

@@ -92,6 +92,10 @@ class SalesInvoicePDF(Document):
             conditions.append("customer = %(customer)s")
             values["customer"] = self.customer
 
+        if self.billing_type:
+            conditions.append("custom_billing_type = %(billing_type)s")
+            values["billing_type"] = self.billing_type
+
         if self.station:
             if self.import__export == "Import":
                 conditions.append("custom_consignee_city = %(station)s")

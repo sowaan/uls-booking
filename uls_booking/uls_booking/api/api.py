@@ -112,7 +112,7 @@ def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
         sales_invoice_pdf = [sales_invoice_pdf]
 
     all_invoice_names = set()
-    emp_id = ''
+    emp_ids = []
 
     # Step 2: Loop through selected PDF docs
     for pdf_name in sales_invoice_pdf:
@@ -129,14 +129,16 @@ def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
             first_row = pdf_doc.customer_with_sales_invoice[0] if pdf_doc.customer_with_sales_invoice else None
             if first_row:
                 si_str = first_row.sales_invoices
-                emp_id = first_row.name1
+                if first_row.name1 and first_row.name1 not in emp_ids:
+                    emp_ids.append(first_row.name1)
                 invoice_names = make_str_to_array(si_str)
 
         # Case 2: Loop through customer table if not directly matched
         else:
             for row in pdf_doc.customer_with_sales_invoice:
                 if row.customer == party:
-                    emp_id = row.name1
+                    if row.name1 and row.name1 not in emp_ids:
+                        emp_ids.append(row.name1)
                     si_str = row.sales_invoices
                     invoice_names = make_str_to_array(si_str)
                     break
@@ -145,7 +147,7 @@ def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
             all_invoice_names.update(invoice_names)
 
     if not all_invoice_names:
-        return {"invoices": [], "emp_id": emp_id}
+        return {"invoices": [], "emp_id": ", ".join(emp_ids)}
 
     # Step 3: Fetch only outstanding invoices
     invoices = frappe.db.get_list(
@@ -187,7 +189,7 @@ def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
             "exchange_rate": flt(inv.conversion_rate)
         })
 
-    return {"invoices": detailed_invoices, "emp_id": emp_id}
+    return {"invoices": detailed_invoices, "emp_id": ", ".join(emp_ids)}
 
 
 
@@ -1417,7 +1419,6 @@ def insert_add_discount_rate_grp_from_erp(rec, full_tariff_group, doctype, rate_
 
         
         
-
 
 
 
