@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import getdate, cint, money_in_words,flt
+from erpnext.controllers.accounts_controller import get_taxes_and_charges
 import re
 import logging
 import json
@@ -1241,6 +1242,13 @@ def get_sales_tax(self, logs=None):
 
 
 
+def apply_sales_tax_template(self, template_name):
+    self.set('taxes_and_charges', template_name)
+    self.set('taxes', [])
+    for tax in get_taxes_and_charges('Sales Taxes and Charges Template', template_name) or []:
+        self.append('taxes', tax)
+
+
 def check_for_shipper_city(self) :
     if self.custom_shipper_city :
         sales_tax_list = frappe.get_all('Sales Taxes and Charges Template', 
@@ -1249,18 +1257,7 @@ def check_for_shipper_city(self) :
                             }
                         )
         if sales_tax_list :
-            sales_tax_doc = frappe.get_doc('Sales Taxes and Charges Template', sales_tax_list[0].name)
-            self.set('taxes_and_charges', sales_tax_doc.name)
-            for sale in sales_tax_doc.taxes:
-                rows = {
-                    'charge_type': sale.charge_type,
-                    'description': sale.description,
-                    'account_head': sale.account_head,
-                    'cost_center': sale.cost_center,
-                    'rate': sale.rate,
-                    'account_currency': sale.account_currency
-                }
-                self.append('taxes', rows)
+            apply_sales_tax_template(self, sales_tax_list[0].name)
             return True
         
         else :
@@ -1272,18 +1269,7 @@ def check_for_shipper_city(self) :
                             }
                         )
                 if sales_tax_list :
-                    sales_tax_doc = frappe.get_doc('Sales Taxes and Charges Template', sales_tax_list[0].name)
-                    self.set('taxes_and_charges', sales_tax_doc.name)
-                    for sale in sales_tax_doc.taxes:
-                        rows = {
-                            'charge_type': sale.charge_type,
-                            'description': sale.description,
-                            'account_head': sale.account_head,
-                            'cost_center': sale.cost_center,
-                            'rate': sale.rate,
-                            'account_currency': sale.account_currency
-                        }
-                        self.append('taxes', rows)
+                    apply_sales_tax_template(self, sales_tax_list[0].name)
                     return True
     return False
         
@@ -1296,18 +1282,7 @@ def check_for_consignee_city(self):
                             }
                         )
         if sales_tax_list :
-            sales_tax_doc = frappe.get_doc('Sales Taxes and Charges Template', sales_tax_list[0].name)
-            self.set('taxes_and_charges', sales_tax_doc.name)
-            for sale in sales_tax_doc.taxes:
-                rows = {
-                    'charge_type': sale.charge_type,
-                    'description': sale.description,
-                    'account_head': sale.account_head,
-                    'cost_center': sale.cost_center,
-                    'rate': sale.rate,
-                    'account_currency': sale.account_currency
-                }
-                self.append('taxes', rows)
+            apply_sales_tax_template(self, sales_tax_list[0].name)
             return True
         
         else :
@@ -1319,18 +1294,7 @@ def check_for_consignee_city(self):
                             }
                         )
                 if sales_tax_list :
-                    sales_tax_doc = frappe.get_doc('Sales Taxes and Charges Template', sales_tax_list[0].name)
-                    self.set('taxes_and_charges', sales_tax_doc.name)
-                    for sale in sales_tax_doc.taxes:
-                        rows = {
-                            'charge_type': sale.charge_type,
-                            'description': sale.description,
-                            'account_head': sale.account_head,
-                            'cost_center': sale.cost_center,
-                            'rate': sale.rate,
-                            'account_currency': sale.account_currency
-                        }
-                        self.append('taxes', rows)
+                    apply_sales_tax_template(self, sales_tax_list[0].name)
                     return True
     return False
 
@@ -1338,18 +1302,7 @@ def check_for_consignee_city(self):
 def set_default_tax(self) :
     default_sales_tax = frappe.db.get_single_value('Manifest Setting Definition', 'default_sales_taxes_and_charges_template')
     if default_sales_tax :
-        sales_tax_doc = frappe.get_doc('Sales Taxes and Charges Template', default_sales_tax)
-        self.set('taxes_and_charges', sales_tax_doc.name)
-        for sale in sales_tax_doc.taxes:
-            rows = {
-                'charge_type': sale.charge_type,
-                'description': sale.description,
-                'account_head': sale.account_head,
-                'cost_center': sale.cost_center,
-                'rate': sale.rate,
-                'account_currency': sale.account_currency
-            }
-            self.append('taxes', rows)
+        apply_sales_tax_template(self, default_sales_tax)
     else :
         frappe.throw('Please set default sales tax template in Manifest Setting Definition')
 
