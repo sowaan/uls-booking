@@ -96,6 +96,62 @@ def make_str_to_array(str_value):
 
 
 @frappe.whitelist()
+def get_outstanding_sales_invoice_pdf_options(party, txt=""):
+    """
+    Return submitted Sales Invoice PDF names for the given customer that still
+    contain at least one linked Sales Invoice with outstanding amount > 0.
+    """
+    if not party:
+        return []
+
+    txt = (txt or "").strip().lower()
+    matching_pdfs = []
+
+    pdf_names = frappe.get_all(
+        "Sales Invoice PDF",
+        filters={"docstatus": 1},
+        pluck="name",
+        order_by="modified desc"
+    )
+
+    for pdf_name in pdf_names:
+        pdf_doc = frappe.get_doc("Sales Invoice PDF", pdf_name)
+        invoice_names = []
+
+        if pdf_doc.customer and pdf_doc.customer == party:
+            first_row = pdf_doc.customer_with_sales_invoice[0] if pdf_doc.customer_with_sales_invoice else None
+            if first_row:
+                invoice_names = make_str_to_array(first_row.sales_invoices)
+        else:
+            for row in pdf_doc.customer_with_sales_invoice:
+                if row.customer == party:
+                    invoice_names = make_str_to_array(row.sales_invoices)
+                    break
+
+        if not invoice_names:
+            continue
+
+        has_outstanding = frappe.db.exists(
+            "Sales Invoice",
+            {
+                "name": ["in", invoice_names],
+                "docstatus": 1,
+                "outstanding_amount": [">", 0]
+            }
+        )
+
+        if not has_outstanding:
+            continue
+
+        if txt and txt not in pdf_name.lower():
+            continue
+
+        matching_pdfs.append(pdf_name)
+
+    return matching_pdfs
+
+
+@frappe.whitelist()
 def get_outstanding_pdf_invoices(party, sales_invoice_pdf):
     """
     Returns a list of outstanding invoice details for Payment Entry reference table.
@@ -1419,7 +1475,6 @@ def insert_add_discount_rate_grp_from_erp(rec, full_tariff_group, doctype, rate_
 
         
         
-
 
 
 

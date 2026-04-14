@@ -1,4 +1,11 @@
 frappe.ui.form.on('Payment Entry', {
+    party: function (frm) {
+        if (frm.doc.custom_sales_invoice_pdf_ref) {
+            frm.set_value('custom_sales_invoice_pdf_ref', null);
+            frm.set_value('custom_customer_invoice', null);
+        }
+    },
+
     custom_get_pdf_outstanding_invoices: function (frm) {
         let d = new frappe.ui.Dialog({
             title: 'Select Sales Invoice PDF',
@@ -9,7 +16,17 @@ frappe.ui.form.on('Payment Entry', {
                     fieldtype: 'MultiSelectList',
                     reqd: 1,
                     get_data: function (txt) {
-                        return frappe.db.get_link_options('Sales Invoice PDF', txt, { docstatus: 1 });
+                        if (!frm.doc.party || frm.doc.party_type !== 'Customer') {
+                            return [];
+                        }
+
+                        return frappe.call({
+                            method: 'uls_booking.uls_booking.api.api.get_outstanding_sales_invoice_pdf_options',
+                            args: {
+                                party: frm.doc.party,
+                                txt: txt || ''
+                            }
+                        }).then((r) => r.message || []);
                     }
                 }
             ],
@@ -34,7 +51,7 @@ frappe.ui.form.on('Payment Entry', {
                         let selected_pdfs = Array.isArray(values.message)
                             ? values.message
                             : (values.message ? [values.message] : []);
-                        let pdf_ref_value = selected_pdfs.join(', ');
+                        let pdf_ref_value = selected_pdfs.length === 1 ? selected_pdfs[0] : null;
                         let emp_id = r.message ? r.message.emp_id : '';
 
                         frm.set_value('custom_sales_invoice_pdf_ref', pdf_ref_value || null);
