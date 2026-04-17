@@ -2,6 +2,28 @@ let INS = "INS";
 let FSC = "FSC";
 let FCHG = "FCHG";
 
+frappe.listview_settings["Sales Invoice"] = frappe.listview_settings["Sales Invoice"] || {};
+frappe.listview_settings["Sales Invoice"].add_fields = [
+	"customer", "customer_name", "base_grand_total", "outstanding_amount",
+	"due_date", "company", "currency", "is_return", "status"
+];
+frappe.listview_settings["Sales Invoice"].get_indicator = function (doc) {
+	const status_colors = {
+		Draft: "red",
+		Unpaid: "orange",
+		Paid: "green",
+		Return: "gray",
+		"Credit Note Issued": "gray",
+		"Unpaid and Discounted": "orange",
+		"Partly Paid and Discounted": "yellow",
+		"Overdue and Discounted": "red",
+		Overdue: "red",
+		"Partly Paid": "yellow",
+		"Internal Transfer": "darkgrey",
+	};
+	return [__(doc.status), status_colors[doc.status], "status,=," + doc.status];
+};
+
 async function load_manifest_codes() {
     const res = await frappe.db.get_value("Manifest Setting Definition", null, [
         "insurance_charges", "fuel_charges", "freight_charges"
