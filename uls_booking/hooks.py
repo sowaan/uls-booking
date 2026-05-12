@@ -152,11 +152,17 @@ fixtures = [
       ]
 	},
   {
-      "doctype": "Letter Head",
-      "filters": [
-          ["name", "=", "Reimbursement Statement Letter Head"]
-      ]
-  },
+    "doctype": "Print Format",
+    "filters": [
+        ["name", "in", (
+            "Purchase Order",
+            "JV",
+            "Journal Voucher",
+            "With Remarks"
+        )]
+    ]
+  },  
+  
   {"dt": "Station"}
   
 ]
