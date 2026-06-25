@@ -16,7 +16,6 @@ fixtures = [
         [  
           "fieldname" , "in" , (
 
-                                "custom_booking",
                                 "custom_icris_account",
 
                                 "custom_import_control",
@@ -69,12 +68,10 @@ fixtures = [
                                 "custom_billing_term",
                                 "custom_default_customer",
                                 "custom_duty_and_taxes_sales_invoice_uploader",
-                                "custom_duty_and_taxes_template",
                                 "custom_duty_and_taxes_invoice",
                                 "custom_consignee_building",
                                 "custom_consignee_street",
                                 "custom_mawb_number",
-                                "custom_type",
                                 "custom_location",
                                 "custom_clearance_type",
                                 "custom_zone",
@@ -107,17 +104,13 @@ fixtures = [
                                 "custom_arrival_date",
                                 "custom_mno",
                                 "custom_duty_and_taxes_invoice",
-                                "custom_dt_vendor",
                                 "custom_shipping_billing_charges",
                                 "custom_exempt_gst",
                                 "custom_sales_invoice_definition",
-                                "custom_invoice_logs",
-                                "custom_sales_invoice_log",
                                 "custom_report_item",
 
 
                                 "custom_freight_charges",
-                                "custom_inserted",
                                 "custom_edit_selling_percentage",
 
                                 "custom_applicable_surcharges_for_sales_invoice",

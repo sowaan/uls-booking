@@ -198,7 +198,6 @@ def create_sales_invoices(rec_name) :
 		si_doc.posting_date = frappe.utils.today()
 		si_doc.due_date = frappe.utils.today()
 		si_doc.custom_duty_and_taxes_invoice_generator = self.name
-		si_doc.custom_duty_and_taxes_template = dtt_doc.name
 		si_doc.custom_billing_term = billing_term
 		si_doc.custom_shipment_number = dtt_doc.shipment_number
 		si_doc.custom_tracking_number = dtt_doc.tracking_number
@@ -209,9 +208,7 @@ def create_sales_invoices(rec_name) :
 		si_doc.custom_consignee_phone_number = consignee_phone
 		si_doc.custom_duty_and_taxes_invoice = 1
 		si_doc.custom_mawb_number = dtt_doc.mawb_number
-		si_doc.custom_dt_vendor = dtt_doc.vendor
 		si_doc.custom_arrival_date = dtt_doc.arrival_date
-		si_doc.custom_type = dtt_doc.type
 		si_doc.custom_location = dtt_doc.location
 		si_doc.custom_clearance_type = dtt_doc.clearance_type
 

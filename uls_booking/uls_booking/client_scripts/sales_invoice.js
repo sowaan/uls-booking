@@ -40,7 +40,6 @@ frappe.ui.form.on('Sales Invoice', {
 async custom_selling_percentage(frm) {
     await load_manifest_codes();
 
-    frm.set_value("custom_inserted", 1);
     const customPercentage = frm.doc.custom_selling_percentage;
 
     const exportSaverItem = frm.doc.items.find(item => item.item_code === FCHG);

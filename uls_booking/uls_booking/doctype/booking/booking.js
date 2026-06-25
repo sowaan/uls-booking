@@ -885,7 +885,6 @@ frappe.ui.form.on("Booking", {
                         args: {
                             doc: {  doctype: 'Sales Invoice',
                                     customer: frm.doc.customer,
-                                    custom_booking : frm.doc.name,
                                     items: [{"item_code": frm.doc.item,
                                             "qty": 1,
                                             "rate" : frm.doc.amount_after_discount,
